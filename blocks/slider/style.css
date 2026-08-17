@@ -1,0 +1,119 @@
+/**
+ * wow/slider — front end and editor.
+ */
+
+.wow-slider {
+	--wow-slide-width: 22rem;
+
+	position: relative;
+	display: grid;
+	gap: var(--wp--preset--spacing--50);
+}
+
+.wow-slider__viewport {
+	overflow-x: auto;
+	overflow-y: hidden;
+	scroll-snap-type: x mandatory;
+	scroll-padding-inline: var(--wp--preset--spacing--20);
+	/* Keeps the focus ring from being clipped by the scroll container. */
+	padding: var(--wp--preset--spacing--20);
+	margin: calc(var(--wp--preset--spacing--20) * -1);
+	scrollbar-width: thin;
+	scrollbar-color: var(--wp--preset--color--border-strong) transparent;
+}
+
+.wow-slider__track {
+	display: flex;
+	gap: var(--wp--preset--spacing--50);
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.wow-slider__slide {
+	flex: 0 0 min(var(--wow-slide-width), 82vw);
+	scroll-snap-align: start;
+	margin: 0;
+}
+
+.wow-slider__slide > * {
+	height: 100%;
+	margin: 0;
+}
+
+.wow-slider__controls {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--wp--preset--spacing--30);
+}
+
+.wow-slider__controls[hidden] {
+	display: none;
+}
+
+.wow-slider__button {
+	width: var(--wp--custom--tap-target);
+	height: var(--wp--custom--tap-target);
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--wp--preset--color--surface);
+	color: var(--wp--preset--color--contrast);
+	border: 1px solid var(--wp--preset--color--border-strong);
+	border-radius: var(--wp--custom--radius--pill);
+	cursor: pointer;
+	transition: background-color var(--wp--custom--transition--fast), border-color var(--wp--custom--transition--fast);
+}
+
+.wow-slider__button:hover:not(:disabled) {
+	background: var(--wp--preset--color--surface-2);
+	border-color: var(--wp--preset--color--accent);
+}
+
+.wow-slider__button:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+/* Chevron drawn with two borders — no icon font, no SVG request. */
+.wow-slider__arrow {
+	width: 0.6rem;
+	height: 0.6rem;
+	border-top: 2px solid currentColor;
+	border-right: 2px solid currentColor;
+}
+
+.wow-slider__arrow--next {
+	rotate: 45deg;
+	translate: -2px 0;
+}
+
+.wow-slider__arrow--prev {
+	rotate: -135deg;
+	translate: 2px 0;
+}
+
+/*
+ * The viewport is focusable so it can be scrolled from the keyboard; the ring
+ * has to sit inside it because the container clips its own overflow.
+ */
+.wow-slider__viewport:focus-visible {
+	outline: var(--wp--custom--focus-ring--width) solid var(--wp--custom--focus-ring--color);
+	outline-offset: calc(var(--wp--custom--focus-ring--offset) * -1);
+	border-radius: var(--wp--custom--radius--md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.wow-slider__viewport {
+		scroll-behavior: auto;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.wow-slider__button {
+		border-color: ButtonBorder;
+	}
+}

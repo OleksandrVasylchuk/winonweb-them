@@ -1,0 +1,32 @@
+{
+	"name": "winonweb/wow-signal",
+	"description": "WOW — Signal: a fast, accessible WordPress block theme by WOW — Win On Web.",
+	"type": "wordpress-theme",
+	"license": "GPL-2.0-or-later",
+	"homepage": "https://www.winonweb.dev/",
+	"authors": [
+		{
+			"name": "WOW — Win On Web",
+			"homepage": "https://www.winonweb.dev/"
+		}
+	],
+	"require": {
+		"php": ">=8.1"
+	},
+	"require-dev": {
+		"wp-coding-standards/wpcs": "^3.1",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+		"phpcompatibility/phpcompatibility-wp": "^2.1"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		},
+		"sort-packages": true
+	},
+	"scripts": {
+		"lint": "phpcs",
+		"lint:fix": "phpcbf"
+	},
+	"//": "Composer is a development dependency only. The theme autoloads its own classes, so a client can upload the ZIP and activate it without running composer install."
+}

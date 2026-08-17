@@ -1,0 +1,14 @@
+# Normalise line endings across platforms.
+* text=auto eol=lf
+
+# Shell scripts & git hooks MUST stay LF, or they break when run via sh.
+*.sh         text eol=lf
+.githooks/*  text eol=lf
+
+# Binary assets — never touch.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.avif binary

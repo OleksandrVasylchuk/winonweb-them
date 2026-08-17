@@ -1,0 +1,33 @@
+<!-- wp:template-part {"slug":"header","tagName":"header","area":"header"} /-->
+
+<!-- wp:group {"tagName":"main","metadata":{"name":"Main"},"anchor":"wow-main","style":{"spacing":{"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|80"}}},"layout":{"type":"constrained"}} -->
+<main class="wp-block-group" id="wow-main" style="padding-top:var(--wp--preset--spacing--80);padding-bottom:var(--wp--preset--spacing--80)"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|70","left":"var:preset|spacing|70"}}}} -->
+<div class="wp-block-columns alignwide"><!-- wp:column {"width":"66%"} -->
+<div class="wp-block-column" style="flex-basis:66%"><!-- wp:post-title {"level":1,"fontSize":"xxx-large"} /-->
+
+<!-- wp:spacer {"height":"var:preset|spacing|50"} -->
+<div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:post-content {"layout":{"type":"constrained"}} /--></div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"34%"} -->
+<div class="wp-block-column" style="flex-basis:34%"><!-- wp:group {"tagName":"aside","metadata":{"name":"Sidebar"},"className":"is-style-card","layout":{"type":"constrained"}} -->
+<aside class="wp-block-group is-style-card"><!-- wp:heading {"level":2,"fontSize":"large"} -->
+<h2 class="wp-block-heading has-large-font-size">Search</h2>
+<!-- /wp:heading -->
+
+<!-- wp:search {"label":"Search","showLabel":false,"placeholder":"Search this site…","buttonText":"Search","buttonPosition":"button-inside"} /-->
+
+<!-- wp:heading {"level":2,"fontSize":"large"} -->
+<h2 class="wp-block-heading has-large-font-size">Latest posts</h2>
+<!-- /wp:heading -->
+
+<!-- wp:latest-posts {"postsToShow":4,"displayPostDate":true} /--></aside>
+<!-- /wp:group --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns --></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer","area":"footer"} /-->

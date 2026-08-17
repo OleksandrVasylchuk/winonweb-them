@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<ruleset name="WOW — Signal">
+	<description>WordPress coding standards for the WOW — Signal block theme.</description>
+
+	<file>.</file>
+
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+	<exclude-pattern>/artifacts/*</exclude-pattern>
+	<exclude-pattern>/languages/*</exclude-pattern>
+
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg name="extensions" value="php"/>
+	<arg name="parallel" value="8"/>
+	<arg value="sp"/>
+
+	<!-- The theme requires PHP 8.1 and WordPress 6.7. -->
+	<config name="testVersion" value="8.1-"/>
+	<config name="minimum_wp_version" value="6.7"/>
+	<rule ref="PHPCompatibilityWP"/>
+
+	<rule ref="WordPress-Extra">
+		<!--
+			File naming: block and pattern files follow the WordPress block API
+			and pattern conventions (block.json, render.php, kebab-case pattern
+			files), not the class-file naming sniff.
+		-->
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
+
+	<rule ref="WordPress-Docs"/>
+
+	<!--
+		The DOM and Zip extensions expose camelCase properties ($textContent,
+		$parentNode, $numFiles). They belong to PHP, not to this theme, and
+		cannot be renamed — the sniff has nothing actionable to say about them.
+	-->
+	<rule ref="WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase">
+		<exclude-pattern>/inc/Support/*</exclude-pattern>
+	</rule>
+
+	<!--
+		file_get_contents()/file_put_contents() on paths this theme just wrote
+		inside uploads. WP_Filesystem is the right tool for remote or
+		credentialed filesystems; here it would add a credentials round-trip to
+		read a local file the same request created.
+	-->
+	<rule ref="WordPress.WP.AlternativeFunctions">
+		<exclude-pattern>/inc/Support/*</exclude-pattern>
+	</rule>
+
+	<!-- Hooks in this theme are namespaced with a slash: wow_signal/modules. -->
+	<rule ref="WordPress.NamingConventions.ValidHookName">
+		<properties>
+			<property name="additionalWordDelimiters" value="/"/>
+		</properties>
+	</rule>
+
+	<!-- Every user-facing string must carry the theme's own text domain. -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="wow-signal"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Globals must be prefixed so the theme can never collide with a plugin. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="wow_signal"/>
+				<element value="wow"/>
+				<element value="Wow\Signal"/>
+			</property>
+		</properties>
+		<!--
+			Block render templates run inside a core closure and legitimately
+			read $attributes, $content and $block from that scope.
+		-->
+		<exclude-pattern>/blocks/*/render.php</exclude-pattern>
+		<exclude-pattern>/patterns/*.php</exclude-pattern>
+	</rule>
+</ruleset>

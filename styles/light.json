@@ -1,0 +1,119 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Signal Light",
+	"description": "Daylight palette. Same tokens, same contrast contract — every text pair still clears WCAG 2.2 AA and every form control border clears 3:1.",
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"slug": "base",
+					"color": "#ffffff",
+					"name": "Base — page background"
+				},
+				{
+					"slug": "surface",
+					"color": "#f5f7fc",
+					"name": "Surface — card"
+				},
+				{
+					"slug": "surface-2",
+					"color": "#e9eefb",
+					"name": "Surface raised"
+				},
+				{
+					"slug": "border",
+					"color": "#dfe4f2",
+					"name": "Divider (decorative)"
+				},
+				{
+					"slug": "border-strong",
+					"color": "#6f7893",
+					"name": "Control border (AA)"
+				},
+				{
+					"slug": "contrast",
+					"color": "#0a0a18",
+					"name": "Contrast — body text"
+				},
+				{
+					"slug": "muted",
+					"color": "#4b5568",
+					"name": "Muted — secondary text"
+				},
+				{
+					"slug": "accent",
+					"color": "#0e6f85",
+					"name": "Accent — signal cyan"
+				},
+				{
+					"slug": "accent-ink",
+					"color": "#0e6f85",
+					"name": "Accent — readable as text"
+				},
+				{
+					"slug": "accent-2",
+					"color": "#6d28d9",
+					"name": "Accent — violet"
+				},
+				{
+					"slug": "accent-3",
+					"color": "#a21caf",
+					"name": "Accent — fuchsia"
+				},
+				{
+					"slug": "success",
+					"color": "#116b4e",
+					"name": "Success"
+				},
+				{
+					"slug": "warning",
+					"color": "#7a4c05",
+					"name": "Warning"
+				}
+			],
+			"gradients": [
+				{
+					"slug": "aurora",
+					"name": "Aurora — cyan to fuchsia",
+					"gradient": "linear-gradient(120deg, #0e6f85 0%, #6d28d9 52%, #a21caf 100%)"
+				},
+				{
+					"slug": "aurora-soft",
+					"name": "Aurora soft — on light",
+					"gradient": "linear-gradient(160deg, #f5f7fc 0%, #e9eefb 60%, #efe6fb 100%)"
+				},
+				{
+					"slug": "signal-fade",
+					"name": "Signal fade — accent to transparent",
+					"gradient": "linear-gradient(180deg, rgba(14,111,133,0.12) 0%, rgba(255,255,255,0) 100%)"
+				}
+			]
+		},
+		"shadow": {
+			"presets": [
+				{
+					"slug": "soft",
+					"name": "Soft",
+					"shadow": "0 1px 2px rgba(10, 10, 24, 0.08)"
+				},
+				{
+					"slug": "card",
+					"name": "Card",
+					"shadow": "0 12px 32px -14px rgba(10, 10, 24, 0.22)"
+				},
+				{
+					"slug": "glow",
+					"name": "Signal glow",
+					"shadow": "0 0 0 1px rgba(14, 111, 133, 0.28), 0 18px 48px -20px rgba(14, 111, 133, 0.35)"
+				}
+			]
+		}
+	},
+	"styles": {
+		"color": {
+			"background": "var(--wp--preset--color--base)",
+			"text": "var(--wp--preset--color--contrast)"
+		}
+	}
+}

@@ -1,0 +1,41 @@
+/**
+ * wow/colophon — front end and editor.
+ *
+ * Loads only on pages where the block renders.
+ */
+
+.wow-colophon {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--wp--preset--spacing--20) var(--wp--preset--spacing--40);
+	margin: 0;
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.wow-colophon__credit::before {
+	content: "·";
+	margin-inline-end: var(--wp--preset--spacing--40);
+	color: var(--wp--preset--color--border-strong);
+}
+
+/* The separator is decorative punctuation, not content. */
+@media (max-width: 480px) {
+
+	.wow-colophon__credit::before {
+		content: none;
+	}
+}
+
+.wow-colophon a {
+	color: inherit;
+	text-decoration-color: var(--wp--preset--color--border-strong);
+	text-underline-offset: 0.25em;
+}
+
+.wow-colophon a:hover,
+.wow-colophon a:focus-visible {
+	color: var(--wp--preset--color--accent);
+	text-decoration-color: currentColor;
+}

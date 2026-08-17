@@ -1,0 +1,53 @@
+/**
+ * wow/metric — front end and editor.
+ */
+
+.wow-metric {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--20);
+}
+
+.wow-metric__value {
+	margin: 0;
+	font-size: var(--wp--preset--font-size--xxx-large);
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: -0.04em;
+	/* Stops the row from reflowing while the number counts up. */
+	font-variant-numeric: tabular-nums;
+	background-image: var(--wp--preset--gradient--aurora);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	-webkit-text-fill-color: transparent;
+}
+
+.wow-metric__figure {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.05em;
+}
+
+.wow-metric__affix {
+	font-size: 0.6em;
+	font-weight: 700;
+}
+
+.wow-metric__label {
+	margin: 0;
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+	line-height: 1.45;
+	text-wrap: balance;
+}
+
+/* Gradient text has no colour of its own to fall back on. */
+@media (forced-colors: active) {
+
+	.wow-metric__value {
+		background-image: none;
+		color: CanvasText;
+		-webkit-text-fill-color: CanvasText;
+	}
+}

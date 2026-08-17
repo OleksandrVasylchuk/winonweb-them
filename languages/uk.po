@@ -1,0 +1,2355 @@
+# Ukrainian translation for WOW — Signal.
+# Copyright (C) 2026 WOW — Win On Web
+# This file is distributed under the GNU General Public License v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: WOW — Signal 1.0.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: uk\n"
+"Language-Team: Ukrainian\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Domain: wow-signal\n"
+
+#: assets/js/admin-import.js:102
+msgid "Choose a ZIP file first."
+msgstr "Спершу виберіть ZIP-файл."
+
+#: assets/js/admin-import.js:110
+msgid "Unpacking and reading the design…"
+msgstr "Розпаковую та читаю дизайн…"
+
+#. translators: 1: number of files, 2: number of pages.
+#: assets/js/admin-import.js:118
+msgid "Read %1$d files and found %2$d pages."
+msgstr "Прочитано %1$d файлів, знайдено %2$d сторінок."
+
+#: assets/js/admin-import.js:132
+msgid "Design archive (.zip)"
+msgstr "Архів дизайну (.zip)"
+
+#: assets/js/admin-import.js:138
+msgid "1. Upload the design"
+msgstr "1. Завантажте дизайн"
+
+#. translators: 1: file path, 2: number of sections.
+#: assets/js/admin-import.js:171
+msgid "%1$s — %2$d sections"
+msgstr "%1$s — секцій: %2$d"
+
+#: assets/js/admin-import.js:181
+msgid "2. Pick a page"
+msgstr "2. Виберіть сторінку"
+
+#. translators: %s: comma-separated language codes.
+#: assets/js/admin-import.js:189
+msgid "This design has %s. Import one language first; the others can be added later with a translation plugin."
+msgstr "Цей дизайн має %s. Спершу імпортуйте одну мову; решту можна додати пізніше плагіном перекладу."
+
+#. translators: %d: number of files.
+#: assets/js/admin-import.js:201
+msgid "%d files were not unpacked"
+msgstr "Не розпаковано файлів: %d"
+
+#: assets/js/admin-import.js:222
+msgid "Reading the page…"
+msgstr "Читаю сторінку…"
+
+#. translators: %d: number of sections.
+#: assets/js/admin-import.js:239
+msgid "Found %d sections on this page."
+msgstr "На цій сторінці знайдено секцій: %d"
+
+#: assets/js/admin-import.js:274
+msgid "Build the whole site"
+msgstr "Побудувати весь сайт"
+
+#: assets/js/admin-import.js:281
+msgid "Build everything at once"
+msgstr "Зібрати все одразу"
+
+#: assets/js/admin-import.js:284
+msgid "Creates every page, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again."
+msgstr "Створює всі сторінки, переносить зображення, збирає меню, хедер і футер, призначає головну. Без ключа API й без чату. Можна скасувати й повторити."
+
+#: assets/js/admin-import.js:291
+msgid "Language to build:"
+msgstr "Мова для збірки:"
+
+#: assets/js/admin-import.js:300
+msgid "Changed your mind, or got a new version of the design? Delete everything and drop the new archive in — nothing here is one-way."
+msgstr "Передумали або маєте нову версію дизайну? Видаліть усе й закиньте новий архів — тут ніщо не робиться в один бік."
+
+#: assets/js/admin-import.js:310
+msgid "Delete everything and start over"
+msgstr "Видалити все й почати заново"
+
+#: assets/js/admin-import.js:311
+msgid "Removes only what an import created. Your own pages are left alone."
+msgstr "Видаляє лише те, що створив імпорт. Ваші власні сторінки не чіпає."
+
+#: assets/js/admin-import.js:336
+msgid "Structure only — the button above"
+msgstr "Тільки структура — кнопка вище"
+
+#: assets/js/admin-import.js:337
+msgid "Free, instant, no account. Headings, lists, cards and images become blocks."
+msgstr "Безкоштовно, миттєво, без реєстрації. Заголовки, списки, картки й зображення стають блоками."
+
+#: assets/js/admin-import.js:340
+msgid "Your Claude subscription"
+msgstr "Ваша підписка Claude"
+
+#: assets/js/admin-import.js:341
+msgid "Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button."
+msgstr "Безкоштовно з будь-яким тарифом. Виберіть сторінку нижче, скопіюйте завдання у свій чат Клода і вставте відповідь назад. Якісніше, ніж кнопка."
+
+#: assets/js/admin-import.js:344
+msgid "An Anthropic API key"
+msgstr "Ключ API Anthropic"
+
+#: assets/js/admin-import.js:345
+msgid "One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above."
+msgstr "Один клік на сторінку, без копіювання. Приблизно один–три долари за весь сайт. Ключ вказується в «Налаштуваннях підключення» вище."
+
+#: assets/js/admin-import.js:357
+msgid "Three ways to convert — which should I use?"
+msgstr "Три способи конвертації — який обрати?"
+
+#: assets/js/admin-import.js:373
+msgid "(%d sections)"
+msgstr "(секцій: %d)"
+
+#: assets/js/admin-import.js:381
+msgid "The site is built."
+msgstr "Сайт зібрано."
+
+#: assets/js/admin-import.js:384 assets/js/admin-import.js:782
+msgid "Worth checking:"
+msgstr "Варто перевірити:"
+
+#: assets/js/admin-import.js:393
+msgid "Building the site — this takes a moment…"
+msgstr "Збираю сайт — це трохи забере часу…"
+
+#. translators: 1: pages built, 2: images imported.
+#: assets/js/admin-import.js:406
+msgid "Built %1$d pages and imported %2$d images. Look through them, then edit anything you like."
+msgstr "Зібрано %1$d сторінок, перенесено %2$d зображень. Перегляньте їх і редагуйте що завгодно."
+
+#: assets/js/admin-import.js:422
+msgid "Undoing…"
+msgstr "Скасовую…"
+
+#. translators: 1: pages removed, 2: images removed.
+#: assets/js/admin-import.js:431
+msgid "Removed %1$d pages and %2$d images. The site is back to how it was."
+msgstr "Видалено %1$d сторінок і %2$d зображень. Сайт повернуто у попередній стан."
+
+#: assets/js/admin-import.js:459
+msgid "3. Convert each section"
+msgstr "3. Конвертуйте кожну секцію"
+
+#: assets/js/admin-import.js:462
+msgid "Convert a section, read what it says, then keep it. Nothing reaches your site until you press Keep."
+msgstr "Сконвертуйте секцію, прочитайте опис і залиште її. Нічого не потрапляє на сайт, доки ви не натиснете «Залишити»."
+
+#: assets/js/admin-import.js:468
+msgid "Convert every section"
+msgstr "Конвертувати всі секції"
+
+#: assets/js/admin-import.js:474
+msgid "Keep the whole page as a draft"
+msgstr "Залишити цілу сторінку як чернетку"
+
+#: assets/js/admin-import.js:480
+msgid "Draft page created."
+msgstr "Чернетку сторінки створено."
+
+#: assets/js/admin-import.js:483 assets/js/admin-import.js:806
+msgid "Open it in the editor"
+msgstr "Відкрити в редакторі"
+
+#: assets/js/admin-import.js:504
+msgid "Paste the whole reply here, including the opening [ and closing ]"
+msgstr "Вставте сюди всю відповідь, разом із відкривною [ і закривною ]"
+
+#: assets/js/admin-import.js:526
+msgid "The brief — select it all and copy"
+msgstr "Завдання — виділіть усе й скопіюйте"
+
+#: assets/js/admin-import.js:533
+msgid "Copy the brief"
+msgstr "Скопіювати завдання"
+
+#: assets/js/admin-import.js:540
+msgid "No API key? Use your own Claude subscription instead"
+msgstr "Немає ключа API? Скористайтеся власною підпискою Claude"
+
+#: assets/js/admin-import.js:542
+msgid "Copy the brief for this page."
+msgstr "Скопіюйте завдання для цієї сторінки."
+
+#: assets/js/admin-import.js:543
+msgid "Paste it into your Claude conversation and send it."
+msgstr "Вставте його у свій чат із Клодом і надішліть."
+
+#: assets/js/admin-import.js:544
+msgid "Copy the whole reply and paste it below."
+msgstr "Скопіюйте всю відповідь і вставте нижче."
+
+#: assets/js/admin-import.js:552
+msgid "Claude’s reply"
+msgstr "Відповідь Клода"
+
+#: assets/js/admin-import.js:559
+msgid "Read the reply"
+msgstr "Прочитати відповідь"
+
+#: assets/js/admin-import.js:572
+msgid "Building the brief…"
+msgstr "Готую завдання…"
+
+#. translators: 1: number of sections, 2: size in kilobytes.
+#: assets/js/admin-import.js:586
+msgid "Brief for %1$d sections, %2$d KB."
+msgstr "Завдання на %1$d секцій, %2$d КБ."
+
+#: assets/js/admin-import.js:593
+msgid "Copied — now paste it into Claude"
+msgstr "Скопійовано — тепер вставте в Клода"
+
+#: assets/js/admin-import.js:594
+msgid "Copied. Paste it into Claude, then bring the reply back."
+msgstr "Скопійовано. Вставте в Клода й поверніть відповідь сюди."
+
+#: assets/js/admin-import.js:609
+msgid "The browser would not copy it, so it is in the box below — select it all and copy it yourself."
+msgstr "Браузер не дав скопіювати, тож завдання в полі нижче — виділіть усе й скопіюйте вручну."
+
+#: assets/js/admin-import.js:650
+msgid "The browser refused to copy."
+msgstr "Браузер відмовився копіювати."
+
+#: assets/js/admin-import.js:657
+msgid "Paste the reply first."
+msgstr "Спершу вставте відповідь."
+
+#: assets/js/admin-import.js:661
+msgid "Reading the reply…"
+msgstr "Читаю відповідь…"
+
+#. translators: 1: sections received, 2: sections expected.
+#: assets/js/admin-import.js:679
+msgid "Read %1$d sections, but this page has %2$d. Check the reply was not cut off."
+msgstr "Прочитано %1$d секцій, а на сторінці їх %2$d. Перевірте, чи відповідь не обірвалася."
+
+#. translators: 1: sections received, 2: sections expected. */ __( 'Read %1$d sections, but this page has %2$d. Check the reply was not cut off.', 'wow-signal' ), data.received, data.expected ), true ); return; } say( sprintf( /* translators: %d: number of sections.
+#: assets/js/admin-import.js:691
+msgid "Read %d sections. Review each one before keeping it."
+msgstr "Прочитано %d секцій. Перегляньте кожну, перш ніж залишати."
+
+#. translators: 1: element name, 2: word count, 3: image count.
+#: assets/js/admin-import.js:710
+msgid "<%1$s> · %2$d words · %3$d images"
+msgstr "<%1$s> · слів: %2$d · зображень: %3$d"
+
+#: assets/js/admin-import.js:725
+msgid "Convert this section"
+msgstr "Конвертувати цю секцію"
+
+#: assets/js/admin-import.js:732
+msgid "Converting…"
+msgstr "Конвертую…"
+
+#: assets/js/admin-import.js:739 assets/js/admin-import.js:766
+msgid "Try again"
+msgstr "Спробувати ще раз"
+
+#: assets/js/admin-import.js:74
+msgid "Something went wrong."
+msgstr "Щось пішло не так."
+
+#: assets/js/admin-import.js:760
+msgid "This conversion was refused:"
+msgstr "Цю конвертацію відхилено:"
+
+#: assets/js/admin-import.js:777
+msgid "You will be able to edit:"
+msgstr "Ви зможете редагувати:"
+
+#: assets/js/admin-import.js:787
+msgid "Quality notes:"
+msgstr "Зауваження щодо якості:"
+
+#: assets/js/admin-import.js:797
+msgid "Preview"
+msgstr "Перегляд"
+
+#: assets/js/admin-import.js:805
+msgid "Kept."
+msgstr "Залишено."
+
+#: assets/js/admin-import.js:818
+msgid "Keep as a reusable section"
+msgstr "Залишити як багаторазову секцію"
+
+#: assets/js/admin-import.js:826
+msgid "Keep as a draft page"
+msgstr "Залишити як чернетку сторінки"
+
+#: assets/js/admin-import.js:851
+msgid "Add your Anthropic API key in the connection settings first."
+msgstr "Спершу додайте ключ API Anthropic у налаштуваннях підключення."
+
+#. translators: %s: section name.
+#: assets/js/admin-import.js:857
+msgid "Converting “%s”…"
+msgstr "Конвертую «%s»…"
+
+#. translators: %s: section name.
+#: assets/js/admin-import.js:873
+msgid "“%s” converted. Review it below."
+msgstr "«%s» сконвертовано. Перегляньте результат нижче."
+
+#. translators: %s: section name. */ __( '“%s” converted. Review it below.', 'wow-signal' ), section.label ) : sprintf( /* translators: %s: section name.
+#: assets/js/admin-import.js:874
+msgid "“%s” was refused — see the reason below."
+msgstr "«%s» відхилено — причина нижче."
+
+#: assets/js/admin-import.js:899
+msgid "All sections converted. Review each one before keeping it."
+msgstr "Усі секції сконвертовано. Перегляньте кожну, перш ніж залишати."
+
+#: assets/js/admin-import.js:927
+msgid "Convert at least one section first."
+msgstr "Спершу сконвертуйте хоча б одну секцію."
+
+#: assets/js/admin-import.js:93
+msgid "Upload and read the design"
+msgstr "Завантажити й прочитати дизайн"
+
+#: assets/js/admin-import.js:933
+msgid "Building the page…"
+msgstr "Збираю сторінку…"
+
+#. translators: 1: sections kept, 2: sections left out.
+#: assets/js/admin-import.js:956
+msgid "Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused."
+msgstr "Чернетку створено з %1$d секцій. %2$d не увійшли: не сконвертовані або відхилені."
+
+#. translators: 1: sections kept, 2: sections left out. */ __( 'Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused.', 'wow-signal' ), ordered.length, skipped ), true ); return; } say( sprintf( /* translators: %d: number of sections.
+#: assets/js/admin-import.js:968
+msgid "Draft page created from all %d sections."
+msgstr "Чернетку створено з усіх %d секцій."
+
+#: assets/js/admin-import.js:989
+msgid "Saved."
+msgstr "Збережено."
+
+#: blocks/colophon/block.json
+msgctxt "block title"
+msgid "Colophon"
+msgstr "Підпис у футері"
+
+#: blocks/colophon/block.json
+msgctxt "block keyword"
+msgid "copyright"
+msgstr "копірайт"
+
+#: blocks/colophon/block.json
+msgctxt "block keyword"
+msgid "credit"
+msgstr "підпис"
+
+#: blocks/colophon/block.json
+msgctxt "block keyword"
+msgid "footer"
+msgstr "футер"
+
+#: blocks/colophon/block.json
+msgctxt "block description"
+msgid "The copyright line for the footer. Keeps the year current on its own and can show the designer credit."
+msgstr "Рядок копірайту для футера. Сам оновлює рік і за потреби показує підпис дизайнера."
+
+#: blocks/colophon/block.json
+msgctxt "block keyword"
+msgid "year"
+msgstr "рік"
+
+#: blocks/colophon/edit.js:27
+msgid "Site name"
+msgstr "Назва сайту"
+
+#: blocks/colophon/edit.js:42
+msgid "Colophon"
+msgstr "Колофон"
+
+#: blocks/colophon/edit.js:44
+msgid "Symbol before the year"
+msgstr "Символ перед роком"
+
+#: blocks/colophon/edit.js:45
+msgid "Usually ©. Leave empty to show the year on its own."
+msgstr "Зазвичай ©. Залиште порожнім, щоб показувати лише рік."
+
+#: blocks/colophon/edit.js:52
+msgid "Show the site name"
+msgstr "Показувати назву сайту"
+
+#: blocks/colophon/edit.js:59
+msgid "Extra text"
+msgstr "Додатковий текст"
+
+#: blocks/colophon/edit.js:60
+msgid "Optional. Shown after the site name, for example \"All rights reserved\"."
+msgstr "Необовʼязково. Показується після назви сайту, наприклад «Усі права захищено»."
+
+#: blocks/colophon/render.php:52
+msgid "WOW — Win On Web"
+msgstr "WOW — Win On Web"
+
+#: blocks/colophon/render.php:53
+msgid "(opens in a new tab)"
+msgstr "(відкриється в новій вкладці)"
+
+#. translators: %s: linked studio name.
+#: blocks/colophon/render.php:58
+msgid "Design by %s"
+msgstr "Дизайн — %s"
+
+#: blocks/contact-form/block.json
+msgctxt "block description"
+msgid "An accessible contact form that emails the site owner. Protected by a nonce, a honeypot and a rate limit — no plugin needed."
+msgstr "Доступна контактна форма, яка надсилає лист власнику сайту. Захищена nonce, пасткою для ботів і обмеженням частоти — без плагінів."
+
+#: blocks/contact-form/block.json
+msgctxt "block keyword"
+msgid "contact"
+msgstr "контакти"
+
+#: blocks/contact-form/block.json
+msgctxt "block title"
+msgid "Contact form"
+msgstr "Контактна форма"
+
+#: blocks/contact-form/block.json
+msgctxt "block keyword"
+msgid "email"
+msgstr "пошта"
+
+#: blocks/contact-form/block.json
+msgctxt "block keyword"
+msgid "enquiry"
+msgstr "запит"
+
+#: blocks/contact-form/block.json
+msgctxt "block keyword"
+msgid "form"
+msgstr "форма"
+
+#: blocks/contact-form/block.json
+msgctxt "block keyword"
+msgid "lead"
+msgstr "лід"
+
+#: blocks/contact-form/edit.js:50
+msgid "Form"
+msgstr "Форма"
+
+#: blocks/contact-form/edit.js:54
+msgid "Messages go to the site administrator email set under Settings → General. A developer can route a form elsewhere with the wow_signal/contact_recipient filter."
+msgstr "Повідомлення надходять на email адміністратора, вказаний у «Налаштування → Загальні». Розробник може перенаправити форму фільтром wow_signal/contact_recipient."
+
+#: blocks/contact-form/edit.js:57
+msgid "Form name"
+msgstr "Назва форми"
+
+#: blocks/contact-form/edit.js:58
+msgid "Used to tell forms apart if the site has more than one, for example \"careers\"."
+msgstr "Потрібна, щоб розрізняти форми, якщо їх на сайті кілька, наприклад «careers»."
+
+#: blocks/contact-form/edit.js:65
+msgid "Ask for a subject"
+msgstr "Питати тему"
+
+#: blocks/contact-form/edit.js:66
+msgid "Adds an optional subject line above the message."
+msgstr "Додає необовʼязкове поле теми над повідомленням."
+
+#: blocks/contact-form/edit.js:73
+msgid "Button text"
+msgstr "Текст кнопки"
+
+#: blocks/contact-form/edit.js:81
+msgid "Thank-you message"
+msgstr "Повідомлення подяки"
+
+#: blocks/contact-form/edit.js:82
+msgid "Shown on the page after the message is sent."
+msgstr "Показується на сторінці після надсилання повідомлення."
+
+#: blocks/contact-form/edit.js:89
+msgid "Small print under the button"
+msgstr "Дрібний текст під кнопкою"
+
+#: blocks/contact-form/edit.js:90
+msgid "Optional. Use it for a privacy note, for example how long you keep enquiries."
+msgstr "Необовʼязково. Для примітки про приватність, наприклад скільки ви зберігаєте звернення."
+
+#: blocks/contact-form/render.php:102
+msgid "Your message was not sent."
+msgstr "Повідомлення не надіслано."
+
+#: blocks/contact-form/render.php:146
+msgid "Leave this field empty"
+msgstr "Залиште це поле порожнім"
+
+#: blocks/contact-form/render.php:182 blocks/contact-form/render.php:230
+msgid "(required)"
+msgstr "(обов’язково)"
+
+#: blocks/contact-form/render.php:195 blocks/contact-form/render.php:236
+msgid "Error:"
+msgstr "Помилка:"
+
+#: blocks/contact-form/render.php:227 blocks/contact-form/edit.js:113
+msgid "How can we help?"
+msgstr "Чим можемо допомогти?"
+
+#: blocks/contact-form/render.php:39 blocks/contact-form/edit.js:74 blocks/contact-form/edit.js:120
+msgid "Send message"
+msgstr "Надіслати повідомлення"
+
+#: blocks/contact-form/render.php:40
+msgid "Thank you — your message is on its way. We reply within one working day."
+msgstr "Дякуємо — ваше повідомлення надіслано. Відповідаємо протягом одного робочого дня."
+
+#: blocks/contact-form/render.php:65 blocks/contact-form/edit.js:104
+msgid "Your name"
+msgstr "Ваше ім’я"
+
+#: blocks/contact-form/render.php:72 blocks/contact-form/edit.js:106
+msgid "Email address"
+msgstr "Електронна пошта"
+
+#: blocks/contact-form/render.php:76 blocks/contact-form/edit.js:107
+msgid "We reply to this address and never share it."
+msgstr "Відповідаємо на цю адресу й нікому її не передаємо."
+
+#: blocks/contact-form/render.php:79 blocks/contact-form/edit.js:111
+msgid "Subject"
+msgstr "Тема"
+
+#: blocks/faq-item/block.json
+msgctxt "block keyword"
+msgid "answer"
+msgstr "відповідь"
+
+#: blocks/faq-item/block.json
+msgctxt "block title"
+msgid "FAQ question"
+msgstr "Питання FAQ"
+
+#: blocks/faq-item/block.json
+msgctxt "block description"
+msgid "One question and its answer. Add these inside an FAQ accordion."
+msgstr "Одне питання та відповідь на нього. Додавайте всередину акордеона FAQ."
+
+#: blocks/faq-item/block.json
+msgctxt "block keyword"
+msgid "question"
+msgstr "питання"
+
+#: blocks/faq-item/edit.js:19
+msgid "Answer the question in a sentence or two…"
+msgstr "Дайте відповідь одним-двома реченнями…"
+
+#: blocks/faq-item/edit.js:42
+msgid "Question"
+msgstr "Питання"
+
+#: blocks/faq-item/edit.js:44
+msgid "Open when the page loads"
+msgstr "Відкрито при завантаженні сторінки"
+
+#: blocks/faq-item/edit.js:45
+msgid "Use this for the one question most visitors ask."
+msgstr "Використайте для того питання, яке ставлять найчастіше."
+
+#: blocks/faq-item/edit.js:63
+msgid "Type the question…"
+msgstr "Введіть питання…"
+
+#: blocks/faq/block.json
+msgctxt "block description"
+msgid "A list of questions that expand and collapse. Works without JavaScript and can publish itself to Google as an FAQ."
+msgstr "Список питань, що розгортаються і згортаються. Працює без JavaScript і може передавати себе в Google як FAQ."
+
+#: blocks/faq/block.json
+msgctxt "block keyword"
+msgid "accordion"
+msgstr "акордеон"
+
+#: blocks/faq/block.json
+msgctxt "block keyword"
+msgid "answers"
+msgstr "відповіді"
+
+#: blocks/faq/block.json blocks/faq-item/block.json
+msgctxt "block keyword"
+msgid "faq"
+msgstr "faq"
+
+#: blocks/faq/block.json
+msgctxt "block title"
+msgid "FAQ accordion"
+msgstr "Акордеон FAQ"
+
+#: blocks/faq/block.json
+msgctxt "block keyword"
+msgid "questions"
+msgstr "питання"
+
+#: blocks/faq/edit.js:38
+msgid "FAQ settings"
+msgstr "Налаштування FAQ"
+
+#: blocks/faq/edit.js:40
+msgid "Publish as an FAQ to search engines"
+msgstr "Публікувати як FAQ для пошукових систем"
+
+#: blocks/faq/edit.js:41
+msgid "Adds hidden FAQ data so Google can show these questions in results. Turn this off if another plugin already does it, or if the answers are not genuine questions."
+msgstr "Додає приховані дані FAQ, щоб Google міг показувати ці питання в результатах. Вимкніть, якщо це вже робить інший плагін або якщо це не справжні питання."
+
+#: blocks/faq/edit.js:48
+msgid "Close other answers when one opens"
+msgstr "Закривати інші відповіді, коли відкривається одна"
+
+#: blocks/faq/edit.js:49
+msgid "Keeps only one answer open at a time. Visitors can still open every answer if JavaScript is unavailable."
+msgstr "Тримає відкритою лише одну відповідь. Якщо JavaScript недоступний, відвідувачі все одно можуть відкрити всі."
+
+#: blocks/metric/block.json
+msgctxt "block keyword"
+msgid "counter"
+msgstr "лічильник"
+
+#: blocks/metric/block.json
+msgctxt "block keyword"
+msgid "kpi"
+msgstr "kpi"
+
+#: blocks/metric/block.json
+msgctxt "block keyword"
+msgid "metric"
+msgstr "метрика"
+
+#: blocks/metric/block.json
+msgctxt "block title"
+msgid "Metric"
+msgstr "Метрика"
+
+#: blocks/metric/block.json
+msgctxt "block keyword"
+msgid "number"
+msgstr "число"
+
+#: blocks/metric/block.json
+msgctxt "block description"
+msgid "One number with a caption — a Lighthouse score, a conversion lift, a delivery time. Counts up when it scrolls into view."
+msgstr "Одне число з підписом — оцінка Lighthouse, приріст конверсії, строк виконання. Прокручується вгору, коли потрапляє в поле зору."
+
+#: blocks/metric/block.json
+msgctxt "block keyword"
+msgid "statistic"
+msgstr "статистика"
+
+#: blocks/metric/edit.js:34
+msgid "Metric"
+msgstr "Показник"
+
+#: blocks/metric/edit.js:36
+msgid "Number"
+msgstr "Число"
+
+#: blocks/metric/edit.js:37
+msgid "For example 98, 4.9 or 150. Text like \"24/7\" also works, it simply will not count up."
+msgstr "Наприклад 98, 4.9 або 150. Текст на кшталт «24/7» теж працює, просто без анімації підрахунку."
+
+#: blocks/metric/edit.js:44
+msgid "Before the number"
+msgstr "Перед числом"
+
+#: blocks/metric/edit.js:45
+msgid "Optional, for example a currency sign."
+msgstr "Необовʼязково, наприклад знак валюти."
+
+#: blocks/metric/edit.js:52
+msgid "After the number"
+msgstr "Після числа"
+
+#: blocks/metric/edit.js:53
+msgid "Optional, for example % or +."
+msgstr "Необовʼязково, наприклад % або +."
+
+#: blocks/metric/edit.js:60
+msgid "Count up when it scrolls into view"
+msgstr "Рахувати вгору при появі на екрані"
+
+#: blocks/metric/edit.js:62
+msgid "Visitors who ask their device for reduced motion always see the final number straight away."
+msgstr "Відвідувачі, які увімкнули зменшення анімації, одразу бачать кінцеве число."
+
+#: blocks/metric/edit.js:63
+msgid "This number is not a plain figure, so it will be shown without counting."
+msgstr "Це не звичайне число, тож воно показуватиметься без підрахунку."
+
+#: blocks/metric/edit.js:87
+msgid "00"
+msgstr "00"
+
+#: blocks/metric/edit.js:98
+msgid "What the number means…"
+msgstr "Що означає це число…"
+
+#: blocks/slider/block.json
+msgctxt "block description"
+msgid "A horizontal row of cards a visitor can swipe or scroll through. Every card stays reachable without JavaScript."
+msgstr "Горизонтальний ряд карток, який можна гортати або прокручувати. Кожна картка доступна навіть без JavaScript."
+
+#: blocks/slider/block.json
+msgctxt "block keyword"
+msgid "carousel"
+msgstr "карусель"
+
+#: blocks/slider/block.json
+msgctxt "block title"
+msgid "Case slider"
+msgstr "Слайдер кейсів"
+
+#: blocks/slider/block.json
+msgctxt "block keyword"
+msgid "cases"
+msgstr "кейси"
+
+#: blocks/slider/block.json
+msgctxt "block keyword"
+msgid "portfolio"
+msgstr "портфоліо"
+
+#: blocks/slider/block.json
+msgctxt "block keyword"
+msgid "scroller"
+msgstr "прокрутка"
+
+#: blocks/slider/block.json
+msgctxt "block keyword"
+msgid "slider"
+msgstr "слайдер"
+
+#: blocks/slider/edit.js:18
+msgid "Case name"
+msgstr "Назва кейсу"
+
+#: blocks/slider/edit.js:19
+msgid "What changed, and by how much."
+msgstr "Що змінилося і наскільки."
+
+#: blocks/slider/edit.js:46
+msgid "Slider"
+msgstr "Слайдер"
+
+#: blocks/slider/edit.js:48
+msgid "What is in this slider"
+msgstr "Що в цьому слайдері"
+
+#: blocks/slider/edit.js:49
+msgid "A short description read aloud by screen readers, for example \"Client case studies\"."
+msgstr "Короткий опис, який зачитують зчитувачі екрана, наприклад «Кейси клієнтів»."
+
+#: blocks/slider/edit.js:56
+msgid "Card width"
+msgstr "Ширина картки"
+
+#: blocks/slider/edit.js:59
+msgid "Narrow"
+msgstr "Вузька"
+
+#: blocks/slider/edit.js:60
+msgid "Medium"
+msgstr "Середня"
+
+#: blocks/slider/edit.js:61
+msgid "Wide"
+msgstr "Широка"
+
+#: blocks/slider/render.php:27
+msgid "Case studies"
+msgstr "Кейси"
+
+#: blocks/slider/render.php:56
+msgid "carousel"
+msgstr "карусель"
+
+#: blocks/slider/render.php:77
+msgid "Previous cases"
+msgstr "Попередні кейси"
+
+#: blocks/slider/render.php:86
+msgid "Next cases"
+msgstr "Наступні кейси"
+
+#: inc/Modules/Accessibility.php:56
+msgid "Skip to main content"
+msgstr "Перейти до основного вмісту"
+
+#: inc/Modules/Accessibility.php:91
+msgid "Read more"
+msgstr "Читати далі"
+
+#: inc/Modules/Blocks.php:123
+msgid "Card"
+msgstr "Картка"
+
+#: inc/Modules/Blocks.php:129
+msgid "Glass panel"
+msgstr "Скляна панель"
+
+#: inc/Modules/Blocks.php:135
+msgid "Card columns"
+msgstr "Колонки-картки"
+
+#: inc/Modules/Blocks.php:141
+msgid "Signal glow"
+msgstr "Сяйво Signal"
+
+#: inc/Modules/Blocks.php:147
+msgid "Aurora gradient"
+msgstr "Градієнт Aurora"
+
+#: inc/Modules/Blocks.php:159
+msgid "Check list"
+msgstr "Список із галочками"
+
+#: inc/Modules/Blocks.php:170
+msgid "Signal line"
+msgstr "Лінія Signal"
+
+#: inc/Modules/Blocks.php:80
+msgid "WOW blocks"
+msgstr "Блоки WOW"
+
+#. translators: %s: linked studio name.
+#: inc/Modules/Branding.php:104
+msgid "Built with WOW — Signal by %s"
+msgstr "Зроблено на WOW — Signal від %s"
+
+#: inc/Modules/Branding.php:105
+msgid "Win On Web"
+msgstr "Win On Web"
+
+#: inc/Modules/ContactForm.php:122
+msgid "Too many messages sent from this connection. Please try again in a few minutes."
+msgstr "Забагато повідомлень із цього з’єднання. Спробуйте ще раз за кілька хвилин."
+
+#: inc/Modules/ContactForm.php:136
+msgid "The message could not be sent because of a server error. Please email us directly."
+msgstr "Не вдалося надіслати повідомлення через помилку сервера. Напишіть нам, будь ласка, на пошту напряму."
+
+#: inc/Modules/ContactForm.php:158
+msgid "Please enter your name."
+msgstr "Вкажіть, будь ласка, своє ім’я."
+
+#: inc/Modules/ContactForm.php:162
+msgid "Please enter your email address."
+msgstr "Вкажіть, будь ласка, свою електронну пошту."
+
+#: inc/Modules/ContactForm.php:164
+msgid "That email address does not look right. Please check it, for example name@company.com."
+msgstr "Схоже, адреса вказана з помилкою. Перевірте її, наприклад: name@company.com."
+
+#: inc/Modules/ContactForm.php:170
+msgid "Please tell us what you need."
+msgstr "Напишіть, будь ласка, що вам потрібно."
+
+#: inc/Modules/ContactForm.php:172
+msgid "Your message is longer than 5000 characters. Please shorten it."
+msgstr "Повідомлення довше за 5000 символів. Скоротіть його, будь ласка."
+
+#: inc/Modules/ContactForm.php:209
+msgid "New message from %s"
+msgstr "Нове повідомлення з %s"
+
+#: inc/Modules/ContactForm.php:214
+msgid "Name:"
+msgstr "Ім’я:"
+
+#: inc/Modules/ContactForm.php:215
+msgid "Email:"
+msgstr "Пошта:"
+
+#: inc/Modules/ContactForm.php:217
+msgid "Message:"
+msgstr "Повідомлення:"
+
+#: inc/Modules/ContactForm.php:222
+msgid "Sent from the contact form on %s"
+msgstr "Надіслано з контактної форми на %s"
+
+#: inc/Modules/ContactForm.php:242
+msgid "Website visitor"
+msgstr "Відвідувач сайту"
+
+#: inc/Modules/ContactForm.php:92
+msgid "Your session expired. Please try sending the message again."
+msgstr "Сеанс завершився. Спробуйте надіслати повідомлення ще раз."
+
+#: inc/Modules/Credit.php:50
+msgid "Footer credit"
+msgstr "Підпис у футері"
+
+#: inc/Modules/Credit.php:51
+msgid "Show a small \"Design by WOW — Win On Web\" line at the bottom of every page."
+msgstr "Показувати внизу кожної сторінки невеликий рядок «Дизайн — WOW — Win On Web»."
+
+#: inc/Modules/Credit.php:71
+msgid "Show the designer credit"
+msgstr "Показувати підпис дизайнера"
+
+#: inc/Modules/Importer.php:101 inc/Modules/Importer.php:102 inc/Modules/Importer.php:296
+msgid "Design import"
+msgstr "Імпорт дизайну"
+
+#. translators: %d: number of conversions allowed per hour.
+#: inc/Modules/Importer.php:1059
+msgid "That is %d conversions in an hour, which is the limit. Wait a little before continuing."
+msgstr "Це %d конвертацій за годину — досягнуто ліміт. Зачекайте трохи, перш ніж продовжити."
+
+#: inc/Modules/Importer.php:1093
+msgid "Imported section"
+msgstr "Імпортована секція"
+
+#: inc/Modules/Importer.php:282
+msgid "You do not have permission to import designs."
+msgstr "У вас немає прав на імпорт дизайнів."
+
+#: inc/Modules/Importer.php:299
+msgid "Upload an HTML design as a ZIP. Each section is converted into editable blocks, one at a time, and nothing is added to your site until you accept it."
+msgstr "Завантажте HTML-дизайн у вигляді ZIP-архіву. Кожна секція перетворюється на редаговані блоки, по одній за раз, і нічого не додається на сайт, доки ви не приймете результат."
+
+#: inc/Modules/Importer.php:305
+msgid "Connection settings"
+msgstr "Налаштування підключення"
+
+#: inc/Modules/Importer.php:309
+msgid "Key active — from wp-config.php"
+msgstr "Ключ активний — із wp-config.php"
+
+#. translators: %s: the last four characters of the key.
+#: inc/Modules/Importer.php:316
+msgid "Key active — ends in %s"
+msgstr "Ключ активний — закінчується на %s"
+
+#: inc/Modules/Importer.php:323
+msgid "No key — the free routes still work"
+msgstr "Ключа немає — безкоштовні способи працюють"
+
+#: inc/Modules/Importer.php:334
+msgid "Anthropic API key"
+msgstr "Ключ API Anthropic"
+
+#: inc/Modules/Importer.php:339
+msgid "Set in wp-config.php."
+msgstr "Задано у wp-config.php."
+
+#: inc/Modules/Importer.php:340
+msgid "The key is defined as a constant, so it is not stored in the database and cannot be changed here."
+msgstr "Ключ визначено як константу, тож він не зберігається в базі даних і його не можна змінити тут."
+
+#: inc/Modules/Importer.php:354
+msgid "Used only on the server; it is never sent to the browser. For the strongest setup, put it in wp-config.php instead:"
+msgstr "Використовується лише на сервері й ніколи не надсилається у браузер. Найнадійніше — вказати його у wp-config.php:"
+
+#: inc/Modules/Importer.php:362
+msgid "Model"
+msgstr "Модель"
+
+#: inc/Modules/Importer.php:376
+msgid "Care taken per section"
+msgstr "Ретельність опрацювання секції"
+
+#: inc/Modules/Importer.php:387
+msgid "Higher settings take longer and cost more per section, and handle complicated layouts better."
+msgstr "Вищі значення потребують більше часу й коштів на секцію, але краще справляються зі складними макетами."
+
+#: inc/Modules/Importer.php:393
+msgid "Save settings"
+msgstr "Зберегти налаштування"
+
+#: inc/Modules/Importer.php:398
+msgid "This screen needs JavaScript."
+msgstr "Для цього екрана потрібен JavaScript."
+
+#. translators: %d: section number on the page.
+#: inc/Modules/Importer.php:657 inc/Support/SectionSplitter.php:480
+msgid "Section %d"
+msgstr "Секція %d"
+
+#: inc/Modules/Importer.php:739
+msgid "No file was received."
+msgstr "Файл не надійшов."
+
+#: inc/Modules/Importer.php:745
+msgid "The upload did not complete. The file may be larger than this server allows."
+msgstr "Завантаження не завершилося. Можливо, файл більший, ніж дозволяє цей сервер."
+
+#: inc/Modules/Importer.php:754
+msgid "That file did not arrive as an upload."
+msgstr "Цей файл надійшов не як завантаження."
+
+#: inc/Modules/Importer.php:760
+msgid "Please upload a .zip archive."
+msgstr "Завантажте, будь ласка, архів .zip."
+
+#: inc/Modules/Importer.php:803 inc/Modules/Importer.php:807 inc/Support/SiteBuilder.php:66
+msgid "That design is not on this site."
+msgstr "Такого дизайну на цьому сайті немає."
+
+#: inc/Modules/Importer.php:879 inc/Modules/Importer.php:886
+msgid "That page is not in this design."
+msgstr "Такої сторінки в цьому дизайні немає."
+
+#: inc/Modules/Importer.php:890
+msgid "That is not an HTML page."
+msgstr "Це не HTML-сторінка."
+
+#: inc/Modules/Importer.php:934
+msgid "That section is no longer in the page."
+msgstr "Цієї секції вже немає на сторінці."
+
+#: inc/Modules/Patterns.php:42
+msgid "WOW — Hero"
+msgstr "WOW — Перший екран"
+
+#: inc/Modules/Patterns.php:43
+msgid "Opening sections for the top of a page."
+msgstr "Секції для початку сторінки."
+
+#: inc/Modules/Patterns.php:46
+msgid "WOW — Content"
+msgstr "WOW — Контент"
+
+#: inc/Modules/Patterns.php:47
+msgid "Services, process, features and text sections."
+msgstr "Послуги, процес, переваги та текстові секції."
+
+#: inc/Modules/Patterns.php:50
+msgid "WOW — Proof"
+msgstr "WOW — Докази"
+
+#: inc/Modules/Patterns.php:51
+msgid "Case studies, metrics, testimonials and client logos."
+msgstr "Кейси, метрики, відгуки та логотипи клієнтів."
+
+#: inc/Modules/Patterns.php:54
+msgid "WOW — Conversion"
+msgstr "WOW — Конверсія"
+
+#: inc/Modules/Patterns.php:55
+msgid "Pricing, FAQ, contact and call-to-action sections."
+msgstr "Ціни, FAQ, контакти та секції із закликом до дії."
+
+#: inc/Modules/Patterns.php:58
+msgid "WOW — Full pages"
+msgstr "WOW — Готові сторінки"
+
+#: inc/Modules/Patterns.php:59
+msgid "Complete page layouts you can drop in and edit."
+msgstr "Готові макети сторінок, які можна вставити й відредагувати."
+
+#: inc/Modules/Seo.php:231
+msgid "Home"
+msgstr "Головна"
+
+#: inc/Modules/Setup.php:94
+msgid "Signal card (3:2)"
+msgstr "Signal картка (3:2)"
+
+#: inc/Modules/Setup.php:95
+msgid "Signal wide (16:9)"
+msgstr "Signal широка (16:9)"
+
+#: inc/Modules/Setup.php:96
+msgid "Signal square (1:1)"
+msgstr "Signal квадрат (1:1)"
+
+#. translators: 1: average rating, 2: number of reviews.
+#: inc/Modules/WooCommerce.php:132
+msgid "Rated %1$s out of 5 based on %2$s review"
+msgid_plural "Rated %1$s out of 5 based on %2$s reviews"
+msgstr[0] "Оцінка %1$s з 5 на основі %2$s відгуку"
+msgstr[1] "Оцінка %1$s з 5 на основі %2$s відгуків"
+msgstr[2] "Оцінка %1$s з 5 на основі %2$s відгуків"
+
+#: inc/Support/AnthropicClient.php:121
+msgid "No Anthropic API key is configured yet. Add one under Appearance → AI section builder."
+msgstr "Ключ API Anthropic ще не налаштовано. Додайте його в розділі «Зовнішній вигляд → Конструктор секцій ШІ»."
+
+#. translators: %s: transport error message.
+#: inc/Support/AnthropicClient.php:217
+msgid "Could not reach the Anthropic API: %s"
+msgstr "Не вдалося звʼязатися з API Anthropic: %s"
+
+#: inc/Support/AnthropicClient.php:232
+msgid "The API returned a response that could not be read."
+msgstr "API повернуло відповідь, яку не вдалося прочитати."
+
+#: inc/Support/AnthropicClient.php:243
+msgid "Anthropic declined this request. Rephrase the brief and try again — describe the section rather than pasting code from an unrelated system."
+msgstr "Anthropic відхилив цей запит. Переформулюйте завдання та спробуйте ще раз — опишіть секцію, а не вставляйте код зі сторонньої системи."
+
+#: inc/Support/AnthropicClient.php:250
+msgid "The reply was cut off before it finished. Ask for a smaller section, or split the design into two."
+msgstr "Відповідь обірвалася, не завершившись. Попросіть меншу секцію або розділіть дизайн на дві частини."
+
+#: inc/Support/AnthropicClient.php:265
+msgid "The reply did not match the expected format."
+msgstr "Відповідь не відповідає очікуваному формату."
+
+#: inc/Support/AnthropicClient.php:289
+msgid "The request was rejected as invalid."
+msgstr "Запит відхилено як некоректний."
+
+#: inc/Support/AnthropicClient.php:290
+msgid "The API key was not accepted. Check it and save again."
+msgstr "Ключ API не прийнято. Перевірте його та збережіть ще раз."
+
+#: inc/Support/AnthropicClient.php:291
+msgid "This API key does not have access to the selected model."
+msgstr "Цей ключ API не має доступу до обраної моделі."
+
+#: inc/Support/AnthropicClient.php:292
+msgid "The selected model does not exist. Pick another one in the settings."
+msgstr "Обраної моделі не існує. Виберіть іншу в налаштуваннях."
+
+#: inc/Support/AnthropicClient.php:293
+msgid "The design you pasted is too large. Send one section at a time."
+msgstr "Надісланий дизайн завеликий. Надсилайте по одній секції за раз."
+
+#: inc/Support/AnthropicClient.php:294
+msgid "Rate limit reached. Wait a minute and try again."
+msgstr "Досягнуто ліміт запитів. Зачекайте хвилину та спробуйте ще раз."
+
+#: inc/Support/AnthropicClient.php:295
+msgid "Anthropic had a server error. Try again shortly."
+msgstr "На боці Anthropic сталася помилка сервера. Спробуйте трохи згодом."
+
+#: inc/Support/AnthropicClient.php:296
+msgid "Anthropic is overloaded right now. Try again shortly."
+msgstr "Anthropic зараз перевантажений. Спробуйте трохи згодом."
+
+#. translators: %d: HTTP status code.
+#: inc/Support/AnthropicClient.php:301
+msgid "The API returned an unexpected status (%d)."
+msgstr "API повернуло неочікуваний статус (%d)."
+
+#: inc/Support/AnthropicClient.php:55
+msgid "Claude Opus 5 — best quality (default)"
+msgstr "Claude Opus 5 — найкраща якість (за замовчуванням)"
+
+#: inc/Support/AnthropicClient.php:56
+msgid "Claude Sonnet 5 — faster and cheaper"
+msgstr "Claude Sonnet 5 — швидше й дешевше"
+
+#: inc/Support/AnthropicClient.php:57
+msgid "Claude Haiku 4.5 — fastest, simple sections only"
+msgstr "Claude Haiku 4.5 — найшвидше, лише для простих секцій"
+
+#: inc/Support/AnthropicClient.php:68
+msgid "Low — quickest, for simple sections"
+msgstr "Низька — найшвидше, для простих секцій"
+
+#: inc/Support/AnthropicClient.php:69
+msgid "Medium — balanced"
+msgstr "Середня — збалансовано"
+
+#: inc/Support/AnthropicClient.php:70
+msgid "High — recommended"
+msgstr "Висока — рекомендовано"
+
+#: inc/Support/AnthropicClient.php:71
+msgid "Extra high — slowest, for complex layouts"
+msgstr "Дуже висока — найповільніше, для складних макетів"
+
+#: inc/Support/BlockConverter.php:1032
+msgid "Heading text"
+msgstr "Текст заголовка"
+
+#: inc/Support/BlockConverter.php:1086
+msgid "Small label above a heading"
+msgstr "Маленький напис над заголовком"
+
+#: inc/Support/BlockConverter.php:1105
+msgid "Body text"
+msgstr "Основний текст"
+
+#: inc/Support/BlockConverter.php:1255
+msgid "Image and its alt text"
+msgstr "Зображення та його альтернативний текст"
+
+#: inc/Support/BlockConverter.php:1258
+msgid "An image had no alt text in the design. Describe it in the editor, or mark it decorative."
+msgstr "У дизайні зображення не мало альтернативного тексту. Опишіть його в редакторі або позначте декоративним."
+
+#: inc/Support/BlockConverter.php:1355
+msgid "Table contents"
+msgstr "Вміст таблиці"
+
+#: inc/Support/BlockConverter.php:1431
+msgid "A link ran a script instead of going somewhere; it now points nowhere."
+msgstr "Посилання запускало скрипт замість переходу; тепер воно нікуди не веде."
+
+#: inc/Support/BlockConverter.php:1484
+msgid "This section had a form. Add the theme’s Contact form block where it belongs — a form copied as markup would not send anything."
+msgstr "У цій секції була форма. Додайте блок «Контактна форма» з теми на її місце — скопійована розмітка форми нічого б не надсилала."
+
+#: inc/Support/BlockConverter.php:1490
+msgid "Decorative vector artwork was left out. The theme’s gradients stand in for it; add a real image if you need the original."
+msgstr "Декоративну векторну графіку не перенесено. Її замінюють градієнти теми; додайте справжнє зображення, якщо потрібен оригінал."
+
+#: inc/Support/BlockConverter.php:1496
+msgid "An embedded frame was left out. Use the matching embed block if you need it back."
+msgstr "Вбудований фрейм не перенесено. Скористайтеся відповідним блоком вставки, якщо він потрібен."
+
+#. translators: 1: section label, 2: word count, 3: image count.
+#: inc/Support/BlockConverter.php:1509
+msgid "\"%1$s\" — %2$d words and %3$d image(s), converted structurally into editable blocks."
+msgstr "«%1$s» — слів: %2$d, зображень: %3$d; структурно перетворено на редаговані блоки."
+
+#: inc/Support/BlockConverter.php:166
+msgid "This section held nothing that could become content."
+msgstr "У цій секції не було нічого, що могло б стати вмістом."
+
+#: inc/Support/BlockConverter.php:614 inc/Support/BlockConverter.php:1217
+msgid "List items"
+msgstr "Пункти списку"
+
+#: inc/Support/BlockConverter.php:678
+msgid "Figure and its caption"
+msgstr "Число та його підпис"
+
+#: inc/Support/BlockConverter.php:718 inc/Support/BlockConverter.php:1308
+msgid "Quotation"
+msgstr "Цитата"
+
+#: inc/Support/BlockConverter.php:975
+msgid "Button label and link"
+msgstr "Напис і посилання кнопки"
+
+#: inc/Support/BlockMarkupValidator.php:152
+msgid "The conversion produced nothing."
+msgstr "Конвертація не дала жодного результату."
+
+#: inc/Support/BlockMarkupValidator.php:171
+msgid "The result contains PHP, which is never allowed in page content."
+msgstr "Результат містить PHP, який ніколи не дозволений у вмісті сторінки."
+
+#. translators: %s: HTML tag name.
+#: inc/Support/BlockMarkupValidator.php:178
+msgid "The result contains a <%s> element, which generated content may not include."
+msgstr "Результат містить елемент <%s>, якого не може бути у згенерованому вмісті."
+
+#: inc/Support/BlockMarkupValidator.php:190
+msgid "The result contains an inline event handler attribute."
+msgstr "Результат містить вбудований атрибут-обробник події."
+
+#: inc/Support/BlockMarkupValidator.php:194
+msgid "The result contains a script-carrying link or source."
+msgstr "Результат містить посилання або джерело, що несе скрипт."
+
+#: inc/Support/BlockMarkupValidator.php:199
+msgid "The result uses the Custom HTML block. Sections must be built from real blocks so they stay editable."
+msgstr "Результат використовує блок «Довільний HTML». Секції мають складатися зі справжніх блоків, щоб залишатися редагованими."
+
+#: inc/Support/BlockMarkupValidator.php:213 inc/Support/BlockMarkupValidator.php:280
+msgid "The result contains no blocks at all."
+msgstr "Результат не містить жодного блока."
+
+#. translators: %s: block name.
+#: inc/Support/BlockMarkupValidator.php:234
+msgid "The settings on the \"%s\" block are not valid JSON."
+msgstr "Налаштування блока «%s» не є коректним JSON."
+
+#. translators: %s: block name. */ __( 'The settings on the "%s" block are not valid JSON.', 'wow-signal' ), $name ); } } if ( $self_closing ) { continue; } if ( $closing ) { $open = array_pop( $stack ); if ( null === $open ) { $this->errors[] = sprintf( /* translators: %s: block name.
+#: inc/Support/BlockMarkupValidator.php:250
+msgid "A \"%s\" block is closed but was never opened."
+msgstr "Блок «%s» закрито, але жодного разу не відкрито."
+
+#. translators: %s: block name. */ __( 'A "%s" block is closed but was never opened.', 'wow-signal' ), $name ); continue; } if ( $open !== $name ) { $this->errors[] = sprintf( /* translators: 1: closing block name, 2: block that was open.
+#: inc/Support/BlockMarkupValidator.php:259
+msgid "A \"%1$s\" block closes while \"%2$s\" is still open."
+msgstr "Блок «%1$s» закривається, поки «%2$s» ще відкритий."
+
+#. translators: 1: closing block name, 2: block that was open. */ __( 'A "%1$s" block closes while "%2$s" is still open.', 'wow-signal' ), $name, $open ); } continue; } $stack[] = $name; } if ( array() !== $stack ) { $this->errors[] = sprintf( /* translators: %s: comma-separated block names.
+#: inc/Support/BlockMarkupValidator.php:274
+msgid "These blocks are never closed: %s."
+msgstr "Ці блоки так і не закриті: %s."
+
+#. translators: %s: block name.
+#: inc/Support/BlockMarkupValidator.php:298
+msgid "\"%s\" is not a block the converter is allowed to use."
+msgstr "«%s» не є блоком, який конвертеру дозволено використовувати."
+
+#. translators: %s: block name.
+#: inc/Support/BlockMarkupValidator.php:320
+msgid "\"%s\" is not installed on this site, so that part of the section would render as nothing."
+msgstr "«%s» не встановлено на цьому сайті, тож ця частина секції не відобразиться взагалі."
+
+#: inc/Support/BlockMarkupValidator.php:338
+msgid "An image has no alt text. Add one, or mark it decorative, before publishing."
+msgstr "У зображення немає альтернативного тексту. Додайте його або позначте зображення декоративним перед публікацією."
+
+#: inc/Support/BlockMarkupValidator.php:347
+msgid "A colour is written directly into the markup instead of using a theme colour, so it will not follow the site palette."
+msgstr "Колір записано прямо в розмітку замість кольору теми, тож він не слідуватиме палітрі сайту."
+
+#: inc/Support/BlockMarkupValidator.php:351
+msgid "A font size is written directly into the markup instead of using a theme size."
+msgstr "Розмір шрифту записано прямо в розмітку замість розміру з теми."
+
+#: inc/Support/BlockMarkupValidator.php:360
+msgid "This section contains more than one level-1 heading. A page should have exactly one."
+msgstr "Ця секція містить більше одного заголовка першого рівня. На сторінці має бути рівно один."
+
+#: inc/Support/BlockMarkupValidator.php:367
+msgid "The heading levels skip a step, which is confusing for screen reader users."
+msgstr "Рівні заголовків пропускають щабель, що збиває з пантелику користувачів зчитувачів екрана."
+
+#: inc/Support/ConversionPrompt.php:411
+msgid "Nothing was pasted."
+msgstr "Нічого не вставлено."
+
+#: inc/Support/ConversionPrompt.php:425
+msgid "That does not look like the JSON list the brief asked for. Copy the whole reply, including the opening [ and closing ]."
+msgstr "Це не схоже на список JSON, який просило завдання. Скопіюйте всю відповідь, разом із відкривною [ і закривною ]."
+
+#: inc/Support/ConversionPrompt.php:434
+msgid "The pasted reply is not valid JSON. It may have been cut off — ask for it again and copy all of it."
+msgstr "Вставлена відповідь не є коректним JSON. Можливо, вона обірвалася — попросіть її ще раз і скопіюйте повністю."
+
+#: inc/Support/ConversionPrompt.php:470
+msgid "The pasted list has no sections with markup in it."
+msgstr "У вставленому списку немає жодної секції з розміткою."
+
+#: inc/Support/DesignArchive.php:134
+msgid "Could not create the designs folder inside uploads."
+msgstr "Не вдалося створити теку дизайнів усередині uploads."
+
+#: inc/Support/DesignArchive.php:179
+msgid "This server has no ZIP support in PHP, so archives cannot be unpacked. Ask your host to enable the zip extension."
+msgstr "На цьому сервері PHP не підтримує ZIP, тож архіви неможливо розпакувати. Попросіть хостинг увімкнути розширення zip."
+
+#: inc/Support/DesignArchive.php:195
+msgid "Could not create a folder for this design."
+msgstr "Не вдалося створити теку для цього дизайну."
+
+#: inc/Support/DesignArchive.php:201
+msgid "That file could not be opened as a ZIP archive."
+msgstr "Цей файл не вдалося відкрити як ZIP-архів."
+
+#. translators: %d: maximum number of files.
+#: inc/Support/DesignArchive.php:213
+msgid "That archive holds more than %d files. Send the design folder on its own, without build output or dependencies."
+msgstr "Цей архів містить більше ніж %d файлів. Надішліть саму теку дизайну, без результатів збірки та залежностей."
+
+#: inc/Support/DesignArchive.php:224
+msgid "Could not resolve the destination folder."
+msgstr "Не вдалося визначити теку призначення."
+
+#: inc/Support/DesignArchive.php:264
+msgid "That archive unpacks to more than 200 MB. Remove videos, design binaries and node_modules before sending it."
+msgstr "Цей архів розпаковується у понад 200 МБ. Приберіть відео, бінарні файли дизайну та node_modules, перш ніж надсилати."
+
+#. translators: %s: entry path inside the archive.
+#: inc/Support/DesignArchive.php:273
+msgid "%s — refused, the path points outside the folder"
+msgstr "%s — відхилено, шлях веде за межі теки"
+
+#: inc/Support/DesignArchive.php:313
+msgid "Nothing usable was found in that archive. It should contain the design HTML, its stylesheets and its images."
+msgstr "У цьому архіві не знайдено нічого придатного. Він має містити HTML дизайну, його таблиці стилів та зображення."
+
+#. translators: %s: entry path inside the archive.
+#: inc/Support/DesignArchive.php:360
+msgid "%s — refused, executable files are never unpacked"
+msgstr "%s — відхилено, виконувані файли ніколи не розпаковуються"
+
+#. translators: %s: entry path inside the archive. */ __( '%s — refused, executable files are never unpacked', 'wow-signal' ), $name ); } if ( ! in_array( $extension, self::ALLOWED_EXTENSIONS, true ) ) { return sprintf( /* translators: %s: entry path inside the archive.
+#: inc/Support/DesignArchive.php:368
+msgid "%s — skipped, not a design file"
+msgstr "%s — пропущено, це не файл дизайну"
+
+#. translators: %s: entry path inside the archive. */ __( '%s — skipped, not a design file', 'wow-signal' ), $name ); } if ( $size > self::MAX_FILE_BYTES ) { return sprintf( /* translators: %s: entry path inside the archive.
+#: inc/Support/DesignArchive.php:376
+msgid "%s — skipped, larger than 12 MB"
+msgstr "%s — пропущено, більший за 12 МБ"
+
+#. translators: 1: link target, 2: how many links point at it.
+#: inc/Support/SiteAssembler.php:107
+msgid "%2$d link points at \"%1$s\", which is not a page on this site. Check the design or remove the link."
+msgid_plural "%2$d links point at \"%1$s\", which is not a page on this site. Check the design or remove the links."
+msgstr[0] "%2$d посилання веде на «%1$s», якої немає на цьому сайті. Перевірте дизайн або приберіть посилання."
+msgstr[1] "%2$d посилання ведуть на «%1$s», якої немає на цьому сайті. Перевірте дизайн або приберіть посилання."
+msgstr[2] "%2$d посилань ведуть на «%1$s», якої немає на цьому сайті. Перевірте дизайн або приберіть посилання."
+
+#: inc/Support/SiteAssembler.php:147
+msgid "body text on the page background"
+msgstr "основного тексту на тлі сторінки"
+
+#: inc/Support/SiteAssembler.php:148
+msgid "secondary text on the page background"
+msgstr "другорядного тексту на тлі сторінки"
+
+#: inc/Support/SiteAssembler.php:149
+msgid "text on cards"
+msgstr "тексту на картках"
+
+#: inc/Support/SiteAssembler.php:150
+msgid "form field borders"
+msgstr "рамок полів форми"
+
+#. translators: 1: what the pair is used for, 2: measured ratio, 3: required ratio.
+#: inc/Support/SiteAssembler.php:170
+msgid "The design's colours give %1$s a contrast of %2$s:1, below the %3$s:1 that WCAG 2.2 AA asks for. Adjust it in Appearance → Editor → Styles before launch."
+msgstr "Кольори дизайну дають для %1$s контраст %2$s:1 — нижче за %3$s:1, який вимагає WCAG 2.2 AA. Виправте це у «Вигляд → Редактор → Стилі» до запуску."
+
+#. translators: 1: section label, 2: reason.
+#: inc/Support/SiteAssembler.php:268
+msgid "Section \"%1$s\" was left out: %2$s"
+msgstr "Секцію «%1$s» пропущено: %2$s"
+
+#: inc/Support/SiteAssembler.php:282
+msgid "Nothing on this page could be converted."
+msgstr "На цій сторінці не вдалося сконвертувати нічого."
+
+#: inc/Support/SiteAssembler.php:292
+msgid "This page had no heading of its own, so its title was added as the top heading."
+msgstr "Ця сторінка не мала власного заголовка, тож її назву додано як головний заголовок."
+
+#: inc/Support/SiteAssembler.php:52
+msgid "No pages were found in that language."
+msgstr "Сторінок цією мовою не знайдено."
+
+#: inc/Support/SiteAssembler.php:781
+msgid "Main navigation"
+msgstr "Головна навігація"
+
+#: inc/Support/SiteAssembler.php:872
+msgid "Footer"
+msgstr "Футер"
+
+#: inc/Support/SiteAssembler.php:872
+msgid "Header"
+msgstr "Хедер"
+
+#: inc/Support/SiteAssembler.php:98
+msgid "None of the pages could be converted."
+msgstr "Жодну зі сторінок не вдалося сконвертувати."
+
+#: patterns/cases-slider.php
+msgctxt "Pattern description"
+msgid "A horizontal slider of case study cards, each with a result, a client and a short summary."
+msgstr "Горизонтальний слайдер карток-кейсів: результат, клієнт і короткий опис у кожній."
+
+#: patterns/cases-slider.php
+msgctxt "Pattern title"
+msgid "Case studies — swipeable cards"
+msgstr "Кейси — картки з гортанням"
+
+#: patterns/cases-slider.php
+msgctxt "Pattern keywords"
+msgid "cases, portfolio, work, slider, carousel, results"
+msgstr "кейси, портфоліо, роботи, слайдер, карусель, результати"
+
+#: patterns/cases-slider.php:19
+msgctxt "Pattern placeholder text"
+msgid "Selected work"
+msgstr "Обрані роботи"
+
+#: patterns/cases-slider.php:23
+msgctxt "Pattern placeholder text"
+msgid "Every project below is measured against what it was before we touched it."
+msgstr "Кожен проєкт нижче виміряно відносно того, яким він був до нас."
+
+#: patterns/cases-slider.php:31
+msgctxt "Pattern placeholder text"
+msgid "Client case studies"
+msgstr "Кейси клієнтів"
+
+#: patterns/cases-slider.php:33
+msgctxt "Pattern placeholder text"
+msgid "more enquiries in the first quarter"
+msgstr "більше звернень у перший квартал"
+
+#: patterns/cases-slider.php:36
+msgctxt "Pattern placeholder text"
+msgid "B2B manufacturer, rebuilt"
+msgstr "B2B-виробник, переробка з нуля"
+
+#: patterns/cases-slider.php:40
+msgctxt "Pattern placeholder text"
+msgid "Replaced a page builder with a block theme. The site went from 4.8 seconds to 1.6 and the sales team stopped filing tickets to change a phone number."
+msgstr "Замінили конструктор сторінок на блокову тему. Сайт прискорився з 4,8 до 1,6 секунди, а відділ продажів перестав створювати заявки, щоб змінити номер телефону."
+
+#: patterns/cases-slider.php:45
+msgctxt "Pattern placeholder text"
+msgid "accessibility score, up from 61"
+msgstr "оцінка доступності замість 61"
+
+#: patterns/cases-slider.php:48
+msgctxt "Pattern placeholder text"
+msgid "Public sector portal"
+msgstr "Портал державного сектору"
+
+#: patterns/cases-slider.php:52
+msgctxt "Pattern placeholder text"
+msgid "A full WCAG 2.2 AA remediation with a written audit trail, delivered ahead of a statutory compliance deadline."
+msgstr "Повне усунення проблем до рівня WCAG 2.2 AA з письмовим звітом аудиту — здано раніше за встановлений законом дедлайн."
+
+#: patterns/cases-slider.php:57
+msgctxt "Pattern placeholder text"
+msgid "faster checkout on mobile"
+msgstr "швидше оформлення замовлення на мобільному"
+
+#: patterns/cases-slider.php:60
+msgctxt "Pattern placeholder text"
+msgid "WooCommerce performance rescue"
+msgstr "Порятунок продуктивності WooCommerce"
+
+#: patterns/cases-slider.php:64
+msgctxt "Pattern placeholder text"
+msgid "Cut eleven plugins, moved the cart to blocks and put the shop assets behind a condition. Same features, a third of the JavaScript."
+msgstr "Прибрали одинадцять плагінів, перевели кошик на блоки та зробили підключення ресурсів магазину умовним. Функції ті самі, JavaScript — утричі менше."
+
+#: patterns/cases-slider.php:69
+msgctxt "Pattern placeholder text"
+msgid "weeks from first call to launch"
+msgstr "тижнів від першого дзвінка до запуску"
+
+#: patterns/cases-slider.php:72
+msgctxt "Pattern placeholder text"
+msgid "SaaS marketing site"
+msgstr "Маркетинговий сайт SaaS"
+
+#: patterns/cases-slider.php:76
+msgctxt "Pattern placeholder text"
+msgid "Next.js front end, WordPress editing behind it. Marketing publishes without a deploy, engineering keeps its type safety."
+msgstr "Фронтенд на Next.js, редагування — у WordPress. Маркетинг публікує без деплою, розробка зберігає типобезпеку."
+
+#: patterns/contact-section.php
+msgctxt "Pattern description"
+msgid "A two-column contact section: an accessible enquiry form next to direct contact details."
+msgstr "Контактна секція у дві колонки: доступна форма запиту поруч із прямими контактами."
+
+#: patterns/contact-section.php
+msgctxt "Pattern title"
+msgid "Contact — form with direct details"
+msgstr "Контакти — форма та прямі контакти"
+
+#: patterns/contact-section.php
+msgctxt "Pattern keywords"
+msgid "contact, form, enquiry, email, get in touch"
+msgstr "контакти, форма, запит, пошта, зв’язатися"
+
+#: patterns/contact-section.php:20
+msgctxt "Pattern placeholder text"
+msgid "Tell us what you are building"
+msgstr "Розкажіть, що ви будуєте"
+
+#: patterns/contact-section.php:24
+msgctxt "Pattern placeholder text"
+msgid "You will hear back from one of the two people who would actually do the work, within one working day."
+msgstr "Вам відповість один із двох людей, які й робитимуть роботу — протягом одного робочого дня."
+
+#: patterns/contact-section.php:33
+msgctxt "Pattern placeholder text"
+msgid "A written scope and a fixed number before anything starts"
+msgstr "Письмове ТЗ і фіксована сума ще до старту"
+
+#: patterns/contact-section.php:37
+msgctxt "Pattern placeholder text"
+msgid "No sales call, no discovery workshop invoice"
+msgstr "Без дзвінків від продажників і без рахунку за «дослідницький воркшоп»"
+
+#: patterns/contact-section.php:41
+msgctxt "Pattern placeholder text"
+msgid "We will tell you if your project is not a fit for us"
+msgstr "Ми прямо скажемо, якщо ваш проєкт нам не підходить"
+
+#: patterns/contact-section.php:48
+msgctxt "Pattern placeholder text"
+msgid "We use your details only to answer this enquiry and delete them after twelve months."
+msgstr "Ми використовуємо ваші дані лише щоб відповісти на це звернення й видаляємо їх через дванадцять місяців."
+
+#: patterns/cta-band.php
+msgctxt "Pattern description"
+msgid "A wide, high-contrast band with one headline and one button."
+msgstr "Широка контрастна смуга з одним заголовком і однією кнопкою."
+
+#: patterns/cta-band.php
+msgctxt "Pattern title"
+msgid "Call to action — full width band"
+msgstr "Заклик до дії — смуга на всю ширину"
+
+#: patterns/cta-band.php
+msgctxt "Pattern keywords"
+msgid "cta, call to action, banner, conversion, contact"
+msgstr "cta, заклик до дії, банер, конверсія, контакти"
+
+#: patterns/cta-band.php:19
+msgctxt "Pattern placeholder text"
+msgid "Ready to stop losing visitors to a slow site?"
+msgstr "Готові перестати втрачати відвідувачів через повільний сайт?"
+
+#: patterns/cta-band.php:23
+msgctxt "Pattern placeholder text"
+msgid "Send us the URL. We will tell you what is wrong with it, for free, before you decide anything."
+msgstr "Надішліть посилання. Ми безкоштовно скажемо, що з ним не так, ще до того, як ви щось вирішите."
+
+#: patterns/cta-band.php:32
+msgctxt "Pattern placeholder text"
+msgid "Get a free review"
+msgstr "Отримати безкоштовний аудит"
+
+#: patterns/faq-section.php
+msgctxt "Pattern description"
+msgid "A heading and a set of questions that expand and collapse, ready to be picked up by search engines."
+msgstr "Заголовок і набір питань, що розгортаються, готові до індексації пошуковими системами."
+
+#: patterns/faq-section.php
+msgctxt "Pattern title"
+msgid "FAQ — accordion with structured data"
+msgstr "FAQ — акордеон зі структурованими даними"
+
+#: patterns/faq-section.php
+msgctxt "Pattern keywords"
+msgid "faq, questions, accordion, answers, support"
+msgstr "faq, питання, акордеон, відповіді, підтримка"
+
+#: patterns/faq-section.php:18
+msgctxt "Pattern placeholder text"
+msgid "Questions we get asked"
+msgstr "Питання, які нам ставлять"
+
+#: patterns/faq-section.php:26
+msgctxt "Pattern placeholder text"
+msgid "How long does a site take?"
+msgstr "Скільки часу займає сайт?"
+
+#: patterns/faq-section.php:28
+msgctxt "Pattern placeholder text"
+msgid "A marketing site is usually four to eight weeks from the scope call. A rebuild with content migration runs longer, and we tell you which one you are in before you commit to anything."
+msgstr "Маркетинговий сайт — зазвичай від чотирьох до восьми тижнів після дзвінка щодо обсягу робіт. Переробка з перенесенням контенту триває довше, і ми кажемо вам, який це випадок, ще до будь-яких зобов’язань."
+
+#: patterns/faq-section.php:32
+msgctxt "Pattern placeholder text"
+msgid "Do you use page builders?"
+msgstr "Ви використовуєте конструктори сторінок?"
+
+#: patterns/faq-section.php:34
+msgctxt "Pattern placeholder text"
+msgid "No. We build block themes on the editor that ships with WordPress. It is faster, it has no licence to renew, and it will still open in five years."
+msgstr "Ні. Ми робимо блокові теми на редакторі, який іде в комплекті з WordPress. Це швидше, не потребує продовження ліцензії й відкриється навіть за п’ять років."
+
+#: patterns/faq-section.php:38
+msgctxt "Pattern placeholder text"
+msgid "What does accessible actually mean here?"
+msgstr "Що саме тут означає «доступний»?"
+
+#: patterns/faq-section.php:40
+msgctxt "Pattern placeholder text"
+msgid "WCAG 2.2 level AA, checked with automated tooling and by hand with a keyboard and a screen reader. You get the report, including anything we could not fix and why."
+msgstr "WCAG 2.2 рівня AA, перевірено автоматичними інструментами й вручну — з клавіатури та зі скрінрідером. Ви отримуєте звіт, зокрема про те, чого ми не змогли виправити і чому."
+
+#: patterns/faq-section.php:44
+msgctxt "Pattern placeholder text"
+msgid "Who owns the code?"
+msgstr "Кому належить код?"
+
+#: patterns/faq-section.php:46
+msgctxt "Pattern placeholder text"
+msgid "You do, from the first commit. The repository is yours, the hosting is in your name, and nothing we write depends on us staying involved."
+msgstr "Вам — із першого коміту. Репозиторій ваш, хостинг оформлений на вас, і ніщо з написаного нами не залежить від нашої подальшої участі."
+
+#: patterns/faq-section.php:50
+msgctxt "Pattern placeholder text"
+msgid "Can you work with our existing team?"
+msgstr "Чи можете ви працювати з нашою командою?"
+
+#: patterns/faq-section.php:52
+msgctxt "Pattern placeholder text"
+msgid "Often, yes. We review pull requests, pair with in-house developers and leave the conventions documented so the work outlives the engagement."
+msgstr "Часто так. Ми рев’юїмо пул-реквести, працюємо в парі з вашими розробниками й документуємо домовленості, щоб робота пережила співпрацю."
+
+#: patterns/hero-home.php
+msgctxt "Pattern description"
+msgid "A full-width opening section with an eyebrow, a large headline, a supporting line, two buttons and a row of metrics."
+msgstr "Секція на всю ширину: надзаголовок, великий заголовок, підзаголовок, дві кнопки та ряд метрик."
+
+#: patterns/hero-home.php
+msgctxt "Pattern title"
+msgid "Hero — headline, promise and proof"
+msgstr "Перший екран — заголовок, обіцянка і докази"
+
+#: patterns/hero-home.php
+msgctxt "Pattern keywords"
+msgid "hero, intro, headline, opening, banner"
+msgstr "перший екран, вступ, заголовок, банер"
+
+#: patterns/hero-home.php:19
+msgctxt "Pattern placeholder text"
+msgid "Boutique studio · WordPress &amp; Next.js"
+msgstr "Бутикова студія · WordPress і Next.js"
+
+#: patterns/hero-home.php:23
+msgctxt "Pattern placeholder text"
+msgid "Websites that win."
+msgstr "Сайти, які перемагають."
+
+#: patterns/hero-home.php:27
+msgctxt "Pattern placeholder text"
+msgid "We build fast, accessible, measurable websites. Two senior developers, no account managers, no hand-offs — the people who scope your project are the ones who ship it."
+msgstr "Ми робимо швидкі, доступні та вимірювані сайти. Двоє senior-розробників, без акаунт-менеджерів і передач між командами — ті, хто оцінює ваш проєкт, той і випускає його."
+
+#: patterns/hero-home.php:36
+msgctxt "Pattern placeholder text"
+msgid "Start a project"
+msgstr "Почати проєкт"
+
+#: patterns/hero-home.php:40
+msgctxt "Pattern placeholder text"
+msgid "See the numbers"
+msgstr "Подивитися цифри"
+
+#: patterns/hero-home.php:51
+msgctxt "Pattern placeholder text"
+msgid "Average Lighthouse performance score on launch"
+msgstr "Середня оцінка Lighthouse на запуску"
+
+#: patterns/hero-home.php:55
+msgctxt "Pattern placeholder text"
+msgid "Typical Largest Contentful Paint on 4G"
+msgstr "Типовий Largest Contentful Paint на 4G"
+
+#: patterns/hero-home.php:59
+msgctxt "Pattern placeholder text"
+msgid "Projects delivered to WCAG 2.2 AA"
+msgstr "Проєктів здано за WCAG 2.2 AA"
+
+#: patterns/hero-home.php:63
+msgctxt "Pattern placeholder text"
+msgid "Senior developers on every project, start to finish"
+msgstr "Senior-розробники на кожному проєкті, від початку до кінця"
+
+#: patterns/hero-page.php
+msgctxt "Pattern description"
+msgid "A compact page opener with an eyebrow, a heading and one supporting paragraph."
+msgstr "Компактний початок сторінки: надзаголовок, заголовок і один абзац."
+
+#: patterns/hero-page.php
+msgctxt "Pattern title"
+msgid "Hero — inner page header"
+msgstr "Перший екран — шапка внутрішньої сторінки"
+
+#: patterns/hero-page.php
+msgctxt "Pattern keywords"
+msgid "hero, page header, intro, title"
+msgstr "перший екран, шапка сторінки, вступ, заголовок"
+
+#: patterns/hero-page.php:19
+msgctxt "Pattern placeholder text"
+msgid "Services"
+msgstr "Послуги"
+
+#: patterns/hero-page.php:23
+msgctxt "Pattern placeholder text"
+msgid "What we do, and what it costs"
+msgstr "Що ми робимо і скільки це коштує"
+
+#: patterns/hero-page.php:27
+msgctxt "Pattern placeholder text"
+msgid "Short version: we build and rescue WordPress and Next.js sites, we quote a fixed number, and we can show you the measurements afterwards."
+msgstr "Коротко: ми створюємо й рятуємо сайти на WordPress і Next.js, називаємо фіксовану суму й потім показуємо вам виміри."
+
+#: patterns/hidden-404.php
+msgctxt "Pattern title"
+msgid "404 content"
+msgstr "Вміст сторінки 404"
+
+#: patterns/hidden-404.php:15
+msgctxt "Pattern placeholder text"
+msgid "Error 404"
+msgstr "Помилка 404"
+
+#: patterns/hidden-404.php:19
+msgctxt "Pattern placeholder text"
+msgid "That page is not here"
+msgstr "Такої сторінки тут немає"
+
+#: patterns/hidden-404.php:23
+msgctxt "Pattern placeholder text"
+msgid "It may have moved, or the link that brought you here may be out of date. Try a search, or head back to the homepage."
+msgstr "Можливо, вона переїхала, або посилання застаріло. Скористайтеся пошуком або поверніться на головну."
+
+#: patterns/hidden-404.php:30 patterns/hidden-no-results.php:22
+msgctxt "Pattern placeholder text"
+msgid "Search"
+msgstr "Пошук"
+
+#: patterns/hidden-404.php:30 patterns/hidden-no-results.php:22
+msgctxt "Pattern placeholder text"
+msgid "Search this site"
+msgstr "Пошук по сайту"
+
+#: patterns/hidden-404.php:30 patterns/hidden-no-results.php:22
+msgctxt "Pattern placeholder text"
+msgid "Search this site…"
+msgstr "Пошук по сайту…"
+
+#: patterns/hidden-404.php:38
+msgctxt "Pattern placeholder text"
+msgid "Back to the homepage"
+msgstr "Повернутися на головну"
+
+#: patterns/hidden-no-results.php
+msgctxt "Pattern title"
+msgid "No results"
+msgstr "Нічого не знайдено"
+
+#: patterns/hidden-no-results.php:15
+msgctxt "Pattern placeholder text"
+msgid "Nothing matched"
+msgstr "Нічого не знайдено"
+
+#: patterns/hidden-no-results.php:19
+msgctxt "Pattern placeholder text"
+msgid "Try a shorter phrase, or a different word for the same thing."
+msgstr "Спробуйте коротшу фразу або інше слово з тим самим значенням."
+
+#: patterns/logos-strip.php
+msgctxt "Pattern description"
+msgid "A low-key row of client names or logos under the hero. Replace the text with images once you have permission to use them."
+msgstr "Стриманий ряд назв або логотипів клієнтів під першим екраном. Замініть текст зображеннями, коли отримаєте дозвіл на їх використання."
+
+#: patterns/logos-strip.php
+msgctxt "Pattern title"
+msgid "Client logos — quiet strip"
+msgstr "Логотипи клієнтів — стримана смуга"
+
+#: patterns/logos-strip.php
+msgctxt "Pattern keywords"
+msgid "logos, clients, brands, trust, partners"
+msgstr "логотипи, клієнти, бренди, довіра, партнери"
+
+#: patterns/logos-strip.php:18
+msgctxt "Pattern placeholder text"
+msgid "Trusted by teams at"
+msgstr "Нам довіряють команди"
+
+#: patterns/logos-strip.php:27
+msgctxt "Pattern placeholder text"
+msgid "Northwind"
+msgstr "Northwind"
+
+#: patterns/logos-strip.php:31
+msgctxt "Pattern placeholder text"
+msgid "Kraftverk"
+msgstr "Kraftverk"
+
+#: patterns/logos-strip.php:35
+msgctxt "Pattern placeholder text"
+msgid "Meridian"
+msgstr "Meridian"
+
+#: patterns/logos-strip.php:39
+msgctxt "Pattern placeholder text"
+msgid "Volta Labs"
+msgstr "Volta Labs"
+
+#: patterns/logos-strip.php:43
+msgctxt "Pattern placeholder text"
+msgid "Aurora Health"
+msgstr "Aurora Health"
+
+#: patterns/metrics-band.php
+msgctxt "Pattern description"
+msgid "A row of four numbers that count up as the visitor reaches them."
+msgstr "Ряд із чотирьох чисел, які прокручуються, коли відвідувач до них доходить."
+
+#: patterns/metrics-band.php
+msgctxt "Pattern title"
+msgid "Metrics — four figures in a row"
+msgstr "Метрики — чотири числа в ряд"
+
+#: patterns/metrics-band.php
+msgctxt "Pattern keywords"
+msgid "metrics, numbers, stats, results, kpi, counters"
+msgstr "метрики, числа, статистика, результати, kpi, лічильники"
+
+#: patterns/metrics-band.php:19
+msgctxt "Pattern placeholder text"
+msgid "Median Largest Contentful Paint across live client sites"
+msgstr "Медіанний Largest Contentful Paint на живих сайтах клієнтів"
+
+#: patterns/metrics-band.php:23
+msgctxt "Pattern placeholder text"
+msgid "Cumulative Layout Shift on every template we ship"
+msgstr "Cumulative Layout Shift на кожному шаблоні, який ми випускаємо"
+
+#: patterns/metrics-band.php:27
+msgctxt "Pattern placeholder text"
+msgid "Projects delivered since 2016"
+msgstr "Проєктів здано з 2016 року"
+
+#: patterns/metrics-band.php:31
+msgctxt "Pattern placeholder text"
+msgid "Maximum time to a reply from a real developer"
+msgstr "Максимальний час до відповіді живого розробника"
+
+#: patterns/page-contact.php
+msgctxt "Pattern description"
+msgid "A contact page with an enquiry form, direct details and the questions people ask before getting in touch."
+msgstr "Сторінка контактів із формою запиту, прямими контактами та питаннями, які ставлять перед зверненням."
+
+#: patterns/page-contact.php
+msgctxt "Pattern keywords"
+msgid "contact, enquiry, form, full page"
+msgstr "контакти, запит, форма, готова сторінка"
+
+#: patterns/page-contact.php
+msgctxt "Pattern title"
+msgid "Page — contact"
+msgstr "Сторінка — контакти"
+
+#: patterns/page-contact.php:21
+msgctxt "Pattern placeholder text"
+msgid "Contact"
+msgstr "Контакти"
+
+#: patterns/page-contact.php:25
+msgctxt "Pattern placeholder text"
+msgid "Let us look at your project"
+msgstr "Дайте нам подивитися на ваш проєкт"
+
+#: patterns/page-home.php
+msgctxt "Pattern description"
+msgid "A complete homepage: hero with metrics, client logos, services, case studies, process, testimonials, pricing, FAQ and a contact form."
+msgstr "Повноцінна головна: перший екран із метриками, логотипи клієнтів, послуги, кейси, процес, відгуки, ціни, FAQ і контактна форма."
+
+#: patterns/page-home.php
+msgctxt "Pattern keywords"
+msgid "home, homepage, landing, full page, agency"
+msgstr "головна, лендинг, готова сторінка, агенція"
+
+#: patterns/page-home.php
+msgctxt "Pattern title"
+msgid "Page — studio homepage"
+msgstr "Сторінка — головна студії"
+
+#: patterns/page-services.php
+msgctxt "Pattern description"
+msgid "A services page: page hero, the service grid, how a project runs, pricing tiers, FAQ and a closing call to action."
+msgstr "Сторінка послуг: перший екран, сітка послуг, хід проєкту, тарифи, FAQ і фінальний заклик до дії."
+
+#: patterns/page-services.php
+msgctxt "Pattern title"
+msgid "Page — services and pricing"
+msgstr "Сторінка — послуги та ціни"
+
+#: patterns/page-services.php
+msgctxt "Pattern keywords"
+msgid "services, pricing, offering, full page"
+msgstr "послуги, ціни, пропозиція, готова сторінка"
+
+#: patterns/pricing-tiers.php
+msgctxt "Pattern title"
+msgid "Pricing — three tiers"
+msgstr "Ціни — три тарифи"
+
+#: patterns/pricing-tiers.php
+msgctxt "Pattern keywords"
+msgid "pricing, plans, packages, tiers, cost"
+msgstr "ціни, плани, пакети, тарифи, вартість"
+
+#: patterns/pricing-tiers.php
+msgctxt "Pattern description"
+msgid "Three pricing cards with a highlighted middle tier, a feature list and a call to action on each."
+msgstr "Три тарифні картки з виділеним середнім тарифом, переліком можливостей і кнопкою в кожній."
+
+#: patterns/pricing-tiers.php:100
+msgctxt "Pattern placeholder text"
+msgid "Content migration"
+msgstr "Перенесення контенту"
+
+#: patterns/pricing-tiers.php:106
+msgctxt "Pattern placeholder text"
+msgid "Ask about Site"
+msgstr "Запитати про «Сайт»"
+
+#: patterns/pricing-tiers.php:115
+msgctxt "Pattern placeholder text"
+msgid "Partner"
+msgstr "Партнерство"
+
+#: patterns/pricing-tiers.php:119
+msgctxt "Pattern placeholder text"
+msgid "from €2,400/mo"
+msgstr "від €2 400/міс"
+
+#: patterns/pricing-tiers.php:123
+msgctxt "Pattern placeholder text"
+msgid "Ongoing development with a reserved share of our week."
+msgstr "Постійна розробка із зарезервованою часткою нашого тижня."
+
+#: patterns/pricing-tiers.php:128
+msgctxt "Pattern placeholder text"
+msgid "Roadmap sessions every month"
+msgstr "Сесії з дорожньою картою щомісяця"
+
+#: patterns/pricing-tiers.php:132
+msgctxt "Pattern placeholder text"
+msgid "Core Web Vitals monitoring"
+msgstr "Моніторинг Core Web Vitals"
+
+#: patterns/pricing-tiers.php:136
+msgctxt "Pattern placeholder text"
+msgid "Security patching within 24 hours"
+msgstr "Патчі безпеки протягом 24 годин"
+
+#: patterns/pricing-tiers.php:142
+msgctxt "Pattern placeholder text"
+msgid "Ask about Partner"
+msgstr "Запитати про «Партнерство»"
+
+#: patterns/pricing-tiers.php:19
+msgctxt "Pattern placeholder text"
+msgid "Straight pricing"
+msgstr "Чесні ціни"
+
+#: patterns/pricing-tiers.php:23
+msgctxt "Pattern placeholder text"
+msgid "Fixed scope, fixed price, written down before we start. If the scope changes we tell you what it costs before we do it."
+msgstr "Фіксований обсяг, фіксована ціна, зафіксовані письмово до старту. Якщо обсяг змінюється, ми називаємо вартість до того, як щось робити."
+
+#: patterns/pricing-tiers.php:35
+msgctxt "Pattern placeholder text"
+msgid "Landing"
+msgstr "Лендинг"
+
+#: patterns/pricing-tiers.php:39
+msgctxt "Pattern placeholder text"
+msgid "from €3,500"
+msgstr "від €3 500"
+
+#: patterns/pricing-tiers.php:43
+msgctxt "Pattern placeholder text"
+msgid "One page that has to convert. Two to three weeks."
+msgstr "Одна сторінка, яка має конвертувати. Два-три тижні."
+
+#: patterns/pricing-tiers.php:48
+msgctxt "Pattern placeholder text"
+msgid "Custom block patterns"
+msgstr "Власні блокові патерни"
+
+#: patterns/pricing-tiers.php:52
+msgctxt "Pattern placeholder text"
+msgid "Lighthouse 95+ on launch"
+msgstr "Lighthouse 95+ на запуску"
+
+#: patterns/pricing-tiers.php:56
+msgctxt "Pattern placeholder text"
+msgid "Analytics and conversion tracking"
+msgstr "Аналітика та відстеження конверсій"
+
+#: patterns/pricing-tiers.php:62
+msgctxt "Pattern placeholder text"
+msgid "Ask about Landing"
+msgstr "Запитати про «Лендинг»"
+
+#: patterns/pricing-tiers.php:71
+msgctxt "Pattern placeholder text"
+msgid "Most chosen"
+msgstr "Обирають найчастіше"
+
+#: patterns/pricing-tiers.php:75
+msgctxt "Pattern placeholder text"
+msgid "Site"
+msgstr "Сайт"
+
+#: patterns/pricing-tiers.php:79
+msgctxt "Pattern placeholder text"
+msgid "from €9,000"
+msgstr "від €9 000"
+
+#: patterns/pricing-tiers.php:83
+msgctxt "Pattern placeholder text"
+msgid "A complete block theme your team owns. Four to eight weeks."
+msgstr "Повноцінна блокова тема, якою володіє ваша команда. Від чотирьох до восьми тижнів."
+
+#: patterns/pricing-tiers.php:88
+msgctxt "Pattern placeholder text"
+msgid "Everything in Landing"
+msgstr "Усе з тарифу «Лендинг»"
+
+#: patterns/pricing-tiers.php:92
+msgctxt "Pattern placeholder text"
+msgid "Full Site Editing setup and training"
+msgstr "Налаштування Full Site Editing і навчання"
+
+#: patterns/pricing-tiers.php:96
+msgctxt "Pattern placeholder text"
+msgid "WCAG 2.2 AA audit and sign-off"
+msgstr "Аудит WCAG 2.2 AA і підтвердження відповідності"
+
+#: patterns/process-steps.php
+msgctxt "Pattern description"
+msgid "Four numbered steps explaining how a project runs, from first call to handover."
+msgstr "Чотири пронумеровані кроки: як іде проєкт — від першого дзвінка до передачі."
+
+#: patterns/process-steps.php
+msgctxt "Pattern title"
+msgid "Process — four numbered steps"
+msgstr "Процес — чотири пронумеровані кроки"
+
+#: patterns/process-steps.php
+msgctxt "Pattern keywords"
+msgid "process, steps, how it works, timeline, method"
+msgstr "процес, кроки, як це працює, етапи, метод"
+
+#: patterns/process-steps.php:18
+msgctxt "Pattern placeholder text"
+msgid "How a project runs"
+msgstr "Як іде проєкт"
+
+#: patterns/process-steps.php:28 patterns/services-grid.php:35
+msgctxt "Pattern placeholder text"
+msgid "01"
+msgstr "01"
+
+#: patterns/process-steps.php:32
+msgctxt "Pattern placeholder text"
+msgid "Scope call"
+msgstr "Дзвінок про обсяг робіт"
+
+#: patterns/process-steps.php:36
+msgctxt "Pattern placeholder text"
+msgid "Forty-five minutes with the developers who will build it. You leave with a written scope and a number."
+msgstr "Сорок п’ять хвилин із розробниками, які це робитимуть. Ви йдете з письмовим обсягом робіт і сумою."
+
+#: patterns/process-steps.php:42 patterns/services-grid.php:65
+msgctxt "Pattern placeholder text"
+msgid "02"
+msgstr "02"
+
+#: patterns/process-steps.php:46
+msgctxt "Pattern placeholder text"
+msgid "Design in the browser"
+msgstr "Дизайн у браузері"
+
+#: patterns/process-steps.php:50
+msgctxt "Pattern placeholder text"
+msgid "You review real pages on a real device, not a flat mockup that hides how it behaves at 320 pixels."
+msgstr "Ви дивитеся справжні сторінки на справжньому пристрої, а не плаский макет, який приховує поведінку на 320 пікселях."
+
+#: patterns/process-steps.php:56 patterns/services-grid.php:95
+msgctxt "Pattern placeholder text"
+msgid "03"
+msgstr "03"
+
+#: patterns/process-steps.php:60
+msgctxt "Pattern placeholder text"
+msgid "Build and test"
+msgstr "Розробка й тестування"
+
+#: patterns/process-steps.php:64
+msgctxt "Pattern placeholder text"
+msgid "Weekly demos on a staging URL. Accessibility and performance are checked as we go, not bolted on at the end."
+msgstr "Щотижневі демо на тестовому домені. Доступність і швидкодію перевіряємо по ходу, а не прикручуємо в кінці."
+
+#: patterns/process-steps.php:70
+msgctxt "Pattern placeholder text"
+msgid "04"
+msgstr "04"
+
+#: patterns/process-steps.php:74
+msgctxt "Pattern placeholder text"
+msgid "Launch and hand over"
+msgstr "Запуск і передача"
+
+#: patterns/process-steps.php:78
+msgctxt "Pattern placeholder text"
+msgid "You get the repository, the documentation and a recorded walkthrough. No lock-in, ever."
+msgstr "Ви отримуєте репозиторій, документацію та записаний відеоогляд. Жодної прив’язки до нас."
+
+#: patterns/services-grid.php
+msgctxt "Pattern description"
+msgid "A heading with a short intro and three service cards, each with a title, description and link."
+msgstr "Заголовок із коротким вступом і три картки послуг: назва, опис і посилання в кожній."
+
+#: patterns/services-grid.php
+msgctxt "Pattern title"
+msgid "Services — three card grid"
+msgstr "Послуги — сітка з трьох карток"
+
+#: patterns/services-grid.php
+msgctxt "Pattern keywords"
+msgid "services, features, cards, offering, grid"
+msgstr "послуги, переваги, картки, пропозиція, сітка"
+
+#: patterns/services-grid.php:103
+msgctxt "Pattern placeholder text"
+msgid "A site that is slow, broken or unusable on a screen reader. We audit it, fix it, and show you the before and after."
+msgstr "Сайт, який повільний, зламаний або непридатний для скрінрідера. Ми його аудитуємо, виправляємо й показуємо «до» і «після»."
+
+#: patterns/services-grid.php:108
+msgctxt "Pattern placeholder text"
+msgid "Core Web Vitals back into the green"
+msgstr "Core Web Vitals знову в зеленій зоні"
+
+#: patterns/services-grid.php:112
+msgctxt "Pattern placeholder text"
+msgid "WCAG 2.2 AA remediation with a report"
+msgstr "Усунення проблем до WCAG 2.2 AA зі звітом"
+
+#: patterns/services-grid.php:116
+msgctxt "Pattern placeholder text"
+msgid "Security and update hygiene, sorted"
+msgstr "Безпека й гігієна оновлень — під контролем"
+
+#: patterns/services-grid.php:19
+msgctxt "Pattern placeholder text"
+msgid "What we build"
+msgstr "Що ми робимо"
+
+#: patterns/services-grid.php:23
+msgctxt "Pattern placeholder text"
+msgid "Three ways we work. Every one of them ends with a site you can measure, not a folder of files you cannot maintain."
+msgstr "Три формати роботи. Кожен закінчується сайтом, який можна виміряти, а не текою файлів, яку неможливо підтримувати."
+
+#: patterns/services-grid.php:39
+msgctxt "Pattern placeholder text"
+msgid "WordPress builds"
+msgstr "Розробка на WordPress"
+
+#: patterns/services-grid.php:43
+msgctxt "Pattern placeholder text"
+msgid "Block themes your team can actually edit. No page builder, no plugin sprawl, no locked-in licence renewals."
+msgstr "Блокові теми, які ваша команда справді може редагувати. Без конструкторів, без нагромадження плагінів, без прив’язки до продовження ліцензій."
+
+#: patterns/services-grid.php:48
+msgctxt "Pattern placeholder text"
+msgid "Full Site Editing from day one"
+msgstr "Full Site Editing від першого дня"
+
+#: patterns/services-grid.php:52
+msgctxt "Pattern placeholder text"
+msgid "Content model built around your editors"
+msgstr "Модель контенту, побудована навколо ваших редакторів"
+
+#: patterns/services-grid.php:56
+msgctxt "Pattern placeholder text"
+msgid "Handover docs and a training session"
+msgstr "Документація з передачі та навчальна сесія"
+
+#: patterns/services-grid.php:69
+msgctxt "Pattern placeholder text"
+msgid "React and Next.js"
+msgstr "React і Next.js"
+
+#: patterns/services-grid.php:73
+msgctxt "Pattern placeholder text"
+msgid "Product interfaces and headless front ends where a template alone will not do the job."
+msgstr "Продуктові інтерфейси й headless-фронтенди там, де самого шаблону вже недостатньо."
+
+#: patterns/services-grid.php:78
+msgctxt "Pattern placeholder text"
+msgid "Server rendering and edge caching"
+msgstr "Серверний рендеринг і кешування на межі мережі"
+
+#: patterns/services-grid.php:82
+msgctxt "Pattern placeholder text"
+msgid "Typed APIs and a real test suite"
+msgstr "Типізовані API та справжній набір тестів"
+
+#: patterns/services-grid.php:86
+msgctxt "Pattern placeholder text"
+msgid "WordPress as the editing layer, if you want it"
+msgstr "WordPress як шар редагування, якщо він вам потрібен"
+
+#: patterns/services-grid.php:99
+msgctxt "Pattern placeholder text"
+msgid "Rescue and rebuild"
+msgstr "Порятунок і переробка"
+
+#: patterns/testimonials.php
+msgctxt "Pattern title"
+msgid "Testimonials — three quotes"
+msgstr "Відгуки — три цитати"
+
+#: patterns/testimonials.php
+msgctxt "Pattern keywords"
+msgid "testimonials, quotes, reviews, clients, social proof"
+msgstr "відгуки, цитати, рецензії, клієнти, соціальний доказ"
+
+#: patterns/testimonials.php
+msgctxt "Pattern description"
+msgid "Three client quotes with an attribution line under each."
+msgstr "Три цитати клієнтів із підписом під кожною."
+
+#: patterns/testimonials.php:18
+msgctxt "Pattern placeholder text"
+msgid "What clients say afterwards"
+msgstr "Що клієнти кажуть потім"
+
+#: patterns/testimonials.php:29
+msgctxt "Pattern placeholder text"
+msgid "“They rewrote our theme in six weeks and the first thing I noticed was that our editors stopped emailing me to change text.”"
+msgstr "«Вони переписали нашу тему за шість тижнів, і перше, що я помітив — редактори перестали писати мені, щоб змінити текст.»"
+
+#: patterns/testimonials.php:33
+msgctxt "Pattern placeholder text"
+msgid "Marketing lead, industrial manufacturer"
+msgstr "Керівник маркетингу, промислове виробництво"
+
+#: patterns/testimonials.php:41
+msgctxt "Pattern placeholder text"
+msgid "“We had failed an accessibility audit twice. WOW fixed it, documented every decision, and we passed on the next attempt.”"
+msgstr "«Ми двічі провалили аудит доступності. WOW це виправили, задокументували кожне рішення — і наступну спробу ми пройшли.»"
+
+#: patterns/testimonials.php:45
+msgctxt "Pattern placeholder text"
+msgid "Head of digital, public sector"
+msgstr "Керівник цифрового напряму, держсектор"
+
+#: patterns/testimonials.php:53
+msgctxt "Pattern placeholder text"
+msgid "“Two developers, no project manager in the middle, and the estimate held. That combination is rarer than it should be.”"
+msgstr "«Двоє розробників, без менеджера посередині — і оцінка витримала. Таке поєднання трапляється рідше, ніж мало б.»"
+
+#: patterns/testimonials.php:57
+msgctxt "Pattern placeholder text"
+msgid "Founder, B2B SaaS"
+msgstr "Засновник, B2B SaaS"
+
+#: styles/light.json
+msgctxt "Style variation description"
+msgid "Daylight palette. Same tokens, same contrast contract — every text pair still clears WCAG 2.2 AA and every form control border clears 3:1."
+msgstr "Світла палітра. Ті самі токени й той самий контракт контрасту — кожна пара тексту проходить WCAG 2.2 AA, кожна рамка поля форми — 3:1."
+
+#: styles/light.json
+msgctxt "Style variation name"
+msgid "Signal Light"
+msgstr "Signal Light"

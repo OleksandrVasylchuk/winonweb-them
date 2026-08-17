@@ -1,0 +1,254 @@
+{
+	"domain": "messages",
+	"translation-revision-date": "2026-08-16T14:54:58+0000",
+	"generator": "wow-signal/make-mo.mjs",
+	"locale_data": {
+		"messages": {
+			"": {
+				"domain": "messages",
+				"lang": "uk",
+				"plural-forms": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
+			},
+			"Choose a ZIP file first.": [
+				"Спершу виберіть ZIP-файл."
+			],
+			"Unpacking and reading the design…": [
+				"Розпаковую та читаю дизайн…"
+			],
+			"Read %1$d files and found %2$d pages.": [
+				"Прочитано %1$d файлів, знайдено %2$d сторінок."
+			],
+			"Design archive (.zip)": [
+				"Архів дизайну (.zip)"
+			],
+			"1. Upload the design": [
+				"1. Завантажте дизайн"
+			],
+			"%1$s — %2$d sections": [
+				"%1$s — секцій: %2$d"
+			],
+			"2. Pick a page": [
+				"2. Виберіть сторінку"
+			],
+			"This design has %s. Import one language first; the others can be added later with a translation plugin.": [
+				"Цей дизайн має %s. Спершу імпортуйте одну мову; решту можна додати пізніше плагіном перекладу."
+			],
+			"%d files were not unpacked": [
+				"Не розпаковано файлів: %d"
+			],
+			"Reading the page…": [
+				"Читаю сторінку…"
+			],
+			"Found %d sections on this page.": [
+				"На цій сторінці знайдено секцій: %d"
+			],
+			"Build the whole site": [
+				"Побудувати весь сайт"
+			],
+			"Build everything at once": [
+				"Зібрати все одразу"
+			],
+			"Creates every page, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again.": [
+				"Створює всі сторінки, переносить зображення, збирає меню, хедер і футер, призначає головну. Без ключа API й без чату. Можна скасувати й повторити."
+			],
+			"Language to build:": [
+				"Мова для збірки:"
+			],
+			"Changed your mind, or got a new version of the design? Delete everything and drop the new archive in — nothing here is one-way.": [
+				"Передумали або маєте нову версію дизайну? Видаліть усе й закиньте новий архів — тут ніщо не робиться в один бік."
+			],
+			"Delete everything and start over": [
+				"Видалити все й почати заново"
+			],
+			"Removes only what an import created. Your own pages are left alone.": [
+				"Видаляє лише те, що створив імпорт. Ваші власні сторінки не чіпає."
+			],
+			"Structure only — the button above": [
+				"Тільки структура — кнопка вище"
+			],
+			"Free, instant, no account. Headings, lists, cards and images become blocks.": [
+				"Безкоштовно, миттєво, без реєстрації. Заголовки, списки, картки й зображення стають блоками."
+			],
+			"Your Claude subscription": [
+				"Ваша підписка Claude"
+			],
+			"Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button.": [
+				"Безкоштовно з будь-яким тарифом. Виберіть сторінку нижче, скопіюйте завдання у свій чат Клода і вставте відповідь назад. Якісніше, ніж кнопка."
+			],
+			"An Anthropic API key": [
+				"Ключ API Anthropic"
+			],
+			"One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above.": [
+				"Один клік на сторінку, без копіювання. Приблизно один–три долари за весь сайт. Ключ вказується в «Налаштуваннях підключення» вище."
+			],
+			"Three ways to convert — which should I use?": [
+				"Три способи конвертації — який обрати?"
+			],
+			"(%d sections)": [
+				"(секцій: %d)"
+			],
+			"The site is built.": [
+				"Сайт зібрано."
+			],
+			"Worth checking:": [
+				"Варто перевірити:"
+			],
+			"Building the site — this takes a moment…": [
+				"Збираю сайт — це трохи забере часу…"
+			],
+			"Built %1$d pages and imported %2$d images. Look through them, then edit anything you like.": [
+				"Зібрано %1$d сторінок, перенесено %2$d зображень. Перегляньте їх і редагуйте що завгодно."
+			],
+			"Undoing…": [
+				"Скасовую…"
+			],
+			"Removed %1$d pages and %2$d images. The site is back to how it was.": [
+				"Видалено %1$d сторінок і %2$d зображень. Сайт повернуто у попередній стан."
+			],
+			"3. Convert each section": [
+				"3. Конвертуйте кожну секцію"
+			],
+			"Convert a section, read what it says, then keep it. Nothing reaches your site until you press Keep.": [
+				"Сконвертуйте секцію, прочитайте опис і залиште її. Нічого не потрапляє на сайт, доки ви не натиснете «Залишити»."
+			],
+			"Convert every section": [
+				"Конвертувати всі секції"
+			],
+			"Keep the whole page as a draft": [
+				"Залишити цілу сторінку як чернетку"
+			],
+			"Draft page created.": [
+				"Чернетку сторінки створено."
+			],
+			"Open it in the editor": [
+				"Відкрити в редакторі"
+			],
+			"Paste the whole reply here, including the opening [ and closing ]": [
+				"Вставте сюди всю відповідь, разом із відкривною [ і закривною ]"
+			],
+			"The brief — select it all and copy": [
+				"Завдання — виділіть усе й скопіюйте"
+			],
+			"Copy the brief": [
+				"Скопіювати завдання"
+			],
+			"No API key? Use your own Claude subscription instead": [
+				"Немає ключа API? Скористайтеся власною підпискою Claude"
+			],
+			"Copy the brief for this page.": [
+				"Скопіюйте завдання для цієї сторінки."
+			],
+			"Paste it into your Claude conversation and send it.": [
+				"Вставте його у свій чат із Клодом і надішліть."
+			],
+			"Copy the whole reply and paste it below.": [
+				"Скопіюйте всю відповідь і вставте нижче."
+			],
+			"Claude’s reply": [
+				"Відповідь Клода"
+			],
+			"Read the reply": [
+				"Прочитати відповідь"
+			],
+			"Building the brief…": [
+				"Готую завдання…"
+			],
+			"Brief for %1$d sections, %2$d KB.": [
+				"Завдання на %1$d секцій, %2$d КБ."
+			],
+			"Copied — now paste it into Claude": [
+				"Скопійовано — тепер вставте в Клода"
+			],
+			"Copied. Paste it into Claude, then bring the reply back.": [
+				"Скопійовано. Вставте в Клода й поверніть відповідь сюди."
+			],
+			"The browser would not copy it, so it is in the box below — select it all and copy it yourself.": [
+				"Браузер не дав скопіювати, тож завдання в полі нижче — виділіть усе й скопіюйте вручну."
+			],
+			"The browser refused to copy.": [
+				"Браузер відмовився копіювати."
+			],
+			"Paste the reply first.": [
+				"Спершу вставте відповідь."
+			],
+			"Reading the reply…": [
+				"Читаю відповідь…"
+			],
+			"Read %1$d sections, but this page has %2$d. Check the reply was not cut off.": [
+				"Прочитано %1$d секцій, а на сторінці їх %2$d. Перевірте, чи відповідь не обірвалася."
+			],
+			"Read %d sections. Review each one before keeping it.": [
+				"Прочитано %d секцій. Перегляньте кожну, перш ніж залишати."
+			],
+			"<%1$s> · %2$d words · %3$d images": [
+				"<%1$s> · слів: %2$d · зображень: %3$d"
+			],
+			"Convert this section": [
+				"Конвертувати цю секцію"
+			],
+			"Converting…": [
+				"Конвертую…"
+			],
+			"Try again": [
+				"Спробувати ще раз"
+			],
+			"Something went wrong.": [
+				"Щось пішло не так."
+			],
+			"This conversion was refused:": [
+				"Цю конвертацію відхилено:"
+			],
+			"You will be able to edit:": [
+				"Ви зможете редагувати:"
+			],
+			"Quality notes:": [
+				"Зауваження щодо якості:"
+			],
+			"Preview": [
+				"Перегляд"
+			],
+			"Kept.": [
+				"Залишено."
+			],
+			"Keep as a reusable section": [
+				"Залишити як багаторазову секцію"
+			],
+			"Keep as a draft page": [
+				"Залишити як чернетку сторінки"
+			],
+			"Add your Anthropic API key in the connection settings first.": [
+				"Спершу додайте ключ API Anthropic у налаштуваннях підключення."
+			],
+			"Converting “%s”…": [
+				"Конвертую «%s»…"
+			],
+			"“%s” converted. Review it below.": [
+				"«%s» сконвертовано. Перегляньте результат нижче."
+			],
+			"“%s” was refused — see the reason below.": [
+				"«%s» відхилено — причина нижче."
+			],
+			"All sections converted. Review each one before keeping it.": [
+				"Усі секції сконвертовано. Перегляньте кожну, перш ніж залишати."
+			],
+			"Convert at least one section first.": [
+				"Спершу сконвертуйте хоча б одну секцію."
+			],
+			"Upload and read the design": [
+				"Завантажити й прочитати дизайн"
+			],
+			"Building the page…": [
+				"Збираю сторінку…"
+			],
+			"Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused.": [
+				"Чернетку створено з %1$d секцій. %2$d не увійшли: не сконвертовані або відхилені."
+			],
+			"Draft page created from all %d sections.": [
+				"Чернетку створено з усіх %d секцій."
+			],
+			"Saved.": [
+				"Збережено."
+			]
+		}
+	}
+}

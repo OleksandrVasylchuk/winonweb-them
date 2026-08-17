@@ -1,0 +1,20 @@
+{
+	"extends": [ "html-validate:recommended" ],
+	"rules": {
+		"attribute-boolean-style": "off",
+		"void-style": "off",
+		"no-trailing-whitespace": "off",
+		"attr-quotes": "off",
+		"no-inline-style": "off",
+		"require-sri": "off",
+		"valid-id": [ "error", { "relaxed": true } ],
+		"no-redundant-role": "off",
+		"wcag/h30": "error",
+		"wcag/h32": "error",
+		"wcag/h36": "error",
+		"wcag/h37": "error",
+		"wcag/h63": "error",
+		"wcag/h67": "error",
+		"wcag/h71": "error"
+	}
+}

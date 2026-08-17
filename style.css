@@ -1,0 +1,29 @@
+/*
+Theme Name:        WOW — Signal
+Theme URI:         https://www.winonweb.dev/themes/signal/
+Author:            WOW — Win On Web
+Author URI:        https://www.winonweb.dev/
+Description:       A fast, accessible Gutenberg block theme for digital studios, agencies and service businesses. Full Site Editing, WCAG 2.2 AA out of the box, self-hosted variable fonts, zero build step and no page-builder dependency. Built by WOW — Win On Web.
+Version:           1.1.0
+Requires at least: 6.7
+Tested up to:      7.0
+Requires PHP:      8.1
+License:           GNU General Public License v2 or later
+License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain:       wow-signal
+Tags:              full-site-editing, block-patterns, block-styles, accessibility-ready, translation-ready, custom-colors, custom-logo, custom-menu, editor-style, featured-images, wide-blocks, one-column, two-columns, right-sidebar, blog, portfolio, e-commerce
+
+WOW — Signal is distributed under the terms of the GNU GPL v2 or later.
+
+Bundled resources
+-----------------
+Manrope (assets/fonts/*.woff2)
+	Copyright the Manrope Project Authors. SIL Open Font License 1.1.
+	https://github.com/sharanda/manrope
+
+Design tokens, layout and element styles live in theme.json — not here.
+This file carries the theme header only, which is all a block theme needs.
+Anything theme.json cannot express is either in theme.json's `styles.css`
+key (inlined with global styles, so it costs no extra request) or in a
+per-block stylesheet under /blocks that loads only when that block renders.
+*/

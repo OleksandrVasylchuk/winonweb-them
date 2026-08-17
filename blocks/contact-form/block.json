@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "wow/contact-form",
+	"title": "Contact form",
+	"category": "wow",
+	"icon": "email-alt",
+	"description": "An accessible contact form that emails the site owner. Protected by a nonce, a honeypot and a rate limit — no plugin needed.",
+	"keywords": [ "contact", "form", "email", "enquiry", "lead" ],
+	"textdomain": "wow-signal",
+	"attributes": {
+		"formId": {
+			"type": "string",
+			"default": "default"
+		},
+		"showSubject": {
+			"type": "boolean",
+			"default": false
+		},
+		"submitLabel": {
+			"type": "string",
+			"default": ""
+		},
+		"successMessage": {
+			"type": "string",
+			"default": ""
+		},
+		"consentText": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"align": [ "wide" ],
+		"multiple": false,
+		"color": {
+			"text": true,
+			"background": true
+		},
+		"spacing": {
+			"padding": true,
+			"margin": [ "top", "bottom" ]
+		}
+	},
+	"editorScript": "file:./edit.js",
+	"style": "file:./style.css",
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,2352 @@
+# Copyright (C) 2026 WOW — Win On Web
+# This file is distributed under the GNU General Public License v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: WOW — Signal 1.0.0\n"
+"Report-Msgid-Bugs-To: https://www.winonweb.dev/\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language-Team: WOW — Win On Web\n"
+"X-Domain: wow-signal\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: assets/js/admin-import.js:102
+msgid "Choose a ZIP file first."
+msgstr ""
+
+#: assets/js/admin-import.js:110
+msgid "Unpacking and reading the design…"
+msgstr ""
+
+#. translators: 1: number of files, 2: number of pages.
+#: assets/js/admin-import.js:118
+msgid "Read %1$d files and found %2$d pages."
+msgstr ""
+
+#: assets/js/admin-import.js:132
+msgid "Design archive (.zip)"
+msgstr ""
+
+#: assets/js/admin-import.js:138
+msgid "1. Upload the design"
+msgstr ""
+
+#. translators: 1: file path, 2: number of sections.
+#: assets/js/admin-import.js:171
+msgid "%1$s — %2$d sections"
+msgstr ""
+
+#: assets/js/admin-import.js:181
+msgid "2. Pick a page"
+msgstr ""
+
+#. translators: %s: comma-separated language codes.
+#: assets/js/admin-import.js:189
+msgid "This design has %s. Import one language first; the others can be added later with a translation plugin."
+msgstr ""
+
+#. translators: %d: number of files.
+#: assets/js/admin-import.js:201
+msgid "%d files were not unpacked"
+msgstr ""
+
+#: assets/js/admin-import.js:222
+msgid "Reading the page…"
+msgstr ""
+
+#. translators: %d: number of sections.
+#: assets/js/admin-import.js:239
+msgid "Found %d sections on this page."
+msgstr ""
+
+#: assets/js/admin-import.js:274
+msgid "Build the whole site"
+msgstr ""
+
+#: assets/js/admin-import.js:281
+msgid "Build everything at once"
+msgstr ""
+
+#: assets/js/admin-import.js:284
+msgid "Creates every page, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again."
+msgstr ""
+
+#: assets/js/admin-import.js:291
+msgid "Language to build:"
+msgstr ""
+
+#: assets/js/admin-import.js:300
+msgid "Changed your mind, or got a new version of the design? Delete everything and drop the new archive in — nothing here is one-way."
+msgstr ""
+
+#: assets/js/admin-import.js:310
+msgid "Delete everything and start over"
+msgstr ""
+
+#: assets/js/admin-import.js:311
+msgid "Removes only what an import created. Your own pages are left alone."
+msgstr ""
+
+#: assets/js/admin-import.js:336
+msgid "Structure only — the button above"
+msgstr ""
+
+#: assets/js/admin-import.js:337
+msgid "Free, instant, no account. Headings, lists, cards and images become blocks."
+msgstr ""
+
+#: assets/js/admin-import.js:340
+msgid "Your Claude subscription"
+msgstr ""
+
+#: assets/js/admin-import.js:341
+msgid "Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button."
+msgstr ""
+
+#: assets/js/admin-import.js:344
+msgid "An Anthropic API key"
+msgstr ""
+
+#: assets/js/admin-import.js:345
+msgid "One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above."
+msgstr ""
+
+#: assets/js/admin-import.js:357
+msgid "Three ways to convert — which should I use?"
+msgstr ""
+
+#: assets/js/admin-import.js:373
+msgid "(%d sections)"
+msgstr ""
+
+#: assets/js/admin-import.js:381
+msgid "The site is built."
+msgstr ""
+
+#: assets/js/admin-import.js:384 assets/js/admin-import.js:782
+msgid "Worth checking:"
+msgstr ""
+
+#: assets/js/admin-import.js:393
+msgid "Building the site — this takes a moment…"
+msgstr ""
+
+#. translators: 1: pages built, 2: images imported.
+#: assets/js/admin-import.js:406
+msgid "Built %1$d pages and imported %2$d images. Look through them, then edit anything you like."
+msgstr ""
+
+#: assets/js/admin-import.js:422
+msgid "Undoing…"
+msgstr ""
+
+#. translators: 1: pages removed, 2: images removed.
+#: assets/js/admin-import.js:431
+msgid "Removed %1$d pages and %2$d images. The site is back to how it was."
+msgstr ""
+
+#: assets/js/admin-import.js:459
+msgid "3. Convert each section"
+msgstr ""
+
+#: assets/js/admin-import.js:462
+msgid "Convert a section, read what it says, then keep it. Nothing reaches your site until you press Keep."
+msgstr ""
+
+#: assets/js/admin-import.js:468
+msgid "Convert every section"
+msgstr ""
+
+#: assets/js/admin-import.js:474
+msgid "Keep the whole page as a draft"
+msgstr ""
+
+#: assets/js/admin-import.js:480
+msgid "Draft page created."
+msgstr ""
+
+#: assets/js/admin-import.js:483 assets/js/admin-import.js:806
+msgid "Open it in the editor"
+msgstr ""
+
+#: assets/js/admin-import.js:504
+msgid "Paste the whole reply here, including the opening [ and closing ]"
+msgstr ""
+
+#: assets/js/admin-import.js:526
+msgid "The brief — select it all and copy"
+msgstr ""
+
+#: assets/js/admin-import.js:533
+msgid "Copy the brief"
+msgstr ""
+
+#: assets/js/admin-import.js:540
+msgid "No API key? Use your own Claude subscription instead"
+msgstr ""
+
+#: assets/js/admin-import.js:542
+msgid "Copy the brief for this page."
+msgstr ""
+
+#: assets/js/admin-import.js:543
+msgid "Paste it into your Claude conversation and send it."
+msgstr ""
+
+#: assets/js/admin-import.js:544
+msgid "Copy the whole reply and paste it below."
+msgstr ""
+
+#: assets/js/admin-import.js:552
+msgid "Claude’s reply"
+msgstr ""
+
+#: assets/js/admin-import.js:559
+msgid "Read the reply"
+msgstr ""
+
+#: assets/js/admin-import.js:572
+msgid "Building the brief…"
+msgstr ""
+
+#. translators: 1: number of sections, 2: size in kilobytes.
+#: assets/js/admin-import.js:586
+msgid "Brief for %1$d sections, %2$d KB."
+msgstr ""
+
+#: assets/js/admin-import.js:593
+msgid "Copied — now paste it into Claude"
+msgstr ""
+
+#: assets/js/admin-import.js:594
+msgid "Copied. Paste it into Claude, then bring the reply back."
+msgstr ""
+
+#: assets/js/admin-import.js:609
+msgid "The browser would not copy it, so it is in the box below — select it all and copy it yourself."
+msgstr ""
+
+#: assets/js/admin-import.js:650
+msgid "The browser refused to copy."
+msgstr ""
+
+#: assets/js/admin-import.js:657
+msgid "Paste the reply first."
+msgstr ""
+
+#: assets/js/admin-import.js:661
+msgid "Reading the reply…"
+msgstr ""
+
+#. translators: 1: sections received, 2: sections expected.
+#: assets/js/admin-import.js:679
+msgid "Read %1$d sections, but this page has %2$d. Check the reply was not cut off."
+msgstr ""
+
+#. translators: 1: sections received, 2: sections expected. */ __( 'Read %1$d sections, but this page has %2$d. Check the reply was not cut off.', 'wow-signal' ), data.received, data.expected ), true ); return; } say( sprintf( /* translators: %d: number of sections.
+#: assets/js/admin-import.js:691
+msgid "Read %d sections. Review each one before keeping it."
+msgstr ""
+
+#. translators: 1: element name, 2: word count, 3: image count.
+#: assets/js/admin-import.js:710
+msgid "<%1$s> · %2$d words · %3$d images"
+msgstr ""
+
+#: assets/js/admin-import.js:725
+msgid "Convert this section"
+msgstr ""
+
+#: assets/js/admin-import.js:732
+msgid "Converting…"
+msgstr ""
+
+#: assets/js/admin-import.js:739 assets/js/admin-import.js:766
+msgid "Try again"
+msgstr ""
+
+#: assets/js/admin-import.js:74
+msgid "Something went wrong."
+msgstr ""
+
+#: assets/js/admin-import.js:760
+msgid "This conversion was refused:"
+msgstr ""
+
+#: assets/js/admin-import.js:777
+msgid "You will be able to edit:"
+msgstr ""
+
+#: assets/js/admin-import.js:787
+msgid "Quality notes:"
+msgstr ""
+
+#: assets/js/admin-import.js:797
+msgid "Preview"
+msgstr ""
+
+#: assets/js/admin-import.js:805
+msgid "Kept."
+msgstr ""
+
+#: assets/js/admin-import.js:818
+msgid "Keep as a reusable section"
+msgstr ""
+
+#: assets/js/admin-import.js:826
+msgid "Keep as a draft page"
+msgstr ""
+
+#: assets/js/admin-import.js:851
+msgid "Add your Anthropic API key in the connection settings first."
+msgstr ""
+
+#. translators: %s: section name.
+#: assets/js/admin-import.js:857
+msgid "Converting “%s”…"
+msgstr ""
+
+#. translators: %s: section name.
+#: assets/js/admin-import.js:873
+msgid "“%s” converted. Review it below."
+msgstr ""
+
+#. translators: %s: section name. */ __( '“%s” converted. Review it below.', 'wow-signal' ), section.label ) : sprintf( /* translators: %s: section name.
+#: assets/js/admin-import.js:874
+msgid "“%s” was refused — see the reason below."
+msgstr ""
+
+#: assets/js/admin-import.js:899
+msgid "All sections converted. Review each one before keeping it."
+msgstr ""
+
+#: assets/js/admin-import.js:927
+msgid "Convert at least one section first."
+msgstr ""
+
+#: assets/js/admin-import.js:93
+msgid "Upload and read the design"
+msgstr ""
+
+#: assets/js/admin-import.js:933
+msgid "Building the page…"
+msgstr ""
+
+#. translators: 1: sections kept, 2: sections left out.
+#: assets/js/admin-import.js:956
+msgid "Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused."
+msgstr ""
+
+#. translators: 1: sections kept, 2: sections left out. */ __( 'Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused.', 'wow-signal' ), ordered.length, skipped ), true ); return; } say( sprintf( /* translators: %d: number of sections.
+#: assets/js/admin-import.js:968
+msgid "Draft page created from all %d sections."
+msgstr ""
+
+#: assets/js/admin-import.js:989
+msgid "Saved."
+msgstr ""
+
+#: blocks/colophon/block.json
+msgctxt "block title"
+msgid "Colophon"
+msgstr ""
+
+#: blocks/colophon/block.json
+msgctxt "block keyword"
+msgid "copyright"
+msgstr ""
+
+#: blocks/colophon/block.json
+msgctxt "block keyword"
+msgid "credit"
+msgstr ""
+
+#: blocks/colophon/block.json
+msgctxt "block keyword"
+msgid "footer"
+msgstr ""
+
+#: blocks/colophon/block.json
+msgctxt "block description"
+msgid "The copyright line for the footer. Keeps the year current on its own and can show the designer credit."
+msgstr ""
+
+#: blocks/colophon/block.json
+msgctxt "block keyword"
+msgid "year"
+msgstr ""
+
+#: blocks/colophon/edit.js:27
+msgid "Site name"
+msgstr ""
+
+#: blocks/colophon/edit.js:42
+msgid "Colophon"
+msgstr ""
+
+#: blocks/colophon/edit.js:44
+msgid "Symbol before the year"
+msgstr ""
+
+#: blocks/colophon/edit.js:45
+msgid "Usually ©. Leave empty to show the year on its own."
+msgstr ""
+
+#: blocks/colophon/edit.js:52
+msgid "Show the site name"
+msgstr ""
+
+#: blocks/colophon/edit.js:59
+msgid "Extra text"
+msgstr ""
+
+#: blocks/colophon/edit.js:60
+msgid "Optional. Shown after the site name, for example \"All rights reserved\"."
+msgstr ""
+
+#: blocks/colophon/render.php:52
+msgid "WOW — Win On Web"
+msgstr ""
+
+#: blocks/colophon/render.php:53
+msgid "(opens in a new tab)"
+msgstr ""
+
+#. translators: %s: linked studio name.
+#: blocks/colophon/render.php:58
+msgid "Design by %s"
+msgstr ""
+
+#: blocks/contact-form/block.json
+msgctxt "block description"
+msgid "An accessible contact form that emails the site owner. Protected by a nonce, a honeypot and a rate limit — no plugin needed."
+msgstr ""
+
+#: blocks/contact-form/block.json
+msgctxt "block keyword"
+msgid "contact"
+msgstr ""
+
+#: blocks/contact-form/block.json
+msgctxt "block title"
+msgid "Contact form"
+msgstr ""
+
+#: blocks/contact-form/block.json
+msgctxt "block keyword"
+msgid "email"
+msgstr ""
+
+#: blocks/contact-form/block.json
+msgctxt "block keyword"
+msgid "enquiry"
+msgstr ""
+
+#: blocks/contact-form/block.json
+msgctxt "block keyword"
+msgid "form"
+msgstr ""
+
+#: blocks/contact-form/block.json
+msgctxt "block keyword"
+msgid "lead"
+msgstr ""
+
+#: blocks/contact-form/edit.js:50
+msgid "Form"
+msgstr ""
+
+#: blocks/contact-form/edit.js:54
+msgid "Messages go to the site administrator email set under Settings → General. A developer can route a form elsewhere with the wow_signal/contact_recipient filter."
+msgstr ""
+
+#: blocks/contact-form/edit.js:57
+msgid "Form name"
+msgstr ""
+
+#: blocks/contact-form/edit.js:58
+msgid "Used to tell forms apart if the site has more than one, for example \"careers\"."
+msgstr ""
+
+#: blocks/contact-form/edit.js:65
+msgid "Ask for a subject"
+msgstr ""
+
+#: blocks/contact-form/edit.js:66
+msgid "Adds an optional subject line above the message."
+msgstr ""
+
+#: blocks/contact-form/edit.js:73
+msgid "Button text"
+msgstr ""
+
+#: blocks/contact-form/edit.js:81
+msgid "Thank-you message"
+msgstr ""
+
+#: blocks/contact-form/edit.js:82
+msgid "Shown on the page after the message is sent."
+msgstr ""
+
+#: blocks/contact-form/edit.js:89
+msgid "Small print under the button"
+msgstr ""
+
+#: blocks/contact-form/edit.js:90
+msgid "Optional. Use it for a privacy note, for example how long you keep enquiries."
+msgstr ""
+
+#: blocks/contact-form/render.php:102
+msgid "Your message was not sent."
+msgstr ""
+
+#: blocks/contact-form/render.php:146
+msgid "Leave this field empty"
+msgstr ""
+
+#: blocks/contact-form/render.php:182 blocks/contact-form/render.php:230
+msgid "(required)"
+msgstr ""
+
+#: blocks/contact-form/render.php:195 blocks/contact-form/render.php:236
+msgid "Error:"
+msgstr ""
+
+#: blocks/contact-form/render.php:227 blocks/contact-form/edit.js:113
+msgid "How can we help?"
+msgstr ""
+
+#: blocks/contact-form/render.php:39 blocks/contact-form/edit.js:74 blocks/contact-form/edit.js:120
+msgid "Send message"
+msgstr ""
+
+#: blocks/contact-form/render.php:40
+msgid "Thank you — your message is on its way. We reply within one working day."
+msgstr ""
+
+#: blocks/contact-form/render.php:65 blocks/contact-form/edit.js:104
+msgid "Your name"
+msgstr ""
+
+#: blocks/contact-form/render.php:72 blocks/contact-form/edit.js:106
+msgid "Email address"
+msgstr ""
+
+#: blocks/contact-form/render.php:76 blocks/contact-form/edit.js:107
+msgid "We reply to this address and never share it."
+msgstr ""
+
+#: blocks/contact-form/render.php:79 blocks/contact-form/edit.js:111
+msgid "Subject"
+msgstr ""
+
+#: blocks/faq-item/block.json
+msgctxt "block keyword"
+msgid "answer"
+msgstr ""
+
+#: blocks/faq-item/block.json
+msgctxt "block title"
+msgid "FAQ question"
+msgstr ""
+
+#: blocks/faq-item/block.json
+msgctxt "block description"
+msgid "One question and its answer. Add these inside an FAQ accordion."
+msgstr ""
+
+#: blocks/faq-item/block.json
+msgctxt "block keyword"
+msgid "question"
+msgstr ""
+
+#: blocks/faq-item/edit.js:19
+msgid "Answer the question in a sentence or two…"
+msgstr ""
+
+#: blocks/faq-item/edit.js:42
+msgid "Question"
+msgstr ""
+
+#: blocks/faq-item/edit.js:44
+msgid "Open when the page loads"
+msgstr ""
+
+#: blocks/faq-item/edit.js:45
+msgid "Use this for the one question most visitors ask."
+msgstr ""
+
+#: blocks/faq-item/edit.js:63
+msgid "Type the question…"
+msgstr ""
+
+#: blocks/faq/block.json
+msgctxt "block description"
+msgid "A list of questions that expand and collapse. Works without JavaScript and can publish itself to Google as an FAQ."
+msgstr ""
+
+#: blocks/faq/block.json
+msgctxt "block keyword"
+msgid "accordion"
+msgstr ""
+
+#: blocks/faq/block.json
+msgctxt "block keyword"
+msgid "answers"
+msgstr ""
+
+#: blocks/faq/block.json blocks/faq-item/block.json
+msgctxt "block keyword"
+msgid "faq"
+msgstr ""
+
+#: blocks/faq/block.json
+msgctxt "block title"
+msgid "FAQ accordion"
+msgstr ""
+
+#: blocks/faq/block.json
+msgctxt "block keyword"
+msgid "questions"
+msgstr ""
+
+#: blocks/faq/edit.js:38
+msgid "FAQ settings"
+msgstr ""
+
+#: blocks/faq/edit.js:40
+msgid "Publish as an FAQ to search engines"
+msgstr ""
+
+#: blocks/faq/edit.js:41
+msgid "Adds hidden FAQ data so Google can show these questions in results. Turn this off if another plugin already does it, or if the answers are not genuine questions."
+msgstr ""
+
+#: blocks/faq/edit.js:48
+msgid "Close other answers when one opens"
+msgstr ""
+
+#: blocks/faq/edit.js:49
+msgid "Keeps only one answer open at a time. Visitors can still open every answer if JavaScript is unavailable."
+msgstr ""
+
+#: blocks/metric/block.json
+msgctxt "block keyword"
+msgid "counter"
+msgstr ""
+
+#: blocks/metric/block.json
+msgctxt "block keyword"
+msgid "kpi"
+msgstr ""
+
+#: blocks/metric/block.json
+msgctxt "block keyword"
+msgid "metric"
+msgstr ""
+
+#: blocks/metric/block.json
+msgctxt "block title"
+msgid "Metric"
+msgstr ""
+
+#: blocks/metric/block.json
+msgctxt "block keyword"
+msgid "number"
+msgstr ""
+
+#: blocks/metric/block.json
+msgctxt "block description"
+msgid "One number with a caption — a Lighthouse score, a conversion lift, a delivery time. Counts up when it scrolls into view."
+msgstr ""
+
+#: blocks/metric/block.json
+msgctxt "block keyword"
+msgid "statistic"
+msgstr ""
+
+#: blocks/metric/edit.js:34
+msgid "Metric"
+msgstr ""
+
+#: blocks/metric/edit.js:36
+msgid "Number"
+msgstr ""
+
+#: blocks/metric/edit.js:37
+msgid "For example 98, 4.9 or 150. Text like \"24/7\" also works, it simply will not count up."
+msgstr ""
+
+#: blocks/metric/edit.js:44
+msgid "Before the number"
+msgstr ""
+
+#: blocks/metric/edit.js:45
+msgid "Optional, for example a currency sign."
+msgstr ""
+
+#: blocks/metric/edit.js:52
+msgid "After the number"
+msgstr ""
+
+#: blocks/metric/edit.js:53
+msgid "Optional, for example % or +."
+msgstr ""
+
+#: blocks/metric/edit.js:60
+msgid "Count up when it scrolls into view"
+msgstr ""
+
+#: blocks/metric/edit.js:62
+msgid "Visitors who ask their device for reduced motion always see the final number straight away."
+msgstr ""
+
+#: blocks/metric/edit.js:63
+msgid "This number is not a plain figure, so it will be shown without counting."
+msgstr ""
+
+#: blocks/metric/edit.js:87
+msgid "00"
+msgstr ""
+
+#: blocks/metric/edit.js:98
+msgid "What the number means…"
+msgstr ""
+
+#: blocks/slider/block.json
+msgctxt "block description"
+msgid "A horizontal row of cards a visitor can swipe or scroll through. Every card stays reachable without JavaScript."
+msgstr ""
+
+#: blocks/slider/block.json
+msgctxt "block keyword"
+msgid "carousel"
+msgstr ""
+
+#: blocks/slider/block.json
+msgctxt "block title"
+msgid "Case slider"
+msgstr ""
+
+#: blocks/slider/block.json
+msgctxt "block keyword"
+msgid "cases"
+msgstr ""
+
+#: blocks/slider/block.json
+msgctxt "block keyword"
+msgid "portfolio"
+msgstr ""
+
+#: blocks/slider/block.json
+msgctxt "block keyword"
+msgid "scroller"
+msgstr ""
+
+#: blocks/slider/block.json
+msgctxt "block keyword"
+msgid "slider"
+msgstr ""
+
+#: blocks/slider/edit.js:18
+msgid "Case name"
+msgstr ""
+
+#: blocks/slider/edit.js:19
+msgid "What changed, and by how much."
+msgstr ""
+
+#: blocks/slider/edit.js:46
+msgid "Slider"
+msgstr ""
+
+#: blocks/slider/edit.js:48
+msgid "What is in this slider"
+msgstr ""
+
+#: blocks/slider/edit.js:49
+msgid "A short description read aloud by screen readers, for example \"Client case studies\"."
+msgstr ""
+
+#: blocks/slider/edit.js:56
+msgid "Card width"
+msgstr ""
+
+#: blocks/slider/edit.js:59
+msgid "Narrow"
+msgstr ""
+
+#: blocks/slider/edit.js:60
+msgid "Medium"
+msgstr ""
+
+#: blocks/slider/edit.js:61
+msgid "Wide"
+msgstr ""
+
+#: blocks/slider/render.php:27
+msgid "Case studies"
+msgstr ""
+
+#: blocks/slider/render.php:56
+msgid "carousel"
+msgstr ""
+
+#: blocks/slider/render.php:77
+msgid "Previous cases"
+msgstr ""
+
+#: blocks/slider/render.php:86
+msgid "Next cases"
+msgstr ""
+
+#: inc/Modules/Accessibility.php:56
+msgid "Skip to main content"
+msgstr ""
+
+#: inc/Modules/Accessibility.php:91
+msgid "Read more"
+msgstr ""
+
+#: inc/Modules/Blocks.php:123
+msgid "Card"
+msgstr ""
+
+#: inc/Modules/Blocks.php:129
+msgid "Glass panel"
+msgstr ""
+
+#: inc/Modules/Blocks.php:135
+msgid "Card columns"
+msgstr ""
+
+#: inc/Modules/Blocks.php:141
+msgid "Signal glow"
+msgstr ""
+
+#: inc/Modules/Blocks.php:147
+msgid "Aurora gradient"
+msgstr ""
+
+#: inc/Modules/Blocks.php:159
+msgid "Check list"
+msgstr ""
+
+#: inc/Modules/Blocks.php:170
+msgid "Signal line"
+msgstr ""
+
+#: inc/Modules/Blocks.php:80
+msgid "WOW blocks"
+msgstr ""
+
+#. translators: %s: linked studio name.
+#: inc/Modules/Branding.php:104
+msgid "Built with WOW — Signal by %s"
+msgstr ""
+
+#: inc/Modules/Branding.php:105
+msgid "Win On Web"
+msgstr ""
+
+#: inc/Modules/ContactForm.php:122
+msgid "Too many messages sent from this connection. Please try again in a few minutes."
+msgstr ""
+
+#: inc/Modules/ContactForm.php:136
+msgid "The message could not be sent because of a server error. Please email us directly."
+msgstr ""
+
+#: inc/Modules/ContactForm.php:158
+msgid "Please enter your name."
+msgstr ""
+
+#: inc/Modules/ContactForm.php:162
+msgid "Please enter your email address."
+msgstr ""
+
+#: inc/Modules/ContactForm.php:164
+msgid "That email address does not look right. Please check it, for example name@company.com."
+msgstr ""
+
+#: inc/Modules/ContactForm.php:170
+msgid "Please tell us what you need."
+msgstr ""
+
+#: inc/Modules/ContactForm.php:172
+msgid "Your message is longer than 5000 characters. Please shorten it."
+msgstr ""
+
+#: inc/Modules/ContactForm.php:209
+msgid "New message from %s"
+msgstr ""
+
+#: inc/Modules/ContactForm.php:214
+msgid "Name:"
+msgstr ""
+
+#: inc/Modules/ContactForm.php:215
+msgid "Email:"
+msgstr ""
+
+#: inc/Modules/ContactForm.php:217
+msgid "Message:"
+msgstr ""
+
+#: inc/Modules/ContactForm.php:222
+msgid "Sent from the contact form on %s"
+msgstr ""
+
+#: inc/Modules/ContactForm.php:242
+msgid "Website visitor"
+msgstr ""
+
+#: inc/Modules/ContactForm.php:92
+msgid "Your session expired. Please try sending the message again."
+msgstr ""
+
+#: inc/Modules/Credit.php:50
+msgid "Footer credit"
+msgstr ""
+
+#: inc/Modules/Credit.php:51
+msgid "Show a small \"Design by WOW — Win On Web\" line at the bottom of every page."
+msgstr ""
+
+#: inc/Modules/Credit.php:71
+msgid "Show the designer credit"
+msgstr ""
+
+#: inc/Modules/Importer.php:101 inc/Modules/Importer.php:102 inc/Modules/Importer.php:296
+msgid "Design import"
+msgstr ""
+
+#. translators: %d: number of conversions allowed per hour.
+#: inc/Modules/Importer.php:1059
+msgid "That is %d conversions in an hour, which is the limit. Wait a little before continuing."
+msgstr ""
+
+#: inc/Modules/Importer.php:1093
+msgid "Imported section"
+msgstr ""
+
+#: inc/Modules/Importer.php:282
+msgid "You do not have permission to import designs."
+msgstr ""
+
+#: inc/Modules/Importer.php:299
+msgid "Upload an HTML design as a ZIP. Each section is converted into editable blocks, one at a time, and nothing is added to your site until you accept it."
+msgstr ""
+
+#: inc/Modules/Importer.php:305
+msgid "Connection settings"
+msgstr ""
+
+#: inc/Modules/Importer.php:309
+msgid "Key active — from wp-config.php"
+msgstr ""
+
+#. translators: %s: the last four characters of the key.
+#: inc/Modules/Importer.php:316
+msgid "Key active — ends in %s"
+msgstr ""
+
+#: inc/Modules/Importer.php:323
+msgid "No key — the free routes still work"
+msgstr ""
+
+#: inc/Modules/Importer.php:334
+msgid "Anthropic API key"
+msgstr ""
+
+#: inc/Modules/Importer.php:339
+msgid "Set in wp-config.php."
+msgstr ""
+
+#: inc/Modules/Importer.php:340
+msgid "The key is defined as a constant, so it is not stored in the database and cannot be changed here."
+msgstr ""
+
+#: inc/Modules/Importer.php:354
+msgid "Used only on the server; it is never sent to the browser. For the strongest setup, put it in wp-config.php instead:"
+msgstr ""
+
+#: inc/Modules/Importer.php:362
+msgid "Model"
+msgstr ""
+
+#: inc/Modules/Importer.php:376
+msgid "Care taken per section"
+msgstr ""
+
+#: inc/Modules/Importer.php:387
+msgid "Higher settings take longer and cost more per section, and handle complicated layouts better."
+msgstr ""
+
+#: inc/Modules/Importer.php:393
+msgid "Save settings"
+msgstr ""
+
+#: inc/Modules/Importer.php:398
+msgid "This screen needs JavaScript."
+msgstr ""
+
+#. translators: %d: section number on the page.
+#: inc/Modules/Importer.php:657 inc/Support/SectionSplitter.php:480
+msgid "Section %d"
+msgstr ""
+
+#: inc/Modules/Importer.php:739
+msgid "No file was received."
+msgstr ""
+
+#: inc/Modules/Importer.php:745
+msgid "The upload did not complete. The file may be larger than this server allows."
+msgstr ""
+
+#: inc/Modules/Importer.php:754
+msgid "That file did not arrive as an upload."
+msgstr ""
+
+#: inc/Modules/Importer.php:760
+msgid "Please upload a .zip archive."
+msgstr ""
+
+#: inc/Modules/Importer.php:803 inc/Modules/Importer.php:807 inc/Support/SiteBuilder.php:66
+msgid "That design is not on this site."
+msgstr ""
+
+#: inc/Modules/Importer.php:879 inc/Modules/Importer.php:886
+msgid "That page is not in this design."
+msgstr ""
+
+#: inc/Modules/Importer.php:890
+msgid "That is not an HTML page."
+msgstr ""
+
+#: inc/Modules/Importer.php:934
+msgid "That section is no longer in the page."
+msgstr ""
+
+#: inc/Modules/Patterns.php:42
+msgid "WOW — Hero"
+msgstr ""
+
+#: inc/Modules/Patterns.php:43
+msgid "Opening sections for the top of a page."
+msgstr ""
+
+#: inc/Modules/Patterns.php:46
+msgid "WOW — Content"
+msgstr ""
+
+#: inc/Modules/Patterns.php:47
+msgid "Services, process, features and text sections."
+msgstr ""
+
+#: inc/Modules/Patterns.php:50
+msgid "WOW — Proof"
+msgstr ""
+
+#: inc/Modules/Patterns.php:51
+msgid "Case studies, metrics, testimonials and client logos."
+msgstr ""
+
+#: inc/Modules/Patterns.php:54
+msgid "WOW — Conversion"
+msgstr ""
+
+#: inc/Modules/Patterns.php:55
+msgid "Pricing, FAQ, contact and call-to-action sections."
+msgstr ""
+
+#: inc/Modules/Patterns.php:58
+msgid "WOW — Full pages"
+msgstr ""
+
+#: inc/Modules/Patterns.php:59
+msgid "Complete page layouts you can drop in and edit."
+msgstr ""
+
+#: inc/Modules/Seo.php:231
+msgid "Home"
+msgstr ""
+
+#: inc/Modules/Setup.php:94
+msgid "Signal card (3:2)"
+msgstr ""
+
+#: inc/Modules/Setup.php:95
+msgid "Signal wide (16:9)"
+msgstr ""
+
+#: inc/Modules/Setup.php:96
+msgid "Signal square (1:1)"
+msgstr ""
+
+#. translators: 1: average rating, 2: number of reviews.
+#: inc/Modules/WooCommerce.php:132
+msgid "Rated %1$s out of 5 based on %2$s review"
+msgid_plural "Rated %1$s out of 5 based on %2$s reviews"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/Support/AnthropicClient.php:121
+msgid "No Anthropic API key is configured yet. Add one under Appearance → AI section builder."
+msgstr ""
+
+#. translators: %s: transport error message.
+#: inc/Support/AnthropicClient.php:217
+msgid "Could not reach the Anthropic API: %s"
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:232
+msgid "The API returned a response that could not be read."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:243
+msgid "Anthropic declined this request. Rephrase the brief and try again — describe the section rather than pasting code from an unrelated system."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:250
+msgid "The reply was cut off before it finished. Ask for a smaller section, or split the design into two."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:265
+msgid "The reply did not match the expected format."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:289
+msgid "The request was rejected as invalid."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:290
+msgid "The API key was not accepted. Check it and save again."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:291
+msgid "This API key does not have access to the selected model."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:292
+msgid "The selected model does not exist. Pick another one in the settings."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:293
+msgid "The design you pasted is too large. Send one section at a time."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:294
+msgid "Rate limit reached. Wait a minute and try again."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:295
+msgid "Anthropic had a server error. Try again shortly."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:296
+msgid "Anthropic is overloaded right now. Try again shortly."
+msgstr ""
+
+#. translators: %d: HTTP status code.
+#: inc/Support/AnthropicClient.php:301
+msgid "The API returned an unexpected status (%d)."
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:55
+msgid "Claude Opus 5 — best quality (default)"
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:56
+msgid "Claude Sonnet 5 — faster and cheaper"
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:57
+msgid "Claude Haiku 4.5 — fastest, simple sections only"
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:68
+msgid "Low — quickest, for simple sections"
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:69
+msgid "Medium — balanced"
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:70
+msgid "High — recommended"
+msgstr ""
+
+#: inc/Support/AnthropicClient.php:71
+msgid "Extra high — slowest, for complex layouts"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1032
+msgid "Heading text"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1086
+msgid "Small label above a heading"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1105
+msgid "Body text"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1255
+msgid "Image and its alt text"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1258
+msgid "An image had no alt text in the design. Describe it in the editor, or mark it decorative."
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1355
+msgid "Table contents"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1431
+msgid "A link ran a script instead of going somewhere; it now points nowhere."
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1484
+msgid "This section had a form. Add the theme’s Contact form block where it belongs — a form copied as markup would not send anything."
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1490
+msgid "Decorative vector artwork was left out. The theme’s gradients stand in for it; add a real image if you need the original."
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1496
+msgid "An embedded frame was left out. Use the matching embed block if you need it back."
+msgstr ""
+
+#. translators: 1: section label, 2: word count, 3: image count.
+#: inc/Support/BlockConverter.php:1509
+msgid "\"%1$s\" — %2$d words and %3$d image(s), converted structurally into editable blocks."
+msgstr ""
+
+#: inc/Support/BlockConverter.php:166
+msgid "This section held nothing that could become content."
+msgstr ""
+
+#: inc/Support/BlockConverter.php:614 inc/Support/BlockConverter.php:1217
+msgid "List items"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:678
+msgid "Figure and its caption"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:718 inc/Support/BlockConverter.php:1308
+msgid "Quotation"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:975
+msgid "Button label and link"
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:152
+msgid "The conversion produced nothing."
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:171
+msgid "The result contains PHP, which is never allowed in page content."
+msgstr ""
+
+#. translators: %s: HTML tag name.
+#: inc/Support/BlockMarkupValidator.php:178
+msgid "The result contains a <%s> element, which generated content may not include."
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:190
+msgid "The result contains an inline event handler attribute."
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:194
+msgid "The result contains a script-carrying link or source."
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:199
+msgid "The result uses the Custom HTML block. Sections must be built from real blocks so they stay editable."
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:213 inc/Support/BlockMarkupValidator.php:280
+msgid "The result contains no blocks at all."
+msgstr ""
+
+#. translators: %s: block name.
+#: inc/Support/BlockMarkupValidator.php:234
+msgid "The settings on the \"%s\" block are not valid JSON."
+msgstr ""
+
+#. translators: %s: block name. */ __( 'The settings on the "%s" block are not valid JSON.', 'wow-signal' ), $name ); } } if ( $self_closing ) { continue; } if ( $closing ) { $open = array_pop( $stack ); if ( null === $open ) { $this->errors[] = sprintf( /* translators: %s: block name.
+#: inc/Support/BlockMarkupValidator.php:250
+msgid "A \"%s\" block is closed but was never opened."
+msgstr ""
+
+#. translators: %s: block name. */ __( 'A "%s" block is closed but was never opened.', 'wow-signal' ), $name ); continue; } if ( $open !== $name ) { $this->errors[] = sprintf( /* translators: 1: closing block name, 2: block that was open.
+#: inc/Support/BlockMarkupValidator.php:259
+msgid "A \"%1$s\" block closes while \"%2$s\" is still open."
+msgstr ""
+
+#. translators: 1: closing block name, 2: block that was open. */ __( 'A "%1$s" block closes while "%2$s" is still open.', 'wow-signal' ), $name, $open ); } continue; } $stack[] = $name; } if ( array() !== $stack ) { $this->errors[] = sprintf( /* translators: %s: comma-separated block names.
+#: inc/Support/BlockMarkupValidator.php:274
+msgid "These blocks are never closed: %s."
+msgstr ""
+
+#. translators: %s: block name.
+#: inc/Support/BlockMarkupValidator.php:298
+msgid "\"%s\" is not a block the converter is allowed to use."
+msgstr ""
+
+#. translators: %s: block name.
+#: inc/Support/BlockMarkupValidator.php:320
+msgid "\"%s\" is not installed on this site, so that part of the section would render as nothing."
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:338
+msgid "An image has no alt text. Add one, or mark it decorative, before publishing."
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:347
+msgid "A colour is written directly into the markup instead of using a theme colour, so it will not follow the site palette."
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:351
+msgid "A font size is written directly into the markup instead of using a theme size."
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:360
+msgid "This section contains more than one level-1 heading. A page should have exactly one."
+msgstr ""
+
+#: inc/Support/BlockMarkupValidator.php:367
+msgid "The heading levels skip a step, which is confusing for screen reader users."
+msgstr ""
+
+#: inc/Support/ConversionPrompt.php:411
+msgid "Nothing was pasted."
+msgstr ""
+
+#: inc/Support/ConversionPrompt.php:425
+msgid "That does not look like the JSON list the brief asked for. Copy the whole reply, including the opening [ and closing ]."
+msgstr ""
+
+#: inc/Support/ConversionPrompt.php:434
+msgid "The pasted reply is not valid JSON. It may have been cut off — ask for it again and copy all of it."
+msgstr ""
+
+#: inc/Support/ConversionPrompt.php:470
+msgid "The pasted list has no sections with markup in it."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:134
+msgid "Could not create the designs folder inside uploads."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:179
+msgid "This server has no ZIP support in PHP, so archives cannot be unpacked. Ask your host to enable the zip extension."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:195
+msgid "Could not create a folder for this design."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:201
+msgid "That file could not be opened as a ZIP archive."
+msgstr ""
+
+#. translators: %d: maximum number of files.
+#: inc/Support/DesignArchive.php:213
+msgid "That archive holds more than %d files. Send the design folder on its own, without build output or dependencies."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:224
+msgid "Could not resolve the destination folder."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:264
+msgid "That archive unpacks to more than 200 MB. Remove videos, design binaries and node_modules before sending it."
+msgstr ""
+
+#. translators: %s: entry path inside the archive.
+#: inc/Support/DesignArchive.php:273
+msgid "%s — refused, the path points outside the folder"
+msgstr ""
+
+#: inc/Support/DesignArchive.php:313
+msgid "Nothing usable was found in that archive. It should contain the design HTML, its stylesheets and its images."
+msgstr ""
+
+#. translators: %s: entry path inside the archive.
+#: inc/Support/DesignArchive.php:360
+msgid "%s — refused, executable files are never unpacked"
+msgstr ""
+
+#. translators: %s: entry path inside the archive. */ __( '%s — refused, executable files are never unpacked', 'wow-signal' ), $name ); } if ( ! in_array( $extension, self::ALLOWED_EXTENSIONS, true ) ) { return sprintf( /* translators: %s: entry path inside the archive.
+#: inc/Support/DesignArchive.php:368
+msgid "%s — skipped, not a design file"
+msgstr ""
+
+#. translators: %s: entry path inside the archive. */ __( '%s — skipped, not a design file', 'wow-signal' ), $name ); } if ( $size > self::MAX_FILE_BYTES ) { return sprintf( /* translators: %s: entry path inside the archive.
+#: inc/Support/DesignArchive.php:376
+msgid "%s — skipped, larger than 12 MB"
+msgstr ""
+
+#. translators: 1: link target, 2: how many links point at it.
+#: inc/Support/SiteAssembler.php:107
+msgid "%2$d link points at \"%1$s\", which is not a page on this site. Check the design or remove the link."
+msgid_plural "%2$d links point at \"%1$s\", which is not a page on this site. Check the design or remove the links."
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/Support/SiteAssembler.php:147
+msgid "body text on the page background"
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:148
+msgid "secondary text on the page background"
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:149
+msgid "text on cards"
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:150
+msgid "form field borders"
+msgstr ""
+
+#. translators: 1: what the pair is used for, 2: measured ratio, 3: required ratio.
+#: inc/Support/SiteAssembler.php:170
+msgid "The design's colours give %1$s a contrast of %2$s:1, below the %3$s:1 that WCAG 2.2 AA asks for. Adjust it in Appearance → Editor → Styles before launch."
+msgstr ""
+
+#. translators: 1: section label, 2: reason.
+#: inc/Support/SiteAssembler.php:268
+msgid "Section \"%1$s\" was left out: %2$s"
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:282
+msgid "Nothing on this page could be converted."
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:292
+msgid "This page had no heading of its own, so its title was added as the top heading."
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:52
+msgid "No pages were found in that language."
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:781
+msgid "Main navigation"
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:872
+msgid "Footer"
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:872
+msgid "Header"
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:98
+msgid "None of the pages could be converted."
+msgstr ""
+
+#: patterns/cases-slider.php
+msgctxt "Pattern description"
+msgid "A horizontal slider of case study cards, each with a result, a client and a short summary."
+msgstr ""
+
+#: patterns/cases-slider.php
+msgctxt "Pattern title"
+msgid "Case studies — swipeable cards"
+msgstr ""
+
+#: patterns/cases-slider.php
+msgctxt "Pattern keywords"
+msgid "cases, portfolio, work, slider, carousel, results"
+msgstr ""
+
+#: patterns/cases-slider.php:19
+msgctxt "Pattern placeholder text"
+msgid "Selected work"
+msgstr ""
+
+#: patterns/cases-slider.php:23
+msgctxt "Pattern placeholder text"
+msgid "Every project below is measured against what it was before we touched it."
+msgstr ""
+
+#: patterns/cases-slider.php:31
+msgctxt "Pattern placeholder text"
+msgid "Client case studies"
+msgstr ""
+
+#: patterns/cases-slider.php:33
+msgctxt "Pattern placeholder text"
+msgid "more enquiries in the first quarter"
+msgstr ""
+
+#: patterns/cases-slider.php:36
+msgctxt "Pattern placeholder text"
+msgid "B2B manufacturer, rebuilt"
+msgstr ""
+
+#: patterns/cases-slider.php:40
+msgctxt "Pattern placeholder text"
+msgid "Replaced a page builder with a block theme. The site went from 4.8 seconds to 1.6 and the sales team stopped filing tickets to change a phone number."
+msgstr ""
+
+#: patterns/cases-slider.php:45
+msgctxt "Pattern placeholder text"
+msgid "accessibility score, up from 61"
+msgstr ""
+
+#: patterns/cases-slider.php:48
+msgctxt "Pattern placeholder text"
+msgid "Public sector portal"
+msgstr ""
+
+#: patterns/cases-slider.php:52
+msgctxt "Pattern placeholder text"
+msgid "A full WCAG 2.2 AA remediation with a written audit trail, delivered ahead of a statutory compliance deadline."
+msgstr ""
+
+#: patterns/cases-slider.php:57
+msgctxt "Pattern placeholder text"
+msgid "faster checkout on mobile"
+msgstr ""
+
+#: patterns/cases-slider.php:60
+msgctxt "Pattern placeholder text"
+msgid "WooCommerce performance rescue"
+msgstr ""
+
+#: patterns/cases-slider.php:64
+msgctxt "Pattern placeholder text"
+msgid "Cut eleven plugins, moved the cart to blocks and put the shop assets behind a condition. Same features, a third of the JavaScript."
+msgstr ""
+
+#: patterns/cases-slider.php:69
+msgctxt "Pattern placeholder text"
+msgid "weeks from first call to launch"
+msgstr ""
+
+#: patterns/cases-slider.php:72
+msgctxt "Pattern placeholder text"
+msgid "SaaS marketing site"
+msgstr ""
+
+#: patterns/cases-slider.php:76
+msgctxt "Pattern placeholder text"
+msgid "Next.js front end, WordPress editing behind it. Marketing publishes without a deploy, engineering keeps its type safety."
+msgstr ""
+
+#: patterns/contact-section.php
+msgctxt "Pattern description"
+msgid "A two-column contact section: an accessible enquiry form next to direct contact details."
+msgstr ""
+
+#: patterns/contact-section.php
+msgctxt "Pattern title"
+msgid "Contact — form with direct details"
+msgstr ""
+
+#: patterns/contact-section.php
+msgctxt "Pattern keywords"
+msgid "contact, form, enquiry, email, get in touch"
+msgstr ""
+
+#: patterns/contact-section.php:20
+msgctxt "Pattern placeholder text"
+msgid "Tell us what you are building"
+msgstr ""
+
+#: patterns/contact-section.php:24
+msgctxt "Pattern placeholder text"
+msgid "You will hear back from one of the two people who would actually do the work, within one working day."
+msgstr ""
+
+#: patterns/contact-section.php:33
+msgctxt "Pattern placeholder text"
+msgid "A written scope and a fixed number before anything starts"
+msgstr ""
+
+#: patterns/contact-section.php:37
+msgctxt "Pattern placeholder text"
+msgid "No sales call, no discovery workshop invoice"
+msgstr ""
+
+#: patterns/contact-section.php:41
+msgctxt "Pattern placeholder text"
+msgid "We will tell you if your project is not a fit for us"
+msgstr ""
+
+#: patterns/contact-section.php:48
+msgctxt "Pattern placeholder text"
+msgid "We use your details only to answer this enquiry and delete them after twelve months."
+msgstr ""
+
+#: patterns/cta-band.php
+msgctxt "Pattern description"
+msgid "A wide, high-contrast band with one headline and one button."
+msgstr ""
+
+#: patterns/cta-band.php
+msgctxt "Pattern title"
+msgid "Call to action — full width band"
+msgstr ""
+
+#: patterns/cta-band.php
+msgctxt "Pattern keywords"
+msgid "cta, call to action, banner, conversion, contact"
+msgstr ""
+
+#: patterns/cta-band.php:19
+msgctxt "Pattern placeholder text"
+msgid "Ready to stop losing visitors to a slow site?"
+msgstr ""
+
+#: patterns/cta-band.php:23
+msgctxt "Pattern placeholder text"
+msgid "Send us the URL. We will tell you what is wrong with it, for free, before you decide anything."
+msgstr ""
+
+#: patterns/cta-band.php:32
+msgctxt "Pattern placeholder text"
+msgid "Get a free review"
+msgstr ""
+
+#: patterns/faq-section.php
+msgctxt "Pattern description"
+msgid "A heading and a set of questions that expand and collapse, ready to be picked up by search engines."
+msgstr ""
+
+#: patterns/faq-section.php
+msgctxt "Pattern title"
+msgid "FAQ — accordion with structured data"
+msgstr ""
+
+#: patterns/faq-section.php
+msgctxt "Pattern keywords"
+msgid "faq, questions, accordion, answers, support"
+msgstr ""
+
+#: patterns/faq-section.php:18
+msgctxt "Pattern placeholder text"
+msgid "Questions we get asked"
+msgstr ""
+
+#: patterns/faq-section.php:26
+msgctxt "Pattern placeholder text"
+msgid "How long does a site take?"
+msgstr ""
+
+#: patterns/faq-section.php:28
+msgctxt "Pattern placeholder text"
+msgid "A marketing site is usually four to eight weeks from the scope call. A rebuild with content migration runs longer, and we tell you which one you are in before you commit to anything."
+msgstr ""
+
+#: patterns/faq-section.php:32
+msgctxt "Pattern placeholder text"
+msgid "Do you use page builders?"
+msgstr ""
+
+#: patterns/faq-section.php:34
+msgctxt "Pattern placeholder text"
+msgid "No. We build block themes on the editor that ships with WordPress. It is faster, it has no licence to renew, and it will still open in five years."
+msgstr ""
+
+#: patterns/faq-section.php:38
+msgctxt "Pattern placeholder text"
+msgid "What does accessible actually mean here?"
+msgstr ""
+
+#: patterns/faq-section.php:40
+msgctxt "Pattern placeholder text"
+msgid "WCAG 2.2 level AA, checked with automated tooling and by hand with a keyboard and a screen reader. You get the report, including anything we could not fix and why."
+msgstr ""
+
+#: patterns/faq-section.php:44
+msgctxt "Pattern placeholder text"
+msgid "Who owns the code?"
+msgstr ""
+
+#: patterns/faq-section.php:46
+msgctxt "Pattern placeholder text"
+msgid "You do, from the first commit. The repository is yours, the hosting is in your name, and nothing we write depends on us staying involved."
+msgstr ""
+
+#: patterns/faq-section.php:50
+msgctxt "Pattern placeholder text"
+msgid "Can you work with our existing team?"
+msgstr ""
+
+#: patterns/faq-section.php:52
+msgctxt "Pattern placeholder text"
+msgid "Often, yes. We review pull requests, pair with in-house developers and leave the conventions documented so the work outlives the engagement."
+msgstr ""
+
+#: patterns/hero-home.php
+msgctxt "Pattern description"
+msgid "A full-width opening section with an eyebrow, a large headline, a supporting line, two buttons and a row of metrics."
+msgstr ""
+
+#: patterns/hero-home.php
+msgctxt "Pattern title"
+msgid "Hero — headline, promise and proof"
+msgstr ""
+
+#: patterns/hero-home.php
+msgctxt "Pattern keywords"
+msgid "hero, intro, headline, opening, banner"
+msgstr ""
+
+#: patterns/hero-home.php:19
+msgctxt "Pattern placeholder text"
+msgid "Boutique studio · WordPress &amp; Next.js"
+msgstr ""
+
+#: patterns/hero-home.php:23
+msgctxt "Pattern placeholder text"
+msgid "Websites that win."
+msgstr ""
+
+#: patterns/hero-home.php:27
+msgctxt "Pattern placeholder text"
+msgid "We build fast, accessible, measurable websites. Two senior developers, no account managers, no hand-offs — the people who scope your project are the ones who ship it."
+msgstr ""
+
+#: patterns/hero-home.php:36
+msgctxt "Pattern placeholder text"
+msgid "Start a project"
+msgstr ""
+
+#: patterns/hero-home.php:40
+msgctxt "Pattern placeholder text"
+msgid "See the numbers"
+msgstr ""
+
+#: patterns/hero-home.php:51
+msgctxt "Pattern placeholder text"
+msgid "Average Lighthouse performance score on launch"
+msgstr ""
+
+#: patterns/hero-home.php:55
+msgctxt "Pattern placeholder text"
+msgid "Typical Largest Contentful Paint on 4G"
+msgstr ""
+
+#: patterns/hero-home.php:59
+msgctxt "Pattern placeholder text"
+msgid "Projects delivered to WCAG 2.2 AA"
+msgstr ""
+
+#: patterns/hero-home.php:63
+msgctxt "Pattern placeholder text"
+msgid "Senior developers on every project, start to finish"
+msgstr ""
+
+#: patterns/hero-page.php
+msgctxt "Pattern description"
+msgid "A compact page opener with an eyebrow, a heading and one supporting paragraph."
+msgstr ""
+
+#: patterns/hero-page.php
+msgctxt "Pattern title"
+msgid "Hero — inner page header"
+msgstr ""
+
+#: patterns/hero-page.php
+msgctxt "Pattern keywords"
+msgid "hero, page header, intro, title"
+msgstr ""
+
+#: patterns/hero-page.php:19
+msgctxt "Pattern placeholder text"
+msgid "Services"
+msgstr ""
+
+#: patterns/hero-page.php:23
+msgctxt "Pattern placeholder text"
+msgid "What we do, and what it costs"
+msgstr ""
+
+#: patterns/hero-page.php:27
+msgctxt "Pattern placeholder text"
+msgid "Short version: we build and rescue WordPress and Next.js sites, we quote a fixed number, and we can show you the measurements afterwards."
+msgstr ""
+
+#: patterns/hidden-404.php
+msgctxt "Pattern title"
+msgid "404 content"
+msgstr ""
+
+#: patterns/hidden-404.php:15
+msgctxt "Pattern placeholder text"
+msgid "Error 404"
+msgstr ""
+
+#: patterns/hidden-404.php:19
+msgctxt "Pattern placeholder text"
+msgid "That page is not here"
+msgstr ""
+
+#: patterns/hidden-404.php:23
+msgctxt "Pattern placeholder text"
+msgid "It may have moved, or the link that brought you here may be out of date. Try a search, or head back to the homepage."
+msgstr ""
+
+#: patterns/hidden-404.php:30 patterns/hidden-no-results.php:22
+msgctxt "Pattern placeholder text"
+msgid "Search"
+msgstr ""
+
+#: patterns/hidden-404.php:30 patterns/hidden-no-results.php:22
+msgctxt "Pattern placeholder text"
+msgid "Search this site"
+msgstr ""
+
+#: patterns/hidden-404.php:30 patterns/hidden-no-results.php:22
+msgctxt "Pattern placeholder text"
+msgid "Search this site…"
+msgstr ""
+
+#: patterns/hidden-404.php:38
+msgctxt "Pattern placeholder text"
+msgid "Back to the homepage"
+msgstr ""
+
+#: patterns/hidden-no-results.php
+msgctxt "Pattern title"
+msgid "No results"
+msgstr ""
+
+#: patterns/hidden-no-results.php:15
+msgctxt "Pattern placeholder text"
+msgid "Nothing matched"
+msgstr ""
+
+#: patterns/hidden-no-results.php:19
+msgctxt "Pattern placeholder text"
+msgid "Try a shorter phrase, or a different word for the same thing."
+msgstr ""
+
+#: patterns/logos-strip.php
+msgctxt "Pattern description"
+msgid "A low-key row of client names or logos under the hero. Replace the text with images once you have permission to use them."
+msgstr ""
+
+#: patterns/logos-strip.php
+msgctxt "Pattern title"
+msgid "Client logos — quiet strip"
+msgstr ""
+
+#: patterns/logos-strip.php
+msgctxt "Pattern keywords"
+msgid "logos, clients, brands, trust, partners"
+msgstr ""
+
+#: patterns/logos-strip.php:18
+msgctxt "Pattern placeholder text"
+msgid "Trusted by teams at"
+msgstr ""
+
+#: patterns/logos-strip.php:27
+msgctxt "Pattern placeholder text"
+msgid "Northwind"
+msgstr ""
+
+#: patterns/logos-strip.php:31
+msgctxt "Pattern placeholder text"
+msgid "Kraftverk"
+msgstr ""
+
+#: patterns/logos-strip.php:35
+msgctxt "Pattern placeholder text"
+msgid "Meridian"
+msgstr ""
+
+#: patterns/logos-strip.php:39
+msgctxt "Pattern placeholder text"
+msgid "Volta Labs"
+msgstr ""
+
+#: patterns/logos-strip.php:43
+msgctxt "Pattern placeholder text"
+msgid "Aurora Health"
+msgstr ""
+
+#: patterns/metrics-band.php
+msgctxt "Pattern description"
+msgid "A row of four numbers that count up as the visitor reaches them."
+msgstr ""
+
+#: patterns/metrics-band.php
+msgctxt "Pattern title"
+msgid "Metrics — four figures in a row"
+msgstr ""
+
+#: patterns/metrics-band.php
+msgctxt "Pattern keywords"
+msgid "metrics, numbers, stats, results, kpi, counters"
+msgstr ""
+
+#: patterns/metrics-band.php:19
+msgctxt "Pattern placeholder text"
+msgid "Median Largest Contentful Paint across live client sites"
+msgstr ""
+
+#: patterns/metrics-band.php:23
+msgctxt "Pattern placeholder text"
+msgid "Cumulative Layout Shift on every template we ship"
+msgstr ""
+
+#: patterns/metrics-band.php:27
+msgctxt "Pattern placeholder text"
+msgid "Projects delivered since 2016"
+msgstr ""
+
+#: patterns/metrics-band.php:31
+msgctxt "Pattern placeholder text"
+msgid "Maximum time to a reply from a real developer"
+msgstr ""
+
+#: patterns/page-contact.php
+msgctxt "Pattern description"
+msgid "A contact page with an enquiry form, direct details and the questions people ask before getting in touch."
+msgstr ""
+
+#: patterns/page-contact.php
+msgctxt "Pattern keywords"
+msgid "contact, enquiry, form, full page"
+msgstr ""
+
+#: patterns/page-contact.php
+msgctxt "Pattern title"
+msgid "Page — contact"
+msgstr ""
+
+#: patterns/page-contact.php:21
+msgctxt "Pattern placeholder text"
+msgid "Contact"
+msgstr ""
+
+#: patterns/page-contact.php:25
+msgctxt "Pattern placeholder text"
+msgid "Let us look at your project"
+msgstr ""
+
+#: patterns/page-home.php
+msgctxt "Pattern description"
+msgid "A complete homepage: hero with metrics, client logos, services, case studies, process, testimonials, pricing, FAQ and a contact form."
+msgstr ""
+
+#: patterns/page-home.php
+msgctxt "Pattern keywords"
+msgid "home, homepage, landing, full page, agency"
+msgstr ""
+
+#: patterns/page-home.php
+msgctxt "Pattern title"
+msgid "Page — studio homepage"
+msgstr ""
+
+#: patterns/page-services.php
+msgctxt "Pattern description"
+msgid "A services page: page hero, the service grid, how a project runs, pricing tiers, FAQ and a closing call to action."
+msgstr ""
+
+#: patterns/page-services.php
+msgctxt "Pattern title"
+msgid "Page — services and pricing"
+msgstr ""
+
+#: patterns/page-services.php
+msgctxt "Pattern keywords"
+msgid "services, pricing, offering, full page"
+msgstr ""
+
+#: patterns/pricing-tiers.php
+msgctxt "Pattern title"
+msgid "Pricing — three tiers"
+msgstr ""
+
+#: patterns/pricing-tiers.php
+msgctxt "Pattern keywords"
+msgid "pricing, plans, packages, tiers, cost"
+msgstr ""
+
+#: patterns/pricing-tiers.php
+msgctxt "Pattern description"
+msgid "Three pricing cards with a highlighted middle tier, a feature list and a call to action on each."
+msgstr ""
+
+#: patterns/pricing-tiers.php:100
+msgctxt "Pattern placeholder text"
+msgid "Content migration"
+msgstr ""
+
+#: patterns/pricing-tiers.php:106
+msgctxt "Pattern placeholder text"
+msgid "Ask about Site"
+msgstr ""
+
+#: patterns/pricing-tiers.php:115
+msgctxt "Pattern placeholder text"
+msgid "Partner"
+msgstr ""
+
+#: patterns/pricing-tiers.php:119
+msgctxt "Pattern placeholder text"
+msgid "from €2,400/mo"
+msgstr ""
+
+#: patterns/pricing-tiers.php:123
+msgctxt "Pattern placeholder text"
+msgid "Ongoing development with a reserved share of our week."
+msgstr ""
+
+#: patterns/pricing-tiers.php:128
+msgctxt "Pattern placeholder text"
+msgid "Roadmap sessions every month"
+msgstr ""
+
+#: patterns/pricing-tiers.php:132
+msgctxt "Pattern placeholder text"
+msgid "Core Web Vitals monitoring"
+msgstr ""
+
+#: patterns/pricing-tiers.php:136
+msgctxt "Pattern placeholder text"
+msgid "Security patching within 24 hours"
+msgstr ""
+
+#: patterns/pricing-tiers.php:142
+msgctxt "Pattern placeholder text"
+msgid "Ask about Partner"
+msgstr ""
+
+#: patterns/pricing-tiers.php:19
+msgctxt "Pattern placeholder text"
+msgid "Straight pricing"
+msgstr ""
+
+#: patterns/pricing-tiers.php:23
+msgctxt "Pattern placeholder text"
+msgid "Fixed scope, fixed price, written down before we start. If the scope changes we tell you what it costs before we do it."
+msgstr ""
+
+#: patterns/pricing-tiers.php:35
+msgctxt "Pattern placeholder text"
+msgid "Landing"
+msgstr ""
+
+#: patterns/pricing-tiers.php:39
+msgctxt "Pattern placeholder text"
+msgid "from €3,500"
+msgstr ""
+
+#: patterns/pricing-tiers.php:43
+msgctxt "Pattern placeholder text"
+msgid "One page that has to convert. Two to three weeks."
+msgstr ""
+
+#: patterns/pricing-tiers.php:48
+msgctxt "Pattern placeholder text"
+msgid "Custom block patterns"
+msgstr ""
+
+#: patterns/pricing-tiers.php:52
+msgctxt "Pattern placeholder text"
+msgid "Lighthouse 95+ on launch"
+msgstr ""
+
+#: patterns/pricing-tiers.php:56
+msgctxt "Pattern placeholder text"
+msgid "Analytics and conversion tracking"
+msgstr ""
+
+#: patterns/pricing-tiers.php:62
+msgctxt "Pattern placeholder text"
+msgid "Ask about Landing"
+msgstr ""
+
+#: patterns/pricing-tiers.php:71
+msgctxt "Pattern placeholder text"
+msgid "Most chosen"
+msgstr ""
+
+#: patterns/pricing-tiers.php:75
+msgctxt "Pattern placeholder text"
+msgid "Site"
+msgstr ""
+
+#: patterns/pricing-tiers.php:79
+msgctxt "Pattern placeholder text"
+msgid "from €9,000"
+msgstr ""
+
+#: patterns/pricing-tiers.php:83
+msgctxt "Pattern placeholder text"
+msgid "A complete block theme your team owns. Four to eight weeks."
+msgstr ""
+
+#: patterns/pricing-tiers.php:88
+msgctxt "Pattern placeholder text"
+msgid "Everything in Landing"
+msgstr ""
+
+#: patterns/pricing-tiers.php:92
+msgctxt "Pattern placeholder text"
+msgid "Full Site Editing setup and training"
+msgstr ""
+
+#: patterns/pricing-tiers.php:96
+msgctxt "Pattern placeholder text"
+msgid "WCAG 2.2 AA audit and sign-off"
+msgstr ""
+
+#: patterns/process-steps.php
+msgctxt "Pattern description"
+msgid "Four numbered steps explaining how a project runs, from first call to handover."
+msgstr ""
+
+#: patterns/process-steps.php
+msgctxt "Pattern title"
+msgid "Process — four numbered steps"
+msgstr ""
+
+#: patterns/process-steps.php
+msgctxt "Pattern keywords"
+msgid "process, steps, how it works, timeline, method"
+msgstr ""
+
+#: patterns/process-steps.php:18
+msgctxt "Pattern placeholder text"
+msgid "How a project runs"
+msgstr ""
+
+#: patterns/process-steps.php:28 patterns/services-grid.php:35
+msgctxt "Pattern placeholder text"
+msgid "01"
+msgstr ""
+
+#: patterns/process-steps.php:32
+msgctxt "Pattern placeholder text"
+msgid "Scope call"
+msgstr ""
+
+#: patterns/process-steps.php:36
+msgctxt "Pattern placeholder text"
+msgid "Forty-five minutes with the developers who will build it. You leave with a written scope and a number."
+msgstr ""
+
+#: patterns/process-steps.php:42 patterns/services-grid.php:65
+msgctxt "Pattern placeholder text"
+msgid "02"
+msgstr ""
+
+#: patterns/process-steps.php:46
+msgctxt "Pattern placeholder text"
+msgid "Design in the browser"
+msgstr ""
+
+#: patterns/process-steps.php:50
+msgctxt "Pattern placeholder text"
+msgid "You review real pages on a real device, not a flat mockup that hides how it behaves at 320 pixels."
+msgstr ""
+
+#: patterns/process-steps.php:56 patterns/services-grid.php:95
+msgctxt "Pattern placeholder text"
+msgid "03"
+msgstr ""
+
+#: patterns/process-steps.php:60
+msgctxt "Pattern placeholder text"
+msgid "Build and test"
+msgstr ""
+
+#: patterns/process-steps.php:64
+msgctxt "Pattern placeholder text"
+msgid "Weekly demos on a staging URL. Accessibility and performance are checked as we go, not bolted on at the end."
+msgstr ""
+
+#: patterns/process-steps.php:70
+msgctxt "Pattern placeholder text"
+msgid "04"
+msgstr ""
+
+#: patterns/process-steps.php:74
+msgctxt "Pattern placeholder text"
+msgid "Launch and hand over"
+msgstr ""
+
+#: patterns/process-steps.php:78
+msgctxt "Pattern placeholder text"
+msgid "You get the repository, the documentation and a recorded walkthrough. No lock-in, ever."
+msgstr ""
+
+#: patterns/services-grid.php
+msgctxt "Pattern description"
+msgid "A heading with a short intro and three service cards, each with a title, description and link."
+msgstr ""
+
+#: patterns/services-grid.php
+msgctxt "Pattern title"
+msgid "Services — three card grid"
+msgstr ""
+
+#: patterns/services-grid.php
+msgctxt "Pattern keywords"
+msgid "services, features, cards, offering, grid"
+msgstr ""
+
+#: patterns/services-grid.php:103
+msgctxt "Pattern placeholder text"
+msgid "A site that is slow, broken or unusable on a screen reader. We audit it, fix it, and show you the before and after."
+msgstr ""
+
+#: patterns/services-grid.php:108
+msgctxt "Pattern placeholder text"
+msgid "Core Web Vitals back into the green"
+msgstr ""
+
+#: patterns/services-grid.php:112
+msgctxt "Pattern placeholder text"
+msgid "WCAG 2.2 AA remediation with a report"
+msgstr ""
+
+#: patterns/services-grid.php:116
+msgctxt "Pattern placeholder text"
+msgid "Security and update hygiene, sorted"
+msgstr ""
+
+#: patterns/services-grid.php:19
+msgctxt "Pattern placeholder text"
+msgid "What we build"
+msgstr ""
+
+#: patterns/services-grid.php:23
+msgctxt "Pattern placeholder text"
+msgid "Three ways we work. Every one of them ends with a site you can measure, not a folder of files you cannot maintain."
+msgstr ""
+
+#: patterns/services-grid.php:39
+msgctxt "Pattern placeholder text"
+msgid "WordPress builds"
+msgstr ""
+
+#: patterns/services-grid.php:43
+msgctxt "Pattern placeholder text"
+msgid "Block themes your team can actually edit. No page builder, no plugin sprawl, no locked-in licence renewals."
+msgstr ""
+
+#: patterns/services-grid.php:48
+msgctxt "Pattern placeholder text"
+msgid "Full Site Editing from day one"
+msgstr ""
+
+#: patterns/services-grid.php:52
+msgctxt "Pattern placeholder text"
+msgid "Content model built around your editors"
+msgstr ""
+
+#: patterns/services-grid.php:56
+msgctxt "Pattern placeholder text"
+msgid "Handover docs and a training session"
+msgstr ""
+
+#: patterns/services-grid.php:69
+msgctxt "Pattern placeholder text"
+msgid "React and Next.js"
+msgstr ""
+
+#: patterns/services-grid.php:73
+msgctxt "Pattern placeholder text"
+msgid "Product interfaces and headless front ends where a template alone will not do the job."
+msgstr ""
+
+#: patterns/services-grid.php:78
+msgctxt "Pattern placeholder text"
+msgid "Server rendering and edge caching"
+msgstr ""
+
+#: patterns/services-grid.php:82
+msgctxt "Pattern placeholder text"
+msgid "Typed APIs and a real test suite"
+msgstr ""
+
+#: patterns/services-grid.php:86
+msgctxt "Pattern placeholder text"
+msgid "WordPress as the editing layer, if you want it"
+msgstr ""
+
+#: patterns/services-grid.php:99
+msgctxt "Pattern placeholder text"
+msgid "Rescue and rebuild"
+msgstr ""
+
+#: patterns/testimonials.php
+msgctxt "Pattern title"
+msgid "Testimonials — three quotes"
+msgstr ""
+
+#: patterns/testimonials.php
+msgctxt "Pattern keywords"
+msgid "testimonials, quotes, reviews, clients, social proof"
+msgstr ""
+
+#: patterns/testimonials.php
+msgctxt "Pattern description"
+msgid "Three client quotes with an attribution line under each."
+msgstr ""
+
+#: patterns/testimonials.php:18
+msgctxt "Pattern placeholder text"
+msgid "What clients say afterwards"
+msgstr ""
+
+#: patterns/testimonials.php:29
+msgctxt "Pattern placeholder text"
+msgid "“They rewrote our theme in six weeks and the first thing I noticed was that our editors stopped emailing me to change text.”"
+msgstr ""
+
+#: patterns/testimonials.php:33
+msgctxt "Pattern placeholder text"
+msgid "Marketing lead, industrial manufacturer"
+msgstr ""
+
+#: patterns/testimonials.php:41
+msgctxt "Pattern placeholder text"
+msgid "“We had failed an accessibility audit twice. WOW fixed it, documented every decision, and we passed on the next attempt.”"
+msgstr ""
+
+#: patterns/testimonials.php:45
+msgctxt "Pattern placeholder text"
+msgid "Head of digital, public sector"
+msgstr ""
+
+#: patterns/testimonials.php:53
+msgctxt "Pattern placeholder text"
+msgid "“Two developers, no project manager in the middle, and the estimate held. That combination is rarer than it should be.”"
+msgstr ""
+
+#: patterns/testimonials.php:57
+msgctxt "Pattern placeholder text"
+msgid "Founder, B2B SaaS"
+msgstr ""
+
+#: styles/light.json
+msgctxt "Style variation description"
+msgid "Daylight palette. Same tokens, same contrast contract — every text pair still clears WCAG 2.2 AA and every form control border clears 3:1."
+msgstr ""
+
+#: styles/light.json
+msgctxt "Style variation name"
+msgid "Signal Light"
+msgstr ""

@@ -1,0 +1,20 @@
+# Dependencies — dev only, never needed to run the theme
+/node_modules/
+/vendor/
+
+# Quality-gate output: rendered pages, downloaded tooling
+/artifacts/
+
+# Source designs handed over for conversion — never part of the theme
+/designs/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+
+# Environment
+.env
+.env.*

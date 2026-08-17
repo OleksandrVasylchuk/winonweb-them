@@ -1,0 +1,44 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "wow/colophon",
+	"title": "Colophon",
+	"category": "wow",
+	"icon": "info-outline",
+	"description": "The copyright line for the footer. Keeps the year current on its own and can show the designer credit.",
+	"keywords": [ "footer", "copyright", "credit", "year" ],
+	"textdomain": "wow-signal",
+	"attributes": {
+		"prefix": {
+			"type": "string",
+			"default": "©"
+		},
+		"showSiteName": {
+			"type": "boolean",
+			"default": true
+		},
+		"extraText": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"align": false,
+		"color": {
+			"text": true,
+			"background": false
+		},
+		"typography": {
+			"fontSize": true,
+			"__experimentalFontFamily": true
+		},
+		"spacing": {
+			"margin": [ "top", "bottom" ]
+		}
+	},
+	"editorScript": "file:./edit.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

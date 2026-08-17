@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "wow/faq-item",
+	"title": "FAQ question",
+	"category": "wow",
+	"icon": "editor-help",
+	"description": "One question and its answer. Add these inside an FAQ accordion.",
+	"keywords": [ "faq", "question", "answer" ],
+	"textdomain": "wow-signal",
+	"parent": [ "wow/faq" ],
+	"attributes": {
+		"question": {
+			"type": "string",
+			"default": ""
+		},
+		"startOpen": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"reusable": false,
+		"color": {
+			"text": false,
+			"background": false
+		}
+	},
+	"editorScript": "file:./edit.js",
+	"render": "file:./render.php"
+}

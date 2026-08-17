@@ -1,0 +1,108 @@
+/**
+ * wow/faq — front end and editor.
+ */
+
+.wow-faq {
+	display: grid;
+	gap: var(--wp--preset--spacing--30);
+}
+
+.wow-faq__item {
+	background: var(--wp--preset--color--surface);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--radius--md);
+	overflow: hidden;
+}
+
+.wow-faq__item[open] {
+	border-color: var(--wp--preset--color--border-strong);
+}
+
+.wow-faq__question {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--wp--preset--spacing--40);
+	min-height: var(--wp--custom--tap-target);
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50);
+	margin: 0;
+	cursor: pointer;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var(--wp--preset--color--contrast);
+	list-style: none;
+	transition: background-color var(--wp--custom--transition--fast);
+}
+
+/* Hide the default disclosure triangle; the custom marker replaces it. */
+.wow-faq__question::-webkit-details-marker {
+	display: none;
+}
+
+.wow-faq__question::marker {
+	content: "";
+}
+
+.wow-faq__question:hover {
+	background: var(--wp--preset--color--surface-2);
+}
+
+.wow-faq__question:focus-visible {
+	outline: var(--wp--custom--focus-ring--width) solid var(--wp--custom--focus-ring--color);
+	outline-offset: calc(var(--wp--custom--focus-ring--offset) * -1);
+}
+
+.wow-faq__question-text {
+	flex: 1 1 auto;
+}
+
+/* Plus sign drawn from two rules so it needs no icon font or SVG request. */
+.wow-faq__marker {
+	position: relative;
+	flex: 0 0 auto;
+	width: 1rem;
+	height: 1rem;
+}
+
+.wow-faq__marker::before,
+.wow-faq__marker::after {
+	content: "";
+	position: absolute;
+	inset-block-start: 50%;
+	inset-inline-start: 0;
+	width: 100%;
+	height: 2px;
+	background: var(--wp--preset--color--accent);
+	translate: 0 -50%;
+	transition: rotate var(--wp--custom--transition--base), opacity var(--wp--custom--transition--fast);
+}
+
+.wow-faq__marker::after {
+	rotate: 90deg;
+}
+
+.wow-faq__item[open] .wow-faq__marker::after {
+	rotate: 180deg;
+	opacity: 0;
+}
+
+.wow-faq__answer {
+	padding: 0 var(--wp--preset--spacing--50) var(--wp--preset--spacing--50);
+	color: var(--wp--preset--color--muted);
+}
+
+.wow-faq__answer > :first-child {
+	margin-block-start: 0;
+}
+
+.wow-faq__answer > :last-child {
+	margin-block-end: 0;
+}
+
+@media (forced-colors: active) {
+
+	.wow-faq__marker::before,
+	.wow-faq__marker::after {
+		background: CanvasText;
+	}
+}

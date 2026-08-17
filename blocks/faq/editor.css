@@ -1,0 +1,39 @@
+/**
+ * wow/faq — editor only.
+ *
+ * In the canvas each question is always expanded so an editor can see and
+ * reach every answer without fighting the disclosure widget.
+ */
+
+.editor-styles-wrapper .wow-faq__item.is-editor {
+	display: block;
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50);
+	background: var(--wp--preset--color--surface);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--radius--md);
+}
+
+.editor-styles-wrapper .wow-faq__item.is-editor .wow-faq__question {
+	padding: 0 0 var(--wp--preset--spacing--30);
+	min-height: 0;
+	cursor: text;
+}
+
+.editor-styles-wrapper .wow-faq__item.is-editor .wow-faq__answer {
+	padding: 0;
+}
+
+/* Make an empty question obvious rather than collapsing to nothing. */
+.editor-styles-wrapper .wow-faq__question-text[data-rich-text-placeholder]::after {
+	opacity: 0.6;
+}
+
+.editor-styles-wrapper .wow-faq:empty::before {
+	content: attr(data-empty-hint);
+	display: block;
+	padding: var(--wp--preset--spacing--60);
+	text-align: center;
+	color: var(--wp--preset--color--muted);
+	border: 1px dashed var(--wp--preset--color--border-strong);
+	border-radius: var(--wp--custom--radius--md);
+}

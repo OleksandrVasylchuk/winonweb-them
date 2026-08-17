@@ -1,0 +1,28 @@
+/**
+ * wow/slider — editor only.
+ *
+ * In the canvas the track wraps instead of scrolling, so every card is
+ * visible and selectable without an editor having to scroll sideways to
+ * find a block.
+ */
+
+.editor-styles-wrapper .wow-slider.is-editor .wow-slider__track {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--50);
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.editor-styles-wrapper .wow-slider.is-editor .wow-slider__track > .block-editor-block-list__block {
+	flex: 0 1 min(var(--wow-slide-width, 22rem), 100%);
+	margin: 0;
+}
+
+.editor-styles-wrapper .wow-slider.is-editor::after {
+	content: attr(data-editor-hint);
+	display: block;
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--x-small);
+}

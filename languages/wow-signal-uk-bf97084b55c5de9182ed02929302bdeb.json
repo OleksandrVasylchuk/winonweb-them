@@ -1,0 +1,35 @@
+{
+	"domain": "messages",
+	"translation-revision-date": "2026-08-16T14:54:58+0000",
+	"generator": "wow-signal/make-mo.mjs",
+	"locale_data": {
+		"messages": {
+			"": {
+				"domain": "messages",
+				"lang": "uk",
+				"plural-forms": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
+			},
+			"Site name": [
+				"Назва сайту"
+			],
+			"Colophon": [
+				"Колофон"
+			],
+			"Symbol before the year": [
+				"Символ перед роком"
+			],
+			"Usually ©. Leave empty to show the year on its own.": [
+				"Зазвичай ©. Залиште порожнім, щоб показувати лише рік."
+			],
+			"Show the site name": [
+				"Показувати назву сайту"
+			],
+			"Extra text": [
+				"Додатковий текст"
+			],
+			"Optional. Shown after the site name, for example \"All rights reserved\".": [
+				"Необовʼязково. Показується після назви сайту, наприклад «Усі права захищено»."
+			]
+		}
+	}
+}

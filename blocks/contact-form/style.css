@@ -1,0 +1,112 @@
+/**
+ * wow/contact-form — front end and editor.
+ */
+
+.wow-contact {
+	display: grid;
+	gap: var(--wp--preset--spacing--50);
+}
+
+.wow-contact__form {
+	display: grid;
+	gap: var(--wp--preset--spacing--50);
+}
+
+.wow-contact__field {
+	display: grid;
+	gap: var(--wp--preset--spacing--20);
+}
+
+.wow-contact__label {
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	color: var(--wp--preset--color--contrast);
+}
+
+.wow-contact__required {
+	color: var(--wp--preset--color--accent);
+}
+
+.wow-contact__hint {
+	margin: 0;
+	font-size: var(--wp--preset--font-size--x-small);
+	color: var(--wp--preset--color--muted);
+}
+
+.wow-contact__error {
+	margin: 0;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	color: var(--wp--preset--color--warning);
+}
+
+.wow-contact__field.has-error .wow-contact__input {
+	border-color: var(--wp--preset--color--warning);
+	border-width: 2px;
+}
+
+.wow-contact__textarea {
+	min-height: 9rem;
+	resize: vertical;
+	line-height: 1.6;
+}
+
+.wow-contact__consent {
+	margin: 0;
+	font-size: var(--wp--preset--font-size--x-small);
+	color: var(--wp--preset--color--muted);
+}
+
+.wow-contact__submit {
+	justify-self: start;
+	cursor: pointer;
+	border: 0;
+}
+
+.wow-contact__notice {
+	margin: 0;
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50);
+	border-radius: var(--wp--custom--radius--md);
+	border: 1px solid var(--wp--preset--color--border-strong);
+	background: var(--wp--preset--color--surface);
+}
+
+.wow-contact__notice--success {
+	border-color: var(--wp--preset--color--success);
+	color: var(--wp--preset--color--success);
+	font-weight: 600;
+}
+
+.wow-contact__notice--error {
+	border-color: var(--wp--preset--color--warning);
+}
+
+.wow-contact__notice-title {
+	margin: 0 0 var(--wp--preset--spacing--20);
+	font-weight: 700;
+	color: var(--wp--preset--color--warning);
+}
+
+.wow-contact__notice-list {
+	margin: 0;
+	padding-inline-start: 1.2em;
+	color: var(--wp--preset--color--contrast);
+}
+
+.wow-contact__notice-list a {
+	color: inherit;
+}
+
+/*
+ * The honeypot is moved out of view rather than display:none — bots that
+ * skip hidden inputs still fill this one in. tabindex="-1" and aria-hidden
+ * on the wrapper keep it away from keyboard and screen-reader users.
+ */
+.wow-contact__trap {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}

@@ -1,0 +1,26 @@
+{
+    "name": "wow-signal",
+    "version": "1.0.0",
+    "private": true,
+    "description": "WOW — Signal: a fast, accessible WordPress block theme by WOW — Win On Web.",
+    "author": "WOW — Win On Web (https://www.winonweb.dev/)",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://www.winonweb.dev/",
+    "engines": {
+        "node": ">=18"
+    },
+    "//": "The theme itself has no build step — what is in the repository is what ships. Node is only used for the quality gates below.",
+    "scripts": {
+        "audit:contrast": "node tools/contrast-audit.mjs",
+        "lint:blocks": "node tools/lint-blocks.mjs",
+        "lint:php": "composer lint",
+        "lint:html": "html-validate \"artifacts/html/*.html\"",
+        "test": "npm run audit:contrast && npm run lint:blocks && npm run lint:php",
+        "make:pot": "node tools/make-pot.mjs",
+        "make:mo": "node tools/make-mo.mjs",
+        "i18n": "npm run make:pot && npm run make:mo"
+    },
+    "devDependencies": {
+        "html-validate": "^8.24.2"
+    }
+}

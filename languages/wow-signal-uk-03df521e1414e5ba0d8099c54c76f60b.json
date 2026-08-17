@@ -1,0 +1,65 @@
+{
+	"domain": "messages",
+	"translation-revision-date": "2026-08-16T14:54:58+0000",
+	"generator": "wow-signal/make-mo.mjs",
+	"locale_data": {
+		"messages": {
+			"": {
+				"domain": "messages",
+				"lang": "uk",
+				"plural-forms": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
+			},
+			"Form": [
+				"Форма"
+			],
+			"Messages go to the site administrator email set under Settings → General. A developer can route a form elsewhere with the wow_signal/contact_recipient filter.": [
+				"Повідомлення надходять на email адміністратора, вказаний у «Налаштування → Загальні». Розробник може перенаправити форму фільтром wow_signal/contact_recipient."
+			],
+			"Form name": [
+				"Назва форми"
+			],
+			"Used to tell forms apart if the site has more than one, for example \"careers\".": [
+				"Потрібна, щоб розрізняти форми, якщо їх на сайті кілька, наприклад «careers»."
+			],
+			"Ask for a subject": [
+				"Питати тему"
+			],
+			"Adds an optional subject line above the message.": [
+				"Додає необовʼязкове поле теми над повідомленням."
+			],
+			"Button text": [
+				"Текст кнопки"
+			],
+			"Thank-you message": [
+				"Повідомлення подяки"
+			],
+			"Shown on the page after the message is sent.": [
+				"Показується на сторінці після надсилання повідомлення."
+			],
+			"Small print under the button": [
+				"Дрібний текст під кнопкою"
+			],
+			"Optional. Use it for a privacy note, for example how long you keep enquiries.": [
+				"Необовʼязково. Для примітки про приватність, наприклад скільки ви зберігаєте звернення."
+			],
+			"How can we help?": [
+				"Чим можемо допомогти?"
+			],
+			"Send message": [
+				"Надіслати повідомлення"
+			],
+			"Your name": [
+				"Ваше ім’я"
+			],
+			"Email address": [
+				"Електронна пошта"
+			],
+			"We reply to this address and never share it.": [
+				"Відповідаємо на цю адресу й нікому її не передаємо."
+			],
+			"Subject": [
+				"Тема"
+			]
+		}
+	}
+}
