@@ -1,0 +1,119 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Signal Sand",
+	"description": "Warm off-white with terracotta, for brands that are people rather than software.",
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"slug": "base",
+					"color": "#fdfaf6",
+					"name": "Base — page background"
+				},
+				{
+					"slug": "surface",
+					"color": "#f6efe6",
+					"name": "Surface — card"
+				},
+				{
+					"slug": "surface-2",
+					"color": "#ede2d3",
+					"name": "Surface raised"
+				},
+				{
+					"slug": "border",
+					"color": "#e0d2bf",
+					"name": "Divider (decorative)"
+				},
+				{
+					"slug": "border-strong",
+					"color": "#7a6a56",
+					"name": "Control border (AA)"
+				},
+				{
+					"slug": "contrast",
+					"color": "#1a1410",
+					"name": "Contrast — body text"
+				},
+				{
+					"slug": "muted",
+					"color": "#574a3c",
+					"name": "Muted — secondary text"
+				},
+				{
+					"slug": "accent",
+					"color": "#a83a20",
+					"name": "Accent — terracotta"
+				},
+				{
+					"slug": "accent-ink",
+					"color": "#a83a20",
+					"name": "Accent — readable as text"
+				},
+				{
+					"slug": "accent-2",
+					"color": "#7a5230",
+					"name": "Accent — bronze"
+				},
+				{
+					"slug": "accent-3",
+					"color": "#99306e",
+					"name": "Accent — plum"
+				},
+				{
+					"slug": "success",
+					"color": "#14653e",
+					"name": "Success"
+				},
+				{
+					"slug": "warning",
+					"color": "#8a4b00",
+					"name": "Warning"
+				}
+			],
+			"gradients": [
+				{
+					"slug": "aurora",
+					"name": "Aurora — terracotta to plum",
+					"gradient": "linear-gradient(120deg, #a83a20 0%, #7a5230 52%, #99306e 100%)"
+				},
+				{
+					"slug": "aurora-soft",
+					"name": "Aurora soft — on light",
+					"gradient": "linear-gradient(160deg, #f6efe6 0%, #ede2d3 60%, #f2e2e0 100%)"
+				},
+				{
+					"slug": "signal-fade",
+					"name": "Signal fade — accent to transparent",
+					"gradient": "linear-gradient(180deg, rgba(168,58,32,0.12) 0%, rgba(253,250,246,0) 100%)"
+				}
+			]
+		},
+		"shadow": {
+			"presets": [
+				{
+					"slug": "soft",
+					"name": "Soft",
+					"shadow": "0 1px 2px rgba(26, 20, 16, 0.08)"
+				},
+				{
+					"slug": "card",
+					"name": "Card",
+					"shadow": "0 12px 32px -14px rgba(26, 20, 16, 0.22)"
+				},
+				{
+					"slug": "glow",
+					"name": "Signal glow",
+					"shadow": "0 0 0 1px rgba(168, 58, 32, 0.28), 0 18px 48px -20px rgba(168, 58, 32, 0.35)"
+				}
+			]
+		}
+	},
+	"styles": {
+		"color": {
+			"background": "var(--wp--preset--color--base)",
+			"text": "var(--wp--preset--color--contrast)"
+		}
+	}
+}

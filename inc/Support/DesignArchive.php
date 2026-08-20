@@ -142,16 +142,23 @@ final class DesignArchive {
 	/**
 	 * Drop guards so nothing in the directory can be fetched over HTTP.
 	 *
-	 * Belt and braces: the .htaccess covers Apache, the index.php covers
-	 * servers that ignore it, and neither is relied on for correctness — the
-	 * extension allow-list already refuses anything executable.
+	 * Belt and braces: the .htaccess covers Apache, the web.config covers
+	 * IIS, the index.php covers servers that ignore both, and none is relied
+	 * on for correctness — the extension allow-list already refuses anything
+	 * executable.
+	 *
+	 * nginx reads neither guard file. A site on nginx needs a `location`
+	 * block in its server configuration that denies this directory, for
+	 * example `location ^~ /wp-content/uploads/wow-signal-designs/ { deny all; }`
+	 * (adjusted to the real uploads path). See the theme documentation.
 	 *
 	 * @param string $dir Absolute directory path.
 	 * @return void
 	 */
 	private static function protect( string $dir ): void {
-		$htaccess = trailingslashit( $dir ) . '.htaccess';
-		$index    = trailingslashit( $dir ) . 'index.php';
+		$htaccess  = trailingslashit( $dir ) . '.htaccess';
+		$webconfig = trailingslashit( $dir ) . 'web.config';
+		$index     = trailingslashit( $dir ) . 'index.php';
 
 		if ( ! file_exists( $htaccess ) ) {
 			file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Guard file must exist before WP_Filesystem is available during an upload request.
@@ -160,9 +167,139 @@ final class DesignArchive {
 			);
 		}
 
+		if ( ! file_exists( $webconfig ) ) {
+			file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- See above.
+				$webconfig,
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+				. "<!-- Design sources are read by PHP only, never served. -->\n"
+				. "<configuration>\n\t<system.webServer>\n\t\t<security>\n\t\t\t<authorization>\n"
+				. "\t\t\t\t<remove users=\"*\" roles=\"\" verbs=\"\" />\n"
+				. "\t\t\t\t<add accessType=\"Deny\" users=\"*\" />\n"
+				. "\t\t\t</authorization>\n\t\t</security>\n\t</system.webServer>\n</configuration>\n"
+			);
+		}
+
 		if ( ! file_exists( $index ) ) {
 			file_put_contents( $index, "<?php\n// Silence is golden.\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- See above.
 		}
+	}
+
+	/**
+	 * Remove a partially unpacked design.
+	 *
+	 * Used when an archive turns out to be larger than it declared: the
+	 * half-written tree must not linger in uploads, and its slug must not be
+	 * offered on the designs list.
+	 *
+	 * @param string $root Absolute design root.
+	 * @return void
+	 */
+	private static function discard( string $root ): void {
+		global $wp_filesystem;
+
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		if ( WP_Filesystem() && $wp_filesystem ) {
+			$wp_filesystem->delete( $root, true );
+		}
+	}
+
+	/**
+	 * Delete one unpacked design.
+	 *
+	 * The root must resolve to a directory strictly inside the designs
+	 * folder; anything else — the folder itself, a path that escapes it — is
+	 * refused rather than deleted.
+	 *
+	 * @param string $root Absolute design root.
+	 * @return bool Whether it is gone.
+	 */
+	public static function remove( string $root ): bool {
+		$base = self::base_dir();
+
+		if ( is_wp_error( $base ) ) {
+			return false;
+		}
+
+		$real_base = realpath( $base );
+		$real_root = realpath( $root );
+
+		if ( false === $real_base || false === $real_root || ! is_dir( $real_root ) ) {
+			return false;
+		}
+
+		$real_base = rtrim( str_replace( '\\', '/', $real_base ), '/' );
+		$real_root = rtrim( str_replace( '\\', '/', $real_root ), '/' );
+
+		if ( $real_root === $real_base || ! str_starts_with( $real_root . '/', $real_base . '/' ) ) {
+			return false;
+		}
+
+		self::discard( $real_root );
+
+		return ! is_dir( $real_root );
+	}
+
+	/**
+	 * Delete every unpacked design, keeping the folder and its guard files.
+	 *
+	 * @return int How many designs were removed.
+	 */
+	public static function purge(): int {
+		$base = self::base_dir();
+
+		if ( is_wp_error( $base ) ) {
+			return 0;
+		}
+
+		$removed = 0;
+		$entries = glob( trailingslashit( $base ) . '*', GLOB_ONLYDIR );
+
+		foreach ( $entries ? $entries : array() as $dir ) {
+			if ( self::remove( $dir ) ) {
+				++$removed;
+			}
+		}
+
+		return $removed;
+	}
+
+	/**
+	 * How much disk the unpacked designs take, and how many there are.
+	 *
+	 * @return array{count:int,bytes:int}
+	 */
+	public static function footprint(): array {
+		$base = self::base_dir();
+
+		if ( is_wp_error( $base ) ) {
+			return array(
+				'count' => 0,
+				'bytes' => 0,
+			);
+		}
+
+		$entries = glob( trailingslashit( $base ) . '*', GLOB_ONLYDIR );
+		$bytes   = 0;
+
+		foreach ( $entries ? $entries : array() as $dir ) {
+			$iterator = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS )
+			);
+
+			foreach ( $iterator as $file ) {
+				if ( $file->isFile() ) {
+					$bytes += (int) $file->getSize();
+				}
+			}
+		}
+
+		return array(
+			'count' => $entries ? count( $entries ) : 0,
+			'bytes' => $bytes,
+		);
 	}
 
 	/**
@@ -224,9 +361,10 @@ final class DesignArchive {
 			return new WP_Error( 'wow_signal_mkdir', __( 'Could not resolve the destination folder.', 'wow-signal' ) );
 		}
 
-		$written = 0;
-		$bytes   = 0;
-		$skipped = array();
+		$written  = 0;
+		$bytes    = 0;
+		$inflated = 0;
+		$skipped  = array();
 
 		for ( $i = 0; $i < $count; $i++ ) {
 			$stat = $zip->statIndex( $i );
@@ -258,6 +396,7 @@ final class DesignArchive {
 
 			if ( $bytes > self::MAX_TOTAL_BYTES ) {
 				$zip->close();
+				self::discard( $root );
 
 				return new WP_Error(
 					'wow_signal_too_big',
@@ -298,9 +437,27 @@ final class DesignArchive {
 				continue;
 			}
 
-			stream_copy_to_stream( $stream, $out, self::MAX_FILE_BYTES );
+			$copied = stream_copy_to_stream( $stream, $out, self::MAX_FILE_BYTES + 1 );
 			fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Pairs with fopen() above.
 			fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Pairs with getStream().
+
+			/*
+			 * The declared size is only a claim. Count what actually came out
+			 * of the entry, and treat a copy that hit the per-file ceiling as
+			 * truncated — a bomb declares small and inflates large.
+			 */
+			$copied    = false === $copied ? 0 : (int) $copied;
+			$inflated += $copied;
+
+			if ( $copied > self::MAX_FILE_BYTES || $inflated > self::MAX_TOTAL_BYTES ) {
+				$zip->close();
+				self::discard( $root );
+
+				return new WP_Error(
+					'wow_signal_too_big',
+					__( 'That archive unpacks to more than it declares, past the size limit. Remove videos, design binaries and node_modules before sending it.', 'wow-signal' )
+				);
+			}
 
 			++$written;
 		}

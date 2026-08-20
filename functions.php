@@ -26,7 +26,7 @@ if ( ! defined( 'WOW_SIGNAL_VERSION' ) ) {
 	$wow_signal_theme = wp_get_theme( get_template() );
 	$wow_signal_ver   = $wow_signal_theme->get( 'Version' );
 
-	define( 'WOW_SIGNAL_VERSION', is_string( $wow_signal_ver ) && '' !== $wow_signal_ver ? $wow_signal_ver : '1.0.0' );
+	define( 'WOW_SIGNAL_VERSION', is_string( $wow_signal_ver ) && '' !== $wow_signal_ver ? $wow_signal_ver : '0.0.0' );
 
 	unset( $wow_signal_theme, $wow_signal_ver );
 }

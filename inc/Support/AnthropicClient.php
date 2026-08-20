@@ -118,7 +118,7 @@ final class AnthropicClient {
 		if ( '' === $key ) {
 			return new WP_Error(
 				'wow_signal_no_key',
-				__( 'No Anthropic API key is configured yet. Add one under Appearance → AI section builder.', 'wow-signal' )
+				__( 'No Anthropic API key is configured yet. Add one under Appearance → Design import.', 'wow-signal' )
 			);
 		}
 
@@ -133,18 +133,16 @@ final class AnthropicClient {
 			$effort = 'high';
 		}
 
+		/*
+		 * Haiku 4.5 predates adaptive thinking, effort and server-side
+		 * fallbacks; it answers every one of them with a 400. It gets the
+		 * plain request and the structured-output constraint only.
+		 */
+		$legacy = self::is_legacy_model( $model );
+
 		$body = array(
 			'model'         => $model,
 			'max_tokens'    => isset( $options['max_tokens'] ) ? (int) $options['max_tokens'] : 16000,
-
-			/*
-			 * Adaptive thinking lets the model decide how much to reason. On
-			 * Claude Opus 5 it is already the default; sending it explicitly
-			 * documents the intent. The older budget_tokens form and the
-			 * temperature / top_p / top_k sampling parameters are rejected
-			 * with a 400 on this model — do not add them back.
-			 */
-			'thinking'      => array( 'type' => 'adaptive' ),
 			'system'        => array(
 				array(
 					'type'          => 'text',
@@ -171,12 +169,30 @@ final class AnthropicClient {
 			 * of prose.
 			 */
 			'output_config' => array(
-				'effort' => $effort,
 				'format' => array(
 					'type'   => 'json_schema',
 					'schema' => $schema,
 				),
 			),
+		);
+
+		$headers = array(
+			'x-api-key'         => $key,
+			'anthropic-version' => self::API_VERSION,
+			'content-type'      => 'application/json',
+		);
+
+		if ( ! $legacy ) {
+			/*
+			 * Adaptive thinking lets the model decide how much to reason. On
+			 * Claude Opus 5 it is already the default; sending it explicitly
+			 * documents the intent. The older budget_tokens form and the
+			 * temperature / top_p / top_k sampling parameters are rejected
+			 * with a 400 on this model — do not add them back.
+			 */
+			$body['thinking'] = array( 'type' => 'adaptive' );
+
+			$body['output_config']['effort'] = $effort;
 
 			/*
 			 * Claude Opus 5 runs safety classifiers that can decline a
@@ -184,8 +200,10 @@ final class AnthropicClient {
 			 * request on a suitable fallback model server-side instead of
 			 * handing us a dead end.
 			 */
-			'fallbacks'     => 'default',
-		);
+			$body['fallbacks'] = 'default';
+
+			$headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
+		}
 
 		/*
 		 * The timeout is generous because a high-effort request genuinely takes
@@ -199,12 +217,7 @@ final class AnthropicClient {
 			array(
 				'timeout'     => $timeout,
 				'redirection' => 0,
-				'headers'     => array(
-					'x-api-key'         => $key,
-					'anthropic-version' => self::API_VERSION,
-					'anthropic-beta'    => 'server-side-fallback-2026-07-01',
-					'content-type'      => 'application/json',
-				),
+				'headers'     => $headers,
 				'body'        => wp_json_encode( $body ),
 			)
 		);
@@ -269,6 +282,16 @@ final class AnthropicClient {
 		$payload['_model'] = isset( $parsed['model'] ) ? (string) $parsed['model'] : $model;
 
 		return $payload;
+	}
+
+	/**
+	 * Whether a model rejects the thinking, effort and fallback parameters.
+	 *
+	 * @param string $model Model ID.
+	 * @return bool
+	 */
+	public static function is_legacy_model( string $model ): bool {
+		return str_starts_with( $model, 'claude-haiku-4-5' );
 	}
 
 	/**

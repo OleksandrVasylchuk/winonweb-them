@@ -13,15 +13,16 @@
 	var TextControl = wp.components.TextControl;
 	var ToggleControl = wp.components.ToggleControl;
 
+	// Mirrors render.php and view.js: digits, optional thousands spaces, dot decimal.
+	var COUNTABLE = /^\d[\d\s]*(\.\d+)?$/;
+
 	wp.blocks.registerBlockType( 'wow/metric', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
 			var blockProps = useBlockProps( { className: 'wow-metric' } );
 
-			var isNumeric =
-				'' !== attributes.value &&
-				! isNaN( parseFloat( String( attributes.value ).replace( /[\s,]/g, '' ) ) );
+			var isNumeric = COUNTABLE.test( String( attributes.value || '' ).trim() );
 
 			return el(
 				wp.element.Fragment,
@@ -84,7 +85,7 @@
 							el(
 								'span',
 								{ className: 'wow-metric__number' },
-								attributes.value || __( '00', 'wow-signal' )
+								attributes.value || '00'
 							),
 							attributes.suffix
 								? el( 'span', { className: 'wow-metric__affix' }, attributes.suffix )

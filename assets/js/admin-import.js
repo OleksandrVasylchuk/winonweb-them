@@ -12,6 +12,7 @@
 
 	var cfg = window.wowSignalImport || {};
 	var __ = wp.i18n.__;
+	var _n = wp.i18n._n;
 	var sprintf = wp.i18n.sprintf;
 	var apiFetch = wp.apiFetch;
 
@@ -32,7 +33,99 @@
 		built: null,
 		savedPage: null,
 		busy: false,
+		spend: null,
+		limit: null,
+		summary: cfg.summary || null,
+		confirmingReset: false,
+		confirmingPurge: false,
+		// Build options live here so a re-render does not reset the form.
+		publish: false,
+		language: '',
+		keepArchive: false,
+		// Designs already unpacked on the server, and what they weigh.
+		designs: [],
+		archive: ( cfg.summary && cfg.summary.archive ) || null,
+		// Preview-before-build: which page is open, and which sections stay in.
+		preview: null,
+		includes: {},
+		// The stepwise build in progress, if any.
+		job: null,
 	};
+
+	/**
+	 * The file picker is created once and re-attached on every render, so
+	 * choosing an archive survives a re-render (a cancelled clean-up, a page
+	 * click) instead of quietly emptying the field.
+	 */
+	var archiveInput = null;
+
+	/**
+	 * Money, written the way a person reads it.
+	 *
+	 * Every figure on this screen is derived from published list prices, so it
+	 * is an estimate and is always labelled as one. Sub-cent amounts round to
+	 * "under $0.01" rather than to "$0.00", which would read as free.
+	 */
+	function money( dollars ) {
+		var amount = Number( dollars );
+
+		if ( ! isFinite( amount ) || amount <= 0 ) {
+			return '$0.00';
+		}
+
+		if ( amount < 0.01 ) {
+			return __( 'under $0.01', 'wow-signal' );
+		}
+
+		return '$' + amount.toFixed( 2 );
+	}
+
+	/** A token count, abbreviated once it stops being worth reading in full. */
+	function tokens( count ) {
+		var value = Number( count ) || 0;
+
+		return value >= 1000 ? Math.round( value / 1000 ) + 'k' : String( value );
+	}
+
+	/** Minutes until the hourly conversion allowance comes back. */
+	function minutes( seconds ) {
+		return Math.max( 1, Math.ceil( ( Number( seconds ) || 0 ) / 60 ) );
+	}
+
+	/** A size on disk, in the unit a person would pick. */
+	function bytesText( bytes ) {
+		var value = Number( bytes ) || 0;
+
+		if ( value >= 1048576 ) {
+			/* translators: %s: size in megabytes. */
+			return sprintf( __( '%s MB', 'wow-signal' ), ( value / 1048576 ).toFixed( 1 ) );
+		}
+
+		/* translators: %s: size in kilobytes. */
+		return sprintf( __( '%s KB', 'wow-signal' ), String( Math.max( 1, Math.round( value / 1024 ) ) ) );
+	}
+
+	/** What converting the not-yet-converted sections would cost, roughly. */
+	function outstandingEstimate() {
+		return state.sections.reduce( function ( total, section ) {
+			var done = state.results[ section.position ];
+
+			if ( done && ! done.error ) {
+				return total;
+			}
+
+			return total + ( Number( section.estimate ) || 0 );
+		}, 0 );
+	}
+
+	/** How many sections still need converting. */
+	function outstandingCount() {
+		return state.sections.filter( function ( section ) {
+			var done = state.results[ section.position ];
+
+			return ! done || done.error;
+		} ).length;
+	}
 
 	/** Make an element with attributes and children in one call. */
 	function el( tag, attrs, children ) {
@@ -80,12 +173,16 @@
 	// ---------------------------------------------------------------- upload
 
 	function renderUpload() {
-		var input = el( 'input', {
-			type: 'file',
-			id: 'wow-archive',
-			accept: '.zip,application/zip',
-			class: 'wow-import__file',
-		} );
+		if ( ! archiveInput ) {
+			archiveInput = el( 'input', {
+				type: 'file',
+				id: 'wow-archive',
+				accept: '.zip,application/zip',
+				class: 'wow-import__file',
+			} );
+		}
+
+		var input = archiveInput;
 
 		var button = el( 'button', {
 			type: 'submit',
@@ -120,8 +217,8 @@
 								result.pages.length
 							)
 						);
-						state.design = result;
-						render();
+						chooseDesign( result );
+						loadDesigns();
 					} )
 					.catch( function ( error ) {
 						button.disabled = false;
@@ -137,7 +234,79 @@
 		return el( 'section', { class: 'wow-import__step' }, [
 			el( 'h2', { text: __( '1. Upload the design', 'wow-signal' ) } ),
 			form,
+			renderDesigns(),
 		] );
+	}
+
+	/*
+	 * Designs unpacked on an earlier visit. Without this list a reload meant
+	 * uploading the same archive again — or leaving the old copy in uploads
+	 * with no way to see it was there.
+	 */
+	function renderDesigns() {
+		if ( ! state.designs.length ) {
+			return null;
+		}
+
+		var list = el( 'ul', { class: 'wow-import__designs' } );
+
+		state.designs.forEach( function ( design ) {
+			var active = state.design && state.design.slug === design.slug;
+
+			list.appendChild(
+				el( 'li', {}, [
+					el( 'button', {
+						type: 'button',
+						class: 'wow-import__page' + ( active ? ' is-active' : '' ),
+						'aria-pressed': active ? 'true' : 'false',
+						onClick: function () {
+							chooseDesign( design );
+							render();
+						},
+					}, [
+						el( 'span', { class: 'wow-import__page-title', text: design.slug } ),
+						el( 'span', {
+							class: 'wow-import__page-meta',
+							text: sprintf(
+								/* translators: 1: number of pages, 2: number of images. */
+								__( '%1$d pages · %2$d images', 'wow-signal' ),
+								design.pages.length,
+								design.images
+							),
+						} ),
+					] ),
+				] )
+			);
+		} );
+
+		return el( 'div', { class: 'wow-import__designs-wrap' }, [
+			el( 'h3', { text: __( 'Already uploaded', 'wow-signal' ) } ),
+			list,
+		] );
+	}
+
+	function chooseDesign( design ) {
+		state.design = design;
+		state.page = null;
+		state.sections = [];
+		state.results = {};
+		state.preview = null;
+		state.includes = {};
+		state.savedPage = null;
+	}
+
+	function loadDesigns() {
+		return apiFetch( { path: '/wow-signal/v1/designs' } )
+			.then( function ( result ) {
+				state.designs = result.designs || [];
+				state.archive = result.archive || null;
+			} )
+			.catch( function () {
+				// The list is a convenience; the upload form still works without it.
+			} )
+			.then( function () {
+				render();
+			} );
 	}
 
 	// ----------------------------------------------------------------- pages
@@ -152,9 +321,11 @@
 
 		design.pages.forEach( function ( page ) {
 			var active = state.page && state.page.file === page.file;
+			var previewing = state.preview && state.preview.file === page.file;
+			var chosen = state.includes[ page.file ];
 
 			list.appendChild(
-				el( 'li', {}, [
+				el( 'li', { class: 'wow-import__page-item' }, [
 					el( 'button', {
 						type: 'button',
 						class: 'wow-import__page' + ( active ? ' is-active' : '' ),
@@ -173,7 +344,26 @@
 								page.sections
 							),
 						} ),
+						chosen
+							? el( 'span', {
+								class: 'wow-import__page-meta',
+								text: sprintf(
+									/* translators: %d: number of sections chosen for the build. */
+									_n( '%d section chosen for the build', '%d sections chosen for the build', chosen.length, 'wow-signal' ),
+									chosen.length
+								),
+							} )
+							: null,
 					] ),
+					el( 'button', {
+						type: 'button',
+						class: 'button wow-import__page-preview',
+						'aria-pressed': previewing ? 'true' : 'false',
+						text: previewing ? __( 'Previewing', 'wow-signal' ) : __( 'Preview', 'wow-signal' ),
+						onClick: function () {
+							openPreview( page );
+						},
+					} ),
 				] )
 			);
 		} );
@@ -214,8 +404,249 @@
 
 		children.push( renderAuto( design ) );
 		children.push( list );
+		children.push( renderPreview() );
 
 		return el( 'section', { class: 'wow-import__step' }, children );
+	}
+
+	// --------------------------------------------------------------- preview
+
+	/*
+	 * What the build would make of one page, before it makes it. The server
+	 * runs the very same conversion the build does and sends both halves
+	 * back; the only decision left here is which sections to keep.
+	 */
+	function openPreview( page ) {
+		if ( state.preview && state.preview.file === page.file && state.preview.data ) {
+			state.preview = null;
+			render();
+			return;
+		}
+
+		state.preview = { file: page.file, loading: true };
+		render();
+		say( sprintf( /* translators: %s: page title. */ __( 'Converting “%s” for the preview…', 'wow-signal' ), page.title ) );
+
+		apiFetch( {
+			path:
+				'/wow-signal/v1/designs/' +
+				encodeURIComponent( state.design.slug ) +
+				'/preview?file=' +
+				encodeURIComponent( page.file ),
+		} )
+			.then( function ( data ) {
+				if ( ! state.preview || state.preview.file !== page.file ) {
+					return;
+				}
+
+				state.preview = { file: page.file, data: data };
+
+				// Everything in by default; a section is left out on purpose, never by omission.
+				if ( ! state.includes[ page.file ] ) {
+					state.includes[ page.file ] = data.sections.map( function ( section ) {
+						return section.position;
+					} );
+				}
+
+				say(
+					sprintf(
+						/* translators: 1: page title, 2: number of sections. */
+						__( '“%1$s” previewed: %2$d sections. Untick any you do not want built.', 'wow-signal' ),
+						data.title,
+						data.sections.length
+					)
+				);
+				render();
+				scrollToPreview();
+			} )
+			.catch( function ( error ) {
+				if ( state.preview && state.preview.file === page.file ) {
+					state.preview = { file: page.file, error: errorText( error ) };
+				}
+
+				say( errorText( error ), true );
+				render();
+			} );
+	}
+
+	function scrollToPreview() {
+		var pane = document.getElementById( 'wow-import-preview' );
+
+		if ( pane && pane.scrollIntoView ) {
+			pane.scrollIntoView( { block: 'start' } );
+		}
+	}
+
+	function isIncluded( file, position ) {
+		var chosen = state.includes[ file ];
+
+		return ! chosen || chosen.indexOf( position ) !== -1;
+	}
+
+	function setIncluded( file, position, on ) {
+		var chosen = ( state.includes[ file ] || [] ).filter( function ( item ) {
+			return item !== position;
+		} );
+
+		if ( on ) {
+			chosen.push( position );
+			chosen.sort( function ( a, b ) {
+				return a - b;
+			} );
+		}
+
+		state.includes[ file ] = chosen;
+	}
+
+	function renderPreview() {
+		var preview = state.preview;
+
+		if ( ! preview ) {
+			return null;
+		}
+
+		var wrap = el( 'div', { id: 'wow-import-preview', class: 'wow-import__compare-wrap', tabindex: '-1' } );
+
+		if ( preview.loading ) {
+			wrap.appendChild( el( 'p', { class: 'wow-import__pending', text: __( 'Converting the page…', 'wow-signal' ) } ) );
+			return wrap;
+		}
+
+		if ( preview.error ) {
+			wrap.appendChild( el( 'p', { class: 'wow-import__error', text: preview.error } ) );
+			return wrap;
+		}
+
+		var data = preview.data;
+		var file = preview.file;
+		var total = data.sections.length;
+		var included = data.sections.filter( function ( section ) {
+			return isIncluded( file, section.position );
+		} ).length;
+
+		var head = el( 'div', { class: 'wow-import__compare-head' }, [
+			el( 'h3', {
+				text: sprintf(
+					/* translators: %s: page title. */
+					__( 'Preview: %s', 'wow-signal' ),
+					data.title
+				),
+			} ),
+			el( 'p', {
+				class: 'wow-import__compare-count',
+				role: 'status',
+				text: sprintf(
+					/* translators: 1: sections included, 2: sections on the page. */
+					__( '%1$d of %2$d sections included', 'wow-signal' ),
+					included,
+					total
+				),
+			} ),
+			el( 'p', { class: 'wow-import__actions' }, [
+				el( 'button', {
+					type: 'button',
+					class: 'button',
+					disabled: included === total ? 'disabled' : null,
+					text: __( 'Include all', 'wow-signal' ),
+					onClick: function () {
+						state.includes[ file ] = data.sections.map( function ( section ) {
+							return section.position;
+						} );
+						render();
+					},
+				} ),
+				el( 'button', {
+					type: 'button',
+					class: 'button',
+					text: __( 'Close preview', 'wow-signal' ),
+					onClick: function () {
+						state.preview = null;
+						render();
+					},
+				} ),
+			] ),
+		] );
+
+		wrap.appendChild( head );
+
+		wrap.appendChild(
+			el( 'p', {
+				class: 'wow-import__hint',
+				text: __( 'Left: the design as uploaded. Right: the blocks the build will make of it. Untick a section to leave it out of this page.', 'wow-signal' ),
+			} )
+		);
+
+		if ( data.notes && data.notes.length ) {
+			wrap.appendChild( bullets( data.notes, 'wow-import__notes' ) );
+		}
+
+		var rows = el( 'ol', { class: 'wow-import__compare' } );
+
+		data.sections.forEach( function ( section ) {
+			rows.appendChild( renderCompareRow( file, section ) );
+		} );
+
+		wrap.appendChild( rows );
+
+		return wrap;
+	}
+
+	function renderCompareRow( file, section ) {
+		var id = 'wow-include-' + section.position;
+		var on = isIncluded( file, section.position );
+
+		var box = el( 'input', {
+			type: 'checkbox',
+			id: id,
+			onChange: function ( event ) {
+				setIncluded( file, section.position, !! event.target.checked );
+				render();
+			},
+		} );
+
+		box.checked = on;
+
+		var design = el( 'div', { class: 'wow-import__preview wow-import__preview--design' } );
+		// Server-side kses-filtered; see Importer::original_html().
+		design.innerHTML = section.original_html;
+
+		var blocks = el( 'div', { class: 'wow-import__preview' } );
+
+		if ( section.preview_html ) {
+			// Server-validated and kses-filtered; see Importer::preview().
+			blocks.innerHTML = section.preview_html;
+		} else {
+			blocks.appendChild( el( 'p', { class: 'wow-import__pending', text: __( 'Nothing here could become blocks.', 'wow-signal' ) } ) );
+		}
+
+		var body = [
+			el( 'div', { class: 'wow-import__compare-row-head' }, [
+				el( 'span', { class: 'wow-import__choice' }, [
+					box,
+					el( 'label', { for: id, text: ' ' + __( 'Include', 'wow-signal' ) } ),
+				] ),
+				el( 'strong', { text: section.label } ),
+			] ),
+		];
+
+		if ( section.concerns && section.concerns.length ) {
+			body.push( bullets( section.concerns, 'wow-import__concerns' ) );
+		}
+
+		body.push(
+			el( 'div', { class: 'wow-import__compare-panes' }, [
+				el( 'div', { class: 'wow-import__compare-pane' }, [
+					el( 'h4', { text: __( 'Design', 'wow-signal' ) } ),
+					design,
+				] ),
+				el( 'div', { class: 'wow-import__compare-pane' }, [
+					el( 'h4', { text: __( 'Blocks', 'wow-signal' ) } ),
+					blocks,
+				] ),
+			] )
+		);
+
+		return el( 'li', { class: 'wow-import__compare-row' + ( on ? '' : ' is-excluded' ) }, body );
 	}
 
 	function choosePage( page ) {
@@ -231,14 +662,33 @@
 			.then( function ( result ) {
 				state.page = { file: page.file, title: result.title, lang: result.lang };
 				state.sections = result.sections;
-				state.results = {};
 				state.savedPage = null;
+				state.spend = result.spend || null;
+				state.limit = result.limit || null;
+
+				// Anything converted earlier for this page comes back with it,
+				// so closing the tab mid-run costs the time it took to reopen
+				// and nothing else.
+				state.results = {};
+				Object.keys( result.resume || {} ).forEach( function ( position ) {
+					state.results[ position ] = result.resume[ position ];
+				} );
+
+				var resumed = Object.keys( state.results ).length;
+
 				say(
-					sprintf(
-						/* translators: %d: number of sections. */
-						__( 'Found %d sections on this page.', 'wow-signal' ),
-						result.sections.length
-					)
+					resumed
+						? sprintf(
+								/* translators: 1: number of sections on the page, 2: number already converted. */
+								__( 'Found %1$d sections. %2$d were already converted earlier and have been brought back.', 'wow-signal' ),
+								result.sections.length,
+								resumed
+						  )
+						: sprintf(
+								/* translators: %d: number of sections. */
+								__( 'Found %d sections on this page.', 'wow-signal' ),
+								result.sections.length
+						  )
 				);
 				render();
 			} )
@@ -264,16 +714,49 @@
 
 		var language = el(
 			'select',
-			{ id: 'wow-import-language', class: 'wow-import__language' },
+			{
+				id: 'wow-import-language',
+				class: 'wow-import__language',
+				onChange: function ( event ) {
+					state.language = event.target.value;
+				},
+			},
 			choices
 		);
+
+		if ( state.language ) {
+			language.value = state.language;
+		}
+
+		var publish = el( 'input', {
+			type: 'checkbox',
+			id: 'wow-import-publish',
+			onChange: function ( event ) {
+				state.publish = !! event.target.checked;
+			},
+		} );
+
+		publish.checked = state.publish;
+
+		var keep = el( 'input', {
+			type: 'checkbox',
+			id: 'wow-import-keep',
+			onChange: function ( event ) {
+				state.keepArchive = !! event.target.checked;
+			},
+		} );
+
+		keep.checked = state.keepArchive;
+
+		var running = state.job && state.job.running;
 
 		var build = el( 'button', {
 			type: 'button',
 			class: 'button button-primary button-hero',
 			text: __( 'Build the whole site', 'wow-signal' ),
-			onClick: function ( event ) {
-				buildSite( event.target, choices.length ? language.value : '' );
+			disabled: running ? 'disabled' : null,
+			onClick: function () {
+				startBuild( choices.length ? language.value : '', publish.checked );
 			},
 		} );
 
@@ -281,8 +764,30 @@
 			el( 'h3', { text: __( 'Build everything at once', 'wow-signal' ) } ),
 			el( 'p', {
 				class: 'wow-import__hint',
-				text: __( 'Creates every page, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again.', 'wow-signal' ),
+				text: __( 'Creates every page as a draft, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again. Press Preview on any page below to see what it will become and leave sections out.', 'wow-signal' ),
 			} ),
+			el( 'p', { class: 'wow-import__choice' }, [
+				publish,
+				el( 'label', {
+					for: 'wow-import-publish',
+					text: ' ' + __( 'Publish pages immediately', 'wow-signal' ),
+				} ),
+				el( 'span', {
+					class: 'wow-import__hint',
+					text: ' ' + __( 'Leave this off to review each page as a draft first.', 'wow-signal' ),
+				} ),
+			] ),
+			el( 'p', { class: 'wow-import__choice' }, [
+				keep,
+				el( 'label', {
+					for: 'wow-import-keep',
+					text: ' ' + __( 'Keep the uploaded design for another run', 'wow-signal' ),
+				} ),
+				el( 'span', {
+					class: 'wow-import__hint',
+					text: ' ' + __( 'Otherwise the unpacked files are removed from uploads once the build is done.', 'wow-signal' ),
+				} ),
+			] ),
 		];
 
 		if ( choices.length ) {
@@ -309,20 +814,150 @@
 					class: 'button wow-import__danger',
 					text: __( 'Delete everything and start over', 'wow-signal' ),
 					title: __( 'Removes only what an import created. Your own pages are left alone.', 'wow-signal' ),
-					onClick: function ( event ) {
-						undoBuild( event.target );
+					onClick: function () {
+						state.confirmingReset = true;
+						render();
+						focusConfirm();
 					},
 				} ),
 			] )
 		);
 
-		if ( state.built ) {
-			body.push( renderBuilt( state.built ) );
+		// With nothing counted yet the clean-up panel is hidden, so confirm here.
+		if ( state.confirmingReset && ! summaryTotal( state.summary ) ) {
+			body.push( renderResetConfirm() );
+		}
+
+		if ( state.job ) {
+			body.push( renderProgress( state.job ) );
 		}
 
 		body.push( renderRoutes() );
 
 		return el( 'div', { class: 'wow-import__auto' }, body );
+	}
+
+	/*
+	 * How far the build has got, said in pages rather than percent. The bar
+	 * is a real <progress> so assistive tech reads it as one; the sentence
+	 * beside it is what the live region announces on every step.
+	 */
+	function renderProgress( job ) {
+		var body = [];
+
+		if ( job.starting ) {
+			body.push( el( 'p', { class: 'wow-import__pending', text: __( 'Reading the design, importing fonts and images…', 'wow-signal' ) } ) );
+		}
+
+		if ( job.total ) {
+			var bar = el( 'progress', {
+				class: 'wow-import__bar',
+				max: String( job.total ),
+				value: String( job.done ),
+				'aria-describedby': 'wow-import-progress-text',
+			} );
+
+			body.push( bar );
+			body.push( el( 'p', { id: 'wow-import-progress-text', class: 'wow-import__progress-text', text: progressText( job ) } ) );
+		}
+
+		if ( job.errors && job.errors.length ) {
+			body.push( el( 'p', { class: 'wow-import__label-inline', text: __( 'Steps that did not complete:', 'wow-signal' ) } ) );
+			body.push(
+				bullets(
+					job.errors.map( function ( entry ) {
+						return entry.label + ' — ' + entry.message;
+					} ),
+					'wow-import__error-list'
+				)
+			);
+		}
+
+		var actions = [];
+
+		if ( job.running ) {
+			actions.push(
+				el( 'button', {
+					type: 'button',
+					class: 'button',
+					text: __( 'Cancel', 'wow-signal' ),
+					onClick: function () {
+						job.cancelled = true;
+						job.running = false;
+						say( __( 'Build cancelled. The pages made so far are still on the site as drafts.', 'wow-signal' ) );
+						render();
+					},
+				} )
+			);
+		} else if ( job.cancelled || ( job.errors && job.errors.length && ! job.finished ) ) {
+			actions.push(
+				el( 'button', {
+					type: 'button',
+					class: 'button wow-import__danger',
+					text: __( 'Delete what was built so far', 'wow-signal' ),
+					onClick: function () {
+						state.confirmingReset = true;
+						render();
+						focusConfirm();
+					},
+				} )
+			);
+			actions.push(
+				el( 'button', {
+					type: 'button',
+					class: 'button',
+					text: __( 'Dismiss', 'wow-signal' ),
+					onClick: function () {
+						state.job = null;
+						render();
+					},
+				} )
+			);
+		}
+
+		if ( actions.length ) {
+			body.push( el( 'p', { class: 'wow-import__actions' }, actions ) );
+		}
+
+		return el( 'div', { class: 'wow-import__progress', role: 'group', 'aria-label': __( 'Build progress', 'wow-signal' ) }, body );
+	}
+
+	function progressText( job ) {
+		if ( job.finished ) {
+			return __( 'The build is complete.', 'wow-signal' );
+		}
+
+		if ( job.cancelled ) {
+			/* translators: 1: steps done, 2: steps in total. */
+			return sprintf( __( 'Cancelled after %1$d of %2$d steps.', 'wow-signal' ), job.done, job.total );
+		}
+
+		var step = job.current;
+
+		if ( ! step ) {
+			/* translators: 1: steps done, 2: steps in total. */
+			return sprintf( __( '%1$d of %2$d steps done.', 'wow-signal' ), job.done, job.total );
+		}
+
+		return sprintf(
+			/* translators: 1: what is being built, 2: steps done, 3: steps in total. */
+			__( 'Building %1$s (%2$d of %3$d)', 'wow-signal' ),
+			stepLabel( step ),
+			job.done + 1,
+			job.total
+		);
+	}
+
+	function stepLabel( step ) {
+		if ( 'page' === step.key ) {
+			return step.title || step.file;
+		}
+
+		if ( 'chrome' === step.key ) {
+			return __( 'the menu, header and footer', 'wow-signal' );
+		}
+
+		return __( 'the front page and links', 'wow-signal' );
 	}
 
 	/*
@@ -359,62 +994,330 @@
 		] );
 	}
 
+	/*
+	 * What the build made, with somewhere to go from each row. A list of links
+	 * left the editor to find the pages again under Pages; this puts view,
+	 * edit and publish on the row, and the template parts beside them.
+	 */
 	function renderBuilt( report ) {
-		var list = el( 'ul', { class: 'wow-import__built' } );
+		var drafts = report.pages.filter( function ( page ) {
+			return 'publish' !== page.status;
+		} );
+
+		var table = el( 'table', { class: 'widefat striped wow-import__table' }, [
+			el( 'thead', {}, [
+				el( 'tr', {}, [
+					el( 'th', { scope: 'col', text: __( 'Page', 'wow-signal' ) } ),
+					el( 'th', { scope: 'col', text: __( 'Status', 'wow-signal' ) } ),
+					el( 'th', { scope: 'col', text: __( 'Actions', 'wow-signal' ) } ),
+				] ),
+			] ),
+		] );
+
+		var tbody = el( 'tbody', {} );
 
 		report.pages.forEach( function ( page ) {
-			list.appendChild(
-				el( 'li', {}, [
-					el( 'a', { href: page.url, text: page.title } ),
-					el( 'span', {
-						class: 'wow-import__section-meta',
-						text: sprintf(
-							/* translators: %d: number of sections. */
-							' ' + __( '(%d sections)', 'wow-signal' ),
-							page.sections
-						),
-					} ),
+			var published = 'publish' === page.status;
+			var actions = [
+				el( 'a', { class: 'button button-small', href: page.link || page.url, target: '_blank', rel: 'noopener', text: __( 'View', 'wow-signal' ) } ),
+				el( 'a', { class: 'button button-small', href: page.edit_link, text: __( 'Edit', 'wow-signal' ) } ),
+			];
+
+			if ( ! published ) {
+				actions.push(
+					el( 'button', {
+						type: 'button',
+						class: 'button button-small button-primary',
+						text: __( 'Publish', 'wow-signal' ),
+						onClick: function ( event ) {
+							publishPages( [ page.id ], event.target );
+						},
+					} )
+				);
+			}
+
+			tbody.appendChild(
+				el( 'tr', {}, [
+					el( 'td', {}, [
+						el( 'strong', { text: page.title } ),
+						el( 'span', {
+							class: 'wow-import__section-meta',
+							text: ' ' + sprintf(
+								/* translators: %d: number of sections. */
+								__( '(%d sections)', 'wow-signal' ),
+								page.sections
+							),
+						} ),
+						page.concerns && page.concerns.length ? bullets( page.concerns, 'wow-import__concerns' ) : null,
+					] ),
+					el( 'td', {}, [
+						el( 'span', {
+							class: 'wow-import__badge ' + ( published ? 'is-on' : 'is-off' ),
+							text: published ? __( 'Published', 'wow-signal' ) : __( 'Draft', 'wow-signal' ),
+						} ),
+					] ),
+					el( 'td', {}, [ el( 'span', { class: 'wow-import__row-actions' }, actions ) ] ),
 				] )
 			);
 		} );
 
-		var out = [ el( 'p', { class: 'wow-import__saved' }, [ el( 'strong', { text: __( 'The site is built.', 'wow-signal' ) } ) ] ), list ];
+		table.appendChild( tbody );
+
+		var out = [
+			el( 'p', { class: 'wow-import__saved' }, [ el( 'strong', { text: __( 'The site is built.', 'wow-signal' ) } ) ] ),
+			el( 'div', { class: 'wow-import__table-wrap' }, [ table ] ),
+		];
+
+		if ( drafts.length ) {
+			out.push(
+				el( 'p', { class: 'wow-import__actions' }, [
+					el( 'button', {
+						type: 'button',
+						class: 'button button-primary',
+						text: sprintf(
+							/* translators: %d: number of draft pages. */
+							_n( 'Publish %d draft page', 'Publish all %d draft pages', drafts.length, 'wow-signal' ),
+							drafts.length
+						),
+						onClick: function ( event ) {
+							publishPages(
+								drafts.map( function ( page ) {
+									return page.id;
+								} ),
+								event.target
+							);
+						},
+					} ),
+				] )
+			);
+		}
+
+		var chrome = [];
+
+		( report.parts_detail || [] ).forEach( function ( part ) {
+			chrome.push(
+				el( 'li', {}, [
+					el( 'span', { text: part.title + ' — ' } ),
+					el( 'a', { href: part.edit_link, text: __( 'Edit in the Site Editor', 'wow-signal' ) } ),
+				] )
+			);
+		} );
+
+		if ( report.menu_link ) {
+			chrome.push(
+				el( 'li', {}, [
+					el( 'span', { text: __( 'Main navigation', 'wow-signal' ) + ' — ' } ),
+					el( 'a', { href: report.menu_link, text: __( 'Edit in the Site Editor', 'wow-signal' ) } ),
+				] )
+			);
+		}
+
+		if ( chrome.length ) {
+			out.push( el( 'p', { class: 'wow-import__label-inline', text: __( 'Header, footer and menu:', 'wow-signal' ) } ) );
+			out.push( el( 'ul', { class: 'wow-import__built' }, chrome ) );
+		}
 
 		if ( report.concerns && report.concerns.length ) {
 			out.push( el( 'p', { class: 'wow-import__label-inline', text: __( 'Worth checking:', 'wow-signal' ) } ) );
 			out.push( bullets( report.concerns, 'wow-import__concerns' ) );
 		}
 
-		return el( 'div', {}, out );
+		return el( 'section', { class: 'wow-import__step wow-import__result', 'aria-label': __( 'What the build made', 'wow-signal' ) }, [
+			el( 'h2', { text: __( 'Pages built', 'wow-signal' ) } ),
+		].concat( out ) );
 	}
 
-	function buildSite( button, language ) {
+	function publishPages( ids, button ) {
 		button.disabled = true;
-		say( __( 'Building the site — this takes a moment…', 'wow-signal' ) );
+		say( __( 'Publishing…', 'wow-signal' ) );
 
 		apiFetch( {
-			path: '/wow-signal/v1/build',
+			path: '/wow-signal/v1/build/publish',
 			method: 'POST',
-			data: { slug: state.design.slug, language: language, publish: true },
+			data: { ids: ids },
 		} )
-			.then( function ( report ) {
-				state.built = report;
-				render();
+			.then( function ( result ) {
+				var rows = result.pages || [];
+
+				if ( state.built ) {
+					state.built.pages = state.built.pages.map( function ( page ) {
+						var fresh = rows.filter( function ( row ) {
+							return row.id === page.id;
+						} )[ 0 ];
+
+						// The row from the server knows its new status; the rest is ours.
+						return fresh ? Object.assign( {}, page, { status: fresh.status, link: fresh.link, url: fresh.url } ) : page;
+					} );
+				}
+
 				say(
 					sprintf(
-						/* translators: 1: pages built, 2: images imported. */
-						__( 'Built %1$d pages and imported %2$d images. Look through them, then edit anything you like.', 'wow-signal' ),
-						report.pages.length,
-						report.media
+						/* translators: %d: number of pages published. */
+						_n( 'Published %d page.', 'Published %d pages.', rows.length, 'wow-signal' ),
+						rows.length
 					)
 				);
+				render();
 			} )
 			.catch( function ( error ) {
+				button.disabled = false;
 				say( errorText( error ), true );
+			} );
+	}
+
+	/*
+	 * The build, one request per step. The server does the same work the
+	 * single request used to; the difference is that a twelve-page design no
+	 * longer has to fit inside one PHP timeout, and the screen can say which
+	 * page it is on.
+	 */
+	function startBuild( language, publish ) {
+		if ( state.job && state.job.running ) {
+			return;
+		}
+
+		var includes = {};
+
+		Object.keys( state.includes ).forEach( function ( file ) {
+			includes[ file ] = state.includes[ file ];
+		} );
+
+		state.job = { starting: true, running: true, done: 0, total: 0, errors: [] };
+		state.built = null;
+		render();
+		say( __( 'Starting the build — reading the design, importing fonts and images…', 'wow-signal' ) );
+
+		apiFetch( {
+			path: '/wow-signal/v1/build/start',
+			method: 'POST',
+			data: {
+				slug: state.design.slug,
+				language: language,
+				publish: !! publish,
+				keep_archive: !! state.keepArchive,
+				includes: includes,
+			},
+		} )
+			.then( function ( start ) {
+				state.job = {
+					id: start.job,
+					steps: start.steps,
+					index: 0,
+					done: start.done,
+					total: start.total,
+					running: true,
+					errors: [],
+					publish: !! publish,
+				};
+				render();
+				nextStep();
+			} )
+			.catch( function ( error ) {
+				state.job = null;
+				say( errorText( error ), true );
+				render();
+			} );
+	}
+
+	function nextStep() {
+		var job = state.job;
+
+		if ( ! job || ! job.running || job.cancelled ) {
+			return;
+		}
+
+		var step = job.steps[ job.index ];
+
+		if ( ! step ) {
+			job.running = false;
+			render();
+			return;
+		}
+
+		job.current = step;
+		render();
+		say( progressText( job ) );
+
+		apiFetch( {
+			path: '/wow-signal/v1/build/step',
+			method: 'POST',
+			data: { job: job.id, key: step.key, file: step.file || '' },
+		} )
+			.then( function ( result ) {
+				job.done = result.done;
+
+				if ( 'finish' === step.key ) {
+					finishBuild( job, result );
+				}
+			} )
+			.catch( function ( error ) {
+				if ( error && error.data && error.data.done ) {
+					job.done = error.data.done;
+				}
+
+				job.errors.push( { label: stepLabel( step ), message: errorText( error ) } );
+
+				// A job the server no longer has cannot be continued; say so once.
+				if ( error && 'wow_signal_no_job' === error.code ) {
+					job.cancelled = true;
+				}
+
+				say( stepLabel( step ) + ' — ' + errorText( error ), true );
 			} )
 			.then( function () {
-				button.disabled = false;
+				job.index += 1;
+				job.current = null;
+
+				if ( 'finish' === step.key || job.cancelled ) {
+					job.running = false;
+					render();
+					return;
+				}
+
+				nextStep();
 			} );
+	}
+
+	function finishBuild( job, result ) {
+		var report = result.result;
+
+		job.finished = true;
+		state.built = report;
+
+		if ( result.summary ) {
+			state.summary = result.summary;
+			state.archive = result.summary.archive || state.archive;
+		}
+
+		var message = job.publish
+			? sprintf(
+				/* translators: 1: pages built, 2: images imported. */
+				__( 'Built and published %1$d pages and imported %2$d images. Look through them, then edit anything you like.', 'wow-signal' ),
+				report.pages.length,
+				report.media
+			)
+			: sprintf(
+				/* translators: 1: pages built, 2: images imported. */
+				__( 'Built %1$d draft pages and imported %2$d images. Nothing is public yet — review each page and publish it when it is ready.', 'wow-signal' ),
+				report.pages.length,
+				report.media
+			);
+
+		if ( result.archive_removed ) {
+			message += ' ' + __( 'The uploaded design has been removed from uploads.', 'wow-signal' );
+
+			var gone = state.design ? state.design.slug : '';
+
+			state.designs = state.designs.filter( function ( design ) {
+				return design.slug !== gone;
+			} );
+			state.design = null;
+			state.page = null;
+			state.preview = null;
+			state.includes = {};
+		}
+
+		say( message );
 	}
 
 	function undoBuild( button ) {
@@ -424,7 +1327,8 @@
 		apiFetch( { path: '/wow-signal/v1/reset', method: 'POST' } )
 			.then( function ( counts ) {
 				state.built = null;
-				render();
+				state.job = null;
+				state.confirmingReset = false;
 				say(
 					sprintf(
 						/* translators: 1: pages removed, 2: images removed. */
@@ -433,16 +1337,337 @@
 						counts.media
 					)
 				);
+
+				return refreshSummary();
 			} )
 			.catch( function ( error ) {
 				say( errorText( error ), true );
-			} )
-			.then( function () {
 				button.disabled = false;
 			} );
 	}
 
+	// --------------------------------------------------------------- clean up
+
+	/*
+	 * What a previous import left on the site, whether or not a design is
+	 * loaded right now. The undo button used to live only inside the build
+	 * panel, which meant a reload — or deleting the archive — left the pages,
+	 * parts and menus with no way back.
+	 */
+	function summaryTotal( summary ) {
+		if ( ! summary ) {
+			return 0;
+		}
+
+		return [ 'pages', 'parts', 'menus', 'media', 'fonts' ].reduce( function ( total, key ) {
+			return total + ( parseInt( summary[ key ], 10 ) || 0 );
+		}, 0 );
+	}
+
+	function refreshSummary() {
+		return apiFetch( { path: '/wow-signal/v1/summary' } )
+			.then( function ( summary ) {
+				state.summary = summary;
+			} )
+			.catch( function () {
+				// A failed count only means the panel may be stale; not worth an error.
+			} )
+			.then( function () {
+				render();
+			} );
+	}
+
+	function focusConfirm() {
+		var field = document.getElementById( 'wow-import-confirm' );
+
+		if ( field ) {
+			field.focus();
+		}
+	}
+
+	function renderResetConfirm() {
+		return renderConfirm( {
+			run: undoBuild,
+			hint: __( 'This cannot be undone. Only content this import created is removed; pages, menus and images you made yourself stay exactly as they are.', 'wow-signal' ),
+			cancel: function () {
+				state.confirmingReset = false;
+				render();
+			},
+		} );
+	}
+
+	function renderPurgeConfirm() {
+		return renderConfirm( {
+			run: purgeDesigns,
+			hint: __( 'This removes the unpacked design files from uploads. Pages, images and fonts already imported are not affected — only the source archive goes, and it can be uploaded again.', 'wow-signal' ),
+			cancel: function () {
+				state.confirmingPurge = false;
+				render();
+			},
+		} );
+	}
+
+	/*
+	 * A typed confirmation for anything that deletes. `run` is handed the
+	 * button so it can disable it while the request is out.
+	 */
+	function renderConfirm( options ) {
+		var word = 'DELETE';
+
+		var field = el( 'input', {
+			type: 'text',
+			id: 'wow-import-confirm',
+			class: 'wow-import__field wow-import__confirm-field',
+			autocomplete: 'off',
+			spellcheck: 'false',
+			'aria-describedby': 'wow-import-confirm-hint',
+			onInput: function ( event ) {
+				go.disabled = event.target.value.trim() !== word;
+			},
+			onKeydown: function ( event ) {
+				if ( 'Enter' === event.key && ! go.disabled ) {
+					event.preventDefault();
+					options.run( go );
+				}
+			},
+		} );
+
+		var go = el( 'button', {
+			type: 'button',
+			class: 'button wow-import__danger',
+			disabled: 'disabled',
+			text: __( 'Delete now', 'wow-signal' ),
+			onClick: function ( event ) {
+				options.run( event.target );
+			},
+		} );
+
+		var cancel = el( 'button', {
+			type: 'button',
+			class: 'button',
+			text: __( 'Cancel', 'wow-signal' ),
+			onClick: options.cancel,
+		} );
+
+		return el( 'div', { class: 'wow-import__confirm', role: 'group', 'aria-labelledby': 'wow-import-confirm-label' }, [
+			el( 'label', {
+				id: 'wow-import-confirm-label',
+				for: 'wow-import-confirm',
+				text: sprintf(
+					/* translators: %s: the word to type, in capitals. */
+					__( 'Type %s to confirm', 'wow-signal' ),
+					word
+				),
+			} ),
+			el( 'p', { class: 'wow-import__actions' }, [ field, go, cancel ] ),
+			el( 'p', {
+				id: 'wow-import-confirm-hint',
+				class: 'wow-import__hint',
+				text: options.hint,
+			} ),
+		] );
+	}
+
+	function purgeDesigns( button ) {
+		button.disabled = true;
+		say( __( 'Removing the uploaded designs…', 'wow-signal' ) );
+
+		apiFetch( { path: '/wow-signal/v1/designs', method: 'DELETE' } )
+			.then( function ( result ) {
+				state.confirmingPurge = false;
+				state.designs = [];
+				state.design = null;
+				state.page = null;
+				state.preview = null;
+				state.includes = {};
+				state.archive = result.archive || { count: 0, bytes: 0 };
+
+				if ( state.summary ) {
+					state.summary.archive = state.archive;
+				}
+
+				say(
+					sprintf(
+						/* translators: %d: number of designs removed. */
+						_n( 'Removed %d uploaded design.', 'Removed %d uploaded designs.', result.removed, 'wow-signal' ),
+						result.removed
+					)
+				);
+				render();
+			} )
+			.catch( function ( error ) {
+				button.disabled = false;
+				say( errorText( error ), true );
+			} );
+	}
+
+	function renderCleanup() {
+		var summary = state.summary;
+		var archive = state.archive || ( summary && summary.archive ) || null;
+		var hasArchive = archive && archive.count > 0;
+
+		if ( ! summaryTotal( summary ) && ! hasArchive ) {
+			return null;
+		}
+
+		var body = [ el( 'h3', { text: __( 'Clean up', 'wow-signal' ) } ) ];
+
+		if ( summaryTotal( summary ) ) {
+			body.push(
+				el( 'p', {
+					text: sprintf(
+						/* translators: 1: pages, 2: template parts, 3: menus, 4: images, 5: fonts. */
+						__( 'This import created %1$d pages, %2$d template parts, %3$d menus, %4$d images, %5$d fonts.', 'wow-signal' ),
+						summary.pages || 0,
+						summary.parts || 0,
+						summary.menus || 0,
+						summary.media || 0,
+						summary.fonts || 0
+					),
+				} )
+			);
+			body.push(
+				el( 'p', {
+					class: 'wow-import__hint',
+					text: __( 'Your own content is untouched — only what the import added is removed.', 'wow-signal' ),
+				} )
+			);
+
+			if ( state.confirmingReset ) {
+				body.push( renderResetConfirm() );
+			} else {
+				body.push(
+					el( 'p', { class: 'wow-import__actions' }, [
+						el( 'button', {
+							type: 'button',
+							class: 'button wow-import__danger',
+							text: __( 'Delete everything this import added', 'wow-signal' ),
+							onClick: function () {
+								state.confirmingReset = true;
+								state.confirmingPurge = false;
+								render();
+								focusConfirm();
+							},
+						} ),
+					] )
+				);
+			}
+		}
+
+		if ( hasArchive ) {
+			body.push(
+				el( 'p', {
+					text: sprintf(
+						/* translators: 1: number of uploaded designs, 2: their size on disk. */
+						_n( '%1$d uploaded design is still unpacked in uploads, taking %2$s.', '%1$d uploaded designs are still unpacked in uploads, taking %2$s.', archive.count, 'wow-signal' ),
+						archive.count,
+						bytesText( archive.bytes )
+					),
+				} )
+			);
+
+			if ( state.confirmingPurge ) {
+				body.push( renderPurgeConfirm() );
+			} else {
+				body.push(
+					el( 'p', { class: 'wow-import__actions' }, [
+						el( 'button', {
+							type: 'button',
+							class: 'button wow-import__danger',
+							text: sprintf(
+								/* translators: %s: size on disk. */
+								__( 'Remove uploaded designs (%s)', 'wow-signal' ),
+								bytesText( archive.bytes )
+							),
+							onClick: function () {
+								state.confirmingPurge = true;
+								state.confirmingReset = false;
+								render();
+								focusConfirm();
+							},
+						} ),
+					] )
+				);
+			}
+		}
+
+		return el( 'section', { class: 'wow-import__cleanup', 'aria-label': __( 'Clean up a previous import', 'wow-signal' ) }, body );
+	}
+
 	// -------------------------------------------------------------- sections
+
+	/*
+	 * What this has cost and what the next press would cost.
+	 *
+	 * The API returns its token counts on every reply and the screen used to
+	 * throw them away, which left the person deciding whether to convert
+	 * fourteen sections with no idea whether that was forty cents or four
+	 * dollars. Both figures are estimates from published list prices and say so.
+	 */
+	function renderMeter() {
+		var pending = outstandingCount();
+		var readouts = [];
+
+		if ( pending > 0 ) {
+			readouts.push(
+				el( 'span', { class: 'wow-import__meter-figure' }, [
+					el( 'strong', { text: money( outstandingEstimate() ) } ),
+					el( 'span', {
+						text: ' ' + sprintf(
+							/* translators: %d: number of sections not yet converted. */
+							_n( 'to convert %d remaining section', 'to convert %d remaining sections', pending, 'wow-signal' ),
+							pending
+						),
+					} ),
+				] )
+			);
+		}
+
+		if ( state.spend && state.spend.conversions > 0 ) {
+			readouts.push(
+				el( 'span', { class: 'wow-import__meter-figure' }, [
+					el( 'strong', { text: money( state.spend.cost ) } ),
+					el( 'span', {
+						text: ' ' + sprintf(
+							/* translators: 1: number of conversions run, 2: input tokens, 3: output tokens. */
+							__( 'spent so far · %1$d conversions · %2$s in, %3$s out', 'wow-signal' ),
+							state.spend.conversions,
+							tokens( state.spend.input ),
+							tokens( state.spend.output )
+						),
+					} ),
+				] )
+			);
+		}
+
+		if ( state.limit && state.limit.remaining <= 20 ) {
+			readouts.push(
+				el( 'span', { class: 'wow-import__meter-figure is-warning' }, [
+					el( 'strong', { text: String( state.limit.remaining ) } ),
+					el( 'span', {
+						text: ' ' + sprintf(
+							/* translators: %d: minutes until the hourly limit resets. */
+							__( 'conversions left this hour · resets in %d min', 'wow-signal' ),
+							minutes( state.limit.resets_in )
+						),
+					} ),
+				] )
+			);
+		}
+
+		if ( ! readouts.length ) {
+			return null;
+		}
+
+		readouts.push(
+			el( 'span', {
+				class: 'wow-import__meter-note',
+				text: __( 'Estimated from published list prices — not a bill.', 'wow-signal' ),
+			} )
+		);
+
+		return el( 'p', { class: 'wow-import__meter' }, readouts );
+	}
 
 	function renderSections() {
 		if ( ! state.page ) {
@@ -455,17 +1680,28 @@
 			list.appendChild( renderSection( section ) );
 		} );
 
+		var pending = outstandingCount();
+
 		return el( 'section', { class: 'wow-import__step' }, [
 			el( 'h2', { text: __( '3. Convert each section', 'wow-signal' ) } ),
 			el( 'p', {
 				class: 'wow-import__hint',
 				text: __( 'Convert a section, read what it says, then keep it. Nothing reaches your site until you press Keep.', 'wow-signal' ),
 			} ),
+			renderMeter(),
 			el( 'p', { class: 'wow-import__actions' }, [
 				el( 'button', {
 					type: 'button',
 					class: 'button',
-					text: __( 'Convert every section', 'wow-signal' ),
+					text: pending
+						? sprintf(
+								/* translators: 1: number of sections, 2: estimated cost. */
+								_n( 'Convert %1$d section — about %2$s', 'Convert %1$d sections — about %2$s', pending, 'wow-signal' ),
+								pending,
+								money( outstandingEstimate() )
+						  )
+						: __( 'Every section is converted', 'wow-signal' ),
+					disabled: pending ? null : 'disabled',
 					onClick: convertAll,
 				} ),
 				el( 'button', {
@@ -867,6 +2103,17 @@
 		} )
 			.then( function ( result ) {
 				state.results[ section.position ] = result;
+
+				// The reply carries what it cost and what is left of the
+				// hourly allowance; both are shown rather than discarded.
+				if ( result.spend ) {
+					state.spend = result.spend;
+				}
+
+				if ( result.limit ) {
+					state.limit = result.limit;
+				}
+
 				render();
 				say(
 					result.valid
@@ -889,7 +2136,16 @@
 
 		state.busy = true;
 
-		var queue = state.sections.slice();
+		/*
+		 * Only what has not been converted. Re-running a section that already
+		 * succeeded would spend money to produce the same thing twice — which
+		 * matters now that a run can be resumed after a closed tab.
+		 */
+		var queue = state.sections.filter( function ( section ) {
+			var done = state.results[ section.position ];
+
+			return ! done || done.error;
+		} );
 
 		function next() {
 			var section = queue.shift();
@@ -996,21 +2252,30 @@
 	// ---------------------------------------------------------------- render
 
 	function render() {
+		/*
+		 * The live region is created once and kept across renders. Destroying
+		 * and recreating it in the same task as say() would leave screen
+		 * readers with nothing to announce.
+		 */
 		var status = document.getElementById( 'wow-import-status' );
-		var text = status ? status.textContent : '';
-		var isError = status ? status.className.indexOf( 'is-error' ) > -1 : false;
 
-		app.textContent = '';
-
-		app.appendChild(
-			el( 'p', {
+		if ( ! status ) {
+			status = el( 'p', {
 				id: 'wow-import-status',
-				class: 'wow-import__status' + ( isError ? ' is-error' : '' ),
+				class: 'wow-import__status',
 				role: 'status',
 				'aria-live': 'polite',
-				text: text,
-			} )
-		);
+			} );
+		}
+
+		app.textContent = '';
+		app.appendChild( status );
+
+		var cleanup = renderCleanup();
+
+		if ( cleanup ) {
+			app.appendChild( cleanup );
+		}
 
 		app.appendChild( renderUpload() );
 
@@ -1018,6 +2283,15 @@
 
 		if ( pages ) {
 			app.appendChild( pages );
+		}
+
+		/*
+		 * Outside the design panel on purpose: a build that removed its own
+		 * archive has no design left to hang the result on, and the pages it
+		 * made are the one thing the editor needs to see next.
+		 */
+		if ( state.built ) {
+			app.appendChild( renderBuilt( state.built ) );
 		}
 
 		var sections = renderSections();
@@ -1028,4 +2302,5 @@
 	}
 
 	render();
+	loadDesigns();
 } )( window.wp );

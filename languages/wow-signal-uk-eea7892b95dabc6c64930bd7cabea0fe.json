@@ -1,6 +1,6 @@
 {
 	"domain": "messages",
-	"translation-revision-date": "2026-08-16T14:54:58+0000",
+	"translation-revision-date": "2026-08-20T13:01:00+0000",
 	"generator": "wow-signal/make-mo.mjs",
 	"locale_data": {
 		"messages": {
@@ -9,95 +9,81 @@
 				"lang": "uk",
 				"plural-forms": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 			},
-			"Choose a ZIP file first.": [
-				"Спершу виберіть ZIP-файл."
+			"%s MB": [
+				"%s МБ"
 			],
-			"Unpacking and reading the design…": [
-				"Розпаковую та читаю дизайн…"
+			"Page": [
+				"Сторінка"
 			],
-			"Read %1$d files and found %2$d pages.": [
-				"Прочитано %1$d файлів, знайдено %2$d сторінок."
+			"Status": [
+				"Статус"
 			],
-			"Design archive (.zip)": [
-				"Архів дизайну (.zip)"
+			"Actions": [
+				"Дії"
 			],
-			"1. Upload the design": [
-				"1. Завантажте дизайн"
+			"View": [
+				"Переглянути"
 			],
-			"%1$s — %2$d sections": [
-				"%1$s — секцій: %2$d"
+			"Edit": [
+				"Редагувати"
 			],
-			"2. Pick a page": [
-				"2. Виберіть сторінку"
-			],
-			"This design has %s. Import one language first; the others can be added later with a translation plugin.": [
-				"Цей дизайн має %s. Спершу імпортуйте одну мову; решту можна додати пізніше плагіном перекладу."
-			],
-			"%d files were not unpacked": [
-				"Не розпаковано файлів: %d"
-			],
-			"Reading the page…": [
-				"Читаю сторінку…"
-			],
-			"Found %d sections on this page.": [
-				"На цій сторінці знайдено секцій: %d"
-			],
-			"Build the whole site": [
-				"Побудувати весь сайт"
-			],
-			"Build everything at once": [
-				"Зібрати все одразу"
-			],
-			"Creates every page, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again.": [
-				"Створює всі сторінки, переносить зображення, збирає меню, хедер і футер, призначає головну. Без ключа API й без чату. Можна скасувати й повторити."
-			],
-			"Language to build:": [
-				"Мова для збірки:"
-			],
-			"Changed your mind, or got a new version of the design? Delete everything and drop the new archive in — nothing here is one-way.": [
-				"Передумали або маєте нову версію дизайну? Видаліть усе й закиньте новий архів — тут ніщо не робиться в один бік."
-			],
-			"Delete everything and start over": [
-				"Видалити все й почати заново"
-			],
-			"Removes only what an import created. Your own pages are left alone.": [
-				"Видаляє лише те, що створив імпорт. Ваші власні сторінки не чіпає."
-			],
-			"Structure only — the button above": [
-				"Тільки структура — кнопка вище"
-			],
-			"Free, instant, no account. Headings, lists, cards and images become blocks.": [
-				"Безкоштовно, миттєво, без реєстрації. Заголовки, списки, картки й зображення стають блоками."
-			],
-			"Your Claude subscription": [
-				"Ваша підписка Claude"
-			],
-			"Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button.": [
-				"Безкоштовно з будь-яким тарифом. Виберіть сторінку нижче, скопіюйте завдання у свій чат Клода і вставте відповідь назад. Якісніше, ніж кнопка."
-			],
-			"An Anthropic API key": [
-				"Ключ API Anthropic"
-			],
-			"One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above.": [
-				"Один клік на сторінку, без копіювання. Приблизно один–три долари за весь сайт. Ключ вказується в «Налаштуваннях підключення» вище."
-			],
-			"Three ways to convert — which should I use?": [
-				"Три способи конвертації — який обрати?"
+			"Publish": [
+				"Опублікувати"
 			],
 			"(%d sections)": [
 				"(секцій: %d)"
 			],
+			"%s KB": [
+				"%s КБ"
+			],
+			"Draft": [
+				"Чернетка"
+			],
+			"Published": [
+				"Опубліковано"
+			],
 			"The site is built.": [
 				"Сайт зібрано."
+			],
+			"Publish %d draft page": [
+				"Опублікувати %d чернетку",
+				"Опублікувати всі %d чернетки",
+				"Опублікувати всі %d чернеток"
+			],
+			"Edit in the Site Editor": [
+				"Редагувати в редакторі сайту"
+			],
+			"Header, footer and menu:": [
+				"Шапка, підвал і меню:"
 			],
 			"Worth checking:": [
 				"Варто перевірити:"
 			],
-			"Building the site — this takes a moment…": [
-				"Збираю сайт — це трохи забере часу…"
+			"What the build made": [
+				"Що створив білд"
 			],
-			"Built %1$d pages and imported %2$d images. Look through them, then edit anything you like.": [
-				"Зібрано %1$d сторінок, перенесено %2$d зображень. Перегляньте їх і редагуйте що завгодно."
+			"Pages built": [
+				"Створені сторінки"
+			],
+			"Publishing…": [
+				"Публікація…"
+			],
+			"Published %d page.": [
+				"Опубліковано %d сторінку.",
+				"Опубліковано %d сторінки.",
+				"Опубліковано %d сторінок."
+			],
+			"Starting the build — reading the design, importing fonts and images…": [
+				"Починаємо білд — читаємо дизайн, імпортуємо шрифти й зображення…"
+			],
+			"Built and published %1$d pages and imported %2$d images. Look through them, then edit anything you like.": [
+				"Створено й опубліковано %1$d сторінок, імпортовано %2$d зображень. Перегляньте їх і редагуйте що завгодно."
+			],
+			"Built %1$d draft pages and imported %2$d images. Nothing is public yet — review each page and publish it when it is ready.": [
+				"Створено %1$d чернеток сторінок, імпортовано %2$d зображень. Нічого ще не опубліковано — перегляньте кожну сторінку й опублікуйте, коли буде готова."
+			],
+			"The uploaded design has been removed from uploads.": [
+				"Завантажений дизайн видалено з uploads."
 			],
 			"Undoing…": [
 				"Скасовую…"
@@ -105,14 +91,79 @@
 			"Removed %1$d pages and %2$d images. The site is back to how it was.": [
 				"Видалено %1$d сторінок і %2$d зображень. Сайт повернуто у попередній стан."
 			],
+			"This cannot be undone. Only content this import created is removed; pages, menus and images you made yourself stay exactly as they are.": [
+				"Цю дію не можна скасувати. Видаляється лише те, що створив імпорт; сторінки, меню й зображення, які ви зробили самі, залишаються без змін."
+			],
+			"This removes the unpacked design files from uploads. Pages, images and fonts already imported are not affected — only the source archive goes, and it can be uploaded again.": [
+				"Це видаляє розпаковані файли дизайну з uploads. Уже імпортовані сторінки, зображення та шрифти не зачіпаються — зникає лише вихідний архів, і його можна завантажити знову."
+			],
+			"Delete now": [
+				"Видалити зараз"
+			],
+			"Type %s to confirm": [
+				"Введіть %s для підтвердження"
+			],
+			"Removing the uploaded designs…": [
+				"Видаляємо завантажені дизайни…"
+			],
+			"Removed %d uploaded design.": [
+				"Видалено %d завантажений дизайн.",
+				"Видалено %d завантажені дизайни.",
+				"Видалено %d завантажених дизайнів."
+			],
+			"Clean up": [
+				"Очистити"
+			],
+			"This import created %1$d pages, %2$d template parts, %3$d menus, %4$d images, %5$d fonts.": [
+				"Імпорт створив сторінок: %1$d, частин шаблонів: %2$d, меню: %3$d, зображень: %4$d, шрифтів: %5$d."
+			],
+			"Your own content is untouched — only what the import added is removed.": [
+				"Ваш власний вміст не чіпається — видаляється лише те, що додав імпорт."
+			],
+			"Delete everything this import added": [
+				"Видалити все, що додав імпорт"
+			],
+			"%1$d uploaded design is still unpacked in uploads, taking %2$s.": [
+				"%1$d завантажений дизайн усе ще розпакований в uploads і займає %2$s.",
+				"%1$d завантажені дизайни все ще розпаковані в uploads і займають %2$s.",
+				"%1$d завантажених дизайнів усе ще розпаковані в uploads і займають %2$s."
+			],
+			"Remove uploaded designs (%s)": [
+				"Видалити завантажені дизайни (%s)"
+			],
+			"Clean up a previous import": [
+				"Очистити попередній імпорт"
+			],
+			"to convert %d remaining section": [
+				"щоб конвертувати %d секцію, що лишилась",
+				"щоб конвертувати %d секції, що лишились",
+				"щоб конвертувати %d секцій, що лишились"
+			],
+			"spent so far · %1$d conversions · %2$s in, %3$s out": [
+				"витрачено · %1$d конвертацій · %2$s на вхід, %3$s на вихід"
+			],
+			"conversions left this hour · resets in %d min": [
+				"конвертацій лишилось цієї години · оновиться через %d хв"
+			],
+			"Estimated from published list prices — not a bill.": [
+				"Оцінка за опублікованими цінами — це не рахунок."
+			],
+			"Something went wrong.": [
+				"Щось пішло не так."
+			],
 			"3. Convert each section": [
 				"3. Конвертуйте кожну секцію"
 			],
 			"Convert a section, read what it says, then keep it. Nothing reaches your site until you press Keep.": [
 				"Сконвертуйте секцію, прочитайте опис і залиште її. Нічого не потрапляє на сайт, доки ви не натиснете «Залишити»."
 			],
-			"Convert every section": [
-				"Конвертувати всі секції"
+			"Convert %1$d section — about %2$s": [
+				"Конвертувати %1$d секцію — приблизно %2$s",
+				"Конвертувати %1$d секції — приблизно %2$s",
+				"Конвертувати %1$d секцій — приблизно %2$s"
+			],
+			"Every section is converted": [
+				"Усі секції конвертовано"
 			],
 			"Keep the whole page as a draft": [
 				"Залишити цілу сторінку як чернетку"
@@ -139,13 +190,13 @@
 				"Скопіюйте завдання для цієї сторінки."
 			],
 			"Paste it into your Claude conversation and send it.": [
-				"Вставте його у свій чат із Клодом і надішліть."
+				"Вставте його у свій чат із Claude і надішліть."
 			],
 			"Copy the whole reply and paste it below.": [
 				"Скопіюйте всю відповідь і вставте нижче."
 			],
 			"Claude’s reply": [
-				"Відповідь Клода"
+				"Відповідь Claude"
 			],
 			"Read the reply": [
 				"Прочитати відповідь"
@@ -157,10 +208,10 @@
 				"Завдання на %1$d секцій, %2$d КБ."
 			],
 			"Copied — now paste it into Claude": [
-				"Скопійовано — тепер вставте в Клода"
+				"Скопійовано — тепер вставте в Claude"
 			],
 			"Copied. Paste it into Claude, then bring the reply back.": [
-				"Скопійовано. Вставте в Клода й поверніть відповідь сюди."
+				"Скопійовано. Вставте в Claude й поверніть відповідь сюди."
 			],
 			"The browser would not copy it, so it is in the box below — select it all and copy it yourself.": [
 				"Браузер не дав скопіювати, тож завдання в полі нижче — виділіть усе й скопіюйте вручну."
@@ -173,6 +224,9 @@
 			],
 			"Reading the reply…": [
 				"Читаю відповідь…"
+			],
+			"Upload and read the design": [
+				"Завантажити й прочитати дизайн"
 			],
 			"Read %1$d sections, but this page has %2$d. Check the reply was not cut off.": [
 				"Прочитано %1$d секцій, а на сторінці їх %2$d. Перевірте, чи відповідь не обірвалася."
@@ -192,8 +246,8 @@
 			"Try again": [
 				"Спробувати ще раз"
 			],
-			"Something went wrong.": [
-				"Щось пішло не так."
+			"Choose a ZIP file first.": [
+				"Спершу виберіть ZIP-файл."
 			],
 			"This conversion was refused:": [
 				"Цю конвертацію відхилено:"
@@ -204,17 +258,17 @@
 			"Quality notes:": [
 				"Зауваження щодо якості:"
 			],
-			"Preview": [
-				"Перегляд"
-			],
 			"Kept.": [
 				"Залишено."
 			],
 			"Keep as a reusable section": [
-				"Залишити як багаторазову секцію"
+				"Зберегти як повторюваний блок"
 			],
 			"Keep as a draft page": [
 				"Залишити як чернетку сторінки"
+			],
+			"Unpacking and reading the design…": [
+				"Розпаковую та читаю дизайн…"
 			],
 			"Add your Anthropic API key in the connection settings first.": [
 				"Спершу додайте ключ API Anthropic у налаштуваннях підключення."
@@ -228,14 +282,14 @@
 			"“%s” was refused — see the reason below.": [
 				"«%s» відхилено — причина нижче."
 			],
+			"Read %1$d files and found %2$d pages.": [
+				"Прочитано %1$d файлів, знайдено %2$d сторінок."
+			],
 			"All sections converted. Review each one before keeping it.": [
 				"Усі секції сконвертовано. Перегляньте кожну, перш ніж залишати."
 			],
 			"Convert at least one section first.": [
 				"Спершу сконвертуйте хоча б одну секцію."
-			],
-			"Upload and read the design": [
-				"Завантажити й прочитати дизайн"
 			],
 			"Building the page…": [
 				"Збираю сторінку…"
@@ -248,6 +302,185 @@
 			],
 			"Saved.": [
 				"Збережено."
+			],
+			"Design archive (.zip)": [
+				"Архів дизайну (.zip)"
+			],
+			"1. Upload the design": [
+				"1. Завантажте дизайн"
+			],
+			"%1$d pages · %2$d images": [
+				"Сторінок: %1$d · зображень: %2$d"
+			],
+			"Already uploaded": [
+				"Уже завантажено"
+			],
+			"%1$s — %2$d sections": [
+				"%1$s — секцій: %2$d"
+			],
+			"%d section chosen for the build": [
+				"Для білду вибрано %d секцію",
+				"Для білду вибрано %d секції",
+				"Для білду вибрано %d секцій"
+			],
+			"Preview": [
+				"Перегляд"
+			],
+			"Previewing": [
+				"Перегляд"
+			],
+			"2. Pick a page": [
+				"2. Виберіть сторінку"
+			],
+			"This design has %s. Import one language first; the others can be added later with a translation plugin.": [
+				"Цей дизайн має %s. Спершу імпортуйте одну мову; решту можна додати пізніше плагіном перекладу."
+			],
+			"%d files were not unpacked": [
+				"Не розпаковано файлів: %d"
+			],
+			"Converting “%s” for the preview…": [
+				"Конвертуємо «%s» для перегляду…"
+			],
+			"“%1$s” previewed: %2$d sections. Untick any you do not want built.": [
+				"«%1$s» переглянуто: секцій — %2$d. Зніміть позначку з тих, які не треба будувати."
+			],
+			"Converting the page…": [
+				"Конвертуємо сторінку…"
+			],
+			"Preview: %s": [
+				"Перегляд: %s"
+			],
+			"%1$d of %2$d sections included": [
+				"Включено %1$d з %2$d секцій"
+			],
+			"Include all": [
+				"Включити всі"
+			],
+			"Close preview": [
+				"Закрити перегляд"
+			],
+			"Left: the design as uploaded. Right: the blocks the build will make of it. Untick a section to leave it out of this page.": [
+				"Ліворуч: дизайн, як його завантажено. Праворуч: блоки, які з нього зробить білд. Зніміть позначку із секції, щоб не включати її в цю сторінку."
+			],
+			"Nothing here could become blocks.": [
+				"Тут нічого не можна перетворити на блоки."
+			],
+			"Include": [
+				"Включити"
+			],
+			"Design": [
+				"Дизайн"
+			],
+			"Blocks": [
+				"Блоки"
+			],
+			"Reading the page…": [
+				"Читаю сторінку…"
+			],
+			"Found %1$d sections. %2$d were already converted earlier and have been brought back.": [
+				"Знайдено %1$d секцій. %2$d уже були конвертовані раніше — їх повернуто."
+			],
+			"Found %d sections on this page.": [
+				"На цій сторінці знайдено секцій: %d"
+			],
+			"Build the whole site": [
+				"Побудувати весь сайт"
+			],
+			"Build everything at once": [
+				"Зібрати все одразу"
+			],
+			"Creates every page as a draft, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again. Press Preview on any page below to see what it will become and leave sections out.": [
+				"Створює кожну сторінку як чернетку, імпортує зображення, будує меню, шапку й підвал і призначає головну сторінку. Без API-ключа й без діалогу. Це можна скасувати й повторити. Натисніть «Перегляд» на будь-якій сторінці нижче, щоб побачити, чим вона стане, і прибрати зайві секції."
+			],
+			"under $0.01": [
+				"менше $0,01"
+			],
+			"Publish pages immediately": [
+				"Опублікувати сторінки одразу"
+			],
+			"Leave this off to review each page as a draft first.": [
+				"Залиште вимкненим, щоб спершу переглянути кожну сторінку як чернетку."
+			],
+			"Keep the uploaded design for another run": [
+				"Залишити завантажений дизайн для наступного запуску"
+			],
+			"Otherwise the unpacked files are removed from uploads once the build is done.": [
+				"Інакше розпаковані файли буде видалено з uploads після завершення білду."
+			],
+			"Language to build:": [
+				"Мова для збірки:"
+			],
+			"Changed your mind, or got a new version of the design? Delete everything and drop the new archive in — nothing here is one-way.": [
+				"Передумали або маєте нову версію дизайну? Видаліть усе й закиньте новий архів — тут ніщо не робиться в один бік."
+			],
+			"Delete everything and start over": [
+				"Видалити все й почати заново"
+			],
+			"Removes only what an import created. Your own pages are left alone.": [
+				"Видаляє лише те, що створив імпорт. Ваші власні сторінки не чіпає."
+			],
+			"Reading the design, importing fonts and images…": [
+				"Читаємо дизайн, імпортуємо шрифти й зображення…"
+			],
+			"Steps that did not complete:": [
+				"Кроки, що не завершились:"
+			],
+			"Cancel": [
+				"Скасувати"
+			],
+			"Build cancelled. The pages made so far are still on the site as drafts.": [
+				"Білд скасовано. Уже створені сторінки залишаються на сайті як чернетки."
+			],
+			"Delete what was built so far": [
+				"Видалити створене досі"
+			],
+			"Dismiss": [
+				"Закрити"
+			],
+			"Build progress": [
+				"Перебіг білду"
+			],
+			"The build is complete.": [
+				"Білд завершено."
+			],
+			"Cancelled after %1$d of %2$d steps.": [
+				"Скасовано після %1$d з %2$d кроків."
+			],
+			"%1$d of %2$d steps done.": [
+				"Виконано %1$d з %2$d кроків."
+			],
+			"Building %1$s (%2$d of %3$d)": [
+				"Будуємо %1$s (%2$d з %3$d)"
+			],
+			"the menu, header and footer": [
+				"меню, шапка й підвал"
+			],
+			"the front page and links": [
+				"головна сторінка й посилання"
+			],
+			"Structure only — the button above": [
+				"Тільки структура — кнопка вище"
+			],
+			"Free, instant, no account. Headings, lists, cards and images become blocks.": [
+				"Безкоштовно, миттєво, без реєстрації. Заголовки, списки, картки й зображення стають блоками."
+			],
+			"Your Claude subscription": [
+				"Ваша підписка Claude"
+			],
+			"Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button.": [
+				"Безкоштовно з будь-яким тарифом. Виберіть сторінку нижче, скопіюйте завдання у свій чат Claude і вставте відповідь назад. Якісніше, ніж кнопка."
+			],
+			"An Anthropic API key": [
+				"Ключ API Anthropic"
+			],
+			"One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above.": [
+				"Один клік на сторінку, без копіювання. Приблизно один–три долари за весь сайт. Ключ вказується в «Налаштуваннях підключення» вище."
+			],
+			"Three ways to convert — which should I use?": [
+				"Три способи конвертації — який обрати?"
+			],
+			"Main navigation": [
+				"Головна навігація"
 			]
 		}
 	}

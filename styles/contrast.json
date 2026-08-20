@@ -1,0 +1,119 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Signal High Contrast",
+	"description": "Black on white with saturated, dark accents. For public sector work, or any site that has to defend its accessibility.",
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"slug": "base",
+					"color": "#ffffff",
+					"name": "Base — page background"
+				},
+				{
+					"slug": "surface",
+					"color": "#f2f2f2",
+					"name": "Surface — card"
+				},
+				{
+					"slug": "surface-2",
+					"color": "#e5e5e5",
+					"name": "Surface raised"
+				},
+				{
+					"slug": "border",
+					"color": "#cccccc",
+					"name": "Divider (decorative)"
+				},
+				{
+					"slug": "border-strong",
+					"color": "#595959",
+					"name": "Control border (AA)"
+				},
+				{
+					"slug": "contrast",
+					"color": "#000000",
+					"name": "Contrast — body text"
+				},
+				{
+					"slug": "muted",
+					"color": "#333333",
+					"name": "Muted — secondary text"
+				},
+				{
+					"slug": "accent",
+					"color": "#00458f",
+					"name": "Accent — signal blue"
+				},
+				{
+					"slug": "accent-ink",
+					"color": "#00458f",
+					"name": "Accent — readable as text"
+				},
+				{
+					"slug": "accent-2",
+					"color": "#6b1fa0",
+					"name": "Accent — violet"
+				},
+				{
+					"slug": "accent-3",
+					"color": "#9b0f5f",
+					"name": "Accent — magenta"
+				},
+				{
+					"slug": "success",
+					"color": "#006b3c",
+					"name": "Success"
+				},
+				{
+					"slug": "warning",
+					"color": "#7a4a00",
+					"name": "Warning"
+				}
+			],
+			"gradients": [
+				{
+					"slug": "aurora",
+					"name": "Aurora — blue to magenta",
+					"gradient": "linear-gradient(120deg, #00458f 0%, #6b1fa0 52%, #9b0f5f 100%)"
+				},
+				{
+					"slug": "aurora-soft",
+					"name": "Aurora soft — on light",
+					"gradient": "linear-gradient(160deg, #f2f2f2 0%, #e5e5e5 60%, #e8e8ef 100%)"
+				},
+				{
+					"slug": "signal-fade",
+					"name": "Signal fade — accent to transparent",
+					"gradient": "linear-gradient(180deg, rgba(0,69,143,0.12) 0%, rgba(255,255,255,0) 100%)"
+				}
+			]
+		},
+		"shadow": {
+			"presets": [
+				{
+					"slug": "soft",
+					"name": "Soft",
+					"shadow": "0 1px 2px rgba(0, 0, 0, 0.12)"
+				},
+				{
+					"slug": "card",
+					"name": "Card",
+					"shadow": "0 12px 32px -14px rgba(0, 0, 0, 0.3)"
+				},
+				{
+					"slug": "glow",
+					"name": "Signal glow",
+					"shadow": "0 0 0 1px rgba(0, 69, 143, 0.35), 0 18px 48px -20px rgba(0, 69, 143, 0.4)"
+				}
+			]
+		}
+	},
+	"styles": {
+		"color": {
+			"background": "var(--wp--preset--color--base)",
+			"text": "var(--wp--preset--color--contrast)"
+		}
+	}
+}

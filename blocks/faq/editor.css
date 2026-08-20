@@ -28,7 +28,8 @@
 	opacity: 0.6;
 }
 
-.editor-styles-wrapper .wow-faq:empty::before {
+/* The appender always sits inside the wrapper, so :empty never matches; test for questions instead. */
+.editor-styles-wrapper .wow-faq:not(:has(.wow-faq__item))::before {
 	content: attr(data-empty-hint);
 	display: block;
 	padding: var(--wp--preset--spacing--60);

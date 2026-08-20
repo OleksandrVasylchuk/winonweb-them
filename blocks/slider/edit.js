@@ -13,6 +13,14 @@
 	var TextControl = wp.components.TextControl;
 	var SelectControl = wp.components.SelectControl;
 
+	// Widths are theme.json tokens so the slider follows the design system.
+	var WIDTH_NARROW = 'var(--wp--custom--slider--slide-width-narrow)';
+	var WIDTH_MEDIUM = 'var(--wp--custom--slider--slide-width)';
+	var WIDTH_WIDE = 'var(--wp--custom--slider--slide-width-wide)';
+
+	// Content saved before the tokens existed stored literal rem values.
+	var LEGACY_WIDTHS = { '18rem': WIDTH_NARROW, '22rem': WIDTH_MEDIUM, '28rem': WIDTH_WIDE };
+
 	var TEMPLATE = [
 		[ 'core/group', { className: 'is-style-card' }, [
 			[ 'core/heading', { level: 3, placeholder: __( 'Case name', 'wow-signal' ) } ],
@@ -25,9 +33,12 @@
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
 
+			var slideWidth = LEGACY_WIDTHS[ attributes.slideWidth ] || attributes.slideWidth || WIDTH_MEDIUM;
+
 			var blockProps = useBlockProps( {
 				className: 'wow-slider is-editor',
-				style: { '--wow-slide-width': attributes.slideWidth },
+				style: { '--wow-slide-width': slideWidth },
+				'data-editor-hint': __( 'Cards wrap here in the editor; visitors scroll them sideways.', 'wow-signal' ),
 			} );
 
 			var innerProps = useInnerBlocksProps(
@@ -54,11 +65,11 @@
 						} ),
 						el( SelectControl, {
 							label: __( 'Card width', 'wow-signal' ),
-							value: attributes.slideWidth,
+							value: slideWidth,
 							options: [
-								{ label: __( 'Narrow', 'wow-signal' ), value: '18rem' },
-								{ label: __( 'Medium', 'wow-signal' ), value: '22rem' },
-								{ label: __( 'Wide', 'wow-signal' ), value: '28rem' },
+								{ label: __( 'Narrow', 'wow-signal' ), value: WIDTH_NARROW },
+								{ label: __( 'Medium', 'wow-signal' ), value: WIDTH_MEDIUM },
+								{ label: __( 'Wide', 'wow-signal' ), value: WIDTH_WIDE },
 							],
 							onChange: function ( value ) {
 								setAttributes( { slideWidth: value } );

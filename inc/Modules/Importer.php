@@ -20,9 +20,11 @@ use Wow\Signal\Support\BlockMarkupValidator;
 use Wow\Signal\Support\ConversionPrompt;
 use Wow\Signal\Support\CssIndex;
 use Wow\Signal\Support\DesignArchive;
+use Wow\Signal\Support\ImportSession;
 use Wow\Signal\Support\SectionSplitter;
 use Wow\Signal\Support\SiteAssembler;
 use Wow\Signal\Support\SiteBuilder;
+use Wow\Signal\Support\Spend;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -69,6 +71,11 @@ final class Importer implements Module {
 	 * Conversions allowed per user per hour.
 	 */
 	private const RATE_LIMIT = 120;
+
+	/**
+	 * The window the limit is counted over, in seconds.
+	 */
+	private const WINDOW = HOUR_IN_SECONDS;
 
 	/**
 	 * Hook the module.
@@ -158,7 +165,9 @@ final class Importer implements Module {
 	 * Keep an API key out of the database when it is only a placeholder.
 	 *
 	 * The form shows a masked value; submitting it unchanged must not
-	 * overwrite the real key with asterisks.
+	 * overwrite the real key with bullets. An emptied field, on the other
+	 * hand, means "remove the key" — otherwise a stored key could never be
+	 * taken out again.
 	 *
 	 * @param mixed $value Submitted value.
 	 * @return string
@@ -166,7 +175,11 @@ final class Importer implements Module {
 	public function sanitize_key( $value ): string {
 		$value = is_string( $value ) ? trim( $value ) : '';
 
-		if ( '' === $value || str_contains( $value, '•' ) || str_starts_with( $value, '****' ) ) {
+		if ( '' === $value ) {
+			return '';
+		}
+
+		if ( str_contains( $value, '•' ) || str_contains( $value, '*' ) ) {
 			return (string) get_option( self::OPTION_KEY, '' );
 		}
 
@@ -213,6 +226,7 @@ final class Importer implements Module {
 					'hasKey'    => '' !== AnthropicClient::api_key(),
 					'keyLocked' => AnthropicClient::key_is_constant(),
 					'siteUrl'   => esc_url_raw( admin_url() ),
+					'summary'   => $this->import_summary(),
 				)
 			) . ';',
 			'before'
@@ -262,12 +276,15 @@ final class Importer implements Module {
 			array_map( static fn( string $tag ): string => $scope . ' ' . $tag, $elements )
 		);
 
+		// The :root variables are already scoped into the pane above, so no literal fallbacks are needed.
 		$resets = $inherit . '{color:inherit;}'
-			. $scope . ' a:not(.wp-element-button):not(.wp-block-button__link){color:var(--wp--preset--color--accent,#22d3ee);}'
+			. $scope . ' a:not(.wp-element-button):not(.wp-block-button__link){color:var(--wp--preset--color--accent);}'
 			. $scope . ' .wp-element-button,' . $scope . ' .wp-block-button__link{'
-			. 'background-color:var(--wp--preset--color--accent,#22d3ee);'
-			. 'color:var(--wp--preset--color--base,#0a0a18);'
-			. 'text-decoration:none;padding:0.7em 1.4em;border-radius:6px;display:inline-block;}';
+			. 'background-color:var(--wp--preset--color--accent);'
+			. 'color:var(--wp--preset--color--base);'
+			. 'text-decoration:none;'
+			. 'padding:var(--wp--preset--spacing--30) var(--wp--preset--spacing--50);'
+			. 'border-radius:var(--wp--custom--radius--sm);display:inline-block;}';
 
 		return $variables . $presets . $resets;
 	}
@@ -296,7 +313,7 @@ final class Importer implements Module {
 				<h1><?php esc_html_e( 'Design import', 'wow-signal' ); ?></h1>
 
 				<p class="wow-import__lede">
-					<?php esc_html_e( 'Upload an HTML design as a ZIP. Each section is converted into editable blocks, one at a time, and nothing is added to your site until you accept it.', 'wow-signal' ); ?>
+					<?php esc_html_e( 'Upload an HTML design as a ZIP. Build the whole site in one press as drafts, or convert sections one at a time and accept only the ones you like. Everything an import adds can be removed again in one step.', 'wow-signal' ); ?>
 				</p>
 			</div>
 
@@ -351,7 +368,7 @@ final class Importer implements Module {
 										value="<?php echo '' !== $key ? esc_attr( str_repeat( '•', 24 ) . substr( $key, -4 ) ) : ''; ?>"
 									>
 									<p class="description">
-										<?php esc_html_e( 'Used only on the server; it is never sent to the browser. For the strongest setup, put it in wp-config.php instead:', 'wow-signal' ); ?>
+										<?php esc_html_e( 'Used only on the server; it is never sent to the browser. Clear the field and save to remove the stored key. For the strongest setup, put it in wp-config.php instead:', 'wow-signal' ); ?>
 										<code>define( 'WOW_SIGNAL_ANTHROPIC_KEY', '…' );</code>
 									</p>
 								<?php endif; ?>
@@ -409,6 +426,22 @@ final class Importer implements Module {
 	public function register_routes(): void {
 		$guard = array( $this, 'may_import' );
 
+		/*
+		 * The slug and file arguments are shared by every route that reads a
+		 * design, and are checked here before any callback sees them.
+		 */
+		$slug_arg = array(
+			'type'              => 'string',
+			'required'          => true,
+			'validate_callback' => array( $this, 'validate_slug' ),
+		);
+
+		$file_arg = array(
+			'type'              => 'string',
+			'required'          => true,
+			'validate_callback' => array( $this, 'validate_file' ),
+		);
+
 		register_rest_route(
 			self::NAMESPACE,
 			'/designs',
@@ -423,6 +456,30 @@ final class Importer implements Module {
 					'callback'            => array( $this, 'upload_design' ),
 					'permission_callback' => $guard,
 				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'purge_designs' ),
+					'permission_callback' => $guard,
+				),
+			)
+		);
+
+		/*
+		 * What a build would make of one page, section by section, before
+		 * anything is created. Same converter, same images, no side effects
+		 * beyond importing the pictures — which the build would do anyway.
+		 */
+		register_rest_route(
+			self::NAMESPACE,
+			'/designs/(?P<slug>[a-z0-9-]+)/preview',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'preview_page' ),
+				'permission_callback' => $guard,
+				'args'                => array(
+					'slug' => $slug_arg,
+					'file' => $file_arg,
+				),
 			)
 		);
 
@@ -434,10 +491,8 @@ final class Importer implements Module {
 				'callback'            => array( $this, 'get_sections' ),
 				'permission_callback' => $guard,
 				'args'                => array(
-					'file' => array(
-						'type'     => 'string',
-						'required' => true,
-					),
+					'slug' => $slug_arg,
+					'file' => $file_arg,
 				),
 			)
 		);
@@ -449,6 +504,15 @@ final class Importer implements Module {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'convert_section' ),
 				'permission_callback' => $guard,
+				'args'                => array(
+					'slug'     => $slug_arg,
+					'file'     => $file_arg,
+					'position' => array(
+						'type'     => 'integer',
+						'required' => true,
+						'minimum'  => 0,
+					),
+				),
 			)
 		);
 
@@ -458,6 +522,30 @@ final class Importer implements Module {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'save_markup' ),
+				'permission_callback' => $guard,
+			)
+		);
+
+		/*
+		 * Two things the screen owns and must be able to put down: the work it
+		 * has banked for a page, and the running total of what it has spent.
+		 */
+		register_rest_route(
+			self::NAMESPACE,
+			'/session',
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'forget_session' ),
+				'permission_callback' => $guard,
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/spend',
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'reset_spend' ),
 				'permission_callback' => $guard,
 			)
 		);
@@ -475,10 +563,8 @@ final class Importer implements Module {
 				'callback'            => array( $this, 'page_brief' ),
 				'permission_callback' => $guard,
 				'args'                => array(
-					'file' => array(
-						'type'     => 'string',
-						'required' => true,
-					),
+					'slug' => $slug_arg,
+					'file' => $file_arg,
 				),
 			)
 		);
@@ -490,6 +576,14 @@ final class Importer implements Module {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'accept_paste' ),
 				'permission_callback' => $guard,
+				'args'                => array(
+					'slug'  => $slug_arg,
+					'file'  => $file_arg,
+					'reply' => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+				),
 			)
 		);
 
@@ -505,6 +599,94 @@ final class Importer implements Module {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'build_site' ),
 				'permission_callback' => $guard,
+				'args'                => array(
+					'slug'     => $slug_arg,
+					'language' => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+					'publish'  => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+				),
+			)
+		);
+
+		/*
+		 * The same build, one request per step. A twelve-page design used to
+		 * be one request that had to finish inside whatever timeout the host
+		 * set; now the browser asks for each page in turn and can show how
+		 * far it has got.
+		 */
+		register_rest_route(
+			self::NAMESPACE,
+			'/build/start',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'build_start' ),
+				'permission_callback' => $guard,
+				'args'                => array(
+					'slug'         => $slug_arg,
+					'language'     => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+					'publish'      => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+					'keep_archive' => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+					'includes'     => array(
+						'type'    => 'object',
+						'default' => array(),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/build/step',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'build_step' ),
+				'permission_callback' => $guard,
+				'args'                => array(
+					'job'  => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+					'key'  => array(
+						'type'     => 'string',
+						'required' => true,
+						'enum'     => array( 'page', 'chrome', 'finish' ),
+					),
+					'file' => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/build/publish',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'publish_pages' ),
+				'permission_callback' => $guard,
+				'args'                => array(
+					'ids' => array(
+						'type'     => 'array',
+						'required' => true,
+						'items'    => array( 'type' => 'integer' ),
+					),
+				),
 			)
 		);
 
@@ -515,6 +697,386 @@ final class Importer implements Module {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'reset_site' ),
 				'permission_callback' => $guard,
+			)
+		);
+
+		/*
+		 * What a previous import left on the site. The clean-up panel needs
+		 * this without a design loaded — after a reload, or after the archive
+		 * itself was deleted — or there is no way back.
+		 */
+		register_rest_route(
+			self::NAMESPACE,
+			'/summary',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'summary' ),
+				'permission_callback' => $guard,
+			)
+		);
+	}
+
+	/**
+	 * A design slug as unpacked by DesignArchive: short, ASCII, no dots.
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return bool
+	 */
+	public function validate_slug( $value ): bool {
+		return is_string( $value ) && 1 === preg_match( '/^[a-z0-9][a-z0-9_-]{0,80}$/i', $value );
+	}
+
+	/**
+	 * A page path from the design index: relative, no traversal, ends in .html.
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return bool
+	 */
+	public function validate_file( $value ): bool {
+		if ( ! is_string( $value ) || '' === $value || strlen( $value ) > 512 ) {
+			return false;
+		}
+
+		$value = str_replace( '\\', '/', $value );
+
+		if ( str_contains( $value, "\0" ) || str_contains( $value, '../' ) || str_starts_with( $value, '/' ) || preg_match( '#^[a-z]:#i', $value ) ) {
+			return false;
+		}
+
+		return 1 === preg_match( '#\.html?$#i', $value );
+	}
+
+	/**
+	 * Counts of content a previous import created that is still on the site.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function summary(): WP_REST_Response {
+		return rest_ensure_response( $this->import_summary() );
+	}
+
+	/**
+	 * What a previous import left behind, as counts.
+	 *
+	 * @return array{pages:int,parts:int,menus:int,media:int,fonts:int,archive:array{count:int,bytes:int}}
+	 */
+	private function import_summary(): array {
+		$zero = array(
+			'pages' => 0,
+			'parts' => 0,
+			'menus' => 0,
+			'media' => 0,
+			'fonts' => 0,
+		);
+
+		if ( method_exists( SiteAssembler::class, 'summary' ) ) {
+			$summary = SiteAssembler::summary();
+
+			foreach ( $zero as $key => $unused ) {
+				$zero[ $key ] = (int) ( $summary[ $key ] ?? 0 );
+			}
+		}
+
+		// The unpacked designs are on disk, not on the site, and are counted apart.
+		$zero['archive'] = DesignArchive::footprint();
+
+		return $zero;
+	}
+
+	/**
+	 * Show one page the way a build would make it, before building anything.
+	 *
+	 * Each section comes back twice: the design's own markup and the blocks it
+	 * becomes, both kses-filtered, with images pointing at the Media Library —
+	 * the unpacked design is not web-accessible by design, so its own paths
+	 * would show nothing. Cached briefly per file version; a re-upload lands
+	 * under a new slug and misses the cache on its own.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function preview_page( WP_REST_Request $request ) {
+		$slug = (string) $request->get_param( 'slug' );
+		$file = (string) $request->get_param( 'file' );
+		$root = $this->design_root( $slug );
+
+		if ( is_wp_error( $root ) ) {
+			return $root;
+		}
+
+		$path = $this->page_path( $root, $file );
+
+		if ( is_wp_error( $path ) ) {
+			return $path;
+		}
+
+		$key    = 'wow_signal_preview_' . md5( $slug . '|' . $file . '|' . (int) filemtime( $path ) . '|' . WOW_SIGNAL_VERSION );
+		$cached = get_transient( $key );
+
+		if ( is_array( $cached ) ) {
+			return rest_ensure_response( $cached );
+		}
+
+		// What start() does before reading any page, so the preview sees the same files.
+		SiteBuilder::materialise_data_uris( $root );
+
+		$media    = $this->media_map( $root );
+		$preview  = SiteAssembler::preview( $root, $file, $media );
+		$page_dir = (string) dirname( $file );
+		$sections = array();
+
+		foreach ( $preview['sections'] as $section ) {
+			$markup = (string) $section['markup'];
+
+			$sections[] = array(
+				'position'      => (int) $section['position'],
+				'label'         => (string) $section['label'],
+				'original_html' => $this->original_html( (string) $section['html'], $media, $page_dir ),
+				'preview_html'  => '' !== $markup ? $this->preview( $markup ) : '',
+				'convertible'   => '' !== $markup,
+				'concerns'      => array_values( (array) $section['concerns'] ),
+			);
+		}
+
+		$payload = array(
+			'title'    => (string) $preview['title'],
+			'file'     => $file,
+			'sections' => $sections,
+			'notes'    => array_values( (array) $preview['notes'] ),
+		);
+
+		set_transient( $key, $payload, 10 * MINUTE_IN_SECONDS );
+
+		return rest_ensure_response( $payload );
+	}
+
+	/**
+	 * A design section's own markup, made safe to show on an admin screen.
+	 *
+	 * @param string                                  $html     Section markup from the splitter.
+	 * @param array<string, array{id:int,url:string}> $media    Imported media map.
+	 * @param string                                  $page_dir Directory of the page within the design.
+	 * @return string
+	 */
+	private function original_html( string $html, array $media, string $page_dir ): string {
+		// The splitter has already dropped these; belt and braces before kses.
+		$html = (string) preg_replace( '#<(script|style|noscript|template)\b[^>]*>.*?</\1>#is', '', $html );
+
+		return wp_kses_post( SiteBuilder::relink_media( $html, $media, $page_dir ) );
+	}
+
+	/**
+	 * Begin a stepwise build: everything the pages depend on, in one request.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function build_start( WP_REST_Request $request ) {
+		$slug = (string) $request->get_param( 'slug' );
+		$root = $this->design_root( $slug );
+
+		if ( is_wp_error( $root ) ) {
+			return $root;
+		}
+
+		if ( function_exists( 'set_time_limit' ) ) {
+			set_time_limit( 120 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Fonts and media for a whole design, bounded.
+		}
+
+		$includes = $request->get_param( 'includes' );
+
+		$job = SiteAssembler::start(
+			$root,
+			DesignArchive::index( $root ),
+			array(
+				'language' => (string) $request->get_param( 'language' ),
+				'publish'  => (bool) $request->get_param( 'publish' ),
+				'includes' => is_array( $includes ) ? $includes : array(),
+			)
+		);
+
+		if ( is_wp_error( $job ) ) {
+			$job->add_data( array( 'status' => 400 ) );
+
+			return $job;
+		}
+
+		$steps = array();
+
+		foreach ( $job['pages'] as $page ) {
+			$steps[] = array(
+				'key'   => 'page',
+				'file'  => (string) $page['file'],
+				'title' => (string) ( $page['title'] ?? $page['file'] ),
+			);
+		}
+
+		$steps[] = array( 'key' => 'chrome' );
+		$steps[] = array( 'key' => 'finish' );
+
+		// Tokens, fonts and media are two steps' worth of work already behind us.
+		$job['slug']         = $slug;
+		$job['keep_archive'] = (bool) $request->get_param( 'keep_archive' );
+		$job['completed']    = array();
+		$job['done']         = 2;
+		$job['total']        = 2 + count( $steps );
+
+		$id = ImportSession::start_job( $job );
+
+		return rest_ensure_response(
+			array(
+				'job'   => $id,
+				'steps' => $steps,
+				'done'  => $job['done'],
+				'total' => $job['total'],
+			)
+		);
+	}
+
+	/**
+	 * Run one step of a build the browser is driving.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function build_step( WP_REST_Request $request ) {
+		$job = ImportSession::job( (string) $request->get_param( 'job' ) );
+
+		if ( null === $job ) {
+			return new WP_Error(
+				'wow_signal_no_job',
+				__( 'That build is no longer running. Start it again.', 'wow-signal' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// The design must still be where the job left it.
+		$root = $this->design_root( (string) ( $job['slug'] ?? '' ) );
+
+		if ( is_wp_error( $root ) ) {
+			ImportSession::end_job();
+
+			return $root;
+		}
+
+		if ( function_exists( 'set_time_limit' ) ) {
+			set_time_limit( 60 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- One page, bounded.
+		}
+
+		$key  = (string) $request->get_param( 'key' );
+		$file = (string) $request->get_param( 'file' );
+
+		$progress = static function ( array $job ): array {
+			return array(
+				'done'  => (int) $job['done'],
+				'total' => (int) $job['total'],
+			);
+		};
+
+		if ( 'page' === $key ) {
+			if ( ! $this->validate_file( $file ) ) {
+				return new WP_Error( 'wow_signal_no_page', __( 'That page is not in this design.', 'wow-signal' ), array( 'status' => 404 ) );
+			}
+
+			$result = SiteAssembler::page( $job, $file );
+
+			$job['completed'][ 'page:' . $file ] = true;
+			$job['done']                         = 2 + count( $job['completed'] );
+
+			ImportSession::update_job( $job );
+
+			if ( is_wp_error( $result ) ) {
+				$result->add_data( array_merge( array( 'status' => 400 ), $progress( $job ) ) );
+
+				return $result;
+			}
+
+			return rest_ensure_response( array_merge( $progress( $job ), array( 'result' => $result ) ) );
+		}
+
+		if ( 'chrome' === $key ) {
+			$result = SiteAssembler::chrome( $job );
+
+			$job['completed']['chrome'] = true;
+			$job['done']                = 2 + count( $job['completed'] );
+
+			ImportSession::update_job( $job );
+
+			return rest_ensure_response( array_merge( $progress( $job ), array( 'result' => $result ) ) );
+		}
+
+		$report = SiteAssembler::finish( $job );
+
+		$job['completed']['finish'] = true;
+		$job['done']                = (int) $job['total'];
+
+		if ( is_wp_error( $report ) ) {
+			ImportSession::update_job( $job );
+			$report->add_data( array_merge( array( 'status' => 400 ), $progress( $job ) ) );
+
+			return $report;
+		}
+
+		/*
+		 * The design has done its job. Unless asked to keep it for another
+		 * run, the unpacked copy goes — it is the largest thing an import
+		 * leaves in uploads and nothing on the site refers to it.
+		 */
+		$archive_removed = false;
+
+		if ( empty( $job['keep_archive'] ) ) {
+			$archive_removed = DesignArchive::remove( $root );
+		}
+
+		ImportSession::end_job();
+
+		return rest_ensure_response(
+			array_merge(
+				$progress( $job ),
+				array(
+					'result'          => $report,
+					'archive_removed' => $archive_removed,
+					'summary'         => $this->import_summary(),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Publish pages a build created.
+	 *
+	 * Only pages carrying the import's own meta are touched; any other ID in
+	 * the list is ignored rather than published.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function publish_pages( WP_REST_Request $request ): WP_REST_Response {
+		$ids = $request->get_param( 'ids' );
+
+		return rest_ensure_response(
+			array(
+				'pages' => SiteAssembler::publish( is_array( $ids ) ? $ids : array() ),
+			)
+		);
+	}
+
+	/**
+	 * Delete every unpacked design from uploads.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function purge_designs(): WP_REST_Response {
+		$removed = DesignArchive::purge();
+
+		// Banked conversions refer to files that no longer exist.
+		ImportSession::forget();
+		ImportSession::end_job();
+
+		return rest_ensure_response(
+			array(
+				'removed' => $removed,
+				'archive' => DesignArchive::footprint(),
 			)
 		);
 	}
@@ -649,7 +1211,7 @@ final class Importer implements Module {
 				$markup = $this->with_media( $markup, $root, (string) $request->get_param( 'file' ) );
 			}
 
-			$results[] = array(
+			$result = array(
 				'position' => $position,
 				'label'    => isset( $page['sections'][ $position ] )
 					? (string) $page['sections'][ $position ]['label']
@@ -662,8 +1224,23 @@ final class Importer implements Module {
 				'summary'  => $item['summary'],
 				'editable' => $item['editable'],
 				'concerns' => $item['concerns'],
-				'preview'  => $valid ? $this->preview( $markup ) : '',
 			);
+
+			/*
+			 * A pasted section is banked exactly like a generated one: it
+			 * cost a conversation turn, and a closed tab should not lose it.
+			 */
+			if ( $valid ) {
+				ImportSession::remember(
+					(string) $request->get_param( 'slug' ),
+					(string) $request->get_param( 'file' ),
+					$position,
+					$result
+				);
+			}
+
+			$result['preview'] = $valid ? $this->preview( $markup ) : '';
+			$results[]         = $result;
 		}
 
 		return rest_ensure_response(
@@ -723,7 +1300,12 @@ final class Importer implements Module {
 			);
 		}
 
-		return rest_ensure_response( array( 'designs' => $designs ) );
+		return rest_ensure_response(
+			array(
+				'designs' => $designs,
+				'archive' => DesignArchive::footprint(),
+			)
+		);
 	}
 
 	/**
@@ -790,6 +1372,11 @@ final class Importer implements Module {
 	 * @return string|WP_Error
 	 */
 	private function design_root( string $slug ) {
+		// An empty slug would resolve to the base itself and "build" every design.
+		if ( ! $this->validate_slug( $slug ) ) {
+			return new WP_Error( 'wow_signal_unknown_design', __( 'That design is not on this site.', 'wow-signal' ), array( 'status' => 404 ) );
+		}
+
 		$base = DesignArchive::base_dir();
 
 		if ( is_wp_error( $base ) ) {
@@ -799,15 +1386,33 @@ final class Importer implements Module {
 		$real_base = realpath( $base );
 		$real_dir  = realpath( trailingslashit( $base ) . $slug );
 
-		if ( false === $real_base || false === $real_dir ) {
+		if ( false === $real_base || false === $real_dir || ! is_dir( $real_dir ) ) {
 			return new WP_Error( 'wow_signal_unknown_design', __( 'That design is not on this site.', 'wow-signal' ), array( 'status' => 404 ) );
 		}
 
-		if ( ! str_starts_with( str_replace( '\\', '/', $real_dir ), str_replace( '\\', '/', $real_base ) ) ) {
+		if ( ! $this->is_inside( $real_dir, $real_base ) ) {
 			return new WP_Error( 'wow_signal_unknown_design', __( 'That design is not on this site.', 'wow-signal' ), array( 'status' => 404 ) );
 		}
 
 		return $real_dir;
+	}
+
+	/**
+	 * Whether a resolved path is strictly inside a base directory.
+	 *
+	 * A plain prefix test would accept `/designs-evil` as being inside
+	 * `/designs`, and the base itself as being inside itself. Comparing with
+	 * a trailing separator on both sides rules both out.
+	 *
+	 * @param string $path Resolved absolute path.
+	 * @param string $base Resolved absolute base directory.
+	 * @return bool
+	 */
+	private function is_inside( string $path, string $base ): bool {
+		$path = rtrim( str_replace( '\\', '/', $path ), '/' );
+		$base = rtrim( str_replace( '\\', '/', $base ), '/' );
+
+		return $path !== $base && str_starts_with( $path . '/', $base . '/' );
 	}
 
 	/**
@@ -834,10 +1439,23 @@ final class Importer implements Module {
 
 		$sections = array();
 
+		$model = (string) get_option( self::OPTION_MODEL, AnthropicClient::DEFAULT_MODEL );
+		$held  = ImportSession::recall( (string) $request['slug'], (string) $request->get_param( 'file' ) );
+
 		foreach ( $page['sections'] as $section ) {
+			/*
+			 * The prompt for a section is its own markup plus the CSS rules
+			 * that match it — the same two pieces convert_section() sends. Its
+			 * size is therefore a real basis for a cost estimate rather than an
+			 * average, and it is measured here so the screen can total it up
+			 * before anybody presses anything.
+			 */
+			$prompt_chars = strlen( $section['html'] ) + strlen( $index->rules_for( $section['html'] ) );
+
 			// The markup and CSS stay on the server; the browser only needs a
 			// description of each section to draw the review list.
 			$sections[] = array(
+				'estimate' => Spend::estimate( $prompt_chars, $model ),
 				'position' => $section['position'],
 				'label'    => $section['label'],
 				'tag'      => $section['tag'],
@@ -854,6 +1472,25 @@ final class Importer implements Module {
 
 		unset( $index );
 
+		/*
+		 * Anything already converted for this page is handed back with the
+		 * section list, so reopening the screen resumes rather than restarts.
+		 * Previews are not stored — they are rebuilt here from the markup that
+		 * is, which costs nothing and keeps the stored record small.
+		 */
+		$resume = array();
+
+		foreach ( $held as $position => $result ) {
+			if ( ! is_array( $result ) ) {
+				continue;
+			}
+
+			$result['preview']            = ! empty( $result['valid'] ) && isset( $result['markup'] )
+				? $this->preview( (string) $result['markup'] )
+				: '';
+			$resume[ (string) $position ] = $result;
+		}
+
 		return rest_ensure_response(
 			array(
 				'title'     => $page['title'],
@@ -861,6 +1498,10 @@ final class Importer implements Module {
 				'hasHeader' => null !== $page['header'],
 				'hasFooter' => null !== $page['footer'],
 				'sections'  => $sections,
+				'resume'    => $resume,
+				'spend'     => Spend::totals(),
+				'limit'     => $this->rate_limit_status(),
+				'model'     => $model,
 			)
 		);
 	}
@@ -873,18 +1514,21 @@ final class Importer implements Module {
 	 * @return string|WP_Error
 	 */
 	private function page_path( string $root, string $file ) {
+		if ( ! $this->validate_file( $file ) ) {
+			return new WP_Error( 'wow_signal_no_page', __( 'That page is not in this design.', 'wow-signal' ), array( 'status' => 404 ) );
+		}
+
 		$candidate = realpath( trailingslashit( $root ) . ltrim( str_replace( '\\', '/', $file ), '/' ) );
 
-		if ( false === $candidate ) {
+		if ( false === $candidate || ! is_file( $candidate ) ) {
 			return new WP_Error( 'wow_signal_no_page', __( 'That page is not in this design.', 'wow-signal' ), array( 'status' => 404 ) );
 		}
 
-		$normalised_root = str_replace( '\\', '/', $root );
+		if ( ! $this->is_inside( $candidate, $root ) ) {
+			return new WP_Error( 'wow_signal_no_page', __( 'That page is not in this design.', 'wow-signal' ), array( 'status' => 404 ) );
+		}
+
 		$normalised_file = str_replace( '\\', '/', $candidate );
-
-		if ( ! str_starts_with( $normalised_file, $normalised_root ) ) {
-			return new WP_Error( 'wow_signal_no_page', __( 'That page is not in this design.', 'wow-signal' ), array( 'status' => 404 ) );
-		}
 
 		if ( ! preg_match( '#\.html?$#i', $normalised_file ) ) {
 			return new WP_Error( 'wow_signal_no_page', __( 'That is not an HTML page.', 'wow-signal' ), array( 'status' => 400 ) );
@@ -900,12 +1544,6 @@ final class Importer implements Module {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function convert_section( WP_REST_Request $request ) {
-		$limited = $this->hit_rate_limit();
-
-		if ( is_wp_error( $limited ) ) {
-			return $limited;
-		}
-
 		$root = $this->design_root( (string) $request->get_param( 'slug' ) );
 
 		if ( is_wp_error( $root ) ) {
@@ -934,7 +1572,16 @@ final class Importer implements Module {
 			return new WP_Error( 'wow_signal_no_section', __( 'That section is no longer in the page.', 'wow-signal' ), array( 'status' => 404 ) );
 		}
 
+		// Only a request that will actually reach the API counts against the hour.
+		$limited = $this->hit_rate_limit();
+
+		if ( is_wp_error( $limited ) ) {
+			return $limited;
+		}
+
 		$css = CssIndex::from_directory( $root, $page['styles'] )->rules_for( $section['html'] );
+
+		$model = (string) get_option( self::OPTION_MODEL, AnthropicClient::DEFAULT_MODEL );
 
 		$reply = AnthropicClient::generate(
 			ConversionPrompt::system(),
@@ -949,7 +1596,7 @@ final class Importer implements Module {
 			),
 			ConversionPrompt::schema(),
 			array(
-				'model'  => (string) get_option( self::OPTION_MODEL, AnthropicClient::DEFAULT_MODEL ),
+				'model'  => $model,
 				'effort' => (string) get_option( self::OPTION_EFFORT, 'high' ),
 			)
 		);
@@ -966,19 +1613,52 @@ final class Importer implements Module {
 			$markup = $this->with_media( $markup, $root, (string) $request->get_param( 'file' ) );
 		}
 
-		return rest_ensure_response(
-			array(
-				'valid'    => $valid,
-				'errors'   => $validator->errors(),
-				'notes'    => $valid ? $validator->review( $markup ) : array(),
-				'markup'   => $valid ? $markup : '',
-				'summary'  => isset( $reply['summary'] ) ? (string) $reply['summary'] : '',
-				'editable' => isset( $reply['editable'] ) && is_array( $reply['editable'] ) ? array_map( 'strval', $reply['editable'] ) : array(),
-				'concerns' => isset( $reply['concerns'] ) && is_array( $reply['concerns'] ) ? array_map( 'strval', $reply['concerns'] ) : array(),
-				'preview'  => $valid ? $this->preview( $markup ) : '',
-				'usage'    => isset( $reply['_usage'] ) ? $reply['_usage'] : array(),
-			)
+		$usage = isset( $reply['_usage'] ) && is_array( $reply['_usage'] ) ? $reply['_usage'] : array();
+
+		/*
+		 * Bill the model that answered, not the one that was asked for: a
+		 * server-side fallback can hand the request to a different model.
+		 */
+		$billed   = isset( $reply['_model'] ) && '' !== (string) $reply['_model'] ? (string) $reply['_model'] : $model;
+		$concerns = isset( $reply['concerns'] ) && is_array( $reply['concerns'] ) ? array_map( 'strval', $reply['concerns'] ) : array();
+
+		if ( ! Spend::knows( $billed ) ) {
+			$concerns[] = sprintf(
+				/* translators: %s: model ID. */
+				__( 'This reply came from %s, which has no known price — its cost is recorded as zero.', 'wow-signal' ),
+				$billed
+			);
+		}
+
+		$result = array(
+			'valid'    => $valid,
+			'errors'   => $validator->errors(),
+			'notes'    => $valid ? $validator->review( $markup ) : array(),
+			'markup'   => $valid ? $markup : '',
+			'summary'  => isset( $reply['summary'] ) ? (string) $reply['summary'] : '',
+			'editable' => isset( $reply['editable'] ) && is_array( $reply['editable'] ) ? array_map( 'strval', $reply['editable'] ) : array(),
+			'concerns' => $concerns,
+			'usage'    => $usage,
+			'model'    => $billed,
+			'cost'     => Spend::cost( $usage, $billed ),
 		);
+
+		/*
+		 * The reply is banked before it is returned. A conversion that has been
+		 * paid for should survive the browser it was requested from.
+		 */
+		ImportSession::remember(
+			(string) $request->get_param( 'slug' ),
+			(string) $request->get_param( 'file' ),
+			$position,
+			$result
+		);
+
+		$result['preview'] = $valid ? $this->preview( $markup ) : '';
+		$result['spend']   = Spend::record( $usage, $billed );
+		$result['limit']   = $this->rate_limit_status();
+
+		return rest_ensure_response( $result );
 	}
 
 	/**
@@ -1048,10 +1728,9 @@ final class Importer implements Module {
 	 * @return true|WP_Error
 	 */
 	private function hit_rate_limit() {
-		$key   = 'wow_signal_convert_' . get_current_user_id();
-		$count = (int) get_transient( $key );
+		$status = $this->rate_limit_status();
 
-		if ( $count >= self::RATE_LIMIT ) {
+		if ( $status['remaining'] < 1 ) {
 			return new WP_Error(
 				'wow_signal_rate_limit',
 				sprintf(
@@ -1063,9 +1742,86 @@ final class Importer implements Module {
 			);
 		}
 
-		set_transient( $key, $count + 1, HOUR_IN_SECONDS );
+		$remaining = max( 1, self::WINDOW - ( time() - $status['started'] ) );
+
+		set_transient(
+			$this->rate_limit_key(),
+			array(
+				'count'   => $status['used'] + 1,
+				'started' => $status['started'],
+			),
+			$remaining
+		);
 
 		return true;
+	}
+
+	/**
+	 * The transient holding this user's conversion count.
+	 *
+	 * @return string
+	 */
+	private function rate_limit_key(): string {
+		return 'wow_signal_convert_' . get_current_user_id();
+	}
+
+	/**
+	 * How much of the hourly allowance is left, and when it comes back.
+	 *
+	 * The limit worked before this existed, but silently: the only way to learn
+	 * about it was to run into it mid-run. The window start is kept inside the
+	 * stored value rather than read off the transient's expiry, because a site
+	 * with a persistent object cache does not expose that expiry at all.
+	 *
+	 * @return array{limit:int,used:int,remaining:int,started:int,resets_in:int}
+	 */
+	private function rate_limit_status(): array {
+		$stored = get_transient( $this->rate_limit_key() );
+
+		// Before 1.2.0 the transient held a bare count and no window start.
+		$used    = is_array( $stored ) ? (int) ( $stored['count'] ?? 0 ) : (int) $stored;
+		$started = is_array( $stored ) ? (int) ( $stored['started'] ?? 0 ) : 0;
+
+		// A window that has run out starts afresh, whatever it held.
+		if ( 0 === $used || $started < 1 || time() - $started >= self::WINDOW ) {
+			$used    = 0;
+			$started = time();
+		}
+
+		$elapsed = max( 0, time() - $started );
+
+		return array(
+			'limit'     => self::RATE_LIMIT,
+			'used'      => $used,
+			'remaining' => max( 0, self::RATE_LIMIT - $used ),
+			'started'   => $started,
+			'resets_in' => max( 0, self::WINDOW - $elapsed ),
+		);
+	}
+
+	/**
+	 * Throw away the conversions banked for the current page.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function forget_session(): WP_REST_Response {
+		ImportSession::forget();
+
+		return rest_ensure_response( array( 'cleared' => true ) );
+	}
+
+	/**
+	 * Put the running spend total back to zero.
+	 *
+	 * This clears the record of what was spent; it does not refund anything,
+	 * and the wording on the screen says so.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function reset_spend(): WP_REST_Response {
+		Spend::reset();
+
+		return rest_ensure_response( array( 'spend' => Spend::totals() ) );
 	}
 
 	/**

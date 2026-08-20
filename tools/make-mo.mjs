@@ -23,6 +23,13 @@ import { createHash } from 'node:crypto';
 const root = resolve( dirname( fileURLToPath( import.meta.url ) ), '..' );
 const DOMAIN = 'wow-signal';
 
+/** The theme version, read from the one place that owns it: style.css. */
+const VERSION = ( () => {
+	const header = readFileSync( resolve( root, 'style.css' ), 'utf8' ).slice( 0, 2048 );
+	const match = header.match( /^\s*(?:\*\s*)?Version:\s*(.+)$/m );
+	return match ? match[ 1 ].trim() : '0.0.0';
+} )();
+
 /*
  * gettext separators. A contextual string is keyed as
  *   context + EOT + msgid
@@ -170,7 +177,7 @@ for ( const file of locales ) {
 		'# This file is distributed under the GNU General Public License v2 or later.',
 		'msgid ""',
 		'msgstr ""',
-		'"Project-Id-Version: WOW — Signal 1.0.0\\n"',
+		`"Project-Id-Version: WOW — Signal ${ VERSION }\\n"`,
 		'"MIME-Version: 1.0\\n"',
 		'"Content-Type: text/plain; charset=UTF-8\\n"',
 		'"Content-Transfer-Encoding: 8bit\\n"',
@@ -182,7 +189,7 @@ for ( const file of locales ) {
 	];
 
 	const moHeader = [
-		'Project-Id-Version: WOW — Signal 1.0.0',
+		`Project-Id-Version: WOW — Signal ${ VERSION }`,
 		'MIME-Version: 1.0',
 		'Content-Type: text/plain; charset=UTF-8',
 		'Content-Transfer-Encoding: 8bit',

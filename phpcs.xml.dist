@@ -8,6 +8,17 @@
 	<exclude-pattern>/node_modules/*</exclude-pattern>
 	<exclude-pattern>/artifacts/*</exclude-pattern>
 	<exclude-pattern>/languages/*</exclude-pattern>
+	<exclude-pattern>/designs/*</exclude-pattern>
+	<exclude-pattern>/design-reference/*</exclude-pattern>
+
+	<!--
+		The quality gates themselves. tools/ holds command-line scripts that
+		never ship (build-zip.mjs strips the folder) and never run inside
+		WordPress: they print to a terminal rather than to a page, so the output
+		escaping and global-prefix rules have nothing to protect there. Their
+		correctness is checked by running them, which is the point of them.
+	-->
+	<exclude-pattern>/tools/*</exclude-pattern>
 
 	<arg name="basepath" value="."/>
 	<arg name="colors"/>

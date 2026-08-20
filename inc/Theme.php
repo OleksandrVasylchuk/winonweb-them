@@ -113,12 +113,17 @@ final class Theme {
 			Modules\ContactForm::class,
 			Modules\Credit::class,
 			Modules\Branding::class,
+			Modules\Onboarding::class,
 			Modules\Importer::class,
+			Modules\SiteHealth::class,
+			Modules\Updates::class,
 		);
 
 		// WooCommerce support is inert unless the plugin is actually active.
 		if ( class_exists( 'WooCommerce' ) ) {
 			$classes[] = Modules\WooCommerce::class;
+		} else {
+			Modules\WooCommerce::hide_shop_templates();
 		}
 
 		/**

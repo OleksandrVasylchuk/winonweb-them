@@ -16,7 +16,7 @@
 }
 
 .editor-styles-wrapper .wow-slider.is-editor .wow-slider__track > .block-editor-block-list__block {
-	flex: 0 1 min(var(--wow-slide-width, 22rem), 100%);
+	flex: 0 1 min(var(--wow-slide-width, var(--wp--custom--slider--slide-width)), 100%);
 	margin: 0;
 }
 

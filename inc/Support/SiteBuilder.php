@@ -42,12 +42,76 @@ final class SiteBuilder {
 	 *
 	 * @var array<int, string>
 	 */
-	private const IMAGE_TYPES = array( 'jpg', 'jpeg', 'png', 'webp', 'avif', 'gif' );
+	private const IMAGE_TYPES = array( 'jpg', 'jpeg', 'png', 'webp', 'avif', 'gif', 'svg' );
 
 	/**
 	 * Largest image accepted, in bytes.
 	 */
 	private const MAX_IMAGE_BYTES = 12582912;
+
+	/**
+	 * Directory, under the design root, where inline images are written out.
+	 */
+	private const INLINE_DIR = '_inline';
+
+	/**
+	 * SVG elements allowed through the sanitiser. Anything else is removed.
+	 *
+	 * @var array<int, string>
+	 */
+	private const SVG_ELEMENTS = array(
+		'svg',
+		'g',
+		'path',
+		'rect',
+		'circle',
+		'ellipse',
+		'line',
+		'polyline',
+		'polygon',
+		'text',
+		'tspan',
+		'textpath',
+		'defs',
+		'lineargradient',
+		'radialgradient',
+		'stop',
+		'clippath',
+		'mask',
+		'use',
+		'symbol',
+		'title',
+		'desc',
+		'pattern',
+		'marker',
+		'image',
+		'filter',
+		'feblend',
+		'fecolormatrix',
+		'fecomponenttransfer',
+		'fecomposite',
+		'feconvolvematrix',
+		'fediffuselighting',
+		'fedisplacementmap',
+		'fedistantlight',
+		'fedropshadow',
+		'feflood',
+		'fefunca',
+		'fefuncb',
+		'fefuncg',
+		'fefuncr',
+		'fegaussianblur',
+		'feimage',
+		'femerge',
+		'femergenode',
+		'femorphology',
+		'feoffset',
+		'fepointlight',
+		'fespecularlighting',
+		'fespotlight',
+		'fetile',
+		'feturbulence',
+	);
 
 	/**
 	 * Copy a design's images into the Media Library.
@@ -69,6 +133,9 @@ final class SiteBuilder {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		// Pictures pasted straight into the markup become files first.
+		self::materialise_data_uris( $root );
 
 		$found = self::collect_images( $root );
 		$map   = array();
@@ -97,6 +164,83 @@ final class SiteBuilder {
 		}
 
 		return $map;
+	}
+
+	/**
+	 * Write images embedded as data: URIs out to files the importer can see.
+	 *
+	 * A design tool that lets someone paste a screenshot stores it inside the
+	 * page as base64. The converter and the Media Library both work in files,
+	 * so each such picture is decoded once into `_inline/` under the design
+	 * root and the markup is rewritten to point at it. Re-running is a no-op:
+	 * the file is named by its content, and a page with no data: URIs left is
+	 * not touched.
+	 *
+	 * @param string $root Design root directory.
+	 * @return int How many images were written out.
+	 */
+	public static function materialise_data_uris( string $root ): int {
+		$root = rtrim( str_replace( '\\', '/', $root ), '/' );
+
+		if ( ! is_dir( $root ) ) {
+			return 0;
+		}
+
+		$iterator = new \RecursiveIteratorIterator(
+			new \RecursiveDirectoryIterator( $root, \FilesystemIterator::SKIP_DOTS )
+		);
+
+		$written = 0;
+
+		foreach ( $iterator as $file ) {
+			if ( ! $file->isFile() || 1 !== preg_match( '/\.html?$/i', $file->getFilename() ) ) {
+				continue;
+			}
+
+			$path = str_replace( '\\', '/', $file->getPathname() );
+			$html = (string) file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+
+			if ( ! str_contains( $html, 'data:image/' ) ) {
+				continue;
+			}
+
+			$rewritten = (string) preg_replace_callback(
+				'#(\s(?:src|data-src|href|poster)=")data:image/(png|jpeg|jpg|webp|gif);base64,([A-Za-z0-9+/=\s]+)(")#i',
+				static function ( array $found ) use ( $root, &$written ): string {
+					$ext   = 'jpg' === strtolower( $found[2] ) ? 'jpeg' : strtolower( $found[2] );
+					$bytes = base64_decode( (string) preg_replace( '/\s+/', '', $found[3] ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Decoding an inline image a design tool embedded; the bytes are written to a file, never executed.
+
+					if ( false === $bytes || '' === $bytes || strlen( $bytes ) > self::MAX_IMAGE_BYTES ) {
+						return $found[0];
+					}
+
+					$rel  = self::INLINE_DIR . '/' . sha1( $bytes ) . '.' . $ext;
+					$dest = $root . '/' . $rel;
+
+					if ( ! is_dir( dirname( $dest ) ) && ! wp_mkdir_p( dirname( $dest ) ) ) {
+						return $found[0];
+					}
+
+					if ( ! is_file( $dest ) ) {
+						if ( false === file_put_contents( $dest, $bytes ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Writing into the importer's own unpacked design.
+							return $found[0];
+						}
+
+						++$written;
+					}
+
+					// The page's own directory may be below the root.
+					return $found[1] . $rel . $found[4];
+				},
+				$html
+			);
+
+			if ( $rewritten !== $html ) {
+				file_put_contents( $path, $rewritten ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Rewriting the importer's own unpacked design.
+			}
+		}
+
+		return $written;
 	}
 
 	/**
@@ -218,14 +362,52 @@ final class SiteBuilder {
 
 		$name = wp_unique_filename( $uploads['path'], basename( $rel ) );
 		$dest = trailingslashit( $uploads['path'] ) . $name;
+		$svg  = 'svg' === strtolower( pathinfo( $rel, PATHINFO_EXTENSION ) );
 
-		if ( ! copy( $path, $dest ) ) {
+		if ( $svg ) {
+			/*
+			 * Vector files are the one format that can carry a script, so
+			 * they never go in as they came: the file written to the library
+			 * is the sanitised copy, and one that fails sanitising is refused.
+			 */
+			$clean = self::sanitise_svg( (string) file_get_contents( $path ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+
+			if ( null === $clean ) {
+				return new WP_Error( 'wow_signal_svg_rejected', $rel );
+			}
+
+			if ( false === file_put_contents( $dest, $clean ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Writing the sanitised copy into the uploads directory.
+				return new WP_Error( 'wow_signal_copy', $rel );
+			}
+		} elseif ( ! copy( $path, $dest ) ) {
 			return new WP_Error( 'wow_signal_copy', $rel );
+		}
+
+		$allow_svg = static function ( $mimes ): array {
+			$mimes        = is_array( $mimes ) ? $mimes : array();
+			$mimes['svg'] = 'image/svg+xml';
+
+			return $mimes;
+		};
+
+		// Scoped to this one call: the site's own upload policy is unchanged.
+		if ( $svg ) {
+			add_filter( 'upload_mimes', $allow_svg );
 		}
 
 		$type = wp_check_filetype( $dest );
 
-		if ( empty( $type['type'] ) ) {
+		if ( $svg ) {
+			remove_filter( 'upload_mimes', $allow_svg );
+		}
+
+		$mime = (string) ( $type['type'] ?? '' );
+
+		if ( '' === $mime && $svg ) {
+			$mime = 'image/svg+xml';
+		}
+
+		if ( '' === $mime ) {
 			wp_delete_file( $dest );
 
 			return new WP_Error( 'wow_signal_filetype', $rel );
@@ -233,7 +415,7 @@ final class SiteBuilder {
 
 		$id = wp_insert_attachment(
 			array(
-				'post_mime_type' => $type['type'],
+				'post_mime_type' => $mime,
 				'post_title'     => self::title_from( $rel ),
 				'post_content'   => '',
 				'post_status'    => 'inherit',
@@ -249,7 +431,11 @@ final class SiteBuilder {
 			return $id;
 		}
 
-		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $dest ) );
+		$metadata = $svg
+			? self::svg_metadata( $dest, $uploads )
+			: wp_generate_attachment_metadata( $id, $dest );
+
+		wp_update_attachment_metadata( $id, $metadata );
 		update_post_meta( $id, self::SOURCE_META, $rel );
 
 		if ( '' !== $alt ) {
@@ -257,6 +443,170 @@ final class SiteBuilder {
 		}
 
 		return (int) $id;
+	}
+
+	/**
+	 * Attachment metadata for a vector file, so the editor knows its size.
+	 *
+	 * WordPress's own generator reads pixels and finds none in an SVG. The
+	 * viewBox, or the width and height attributes, say what the editor needs.
+	 *
+	 * @param string               $dest    Absolute path in the uploads directory.
+	 * @param array<string, mixed> $uploads wp_upload_dir() result.
+	 * @return array<string, mixed>
+	 */
+	private static function svg_metadata( string $dest, array $uploads ): array {
+		$size = self::svg_size( (string) file_get_contents( $dest ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Reading the file just written.
+
+		$base = rtrim( str_replace( '\\', '/', (string) $uploads['basedir'] ), '/' );
+		$file = ltrim( substr( str_replace( '\\', '/', $dest ), strlen( $base ) ), '/' );
+
+		return array(
+			'width'    => $size[0],
+			'height'   => $size[1],
+			'file'     => $file,
+			'filesize' => (int) filesize( $dest ),
+			'sizes'    => array(),
+		);
+	}
+
+	/**
+	 * The intrinsic size declared by an SVG, in whole pixels.
+	 *
+	 * @param string $svg File contents.
+	 * @return array{0:int,1:int}
+	 */
+	private static function svg_size( string $svg ): array {
+		if ( 1 !== preg_match( '/<svg\b[^>]*>/i', $svg, $open ) ) {
+			return array( 0, 0 );
+		}
+
+		$tag    = $open[0];
+		$width  = 0;
+		$height = 0;
+
+		if ( 1 === preg_match( '/\swidth="([\d.]+)(?:px)?"/i', $tag, $w ) && 1 === preg_match( '/\sheight="([\d.]+)(?:px)?"/i', $tag, $h ) ) {
+			$width  = (int) round( (float) $w[1] );
+			$height = (int) round( (float) $h[1] );
+		}
+
+		if ( ( 0 === $width || 0 === $height ) && 1 === preg_match( '/\sviewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*"/i', $tag, $box ) ) {
+			$width  = (int) round( (float) $box[1] );
+			$height = (int) round( (float) $box[2] );
+		}
+
+		return array( max( 0, $width ), max( 0, $height ) );
+	}
+
+	/**
+	 * Reduce an SVG to the drawing instructions and nothing else.
+	 *
+	 * An SVG is a document, and a document can run code: in a script
+	 * element, in an event attribute, in a foreignObject holding HTML, in a
+	 * reference to something on another server. None of those draw anything,
+	 * so the sanitiser keeps an allowlist of drawing elements, drops every
+	 * attribute that starts with "on", and only follows references to the
+	 * file itself or to an embedded raster. A file that is not an SVG at the
+	 * root, or that declares a DOCTYPE (the entity-expansion route), is
+	 * refused outright rather than repaired.
+	 *
+	 * @param string $svg Raw file contents.
+	 * @return string|null Cleaned markup, or null when the file is refused.
+	 */
+	public static function sanitise_svg( string $svg ): ?string {
+		$svg = trim( $svg );
+
+		// Strip a UTF-8 byte-order mark, which libxml treats as content.
+		if ( str_starts_with( $svg, "\xEF\xBB\xBF" ) ) {
+			$svg = substr( $svg, 3 );
+		}
+
+		if ( '' === $svg || 1 === preg_match( '/<!DOCTYPE/i', $svg ) || 1 === preg_match( '/<!ENTITY/i', $svg ) ) {
+			return null;
+		}
+
+		$previous = libxml_use_internal_errors( true );
+		$dom      = new \DOMDocument();
+
+		$loaded = $dom->loadXML( $svg, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NOCDATA );
+
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous );
+
+		$root = $dom->documentElement;
+
+		if ( ! $loaded || ! $root instanceof \DOMElement || 'svg' !== strtolower( $root->localName ) ) {
+			return null;
+		}
+
+		// Walk a snapshot: removing while iterating a live list skips nodes.
+		$elements = iterator_to_array( $dom->getElementsByTagName( '*' ) );
+
+		foreach ( $elements as $element ) {
+			if ( ! $element instanceof \DOMElement ) {
+				continue;
+			}
+
+			if ( ! in_array( strtolower( $element->localName ), self::SVG_ELEMENTS, true ) ) {
+				if ( $element->parentNode instanceof \DOMNode ) {
+					$element->parentNode->removeChild( $element );
+				}
+
+				continue;
+			}
+
+			foreach ( iterator_to_array( $element->attributes ) as $attribute ) {
+				if ( ! $attribute instanceof \DOMAttr ) {
+					continue;
+				}
+
+				$name  = strtolower( $attribute->name );
+				$value = trim( $attribute->value );
+
+				if ( str_starts_with( $name, 'on' ) || ! self::svg_attribute_is_safe( $name, $value ) ) {
+					$element->removeAttributeNode( $attribute );
+				}
+			}
+		}
+
+		// Processing instructions can load a stylesheet from anywhere.
+		foreach ( iterator_to_array( $dom->childNodes ) as $node ) {
+			if ( XML_PI_NODE === $node->nodeType ) {
+				$dom->removeChild( $node );
+			}
+		}
+
+		$out = $dom->saveXML( $root );
+
+		return is_string( $out ) && '' !== $out ? $out : null;
+	}
+
+	/**
+	 * Whether one SVG attribute may stay.
+	 *
+	 * @param string $name  Attribute name, lower-cased.
+	 * @param string $value Attribute value.
+	 * @return bool
+	 */
+	private static function svg_attribute_is_safe( string $name, string $value ): bool {
+		$is_reference = 'href' === $name || 'xlink:href' === $name || str_ends_with( $name, ':href' );
+
+		if ( $is_reference ) {
+			if ( str_starts_with( $value, '#' ) ) {
+				return true;
+			}
+
+			return 1 === preg_match( '#^data:image/(png|jpe?g|gif|webp);base64,#i', $value );
+		}
+
+		// url(...) inside a style or a paint must point at the file itself.
+		$lowered = strtolower( $value );
+
+		if ( str_contains( $lowered, 'url(' ) && 1 !== preg_match( '/url\(\s*["\']?#/', $lowered ) ) {
+			return false;
+		}
+
+		return ! str_contains( $lowered, 'javascript:' ) && ! str_contains( $lowered, '&#' ) && ! str_contains( $lowered, '@import' );
 	}
 
 	/**
@@ -288,12 +638,35 @@ final class SiteBuilder {
 			return $markup;
 		}
 
-		return (string) preg_replace_callback(
+		$markup = (string) preg_replace_callback(
 			'#(src|srcset)="([^"]+)"#i',
 			static function ( array $found ) use ( $map, $page_dir ): string {
 				$resolved = self::resolve( $found[2], $map, $page_dir );
 
 				return null === $resolved ? $found[0] : $found[1] . '="' . esc_url( $resolved['url'] ) . '"';
+			},
+			$markup
+		);
+
+		/*
+		 * A cover block carries its picture twice: once as the <img> just
+		 * handled, and once as a JSON attribute in the block comment, which
+		 * the editor reads. Both have to agree or the editor shows a broken
+		 * image over a perfectly good one.
+		 */
+		return (string) preg_replace_callback(
+			'#(<!-- wp:cover \{[^\n]*?"url":")([^"]+)(")#',
+			static function ( array $found ) use ( $map, $page_dir ): string {
+				$resolved = self::resolve( str_replace( '\/', '/', $found[2] ), $map, $page_dir );
+
+				if ( null === $resolved ) {
+					return $found[0];
+				}
+
+				$encoded = wp_json_encode( esc_url( $resolved['url'] ) );
+				$encoded = is_string( $encoded ) ? trim( $encoded, '"' ) : '';
+
+				return '' === $encoded ? $found[0] : $found[1] . $encoded . $found[3];
 			},
 			$markup
 		);

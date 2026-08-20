@@ -15,7 +15,7 @@
 		},
 		"slideWidth": {
 			"type": "string",
-			"default": "22rem"
+			"default": "var(--wp--custom--slider--slide-width)"
 		}
 	},
 	"supports": {

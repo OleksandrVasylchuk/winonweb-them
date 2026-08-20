@@ -25,6 +25,65 @@ defined( 'ABSPATH' ) || exit;
 final class WooCommerce implements Module {
 
 	/**
+	 * Template slugs in /templates that only make sense with a shop.
+	 */
+	private const SHOP_TEMPLATES = array(
+		'cart',
+		'checkout',
+		'single-product',
+		'archive-product',
+		'product-search-results',
+		'taxonomy-product_cat',
+		'taxonomy-product_tag',
+	);
+
+	/**
+	 * Hide the shop templates when WooCommerce is not installed.
+	 *
+	 * The module itself is never booted without WooCommerce (see Theme), but
+	 * the template files still ship in /templates, so without this guard a
+	 * plain page with the slug `cart` or `checkout` would resolve to an empty
+	 * shop template and the Site Editor would list seven templates nobody can
+	 * use. This is the one always-on piece of the module; Theme calls it
+	 * instead of register() when the plugin is absent.
+	 *
+	 * @return void
+	 */
+	public static function hide_shop_templates(): void {
+		add_filter(
+			'get_block_templates',
+			/**
+			 * Drop the shop templates from template queries.
+			 *
+			 * Only `wp_template` queries are touched: a template *part* a site
+			 * happens to name "cart" is none of this filter's business.
+			 *
+			 * @param array<int, \WP_Block_Template> $templates     Found templates.
+			 * @param array<string, mixed>           $query         Query arguments.
+			 * @param string                         $template_type wp_template or wp_template_part.
+			 * @return array<int, \WP_Block_Template>
+			 */
+			static function ( $templates, $query = array(), $template_type = 'wp_template' ) {
+				unset( $query );
+
+				if ( ! is_array( $templates ) || 'wp_template' !== $template_type ) {
+					return $templates;
+				}
+
+				return array_values(
+					array_filter(
+						$templates,
+						static fn( $template ): bool => ! ( $template instanceof \WP_Block_Template )
+							|| ! in_array( $template->slug, self::SHOP_TEMPLATES, true )
+					)
+				);
+			},
+			10,
+			3
+		);
+	}
+
+	/**
 	 * Hook the module.
 	 *
 	 * @return void

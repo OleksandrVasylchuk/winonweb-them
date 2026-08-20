@@ -29,11 +29,13 @@ if ( '' === $wow_value && '' === trim( wp_strip_all_tags( $wow_label ) ) ) {
 }
 
 /*
- * Only a plain number can be counted up. "4.9" or "150" animate; "24/7" or
- * "A+" are shown as-is, which is why the numeric test drives the data
- * attribute rather than the editor's toggle alone.
+ * Only a plain number can be counted up: digits, optional thousands spaces
+ * and an optional dot decimal ("4.9", "150", "12 500"). Anything else —
+ * "24/7", "A+", "4,9" — is shown as-is. The same regex lives in view.js and
+ * edit.js so PHP, the animation and the editor never disagree about what is
+ * countable.
  */
-$wow_numeric   = is_numeric( str_replace( array( ' ', ',' ), array( '', '.' ), $wow_value ) );
+$wow_numeric   = 1 === preg_match( '/^\d[\d\s]*(\.\d+)?$/D', $wow_value );
 $wow_countable = $wow_anim && $wow_numeric && '' !== $wow_value;
 
 // The full string a screen reader should hear, in reading order.

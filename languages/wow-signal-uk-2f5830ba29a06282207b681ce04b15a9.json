@@ -1,6 +1,6 @@
 {
 	"domain": "messages",
-	"translation-revision-date": "2026-08-16T14:54:58+0000",
+	"translation-revision-date": "2026-08-20T13:01:00+0000",
 	"generator": "wow-signal/make-mo.mjs",
 	"locale_data": {
 		"messages": {
@@ -9,6 +9,9 @@
 				"lang": "uk",
 				"plural-forms": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 			},
+			"Add a question to start the FAQ.": [
+				"Додайте запитання, щоб почати FAQ."
+			],
 			"FAQ settings": [
 				"Налаштування FAQ"
 			],

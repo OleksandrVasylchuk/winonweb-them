@@ -1,0 +1,54 @@
+<x-dc>
+<helmet>
+	<title>Fixture Co — Signal for small teams</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Sora:wght@700&family=IBM+Plex+Sans:wght@400&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="styles.css">
+	<script src="data.js"></script>
+</helmet>
+
+<dc-import name="SiteNav" hint-size="100%,70px"></dc-import>
+
+<div class="hero">
+	<p class="eyebrow">Fixture Co</p>
+	<h1>Ship the signal, not the noise</h1>
+	<p class="lede">A small, fast site for a team that would rather be building than maintaining a website.</p>
+	<a class="button" href="Contact.dc.html">Start a project</a>
+	<hero-viz data-speed="slow"></hero-viz>
+</div>
+
+<section class="band" style="background-image:url(img/band.jpg)">
+	<h2>Built on a dark band</h2>
+	<p>This section carries an inline background image, the way exported designs usually do. It should become a cover block.</p>
+</section>
+
+<section class="posts">
+	<h2>Latest from the workshop</h2>
+	<div class="grid">
+		<sc-for list="{{ posts }}" as="p">
+			<article class="card">
+				<img src="{{ p.img }}" alt="{{ p.title }}">
+				<h3>{{ p.title }}</h3>
+				<p>{{ p.summary }}</p>
+			</article>
+		</sc-for>
+	</div>
+</section>
+
+<section class="proof">
+	<h2>Why teams stay</h2>
+	<p class="metric"><b>46,000+</b> messages delivered through forms like the one on the contact page.</p>
+	<dl class="faq">
+		<dt>Does the site work without JavaScript?</dt>
+		<dd>Yes. Every interactive piece has a plain HTML fallback.</dd>
+		<dt>Can we edit it ourselves?</dt>
+		<dd>Everything is a block. Open the Site Editor and change what you like.</dd>
+	</dl>
+	<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="A single pixel of trust" width="1" height="1"></p>
+</section>
+
+<dc-import name="NewsletterPopup" hint-size="0px,0px"></dc-import>
+<dc-import name="SiteFooter" hint-size="100%,300px"></dc-import>
+</x-dc>

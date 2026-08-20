@@ -10,6 +10,9 @@
 
 	var DURATION = 1100;
 
+	// Mirrors render.php and edit.js: digits, optional thousands spaces, dot decimal.
+	var COUNTABLE = /^\d[\d\s]*(\.\d+)?$/;
+
 	function prefersReducedMotion() {
 		return (
 			window.matchMedia &&
@@ -20,7 +23,7 @@
 	/** Match the source formatting (decimals, thousands separators). */
 	function formatter( raw ) {
 		var decimals = ( raw.split( '.' )[ 1 ] || '' ).length;
-		var grouped = raw.indexOf( ',' ) > -1 || raw.indexOf( ' ' ) > -1;
+		var grouped = raw.indexOf( ' ' ) > -1;
 
 		return function ( value ) {
 			var text = value.toFixed( decimals );
@@ -37,10 +40,15 @@
 
 	function animate( figure ) {
 		var raw = figure.getAttribute( 'data-wow-count-to' ) || '';
-		var target = parseFloat( raw.replace( /[\s,]/g, '' ).replace( ',', '.' ) );
 		var number = figure.querySelector( '.wow-metric__number' );
 
-		if ( ! number || isNaN( target ) ) {
+		if ( ! number || ! COUNTABLE.test( raw ) ) {
+			return;
+		}
+
+		var target = parseFloat( raw.replace( /\s/g, '' ) );
+
+		if ( isNaN( target ) ) {
 			return;
 		}
 

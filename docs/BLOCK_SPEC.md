@@ -94,7 +94,7 @@ finds. No registration code is ever needed.
 <?php
 return array(
 	'dependencies' => array( 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-element', 'wp-i18n' ),
-	'version'      => '1.0.0',
+	'version'      => WOW_SIGNAL_VERSION,
 );
 ```
 
@@ -246,7 +246,7 @@ Rules:
 ## 8. Definition of done
 
 ```
-npm run test        # contrast + block markup + PHPCS all clean
+npm run test        # contrast + block markup + PHPCS + unit tests, all clean
 ```
 
 plus, against a running site:

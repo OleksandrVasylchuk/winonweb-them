@@ -1,6 +1,6 @@
 {
 	"domain": "messages",
-	"translation-revision-date": "2026-08-16T14:54:58+0000",
+	"translation-revision-date": "2026-08-20T13:01:00+0000",
 	"generator": "wow-signal/make-mo.mjs",
 	"locale_data": {
 		"messages": {
@@ -10,7 +10,7 @@
 				"plural-forms": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 			},
 			"Metric": [
-				"Показник"
+				"Метрика"
 			],
 			"Number": [
 				"Число"
@@ -31,16 +31,13 @@
 				"Необовʼязково, наприклад % або +."
 			],
 			"Count up when it scrolls into view": [
-				"Рахувати вгору при появі на екрані"
+				"Відлічувати вгору, коли зʼявляється на екрані"
 			],
 			"Visitors who ask their device for reduced motion always see the final number straight away.": [
 				"Відвідувачі, які увімкнули зменшення анімації, одразу бачать кінцеве число."
 			],
 			"This number is not a plain figure, so it will be shown without counting.": [
 				"Це не звичайне число, тож воно показуватиметься без підрахунку."
-			],
-			"00": [
-				"00"
 			],
 			"What the number means…": [
 				"Що означає це число…"

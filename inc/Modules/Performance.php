@@ -29,11 +29,34 @@ final class Performance implements Module {
 		add_filter( 'jpeg_quality', array( $this, 'image_quality' ) );
 		add_filter( 'wp_editor_set_quality', array( $this, 'image_quality' ) );
 		add_filter( 'wp_get_attachment_image_attributes', array( $this, 'image_attributes' ), 10, 3 );
-		add_filter( 'wp_omit_loading_attr_threshold', array( $this, 'lcp_threshold' ) );
-		add_filter( 'wp_lazy_loading_enabled', array( $this, 'lazy_loading' ), 10, 2 );
-		add_action( 'wp_head', array( $this, 'speculation_rules' ), 1 );
+		add_filter( 'wp_lazy_loading_enabled', array( $this, 'lazy_loading' ), 10, 3 );
 		add_filter( 'wp_resource_hints', array( $this, 'resource_hints' ), 10, 2 );
+
+		if ( function_exists( 'wp_get_speculation_rules' ) ) {
+			// WordPress 6.8+ prints its own speculation rules; only tune them.
+			add_filter( 'wp_speculation_rules_configuration', array( $this, 'speculation_configuration' ) );
+		} else {
+			add_action( 'wp_head', array( $this, 'speculation_rules' ), 1 );
+		}
 	}
+
+	/*
+	 * A note on `styles_inline_size_limit`, so nobody spends the afternoon
+	 * rediscovering this:
+	 *
+	 * With separate core block assets on, WordPress inlines block stylesheets
+	 * rather than linking them. Core's navigation stylesheet is 20,709 bytes,
+	 * which looks like it sits 709 bytes over the 20,000-byte default — so the
+	 * obvious fix is to nudge the limit up by a kilobyte.
+	 *
+	 * That does not work. The limit is a *cumulative* budget across every
+	 * stylesheet inlined on the page, not a per-file ceiling, and core sorts
+	 * smallest-first. Making the navigation sheet fit means raising the budget
+	 * past the sum of everything else plus 20 KB — inlining roughly 40 KB of
+	 * uncacheable CSS into every page to save one cacheable request. That is a
+	 * worse trade for anyone who visits more than one page, so the theme leaves
+	 * core's default alone and says so in the README instead.
+	 */
 
 	/**
 	 * Allow modern image formats to be uploaded.
@@ -62,7 +85,11 @@ final class Performance implements Module {
 	 * Decode images off the main thread.
 	 *
 	 * `loading` is intentionally left to core, which already omits it for the
-	 * first images on the page (see lcp_threshold below).
+	 * first three content images on the page (`wp_omit_loading_attr_threshold`
+	 * at its default). The theme used to force that threshold down to 1, but
+	 * the header logo counts toward it, so a logo wide enough to qualify ate
+	 * the single slot and the real LCP image was lazy-loaded. Core's default
+	 * plus the header exemption in lazy_loading() covers both cases.
 	 *
 	 * @param array<string, string> $attr       Image attributes.
 	 * @param \WP_Post              $attachment Attachment post.
@@ -80,27 +107,21 @@ final class Performance implements Module {
 	}
 
 	/**
-	 * Never lazy-load the first image on a page.
+	 * Never lazy-load images inside the header template part.
 	 *
-	 * A lazy-loaded LCP image is the single most common cause of a poor LCP
-	 * score on WordPress. Core's default threshold is 3; 1 is stricter.
-	 *
-	 * @return int
-	 */
-	public function lcp_threshold(): int {
-		return 1;
-	}
-
-	/**
-	 * Keep lazy-loading off template parts that are always above the fold.
+	 * The header is above the fold on every page view, so the logo and any
+	 * image next to it should be fetched eagerly. Core passes the template
+	 * part area as the filter context (`template_part_header`); in a block
+	 * theme that is the only reliable signal, because `wp_body_open` has
+	 * already finished by the time the template renders.
 	 *
 	 * @param bool   $enabled  Whether lazy loading applies.
 	 * @param string $tag_name Tag being filtered.
+	 * @param string $context  Rendering context, e.g. `template_part_header`.
 	 * @return bool
 	 */
-	public function lazy_loading( bool $enabled, string $tag_name ): bool {
-		// The site logo sits in the header on every single page view.
-		if ( 'img' === $tag_name && doing_action( 'wp_body_open' ) ) {
+	public function lazy_loading( bool $enabled, string $tag_name, string $context ): bool {
+		if ( 'img' === $tag_name && 'template_part_' . WP_TEMPLATE_PART_AREA_HEADER === $context ) {
 			return false;
 		}
 
@@ -108,15 +129,58 @@ final class Performance implements Module {
 	}
 
 	/**
+	 * Whether this visitor should get prerendering at all.
+	 *
+	 * Logged-in users are skipped so an editor never prerenders an admin
+	 * action; visitors who sent `Save-Data: on` asked not to spend bandwidth
+	 * on pages they may never open.
+	 *
+	 * @return bool
+	 */
+	private function wants_prerender(): bool {
+		if ( is_user_logged_in() ) {
+			return false;
+		}
+
+		$save_data = isset( $_SERVER['HTTP_SAVE_DATA'] )
+			? sanitize_key( (string) wp_unslash( $_SERVER['HTTP_SAVE_DATA'] ) )
+			: '';
+
+		return 'on' !== $save_data;
+	}
+
+	/**
+	 * Tune core's speculation rules (WordPress 6.8+) to prerender moderately.
+	 *
+	 * Core's own exclusions already cover wp-admin, wp-*.php, nonced links and
+	 * `rel="nofollow"`. Returning the configuration unchanged for users who
+	 * should not prerender falls back to core's default, which is prefetch
+	 * conservatively for logged-out visitors and nothing for logged-in ones.
+	 *
+	 * @param array<string, string>|null $config Core's configuration, or null to disable.
+	 * @return array<string, string>|null
+	 */
+	public function speculation_configuration( $config ) {
+		if ( ! $this->wants_prerender() ) {
+			return $config;
+		}
+
+		return array(
+			'mode'      => 'prerender',
+			'eagerness' => 'moderate',
+		);
+	}
+
+	/**
 	 * Prerender same-origin links the user is likely to open next.
 	 *
-	 * Skipped for logged-in users so an editor never prerenders an admin
-	 * action, and skipped when the visitor asked to save data.
+	 * Fallback for WordPress 6.7, which has no speculation rules API of its
+	 * own. On 6.8+ this is never hooked; see register().
 	 *
 	 * @return void
 	 */
 	public function speculation_rules(): void {
-		if ( is_user_logged_in() ) {
+		if ( ! $this->wants_prerender() ) {
 			return;
 		}
 

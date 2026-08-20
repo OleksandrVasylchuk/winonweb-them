@@ -279,6 +279,11 @@ final class Seo implements Module {
 			'isPartOf'         => array( '@id' => home_url( '/#website' ) ),
 		);
 
+		// Nothing behind a password belongs in structured data.
+		if ( post_password_required( $post_id ) ) {
+			return $node;
+		}
+
 		$author_id = (int) get_post_field( 'post_author', $post_id );
 
 		if ( $author_id > 0 ) {
@@ -304,25 +309,86 @@ final class Seo implements Module {
 	}
 
 	/**
+	 * Longest description search engines reliably show, in characters.
+	 */
+	private const DESCRIPTION_LENGTH = 160;
+
+	/**
 	 * Best available description for the current view.
+	 *
+	 * Password-protected posts return an empty string so nothing behind the
+	 * password leaks into the head. The content fallback strips headings
+	 * before flattening the rest: otherwise an h2 and the paragraph after it
+	 * run together into one sentence that never existed.
 	 *
 	 * @return string
 	 */
 	private function description(): string {
 		if ( is_singular() ) {
 			$post_id = get_queried_object_id();
-			$excerpt = has_excerpt( $post_id )
-				? (string) get_the_excerpt( $post_id )
-				: wp_trim_words( wp_strip_all_tags( (string) get_post_field( 'post_content', $post_id ) ), 32, '' );
 
-			return trim( wp_strip_all_tags( $excerpt ) );
+			if ( post_password_required( $post_id ) ) {
+				return '';
+			}
+
+			if ( has_excerpt( $post_id ) ) {
+				return $this->clip( (string) get_post_field( 'post_excerpt', $post_id ) );
+			}
+
+			return $this->clip( $this->flatten_content( (string) get_post_field( 'post_content', $post_id ) ) );
 		}
 
 		if ( is_category() || is_tag() || is_tax() ) {
-			return trim( wp_strip_all_tags( (string) term_description() ) );
+			return $this->clip( (string) term_description() );
 		}
 
-		return trim( wp_strip_all_tags( (string) get_bloginfo( 'description' ) ) );
+		return $this->clip( (string) get_bloginfo( 'description' ) );
+	}
+
+	/**
+	 * Reduce block content to the prose a description can be built from.
+	 *
+	 * @param string $content Raw post_content.
+	 * @return string Plain text, still uncut.
+	 */
+	private function flatten_content( string $content ): string {
+		if ( function_exists( 'excerpt_remove_blocks' ) ) {
+			$content = (string) excerpt_remove_blocks( $content );
+		}
+
+		$content = (string) preg_replace( '/<!--.*?-->/s', ' ', $content );
+		$content = (string) preg_replace( '/<h[1-6]\b[^>]*>.*?<\/h[1-6]>/is', ' ', $content );
+
+		return $content;
+	}
+
+	/**
+	 * Strip, decode, collapse and cut a string to the description length.
+	 *
+	 * The cut lands on a word boundary and the ellipsis is appended only when
+	 * something was actually removed.
+	 *
+	 * @param string $text Any HTML or plain text.
+	 * @return string
+	 */
+	private function clip( string $text ): string {
+		$text = wp_strip_all_tags( $text, true );
+		$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$text = trim( (string) preg_replace( '/\s+/u', ' ', $text ) );
+
+		if ( mb_strlen( $text ) <= self::DESCRIPTION_LENGTH ) {
+			return $text;
+		}
+
+		// Leave room for the ellipsis itself.
+		$cut   = mb_substr( $text, 0, self::DESCRIPTION_LENGTH - 1 );
+		$space = mb_strrpos( $cut, ' ' );
+
+		if ( false !== $space && $space > 0 ) {
+			$cut = mb_substr( $cut, 0, $space );
+		}
+
+		return rtrim( $cut, " \t\n\r\0\x0B,;:.-" ) . '…';
 	}
 
 	/**
@@ -331,7 +397,7 @@ final class Seo implements Module {
 	 * @return string
 	 */
 	private function social_image(): string {
-		if ( ! is_singular() ) {
+		if ( ! is_singular() || post_password_required( get_queried_object_id() ) ) {
 			return '';
 		}
 
@@ -349,11 +415,23 @@ final class Seo implements Module {
 	/**
 	 * Canonical URL for the current request.
 	 *
+	 * Search, author, date, paged and 404 views return an empty string: they
+	 * have no canonical URL the theme can vouch for, and claiming the home
+	 * page for them would mislead every crawler. The printer skips empty.
+	 *
 	 * @return string
 	 */
 	private function current_url(): string {
+		if ( is_search() || is_author() || is_date() || is_404() || is_paged() ) {
+			return '';
+		}
+
 		if ( is_singular() ) {
 			return (string) get_permalink( get_queried_object_id() );
+		}
+
+		if ( is_front_page() ) {
+			return home_url( '/' );
 		}
 
 		if ( is_home() ) {
@@ -365,9 +443,9 @@ final class Seo implements Module {
 		if ( is_category() || is_tag() || is_tax() ) {
 			$link = get_term_link( get_queried_object_id() );
 
-			return is_string( $link ) ? $link : home_url( '/' );
+			return is_string( $link ) ? $link : '';
 		}
 
-		return home_url( '/' );
+		return '';
 	}
 }

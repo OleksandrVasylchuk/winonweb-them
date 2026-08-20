@@ -1,0 +1,119 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Signal Midnight",
+	"description": "Deep blue dark — quieter and more corporate than the default cyan.",
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"slug": "base",
+					"color": "#070b16",
+					"name": "Base — page background"
+				},
+				{
+					"slug": "surface",
+					"color": "#0f1626",
+					"name": "Surface — card"
+				},
+				{
+					"slug": "surface-2",
+					"color": "#182338",
+					"name": "Surface raised"
+				},
+				{
+					"slug": "border",
+					"color": "#253352",
+					"name": "Divider (decorative)"
+				},
+				{
+					"slug": "border-strong",
+					"color": "#6f7fa8",
+					"name": "Control border (AA)"
+				},
+				{
+					"slug": "contrast",
+					"color": "#eef3fb",
+					"name": "Contrast — body text"
+				},
+				{
+					"slug": "muted",
+					"color": "#b3c0d8",
+					"name": "Muted — secondary text"
+				},
+				{
+					"slug": "accent",
+					"color": "#7dd3fc",
+					"name": "Accent — sky"
+				},
+				{
+					"slug": "accent-ink",
+					"color": "#7dd3fc",
+					"name": "Accent — readable as text"
+				},
+				{
+					"slug": "accent-2",
+					"color": "#c4b5fd",
+					"name": "Accent — periwinkle"
+				},
+				{
+					"slug": "accent-3",
+					"color": "#f0abfc",
+					"name": "Accent — orchid"
+				},
+				{
+					"slug": "success",
+					"color": "#6ee7b7",
+					"name": "Success"
+				},
+				{
+					"slug": "warning",
+					"color": "#fcd34d",
+					"name": "Warning"
+				}
+			],
+			"gradients": [
+				{
+					"slug": "aurora",
+					"name": "Aurora — sky to orchid",
+					"gradient": "linear-gradient(120deg, #7dd3fc 0%, #c4b5fd 52%, #f0abfc 100%)"
+				},
+				{
+					"slug": "aurora-soft",
+					"name": "Aurora soft — on dark",
+					"gradient": "linear-gradient(160deg, #0f1626 0%, #182338 60%, #1f2547 100%)"
+				},
+				{
+					"slug": "signal-fade",
+					"name": "Signal fade — accent to transparent",
+					"gradient": "linear-gradient(180deg, rgba(125,211,252,0.16) 0%, rgba(7,11,22,0) 100%)"
+				}
+			]
+		},
+		"shadow": {
+			"presets": [
+				{
+					"slug": "soft",
+					"name": "Soft",
+					"shadow": "0 1px 2px rgba(2, 4, 10, 0.5)"
+				},
+				{
+					"slug": "card",
+					"name": "Card",
+					"shadow": "0 12px 32px -12px rgba(2, 4, 10, 0.75)"
+				},
+				{
+					"slug": "glow",
+					"name": "Signal glow",
+					"shadow": "0 0 0 1px rgba(125, 211, 252, 0.35), 0 18px 48px -18px rgba(125, 211, 252, 0.45)"
+				}
+			]
+		}
+	},
+	"styles": {
+		"color": {
+			"background": "var(--wp--preset--color--base)",
+			"text": "var(--wp--preset--color--contrast)"
+		}
+	}
+}

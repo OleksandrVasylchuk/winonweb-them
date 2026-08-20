@@ -103,6 +103,16 @@ final class BlockConverter {
 	private bool $on_dark = false;
 
 	/**
+	 * The photograph the design painted behind this band, if any.
+	 *
+	 * Kept as the design's own path so the assembler can repoint it at the
+	 * Media Library afterwards.
+	 *
+	 * @var string
+	 */
+	private string $cover = '';
+
+	/**
 	 * How deep into nested column sets the walk currently is.
 	 *
 	 * @var int
@@ -124,6 +134,80 @@ final class BlockConverter {
 	private array $palette = array();
 
 	/**
+	 * The design's stylesheets, resolvable per element. Null means "structure only".
+	 *
+	 * @var CssIndex|null
+	 */
+	private ?CssIndex $css = null;
+
+	/**
+	 * Theme spacing presets, slug to pixels at desktop width.
+	 *
+	 * @var array<string, float>|null
+	 */
+	private ?array $spacing_presets = null;
+
+	/**
+	 * Theme font-size presets, slug to pixels at desktop width.
+	 *
+	 * @var array<string, float>
+	 */
+	private array $font_presets = array();
+
+	/**
+	 * Theme radius tokens, name to pixels.
+	 *
+	 * @var array<string, float>
+	 */
+	private array $radius_tokens = array();
+
+	/**
+	 * Whether the current section needed a value no preset was close to.
+	 *
+	 * @var bool
+	 */
+	private bool $literal_used = false;
+
+	/**
+	 * The colour currently behind the text being converted, as hex.
+	 *
+	 * Starts as the band and narrows as the walk enters a card or panel with
+	 * its own background. Every text colour taken from the design is checked
+	 * against it before it is allowed through.
+	 *
+	 * @var string
+	 */
+	private string $surface = '#ffffff';
+
+	/**
+	 * Padding the design gave the current section, side to block value.
+	 *
+	 * @var array<string, string>
+	 */
+	private array $band_padding = array();
+
+	/**
+	 * The design's content width for the current section, e.g. "1440px".
+	 *
+	 * @var string
+	 */
+	private string $content_size = '';
+
+	/**
+	 * Whether the design centres the current section's text.
+	 *
+	 * @var bool
+	 */
+	private bool $centered = false;
+
+	/**
+	 * Tolerance for snapping a design value onto a theme preset.
+	 *
+	 * @var float
+	 */
+	private const TOLERANCE = 0.12;
+
+	/**
 	 * Teach the converter what the design's own colours are.
 	 *
 	 * Without this every band falls back to the page colour, which is honest
@@ -131,13 +215,26 @@ final class BlockConverter {
 	 * palette slug closest to that grey — so the rhythm of the original
 	 * survives without a single literal colour reaching the markup.
 	 *
+	 * With the stylesheets as well, the blocks also take the design's own
+	 * sizes: section padding, heading scale, button shape, card treatment —
+	 * each snapped to a theme preset when one is close, kept exact otherwise.
+	 *
 	 * @param array<string, string> $section_colors Class name to hex.
 	 * @param array<string, string> $palette        Slug to hex.
+	 * @param CssIndex|string|null  $css            The design's stylesheets, or the design root to read them from.
 	 * @return void
 	 */
-	public function use_design( array $section_colors, array $palette ): void {
+	public function use_design( array $section_colors, array $palette, $css = null ): void {
 		$this->section_colors = $section_colors;
 		$this->palette        = $palette;
+
+		if ( $css instanceof CssIndex ) {
+			$this->css = $css;
+		} elseif ( is_string( $css ) && '' !== $css && is_dir( $css ) ) {
+			$this->css = CssIndex::from_directory( $css );
+		} else {
+			$this->css = null;
+		}
 	}
 
 	/**
@@ -148,15 +245,34 @@ final class BlockConverter {
 	 * @return array{markup:string,summary:string,editable:array<int,string>,concerns:array<int,string>}
 	 */
 	public function convert( array $section, bool $is_first = false ): array {
-		$this->concerns   = array();
-		$this->editable   = array();
-		$this->allow_h1   = $is_first;
-		$this->background = $this->band_colour( $section );
+		$this->concerns     = array();
+		$this->editable     = array();
+		$this->allow_h1     = $is_first;
+		$this->literal_used = false;
+		$this->background   = $this->band_colour( $section );
 
 		$dom  = self::load( (string) $section['html'] );
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 
+		$this->cover = $body instanceof DOMElement ? $this->background_image( $section, $body ) : '';
+
+		if ( '' !== $this->cover ) {
+			// A picture behind text always gets a dim, and a dim needs light text.
+			$this->gradient = '';
+			$this->on_dark  = true;
+		}
+
+		$this->surface = $this->band_surface();
+
+		if ( $body instanceof DOMElement ) {
+			$this->read_section_styles( $body );
+		}
+
 		$inner = $body instanceof DOMNode ? $this->children( $body ) : '';
+
+		if ( $this->literal_used ) {
+			$this->concerns[] = __( 'Some sizes from the design had no matching theme preset and were kept as exact values; adjust them in the Site Editor if you want them on the scale.', 'wow-signal' );
+		}
 
 		if ( '' === trim( $inner ) ) {
 			return array(
@@ -192,23 +308,45 @@ final class BlockConverter {
 	 */
 	private function band( string $inner, int $position, string $label ): string {
 		$padding = 0 === $position ? '90' : '80';
-		$spacing = array(
-			'padding' => array(
+
+		/*
+		 * The theme's rhythm by default; the design's own padding where it
+		 * stated one. Sides the design left alone keep the theme value, so a
+		 * section that only set its top edge is not left flush at the bottom.
+		 */
+		$sides = array_merge(
+			array(
 				'top'    => 'var:preset|spacing|' . $padding,
 				'bottom' => 'var:preset|spacing|' . $padding,
 			),
+			$this->band_padding
 		);
+
+		$spacing = array( 'padding' => self::ordered_sides( $sides ) );
+		$layout  = array( 'type' => 'constrained' );
+
+		if ( '' !== $this->content_size ) {
+			$layout['contentSize'] = $this->content_size;
+		}
+
+		if ( $this->centered ) {
+			$layout['justifyContent'] = 'center';
+		}
 
 		$attrs = array(
 			'tagName'  => 'section',
 			'metadata' => array( 'name' => $label ),
 			'align'    => 'full',
 			'style'    => array( 'spacing' => $spacing ),
-			'layout'   => array( 'type' => 'constrained' ),
+			'layout'   => $layout,
 		);
 
 		$classes = array( 'wp-block-group', 'alignfull' );
-		$css     = 'padding-top:var(--wp--preset--spacing--' . $padding . ');padding-bottom:var(--wp--preset--spacing--' . $padding . ')';
+		$css     = self::box_css( 'padding', $spacing['padding'] );
+
+		if ( '' !== $this->cover ) {
+			return $this->cover_band( $inner, $label, $spacing, $css, $layout );
+		}
 
 		if ( '' !== $this->gradient ) {
 			// The design's own gradient, carried across whole.
@@ -239,6 +377,119 @@ final class BlockConverter {
 	}
 
 	/**
+	 * Wrap a section's blocks in a Cover block carrying the design's photograph.
+	 *
+	 * A section the design painted with a picture is a Cover, not a Group: the
+	 * Cover block is the one an editor can swap the picture on, and it ships
+	 * the dim that keeps the text over it readable.
+	 *
+	 * @param string               $inner   Inner block markup.
+	 * @param string               $label   Section label.
+	 * @param array<string, mixed> $spacing Spacing style.
+	 * @param string               $css     Inline padding declaration.
+	 * @param array<string, mixed> $layout  Layout attribute.
+	 * @return string
+	 */
+	private function cover_band( string $inner, string $label, array $spacing, string $css, array $layout = array( 'type' => 'constrained' ) ): string {
+		$attrs = array(
+			'url'      => $this->cover,
+			'dimRatio' => 50,
+			'isDark'   => true,
+			'tagName'  => 'section',
+			'metadata' => array( 'name' => $label ),
+			'align'    => 'full',
+			'style'    => array( 'spacing' => $spacing ),
+			'layout'   => $layout,
+		);
+
+		$this->editable[] = __( 'Background image', 'wow-signal' );
+
+		return '<!-- wp:cover ' . wp_json_encode( $attrs ) . " -->\n"
+			. '<section class="wp-block-cover alignfull" style="' . $css . '">'
+			. '<span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span>'
+			. '<img class="wp-block-cover__image-background" alt="" src="' . $this->esc_ref( $this->cover ) . '" data-object-fit="cover"/>'
+			. '<div class="wp-block-cover__inner-container">'
+			. $inner
+			. "</div></section>\n<!-- /wp:cover -->";
+	}
+
+	/**
+	 * The picture the design put behind a section, as the design's own path.
+	 *
+	 * Looked for on the section itself, on its first element child (designs
+	 * often paint the wrapper and pad an inner div), and in the stylesheet's
+	 * rules for the section's classes. Gradients are not pictures and are
+	 * left to band_colour().
+	 *
+	 * @param array<string, mixed> $section Section record.
+	 * @param DOMElement           $body    Parsed section wrapper.
+	 * @return string Relative or absolute URL, or an empty string.
+	 */
+	private function background_image( array $section, DOMElement $body ): string {
+		$candidates = array();
+
+		foreach ( $body->childNodes as $child ) {
+			if ( $child instanceof DOMElement ) {
+				$candidates[] = $child;
+				break;
+			}
+		}
+
+		if ( isset( $candidates[0] ) ) {
+			foreach ( $candidates[0]->childNodes as $child ) {
+				if ( $child instanceof DOMElement ) {
+					$candidates[] = $child;
+					break;
+				}
+			}
+		}
+
+		foreach ( $candidates as $element ) {
+			$url = self::url_in( $element->getAttribute( 'style' ) );
+
+			if ( '' !== $url ) {
+				return $url;
+			}
+		}
+
+		foreach ( (array) ( $section['classes'] ?? array() ) as $class ) {
+			$found = $this->section_colors[ strtolower( (string) $class ) ] ?? '';
+			$url   = '' === $found ? '' : self::url_in( 'background:' . $found );
+
+			if ( '' !== $url ) {
+				return $url;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * The first image URL in a background declaration, or nothing.
+	 *
+	 * @param string $style Inline style or declaration text.
+	 * @return string
+	 */
+	private static function url_in( string $style ): string {
+		if ( 1 !== preg_match( '/background(?:-image)?\s*:\s*([^;]+)/i', $style, $declaration ) ) {
+			return '';
+		}
+
+		if ( 1 !== preg_match( '/url\(\s*["\']?([^"\')]+)["\']?\s*\)/i', $declaration[1], $url ) ) {
+			return '';
+		}
+
+		$url = trim( $url[1] );
+
+		// A data: URI is materialised to a file before the converter runs; anything else inline is refused.
+		if ( '' === $url || str_starts_with( $url, '#' ) || 1 === preg_match( '#^(data|javascript|vbscript):#i', $url ) ) {
+			return '';
+		}
+
+		return $url;
+	}
+
+	/**
 	 * Which palette slug this section's band should be painted with.
 	 *
 	 * @param array<string, mixed> $section Section record.
@@ -260,6 +511,11 @@ final class BlockConverter {
 			}
 
 			$found = $this->section_colors[ $key ];
+
+			// A picture is handled by background_image(), not as a colour.
+			if ( str_starts_with( strtolower( trim( $found ) ), 'url(' ) ) {
+				continue;
+			}
 
 			if ( str_contains( strtolower( $found ), 'gradient' ) ) {
 				$this->gradient = $found;
@@ -472,6 +728,21 @@ final class BlockConverter {
 				return $this->is_button( $node ) ? $this->buttons( array( $node ) ) : $this->text_element( $node );
 
 			default:
+				/*
+				 * A custom element with nothing inside it is a canvas the
+				 * page's own script would have drawn on. There is no script
+				 * here, so say so rather than leave a silent gap.
+				 */
+				if ( str_contains( $tag, '-' ) && '' === trim( (string) $node->textContent ) && 0 === $node->getElementsByTagName( 'img' )->length ) {
+					$this->concerns[] = sprintf(
+						/* translators: %s: custom element name, e.g. hero-viz. */
+						__( 'A JS-rendered visual (%s) was left out. Add an image block where it stood if the page needs something there.', 'wow-signal' ),
+						$tag
+					);
+
+					return '';
+				}
+
 				return $this->container( $node );
 		}
 	}
@@ -541,7 +812,73 @@ final class BlockConverter {
 			return '' === trim( wp_strip_all_tags( $text ) ) ? '' : $this->styled_text( $node, $text );
 		}
 
+		/*
+		 * A container the design painted or framed — a CTA band, a dashboard
+		 * mock, a dark slab with cards in it — is a panel, and a panel is a
+		 * Group the owner can restyle. One that only positions its children
+		 * has nothing to say and is passed through.
+		 */
+		$box = $this->boxed( $node, false );
+
+		if ( null !== $box ) {
+			return $this->panel( $node, $box );
+		}
+
 		return $this->children( $node );
+	}
+
+	/**
+	 * Wrap a painted container's children in a Group carrying its treatment.
+	 *
+	 * @param DOMElement           $node Container.
+	 * @param array<string, mixed> $box  Treatment from boxed().
+	 * @return string
+	 */
+	private function panel( DOMElement $node, array $box ): string {
+		$inner = $this->within( $box, $node );
+
+		if ( '' === trim( $inner ) ) {
+			return '';
+		}
+
+		// A painted slab spans its container in the design, so it is wide, not column-width.
+		$attrs           = array( 'align' => 'wide' ) + $box['attrs'];
+		$attrs['layout'] = array( 'type' => 'constrained' );
+		$classes         = array_merge( array( 'wp-block-group', 'alignwide' ), $box['classes'] );
+		$style           = '' === $box['css'] ? '' : ' style="' . $box['css'] . '"';
+
+		return '<!-- wp:group ' . wp_json_encode( $attrs ) . " -->\n"
+			. '<div class="' . implode( ' ', $classes ) . '"' . $style . '>'
+			. $inner
+			. "</div>\n<!-- /wp:group -->";
+	}
+
+	/**
+	 * Convert a container's children with its own background in effect.
+	 *
+	 * A dark card on a light band inverts the text inside it, exactly as a
+	 * dark band does for a section; the inversion is scoped to the card and
+	 * undone afterwards.
+	 *
+	 * @param array<string, mixed>|null $box  Treatment from boxed(), or null for none.
+	 * @param DOMElement                $node Container.
+	 * @return string
+	 */
+	private function within( ?array $box, DOMElement $node ): string {
+		$dark    = $this->on_dark;
+		$surface = $this->surface;
+
+		if ( null !== $box && null !== $box['dark'] ) {
+			$this->on_dark = (bool) $box['dark'];
+			$this->surface = (string) $box['surface'];
+		}
+
+		$inner = $this->children( $node );
+
+		$this->on_dark = $dark;
+		$this->surface = $surface;
+
+		return $inner;
 	}
 
 	/**
@@ -840,26 +1177,30 @@ final class BlockConverter {
 	 */
 	private function columns( array $cards ): string {
 		$columns = array();
+		$parent  = $cards[0]->parentNode;
+		$grid    = $parent instanceof DOMElement && null !== $this->css ? $this->css->declared_for( $parent ) : array();
 
 		foreach ( $cards as $card ) {
-			$inner = $this->children( $card );
+			$box   = $this->boxed( $card, true );
+			$inner = $this->within( $box, $card );
 
 			if ( '' === trim( $inner ) ) {
 				continue;
 			}
 
-			$columns[] = "<!-- wp:column -->\n<div class=\"wp-block-column\">" . $inner . "</div>\n<!-- /wp:column -->";
+			$attrs   = null === $box ? array() : $box['attrs'];
+			$classes = array_merge( array( 'wp-block-column' ), null === $box ? array() : $box['classes'] );
+			$style   = null === $box || '' === $box['css'] ? '' : ' style="' . $box['css'] . '"';
+
+			$columns[] = '<!-- wp:column' . ( array() === $attrs ? '' : ' ' . wp_json_encode( $attrs ) ) . " -->\n"
+				. '<div class="' . implode( ' ', $classes ) . '"' . $style . '>'
+				. $inner
+				. "</div>\n<!-- /wp:column -->";
 		}
 
 		if ( count( $columns ) < 2 ) {
 			return implode( "\n\n", $columns );
 		}
-
-		/*
-		 * Six columns across a page is not a layout, it is a squeeze: numbers
-		 * end up one character per line. Wrap into rows instead, which is what
-		 * the design's own grid did at every width below its widest.
-		 */
 
 		/*
 		 * Card styling only where there are actually cards. Two columns are a
@@ -870,19 +1211,70 @@ final class BlockConverter {
 		 * page, not against a band that inverts it.
 		 */
 		$as_cards = count( $columns ) >= 3 && ! $this->on_dark;
-		$class    = $as_cards ? ' is-style-cards' : '';
-		$attrs    = $as_cards ? ',"className":"is-style-cards"' : '';
+		$attrs    = array( 'align' => 'wide' );
+		$class    = '';
 
-		$rows = array();
+		if ( $as_cards ) {
+			$attrs['className'] = 'is-style-cards';
+			$class              = ' is-style-cards';
+		}
 
-		foreach ( array_chunk( $columns, count( $columns ) > 4 ? 3 : count( $columns ) ) as $row ) {
-			$rows[] = '<!-- wp:columns {"align":"wide"' . $attrs . "} -->\n"
+		// The design's own gutter, when it stated one.
+		$gap = CssIndex::px( (string) ( $grid['column-gap'] ?? '' ) );
+
+		if ( null !== $gap && $gap > 0 ) {
+			$attrs['style'] = array( 'spacing' => array( 'blockGap' => $this->spacing_value( $gap ) ) );
+		}
+
+		/*
+		 * Six columns across a page is not a layout, it is a squeeze: numbers
+		 * end up one character per line. Wrap into rows instead — by the
+		 * design's own track count when it declared a plain grid, otherwise
+		 * three at a time, which is what the design's grid did at every width
+		 * below its widest.
+		 */
+		$tracks  = self::grid_tracks( (string) ( $grid['grid-template-columns'] ?? '' ) );
+		$per_row = $tracks >= 2 && $tracks <= 4 ? $tracks : ( count( $columns ) > 4 ? 3 : count( $columns ) );
+		$rows    = array();
+
+		foreach ( array_chunk( $columns, $per_row ) as $row ) {
+			$rows[] = '<!-- wp:columns ' . wp_json_encode( $attrs ) . " -->\n"
 				. '<div class="wp-block-columns alignwide' . $class . '">'
 				. implode( "\n\n", $row )
 				. "</div>\n<!-- /wp:columns -->";
 		}
 
 		return implode( "\n\n", $rows );
+	}
+
+	/**
+	 * How many columns a grid-template-columns value lays out.
+	 *
+	 * `repeat(3, 1fr)` is three; `1.1fr .9fr` is two; `repeat(auto-fit, …)`
+	 * is unknown and reported as zero so the caller keeps its own rule.
+	 *
+	 * @param string $value Declaration value.
+	 * @return int
+	 */
+	private static function grid_tracks( string $value ): int {
+		$value = trim( $value );
+
+		if ( '' === $value ) {
+			return 0;
+		}
+
+		if ( 1 === preg_match( '/^repeat\(\s*(\d+)\s*,/i', $value, $count ) ) {
+			return (int) $count[1];
+		}
+
+		if ( str_contains( strtolower( $value ), 'repeat(' ) ) {
+			return 0;
+		}
+
+		// Top-level tracks only: minmax(0, 1fr) is one track, not two.
+		$tracks = preg_split( '/\s+(?![^()]*\))/', $value );
+
+		return is_array( $tracks ) ? count( array_filter( $tracks ) ) : 0;
 	}
 
 	/**
@@ -945,31 +1337,57 @@ final class BlockConverter {
 				continue;
 			}
 
-			$outline = $index > 0;
-			$href    = $this->href( $link );
+			$href   = $this->href( $link );
+			$design = $this->button_styles( $link, $index > 0 );
 
-			/*
-			 * The outline style draws itself in the body-text colour, so on an
-			 * inverted band it has to be told to use the page colour instead
-			 * or it comes out dark on dark.
-			 */
-			$attrs   = array();
+			$outline = $design['outline'];
+			$attrs   = $design['attrs'];
 			$classes = array( 'wp-block-button' );
+			$link_cl = array( 'wp-block-button__link' );
 
 			if ( $outline ) {
 				$attrs['className'] = 'is-style-outline';
 				$classes[]          = 'is-style-outline';
 			}
 
-			if ( $outline && $this->on_dark ) {
+			/*
+			 * The outline style draws itself in the body-text colour, so on an
+			 * inverted band it has to be told to use the page colour instead
+			 * or it comes out dark on dark.
+			 */
+			if ( $outline && $this->on_dark && ! isset( $attrs['textColor'] ) ) {
 				$attrs['textColor'] = 'base';
-				$classes[]          = 'has-base-color';
-				$classes[]          = 'has-text-color';
 			}
+
+			// Classes in the order the Button block's save writes them.
+			if ( isset( $attrs['textColor'] ) ) {
+				$link_cl[] = 'has-' . $attrs['textColor'] . '-color';
+			}
+
+			if ( isset( $attrs['backgroundColor'] ) ) {
+				$link_cl[] = 'has-' . $attrs['backgroundColor'] . '-background-color';
+			}
+
+			if ( isset( $attrs['textColor'] ) ) {
+				$link_cl[] = 'has-text-color';
+			}
+
+			if ( isset( $attrs['backgroundColor'] ) ) {
+				$link_cl[] = 'has-background';
+			}
+
+			$link_cl = array_merge( $link_cl, $design['classes'] );
+
+			if ( isset( $attrs['fontSize'] ) || isset( $attrs['style']['typography']['fontSize'] ) ) {
+				$link_cl[] = 'has-custom-font-size';
+			}
+
+			$link_cl[] = 'wp-element-button';
+			$style     = '' === $design['css'] ? '' : ' style="' . $design['css'] . '"';
 
 			$out[] = '<!-- wp:button' . ( array() === $attrs ? '' : ' ' . wp_json_encode( $attrs ) ) . " -->\n"
 				. '<div class="' . implode( ' ', $classes ) . '">'
-				. '<a class="wp-block-button__link wp-element-button" href="' . $this->esc_ref( $href ) . '">'
+				. '<a class="' . implode( ' ', $link_cl ) . '" href="' . $this->esc_ref( $href ) . '"' . $style . '>'
 				. esc_html( $label )
 				. "</a></div>\n<!-- /wp:button -->";
 
@@ -1032,28 +1450,56 @@ final class BlockConverter {
 
 		$this->editable[] = __( 'Heading text', 'wow-signal' );
 
-		$attrs = array(
-			'level'    => $level,
-			'fontSize' => $size,
-		);
+		$design = $this->typography( $node, true );
+		$attrs  = array( 'level' => $level );
+
+		// The design's own size where it set one; the level's default otherwise.
+		if ( isset( $design['attrs']['fontSize'] ) || isset( $design['attrs']['style']['typography']['fontSize'] ) ) {
+			$attrs = array_merge( $attrs, $design['attrs'] );
+		} else {
+			$attrs['fontSize'] = $size;
+			$attrs             = array_merge( $attrs, $design['attrs'] );
+			$design['classes'] = array_merge( array( 'has-' . $size . '-font-size' ), $design['classes'] );
+		}
 
 		/*
 		 * The theme paints headings with the body-text colour, which is chosen
 		 * against the page and disappears on an inverted band. Text inside the
 		 * band inherits, but a heading carries its own colour and has to be
-		 * told.
+		 * told. A colour the design chose for this heading wins if it reads
+		 * against what is behind it.
 		 */
-		if ( $this->on_dark ) {
+		$colour = $this->text_colour( $node, $this->on_dark ? 'base' : 'contrast' );
+
+		if ( null !== $colour ) {
+			$attrs['textColor'] = $colour;
+		} elseif ( $this->on_dark ) {
 			$attrs['textColor'] = 'base';
 		}
-		$class = 'wp-block-heading has-' . $size . '-font-size';
 
-		if ( $this->on_dark ) {
-			$class = 'wp-block-heading has-base-color has-text-color has-' . $size . '-font-size';
+		$classes = array( 'wp-block-heading' );
+
+		foreach ( $design['classes'] as $class ) {
+			if ( str_starts_with( $class, 'has-text-align-' ) ) {
+				$classes[] = $class;
+			}
 		}
 
+		if ( isset( $attrs['textColor'] ) ) {
+			$classes[] = 'has-' . $attrs['textColor'] . '-color';
+			$classes[] = 'has-text-color';
+		}
+
+		foreach ( $design['classes'] as $class ) {
+			if ( ! str_starts_with( $class, 'has-text-align-' ) ) {
+				$classes[] = $class;
+			}
+		}
+
+		$style = '' === $design['css'] ? '' : ' style="' . $design['css'] . '"';
+
 		return '<!-- wp:heading ' . wp_json_encode( $attrs ) . " -->\n"
-			. '<h' . $level . ' class="' . $class . '">' . $text . '</h' . $level . '>'
+			. '<h' . $level . ' class="' . implode( ' ', $classes ) . '"' . $style . '>' . $text . '</h' . $level . '>'
 			. "\n<!-- /wp:heading -->";
 	}
 
@@ -1091,10 +1537,46 @@ final class BlockConverter {
 			 * seen as a fill, and plenty of them are unreadable at label size.
 			 * The readable sibling keeps the hue and clears the minimum.
 			 */
-			$slug = $this->on_dark ? 'accent' : 'accent-ink';
+			$slug = $this->text_colour( $node, $this->on_dark ? 'accent' : 'accent-ink' ) ?? ( $this->on_dark ? 'accent' : 'accent-ink' );
 
-			return '<!-- wp:paragraph {"textColor":"' . $slug . "\",\"fontSize\":\"x-small\",\"style\":{\"typography\":{\"textTransform\":\"uppercase\",\"letterSpacing\":\"0.14em\",\"fontWeight\":\"700\"}}} -->\n"
-				. '<p class="has-' . $slug . '-color has-text-color has-x-small-font-size" style="font-weight:700;letter-spacing:0.14em;text-transform:uppercase">'
+			// The theme's label treatment, with whatever the design said on top.
+			$design = $this->typography( $node, false );
+			$attrs  = array_replace_recursive(
+				array(
+					'textColor' => $slug,
+					'fontSize'  => 'x-small',
+					'style'     => array(
+						'typography' => array(
+							'textTransform' => 'uppercase',
+							'letterSpacing' => '0.14em',
+							'fontWeight'    => '700',
+						),
+					),
+				),
+				$design['attrs']
+			);
+
+			if ( isset( $attrs['style']['typography']['fontSize'] ) ) {
+				unset( $attrs['fontSize'] );
+			}
+
+			$classes = array();
+
+			foreach ( $design['classes'] as $class ) {
+				if ( str_starts_with( $class, 'has-text-align-' ) ) {
+					$classes[] = $class;
+				}
+			}
+
+			$classes[] = 'has-' . $slug . '-color';
+			$classes[] = 'has-text-color';
+
+			if ( isset( $attrs['fontSize'] ) ) {
+				$classes[] = 'has-' . $attrs['fontSize'] . '-font-size';
+			}
+
+			return '<!-- wp:paragraph ' . wp_json_encode( $attrs ) . " -->\n"
+				. '<p class="' . implode( ' ', $classes ) . '" style="' . self::typography_css( $attrs['style']['typography'] ) . '">'
 				. $text
 				. "</p>\n<!-- /wp:paragraph -->";
 		}
@@ -1105,7 +1587,7 @@ final class BlockConverter {
 
 		$this->editable[] = __( 'Body text', 'wow-signal' );
 
-		return $this->paragraph( $text );
+		return $this->paragraph( $text, $node );
 	}
 
 	/**
@@ -1144,23 +1626,58 @@ final class BlockConverter {
 	/**
 	 * A muted body paragraph.
 	 *
-	 * @param string $text Inline HTML.
+	 * @param string          $text Inline HTML.
+	 * @param DOMElement|null $node The element it came from, for the design's styling.
 	 * @return string
 	 */
-	private function paragraph( string $text ): string {
+	private function paragraph( string $text, ?DOMElement $node = null ): string {
 		/*
 		 * On a dark band the paragraph says nothing about its colour and
 		 * inherits the light text set on the band. Naming "muted" here would
 		 * paint dark grey on dark navy — the palette's muted is chosen against
 		 * the page background, not against every band on it.
 		 */
-		if ( $this->on_dark ) {
-			return "<!-- wp:paragraph -->\n<p>" . $text . "</p>\n<!-- /wp:paragraph -->";
+		$attrs   = array();
+		$classes = array();
+
+		$colour = null === $node ? null : $this->text_colour( $node, $this->on_dark ? 'base' : 'muted' );
+
+		if ( null !== $colour ) {
+			$attrs['textColor'] = $colour;
+		} elseif ( ! $this->on_dark ) {
+			$attrs['textColor'] = 'muted';
 		}
 
-		return "<!-- wp:paragraph {\"textColor\":\"muted\"} -->\n"
-			. '<p class="has-muted-color has-text-color">' . $text . "</p>\n"
-			. '<!-- /wp:paragraph -->';
+		$design = null === $node ? array(
+			'attrs'   => array(),
+			'classes' => array(),
+			'css'     => '',
+		) : $this->typography( $node, false );
+
+		$attrs = array_merge( $attrs, $design['attrs'] );
+
+		foreach ( $design['classes'] as $class ) {
+			if ( str_starts_with( $class, 'has-text-align-' ) ) {
+				$classes[] = $class;
+			}
+		}
+
+		if ( isset( $attrs['textColor'] ) ) {
+			$classes[] = 'has-' . $attrs['textColor'] . '-color';
+			$classes[] = 'has-text-color';
+		}
+
+		foreach ( $design['classes'] as $class ) {
+			if ( ! str_starts_with( $class, 'has-text-align-' ) ) {
+				$classes[] = $class;
+			}
+		}
+
+		$open  = array() === $attrs ? '<!-- wp:paragraph -->' : '<!-- wp:paragraph ' . wp_json_encode( $attrs ) . ' -->';
+		$class = array() === $classes ? '' : ' class="' . implode( ' ', $classes ) . '"';
+		$style = '' === $design['css'] ? '' : ' style="' . $design['css'] . '"';
+
+		return $open . "\n<p" . $class . $style . '>' . $text . "</p>\n<!-- /wp:paragraph -->";
 	}
 
 	/**
@@ -1496,6 +2013,925 @@ final class BlockConverter {
 		if ( 'iframe' === $tag || 'object' === $tag || 'embed' === $tag ) {
 			$this->concerns[] = __( 'An embedded frame was left out. Use the matching embed block if you need it back.', 'wow-signal' );
 		}
+	}
+
+	/**
+	 * Read what the design said about the section itself before walking it.
+	 *
+	 * Padding comes from the section, or from its wrapper when the section
+	 * left its own edges alone; the content width from whichever of the two
+	 * has a max-width; centring from either.
+	 *
+	 * @param DOMElement $body Parsed section wrapper.
+	 * @return void
+	 */
+	private function read_section_styles( DOMElement $body ): void {
+		$this->band_padding = array();
+		$this->content_size = '';
+		$this->centered     = false;
+
+		if ( null === $this->css ) {
+			return;
+		}
+
+		$section = null;
+
+		foreach ( $body->childNodes as $child ) {
+			if ( $child instanceof DOMElement ) {
+				$section = $child;
+				break;
+			}
+		}
+
+		if ( null === $section ) {
+			return;
+		}
+
+		$own  = $this->css->declared_for( $section );
+		$wrap = null;
+
+		foreach ( $section->childNodes as $child ) {
+			if ( ! $child instanceof DOMElement ) {
+				continue;
+			}
+
+			$inner = $this->css->declared_for( $child );
+
+			if ( isset( $inner['max-width'] ) || 1 === preg_match( '/\b(wrap|container|inner|content)\b/', strtolower( $child->getAttribute( 'class' ) ) ) ) {
+				$wrap = $inner;
+			}
+
+			break;
+		}
+
+		foreach ( array( 'top', 'bottom', 'left', 'right' ) as $side ) {
+			$px = CssIndex::px( (string) ( $own[ 'padding-' . $side ] ?? '' ) );
+
+			if ( ( null === $px || $px <= 0 ) && null !== $wrap && ( 'top' === $side || 'bottom' === $side ) ) {
+				$px = CssIndex::px( (string) ( $wrap[ 'padding-' . $side ] ?? '' ) );
+			}
+
+			if ( null !== $px && $px > 0 ) {
+				$this->band_padding[ $side ] = $this->spacing_value( $px );
+			}
+		}
+
+		foreach ( array( $wrap, $own ) as $source ) {
+			$width = CssIndex::px( (string) ( $source['max-width'] ?? '' ) );
+
+			if ( null !== $width && $width >= 320 ) {
+				$this->content_size = self::trim_number( $width ) . 'px';
+				break;
+			}
+		}
+
+		$align = strtolower( (string) ( $this->css->styles_for( $section )['text-align'] ?? '' ) );
+
+		if ( '' === $align && null !== $wrap ) {
+			$align = strtolower( (string) ( $wrap['text-align'] ?? '' ) );
+		}
+
+		$this->centered = 'center' === $align;
+	}
+
+	/**
+	 * The colour behind the band's text, as hex.
+	 *
+	 * @return string
+	 */
+	private function band_surface(): string {
+		if ( '' !== $this->cover ) {
+			return '#333333';
+		}
+
+		if ( '' !== $this->gradient ) {
+			return $this->gradient_average( $this->gradient );
+		}
+
+		return $this->palette[ $this->background ] ?? '#ffffff';
+	}
+
+	/**
+	 * A gradient flattened to the mean of its stops, for contrast arithmetic.
+	 *
+	 * @param string $gradient Gradient declaration.
+	 * @return string
+	 */
+	private function gradient_average( string $gradient ): string {
+		if ( ! preg_match_all( '/#[0-9a-f]{6}\b|#[0-9a-f]{3}\b/i', $gradient, $found ) ) {
+			return $this->on_dark ? '#222222' : '#ffffff';
+		}
+
+		$sum = array( 0, 0, 0 );
+
+		foreach ( $found[0] as $hex ) {
+			$channels = self::channels( $hex );
+			$sum[0]  += $channels[0];
+			$sum[1]  += $channels[1];
+			$sum[2]  += $channels[2];
+		}
+
+		$count = count( $found[0] );
+
+		return sprintf( '#%02x%02x%02x', (int) round( $sum[0] / $count ), (int) round( $sum[1] / $count ), (int) round( $sum[2] / $count ) );
+	}
+
+	/**
+	 * The typography a design gave an element, as block attributes.
+	 *
+	 * Only what the design set: a size is snapped to the nearest theme preset
+	 * within tolerance and otherwise kept exact; weight, line height, letter
+	 * spacing, transform and alignment are carried as written. For headings
+	 * the size and weight have to be on the element itself, because browsers
+	 * reset both and so the design's inherited value was never what showed.
+	 *
+	 * @param DOMElement $node    Element.
+	 * @param bool       $heading Whether it is a heading.
+	 * @return array{attrs:array<string,mixed>,classes:array<int,string>,css:string}
+	 */
+	private function typography( DOMElement $node, bool $heading ): array {
+		$empty = array(
+			'attrs'   => array(),
+			'classes' => array(),
+			'css'     => '',
+		);
+
+		if ( null === $this->css ) {
+			return $empty;
+		}
+
+		$all   = $this->css->styles_for( $node );
+		$reset = $heading ? $this->css->declared_for( $node ) : $all;
+
+		$attrs   = array();
+		$typo    = array();
+		$classes = array();
+		$px      = CssIndex::px( (string) ( $reset['font-size'] ?? '' ) );
+
+		if ( null !== $px && $px > 0 ) {
+			$this->presets();
+			$slug = self::nearest_preset( $px, $this->font_presets );
+
+			if ( '' !== $slug ) {
+				$attrs['fontSize'] = $slug;
+				$classes[]         = 'has-' . $slug . '-font-size';
+			} else {
+				$typo['fontSize']   = self::rem( $px );
+				$this->literal_used = true;
+			}
+		}
+
+		$weight = strtolower( trim( (string) ( $reset['font-weight'] ?? '' ) ) );
+		$weight = array(
+			'bold'   => '700',
+			'normal' => '400',
+		)[ $weight ] ?? $weight;
+
+		if ( 1 === preg_match( '/^[1-9]00$/', $weight ) ) {
+			$typo['fontWeight'] = $weight;
+		}
+
+		$spacing = self::number( (string) ( $all['letter-spacing'] ?? '' ), array( 'em', 'px', 'rem' ) );
+
+		if ( null !== $spacing && '0' !== $spacing ) {
+			$typo['letterSpacing'] = $spacing;
+		}
+
+		$height = self::number( (string) ( $all['line-height'] ?? '' ), array( '', 'px', 'rem', 'em', '%' ) );
+
+		if ( null !== $height && '0' !== $height ) {
+			$typo['lineHeight'] = $height;
+		}
+
+		$transform = strtolower( trim( (string) ( $all['text-transform'] ?? '' ) ) );
+
+		if ( in_array( $transform, array( 'uppercase', 'lowercase', 'capitalize' ), true ) ) {
+			$typo['textTransform'] = $transform;
+		}
+
+		$align = strtolower( trim( (string) ( $all['text-align'] ?? '' ) ) );
+
+		if ( 'center' === $align || 'right' === $align ) {
+			$typo['textAlign'] = $align;
+			$classes[]         = 'has-text-align-' . $align;
+		}
+
+		if ( array() !== $typo ) {
+			$attrs['style'] = array( 'typography' => $typo );
+		}
+
+		return array(
+			'attrs'   => $attrs,
+			'classes' => $classes,
+			'css'     => self::typography_css( $typo ),
+		);
+	}
+
+	/**
+	 * The inline declarations WordPress writes for a typography style object.
+	 *
+	 * Alignment is a class, not a declaration, so it is left out here.
+	 *
+	 * @param array<string, string> $typo style.typography.
+	 * @return string
+	 */
+	private static function typography_css( array $typo ): string {
+		$map = array(
+			'fontSize'      => 'font-size',
+			'fontStyle'     => 'font-style',
+			'fontWeight'    => 'font-weight',
+			'letterSpacing' => 'letter-spacing',
+			'lineHeight'    => 'line-height',
+			'textTransform' => 'text-transform',
+		);
+		$out = array();
+
+		foreach ( $map as $key => $property ) {
+			if ( isset( $typo[ $key ] ) ) {
+				$out[] = $property . ':' . $typo[ $key ];
+			}
+		}
+
+		return implode( ';', $out );
+	}
+
+	/**
+	 * A numeric CSS value normalised the way the editor writes it.
+	 *
+	 * `-.025em` becomes `-0.025em`; anything with a unit outside the allowed
+	 * set, or a keyword, is declined.
+	 *
+	 * @param string             $value Declaration value.
+	 * @param array<int, string> $units Acceptable units; '' for unitless.
+	 * @return string|null
+	 */
+	private static function number( string $value, array $units ): ?string {
+		$value = strtolower( trim( $value ) );
+
+		if ( 1 !== preg_match( '/^(-?\d*\.?\d+)(px|rem|em|%)?$/', $value, $found ) ) {
+			return null;
+		}
+
+		$unit = $found[2] ?? '';
+
+		if ( ! in_array( $unit, $units, true ) ) {
+			return null;
+		}
+
+		$number = (float) $found[1];
+
+		if ( 0.0 === $number ) {
+			return '0';
+		}
+
+		return rtrim( rtrim( number_format( $number, 4, '.', '' ), '0' ), '.' ) . $unit;
+	}
+
+	/**
+	 * The palette slug for a colour the design put on this element's text.
+	 *
+	 * Null when the design set none, when it is the default for this kind
+	 * of element anyway, when no palette entry is close enough to stand in
+	 * for it, or when it would not read against what is behind it. A raw
+	 * value never gets through: either the palette has it or it is dropped.
+	 *
+	 * @param DOMElement $node    Element.
+	 * @param string     $fallback The slug the element would get without the design.
+	 * @return string|null
+	 */
+	private function text_colour( DOMElement $node, string $fallback ): ?string {
+		if ( null === $this->css ) {
+			return null;
+		}
+
+		$raw = (string) ( $this->css->styles_for( $node )['color'] ?? '' );
+
+		if ( '' === $raw ) {
+			return null;
+		}
+
+		$hex = DesignTokens::to_hex( $raw, array() );
+
+		if ( null === $hex ) {
+			return null;
+		}
+
+		if ( isset( $this->palette[ $fallback ] ) && self::colour_distance( $hex, $this->palette[ $fallback ] ) <= 4000 ) {
+			return null;
+		}
+
+		$slug = $this->nearest_any_slug( $hex, 4000 );
+
+		// For text, the readable sibling of the brand colour is the one to name.
+		if ( 'accent' === $slug && isset( $this->palette['accent-ink'] ) && self::colour_distance( $hex, $this->palette['accent-ink'] ) <= 4000 ) {
+			$slug = 'accent-ink';
+		}
+
+		if ( '' === $slug || $slug === $fallback ) {
+			return null;
+		}
+
+		return DesignTokens::contrast( $this->palette[ $slug ], $this->surface ) >= 4.5 ? $slug : null;
+	}
+
+	/**
+	 * The palette entry closest to a colour, from the whole palette.
+	 *
+	 * @param string $hex   Colour.
+	 * @param int    $limit Largest squared distance still counted as a match.
+	 * @return string
+	 */
+	private function nearest_any_slug( string $hex, int $limit ): string {
+		$best     = '';
+		$distance = PHP_INT_MAX;
+
+		foreach ( $this->palette as $slug => $candidate ) {
+			$gap = self::colour_distance( $hex, $candidate );
+
+			if ( $gap < $distance ) {
+				$distance = $gap;
+				$best     = (string) $slug;
+			}
+		}
+
+		return $distance <= $limit ? $best : '';
+	}
+
+	/**
+	 * The treatment a design gave a container: fill, frame, corners, padding.
+	 *
+	 * Null when there is nothing worth carrying. In card mode corners and
+	 * padding are enough on their own, because the column is going to be a
+	 * card anyway; elsewhere only a fill or a frame makes a container a
+	 * panel. A fill that matches what is already behind the element is not
+	 * a fill.
+	 *
+	 * @param DOMElement $node Container.
+	 * @param bool       $card Whether the container is already a card.
+	 * @return array{attrs:array<string,mixed>,classes:array<int,string>,css:string,dark:bool|null,surface:string|null}|null
+	 */
+	private function boxed( DOMElement $node, bool $card ): ?array {
+		if ( null === $this->css ) {
+			return null;
+		}
+
+		$styles     = $this->css->declared_for( $node );
+		$background = $this->background_of( $styles );
+		$border     = $this->border_of( $styles );
+
+		if ( null !== $background && '' === $background['gradient'] && strtolower( $background['hex'] ) === strtolower( $this->surface ) ) {
+			$background = null;
+		}
+
+		$radius  = CssIndex::px( (string) ( $styles['border-radius'] ?? '' ) );
+		$padding = array();
+
+		foreach ( array( 'top', 'right', 'bottom', 'left' ) as $side ) {
+			$px = CssIndex::px( (string) ( $styles[ 'padding-' . $side ] ?? '' ) );
+
+			if ( null !== $px && $px > 0 ) {
+				$padding[ $side ] = $px;
+			}
+		}
+
+		if ( null === $background && null === $border ) {
+			if ( ! $card || ( ( null === $radius || $radius <= 0 ) && array() === $padding ) ) {
+				return null;
+			}
+		}
+
+		$attrs   = array();
+		$style   = array();
+		$css     = array();
+		$dark    = null;
+		$surface = null;
+
+		if ( null !== $background ) {
+			if ( '' !== $background['gradient'] ) {
+				$style['color'] = array( 'gradient' => $background['gradient'] );
+				$css[]          = 'background:' . $background['gradient'];
+			} else {
+				$attrs['backgroundColor'] = $background['slug'];
+			}
+
+			$dark    = $background['dark'];
+			$surface = $background['hex'];
+
+			if ( $dark !== $this->on_dark ) {
+				$attrs['textColor'] = $dark ? 'base' : 'contrast';
+			}
+		}
+
+		if ( null !== $border ) {
+			$attrs['borderColor']     = $border['slug'];
+			$style['border']['width'] = $border['width'];
+			$css[]                    = 'border-width:' . $border['width'];
+		}
+
+		if ( null !== $radius && $radius > 0 ) {
+			$style['border']['radius'] = $this->radius_value( $radius );
+			$css[]                     = 'border-radius:' . $style['border']['radius'];
+		}
+
+		if ( array() !== $padding ) {
+			$sides = array();
+
+			foreach ( $padding as $side => $px ) {
+				$sides[ $side ] = $this->spacing_value( $px );
+			}
+
+			$style['spacing'] = array( 'padding' => $sides );
+			$css[]            = self::box_css( 'padding', $sides );
+		}
+
+		if ( array() !== $style ) {
+			$attrs['style'] = $style;
+		}
+
+		// Classes in the order the block supports write them: colour, then border.
+		$classes = array();
+
+		if ( isset( $attrs['textColor'] ) ) {
+			$classes[] = 'has-' . $attrs['textColor'] . '-color';
+		}
+
+		if ( isset( $attrs['backgroundColor'] ) ) {
+			$classes[] = 'has-' . $attrs['backgroundColor'] . '-background-color';
+		}
+
+		if ( isset( $attrs['textColor'] ) ) {
+			$classes[] = 'has-text-color';
+		}
+
+		if ( isset( $attrs['backgroundColor'] ) || isset( $style['color']['gradient'] ) ) {
+			$classes[] = 'has-background';
+		}
+
+		if ( isset( $attrs['borderColor'] ) ) {
+			$classes[] = 'has-border-color';
+			$classes[] = 'has-' . $attrs['borderColor'] . '-border-color';
+		}
+
+		return array(
+			'attrs'   => $attrs,
+			'classes' => $classes,
+			'css'     => implode( ';', $css ),
+			'dark'    => $dark,
+			'surface' => $surface,
+		);
+	}
+
+	/**
+	 * What a design painted behind an element, as something a block can carry.
+	 *
+	 * A flat colour becomes the nearest background slug; a gradient with
+	 * solid stops is kept whole. A picture, a translucent gradient, or a
+	 * colour nothing in the palette is close to all return null — the first
+	 * is a Cover's job, the other two cannot be judged for contrast.
+	 *
+	 * @param array<string, string> $styles Resolved styles.
+	 * @return array{gradient:string,slug:string,hex:string,dark:bool}|null
+	 */
+	private function background_of( array $styles ): ?array {
+		$image = strtolower( trim( (string) ( $styles['background-image'] ?? 'none' ) ) );
+
+		if ( str_contains( $image, 'url(' ) ) {
+			return null;
+		}
+
+		if ( str_contains( $image, 'gradient' ) ) {
+			if ( 1 === preg_match( '/(?:rgba|hsla)\([^)]*,\s*0?\.\d+\s*\)|color-mix|var\(/', $image ) ) {
+				return null;
+			}
+
+			$gradient = DesignTokens::clean_gradient( (string) $styles['background-image'], array() );
+
+			if ( null === $gradient ) {
+				return null;
+			}
+
+			return array(
+				'gradient' => $gradient,
+				'slug'     => '',
+				'hex'      => $this->gradient_average( $gradient ),
+				'dark'     => $this->gradient_is_dark( $gradient ),
+			);
+		}
+
+		$hex = DesignTokens::to_hex( (string) ( $styles['background-color'] ?? '' ), array() );
+
+		if ( null === $hex ) {
+			return null;
+		}
+
+		$slug = $this->nearest_slug( $hex );
+
+		if ( '' === $slug ) {
+			return null;
+		}
+
+		return array(
+			'gradient' => '',
+			'slug'     => $slug,
+			'hex'      => $this->palette[ $slug ],
+			'dark'     => $this->is_dark( $this->palette[ $slug ] ) && ! $this->is_dark( $this->palette['base'] ?? '#ffffff' ),
+		);
+	}
+
+	/**
+	 * A visible, solid-colour frame the design drew around an element.
+	 *
+	 * @param array<string, string> $styles Resolved styles.
+	 * @return array{slug:string,width:string}|null
+	 */
+	private function border_of( array $styles ): ?array {
+		$style = strtolower( trim( (string) ( $styles['border-style'] ?? '' ) ) );
+
+		if ( ! in_array( $style, array( 'solid', 'dashed', 'dotted', 'double' ), true ) ) {
+			return null;
+		}
+
+		$width = CssIndex::px( (string) ( $styles['border-width'] ?? '' ) );
+
+		if ( null === $width || $width <= 0 ) {
+			return null;
+		}
+
+		$hex = DesignTokens::to_hex( (string) ( $styles['border-color'] ?? '' ), array() );
+
+		if ( null === $hex ) {
+			return null;
+		}
+
+		$slug = $this->nearest_any_slug( $hex, 4000 );
+
+		if ( '' === $slug ) {
+			return null;
+		}
+
+		return array(
+			'slug'  => $slug,
+			'width' => self::trim_number( $width ) . 'px',
+		);
+	}
+
+	/**
+	 * What the design made of a button: filled or outline, shape, size, colours.
+	 *
+	 * @param DOMElement $link      Anchor.
+	 * @param bool       $secondary Whether it is not the first button in its row.
+	 * @return array{outline:bool,attrs:array<string,mixed>,classes:array<int,string>,css:string}
+	 */
+	private function button_styles( DOMElement $link, bool $secondary ): array {
+		$out = array(
+			'outline' => $secondary,
+			'attrs'   => array(),
+			'classes' => array(),
+			'css'     => '',
+		);
+
+		if ( null === $this->css ) {
+			return $out;
+		}
+
+		$styles    = $this->css->styles_for( $link );
+		$class     = strtolower( $link->getAttribute( 'class' ) );
+		$fill      = DesignTokens::to_hex( (string) ( $styles['background-color'] ?? '' ), array() );
+		$fill_slug = null === $fill ? '' : $this->nearest_any_slug( $fill, 4000 );
+		$border    = $this->border_of( $styles );
+
+		// A transparent face with a frame, or a name that says so, is the outline style.
+		if ( null === $fill && ( null !== $border || 1 === preg_match( '/ghost|outline|secondary|tertiary/', $class ) ) ) {
+			$out['outline'] = true;
+		} elseif ( '' !== $fill_slug || 1 === preg_match( '/primary|solid|fill/', $class ) ) {
+			$out['outline'] = false;
+		}
+
+		$attrs  = array();
+		$style  = array();
+		$css    = array();
+		$behind = $this->surface;
+
+		if ( ! $out['outline'] && '' !== $fill_slug ) {
+			$attrs['backgroundColor'] = $fill_slug;
+			$behind                   = $this->palette[ $fill_slug ];
+		}
+
+		$text      = DesignTokens::to_hex( (string) ( $styles['color'] ?? '' ), array() );
+		$text_slug = null === $text ? '' : $this->nearest_any_slug( $text, 4000 );
+
+		if ( isset( $attrs['backgroundColor'] ) ) {
+			/*
+			 * A filled button needs a label that reads on its fill. The design's
+			 * choice first, then the page colour, then the ink; if nothing in
+			 * the palette reads on that fill, the fill goes rather than the text.
+			 */
+			$chosen = '';
+
+			foreach ( array_unique( array_filter( array( $text_slug, 'base', 'contrast' ) ) ) as $slug ) {
+				if ( isset( $this->palette[ $slug ] ) && DesignTokens::contrast( $this->palette[ $slug ], $behind ) >= 4.5 ) {
+					$chosen = $slug;
+					break;
+				}
+			}
+
+			if ( '' === $chosen ) {
+				unset( $attrs['backgroundColor'] );
+			} else {
+				$attrs['textColor'] = $chosen;
+			}
+		} elseif ( '' !== $text_slug && ( $this->on_dark ? 'base' : 'contrast' ) !== $text_slug
+			&& DesignTokens::contrast( $this->palette[ $text_slug ], $behind ) >= 4.5 ) {
+			$attrs['textColor'] = $text_slug;
+		}
+
+		$radius = CssIndex::px( (string) ( $styles['border-radius'] ?? '' ) );
+
+		if ( null !== $radius && $radius > 0 ) {
+			$style['border']['radius'] = $this->radius_value( $radius );
+			$css[]                     = 'border-radius:' . $style['border']['radius'];
+		}
+
+		$sides = array();
+
+		foreach ( array( 'top', 'right', 'bottom', 'left' ) as $side ) {
+			$px = CssIndex::px( (string) ( $styles[ 'padding-' . $side ] ?? '' ) );
+
+			if ( null !== $px && $px > 0 ) {
+				$sides[ $side ] = $this->spacing_value( $px );
+			}
+		}
+
+		if ( array() !== $sides ) {
+			$style['spacing'] = array( 'padding' => $sides );
+			$css[]            = self::box_css( 'padding', $sides );
+		}
+
+		$typo    = array();
+		$classes = array();
+		$px      = CssIndex::px( (string) ( $styles['font-size'] ?? '' ) );
+
+		if ( null !== $px && $px > 0 ) {
+			$this->presets();
+			$slug = self::nearest_preset( $px, $this->font_presets );
+
+			if ( '' !== $slug ) {
+				$attrs['fontSize'] = $slug;
+				$classes[]         = 'has-' . $slug . '-font-size';
+			} else {
+				$typo['fontSize']   = self::rem( $px );
+				$this->literal_used = true;
+			}
+		}
+
+		$weight = strtolower( trim( (string) ( $styles['font-weight'] ?? '' ) ) );
+		$weight = 'bold' === $weight ? '700' : $weight;
+
+		if ( 1 === preg_match( '/^[1-9]00$/', $weight ) ) {
+			$typo['fontWeight'] = $weight;
+		}
+
+		if ( array() !== $typo ) {
+			$style['typography'] = $typo;
+			$css[]               = self::typography_css( $typo );
+		}
+
+		if ( array() !== $style ) {
+			$attrs['style'] = $style;
+		}
+
+		$out['attrs']   = $attrs;
+		$out['classes'] = $classes;
+		$out['css']     = implode( ';', array_filter( $css ) );
+
+		return $out;
+	}
+
+	/**
+	 * Load the theme's presets once, as pixels at desktop width.
+	 *
+	 * Fluid sizes and clamp() ranges are read at their maximum, which is
+	 * what shows at the width a design is drawn at.
+	 *
+	 * @return void
+	 */
+	private function presets(): void {
+		if ( null !== $this->spacing_presets ) {
+			return;
+		}
+
+		$this->spacing_presets = array();
+
+		foreach ( self::preset_list( wp_get_global_settings( array( 'spacing', 'spacingSizes' ) ) ) as $preset ) {
+			$px = self::preset_px( (string) ( $preset['size'] ?? '' ) );
+
+			if ( null !== $px && isset( $preset['slug'] ) ) {
+				$this->spacing_presets[ (string) $preset['slug'] ] = $px;
+			}
+		}
+
+		foreach ( self::preset_list( wp_get_global_settings( array( 'typography', 'fontSizes' ) ) ) as $preset ) {
+			$px = self::preset_px( (string) ( $preset['size'] ?? '' ) );
+
+			if ( null !== $px && isset( $preset['slug'] ) ) {
+				$this->font_presets[ (string) $preset['slug'] ] = $px;
+			}
+		}
+
+		$radius = wp_get_global_settings( array( 'custom', 'radius' ) );
+
+		foreach ( is_array( $radius ) ? $radius : array() as $name => $value ) {
+			$px = is_string( $value ) ? self::preset_px( $value ) : null;
+
+			if ( null !== $px ) {
+				$this->radius_tokens[ (string) $name ] = $px;
+			}
+		}
+	}
+
+	/**
+	 * The presets from a global-settings answer, whichever origin holds them.
+	 *
+	 * @param mixed $settings Return of wp_get_global_settings().
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function preset_list( $settings ): array {
+		if ( ! is_array( $settings ) ) {
+			return array();
+		}
+
+		foreach ( array( 'custom', 'theme', 'default' ) as $origin ) {
+			if ( isset( $settings[ $origin ] ) && is_array( $settings[ $origin ] ) && array() !== $settings[ $origin ] ) {
+				return $settings[ $origin ];
+			}
+		}
+
+		return array_is_list( $settings ) ? $settings : array();
+	}
+
+	/**
+	 * A preset size in pixels; the upper bound for a clamp().
+	 *
+	 * @param string $size Preset size.
+	 * @return float|null
+	 */
+	private static function preset_px( string $size ): ?float {
+		$size = trim( $size );
+
+		if ( 1 === preg_match( '/^clamp\((.*)\)$/i', $size, $range ) ) {
+			$parts = explode( ',', $range[1] );
+			$size  = trim( (string) end( $parts ) );
+		}
+
+		return CssIndex::px( $size );
+	}
+
+	/**
+	 * The preset closest to a value, when one is within tolerance.
+	 *
+	 * @param float                $px      Design value in pixels.
+	 * @param array<string, float> $presets Slug to pixels.
+	 * @return string Slug, or an empty string.
+	 */
+	private static function nearest_preset( float $px, array $presets ): string {
+		$best = '';
+		$gap  = PHP_FLOAT_MAX;
+
+		foreach ( $presets as $slug => $size ) {
+			if ( $size <= 0 ) {
+				continue;
+			}
+
+			$relative = abs( $px - $size ) / $size;
+
+			if ( $relative <= self::TOLERANCE && $relative < $gap ) {
+				$gap  = $relative;
+				$best = (string) $slug;
+			}
+		}
+
+		return $best;
+	}
+
+	/**
+	 * A length as a spacing preset reference, or an exact rem value.
+	 *
+	 * @param float $px Design value in pixels.
+	 * @return string
+	 */
+	private function spacing_value( float $px ): string {
+		$this->presets();
+
+		$slug = self::nearest_preset( $px, $this->spacing_presets );
+
+		if ( '' !== $slug ) {
+			return 'var:preset|spacing|' . $slug;
+		}
+
+		$this->literal_used = true;
+
+		return self::rem( $px );
+	}
+
+	/**
+	 * A corner radius as a theme token reference, or an exact rem value.
+	 *
+	 * Written as a CSS custom property rather than a `var:` reference: the
+	 * radius tokens are theme.json custom values, not presets, and both the
+	 * editor and the style engine pass a var() through untouched.
+	 *
+	 * @param float $px Design value in pixels.
+	 * @return string
+	 */
+	private function radius_value( float $px ): string {
+		$this->presets();
+
+		if ( $px >= 500 && isset( $this->radius_tokens['pill'] ) ) {
+			return 'var(--wp--custom--radius--pill)';
+		}
+
+		$name = self::nearest_preset( $px, $this->radius_tokens );
+
+		if ( '' !== $name ) {
+			return 'var(--wp--custom--radius--' . $name . ')';
+		}
+
+		$this->literal_used = true;
+
+		return self::rem( $px );
+	}
+
+	/**
+	 * Pixels as rem, trimmed.
+	 *
+	 * @param float $px Pixels.
+	 * @return string
+	 */
+	private static function rem( float $px ): string {
+		if ( 0.0 === $px ) {
+			return '0';
+		}
+
+		return self::trim_number( $px / 16 ) . 'rem';
+	}
+
+	/**
+	 * A float without trailing zeros.
+	 *
+	 * @param float $value Number.
+	 * @return string
+	 */
+	private static function trim_number( float $value ): string {
+		return rtrim( rtrim( number_format( $value, 3, '.', '' ), '0' ), '.' );
+	}
+
+	/**
+	 * A block style value as the CSS the editor writes for it.
+	 *
+	 * @param string $value `var:preset|spacing|50` or a literal.
+	 * @return string
+	 */
+	private static function css_value( string $value ): string {
+		if ( str_starts_with( $value, 'var:' ) ) {
+			return 'var(--wp--' . str_replace( '|', '--', substr( $value, 4 ) ) . ')';
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Box sides in the order the editor serialises them.
+	 *
+	 * @param array<string, string> $sides Side to value.
+	 * @return array<string, string>
+	 */
+	private static function ordered_sides( array $sides ): array {
+		$out = array();
+
+		foreach ( array( 'top', 'right', 'bottom', 'left' ) as $side ) {
+			if ( isset( $sides[ $side ] ) ) {
+				$out[ $side ] = $sides[ $side ];
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Inline declarations for a box property.
+	 *
+	 * @param string                $property `padding`.
+	 * @param array<string, string> $sides    Side to value.
+	 * @return string
+	 */
+	private static function box_css( string $property, array $sides ): string {
+		$out = array();
+
+		foreach ( self::ordered_sides( $sides ) as $side => $value ) {
+			$out[] = $property . '-' . $side . ':' . self::css_value( $value );
+		}
+
+		return implode( ';', $out );
 	}
 
 	/**

@@ -16,6 +16,9 @@
 	--wow-admin-ink: #0a0a18;
 	--wow-admin-line: #dcdcde;
 	--wow-admin-muted: #50575e;
+	--wow-admin-paper: #fff;
+	--wow-admin-soft: #f6f7f7;
+	--wow-admin-warn-ink: #8a4b05;
 }
 
 .wow-import__masthead {
@@ -34,7 +37,7 @@
 .wow-import__masthead > h1 {
 	margin: 0.35rem 0 0.5rem;
 	padding: 0;
-	color: #fff;
+	color: var(--wow-admin-paper);
 	font-size: 26px;
 	font-weight: 600;
 	line-height: 1.15;
@@ -86,7 +89,7 @@
 	max-width: 60rem;
 	margin: 1rem 0 1.5rem;
 	padding: 0 1.5rem;
-	background: #fff;
+	background: var(--wow-admin-paper);
 	border: 1px solid var(--wow-admin-line);
 	border-radius: 6px;
 	box-shadow: 0 1px 2px rgba(10, 10, 24, 0.05);
@@ -105,6 +108,43 @@
 
 .wow-import__settings[open] {
 	padding-bottom: 0.5rem;
+}
+
+/*
+ * The cost meter.
+ *
+ * Deliberately plain: this is a number somebody is about to spend money on, so
+ * it reads as a readout rather than as a promotion. The figures are estimates
+ * from list prices and the note under them says so — that sentence is not
+ * decoration and should not be dropped to save a line.
+ */
+.wow-import__meter {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.35rem 1.4rem;
+	margin: 0.9rem 0;
+	padding: 0.7rem 0.9rem;
+	background: var(--wow-admin-soft);
+	border: 1px solid var(--wow-admin-line);
+	border-left: 3px solid var(--wow-admin-accent);
+	border-radius: 4px;
+	font-size: 13px;
+}
+
+.wow-import__meter-figure > strong {
+	font-size: 15px;
+	font-variant-numeric: tabular-nums;
+}
+
+.wow-import__meter-figure.is-warning > strong {
+	color: var(--wow-admin-warn-ink);
+}
+
+.wow-import__meter-note {
+	flex-basis: 100%;
+	color: var(--wow-admin-muted);
+	font-size: 12px;
 }
 
 /* Whether a key is set, said plainly rather than left to be guessed. */
@@ -140,7 +180,7 @@
 	padding: 0.35rem 0.6rem;
 	border: 1px solid #8c8f94;
 	border-radius: 4px;
-	background: #fff;
+	background: var(--wow-admin-paper);
 	font-size: 14px;
 	line-height: 1.5;
 }
@@ -178,7 +218,7 @@
 	max-width: 60rem;
 	margin: 0 0 1.5rem;
 	padding: 1.35rem 1.6rem;
-	background: #fff;
+	background: var(--wow-admin-paper);
 	border: 1px solid var(--wow-admin-line);
 	border-left: 3px solid var(--wow-admin-accent);
 	border-radius: 6px;
@@ -260,14 +300,81 @@
 .wow-import__danger {
 	color: #b32d2e;
 	border-color: #b32d2e;
-	background: #fff;
+	background: var(--wow-admin-paper);
 }
 
 .wow-import__danger:hover:not(:disabled),
 .wow-import__danger:focus:not(:disabled) {
-	color: #fff;
+	color: var(--wow-admin-paper);
 	background: #b32d2e;
 	border-color: #b32d2e;
+}
+
+/* --- clean up a previous import --- */
+
+/*
+ * Sits above the upload step because it is about the site, not about any
+ * design: what a previous import left behind, and the way to take it out.
+ */
+.wow-import__cleanup {
+	max-width: 60rem;
+	margin: 1rem 0 1.5rem;
+	padding: 1.1rem 1.25rem;
+	color: var(--wow-admin-ink);
+	background: var(--wow-admin-paper);
+	border: 1px solid var(--wow-admin-line);
+	border-left: 4px solid var(--wow-admin-accent);
+	border-radius: 6px;
+}
+
+.wow-import__cleanup > h3 {
+	margin: 0 0 0.35rem;
+	color: var(--wow-admin-ink);
+	font-size: 15px;
+}
+
+.wow-import__cleanup > p {
+	margin: 0 0 0.5rem;
+}
+
+.wow-import__cleanup .wow-import__hint {
+	color: var(--wow-admin-muted);
+}
+
+.wow-import__choice {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.25rem;
+	margin: 0.4rem 0 0;
+}
+
+.wow-import__choice > .wow-import__hint {
+	margin: 0;
+}
+
+.wow-import__confirm {
+	margin-top: 0.8rem;
+	padding: 0.8rem 1rem;
+	border: 1px dashed var(--wow-admin-line);
+	border-radius: 6px;
+}
+
+.wow-import__confirm > label {
+	display: block;
+	font-weight: 600;
+}
+
+.wow-import__confirm .wow-import__actions {
+	align-items: center;
+	margin-top: 0.4rem;
+}
+
+.wow-import__confirm-field {
+	width: 10rem;
+	max-width: 100%;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
 .wow-import__routes-wrap {
@@ -325,7 +432,7 @@
 	min-height: 44px;
 	padding: 0.7rem 0.9rem;
 	text-align: left;
-	background: #f6f7f7;
+	background: var(--wow-admin-soft);
 	border: 1px solid #dcdcde;
 	border-radius: 4px;
 	cursor: pointer;
@@ -372,7 +479,7 @@
 .wow-import__bridge {
 	margin: 1rem 0 0;
 	padding: 0 1rem;
-	background: #f6f7f7;
+	background: var(--wow-admin-soft);
 	border: 1px solid #dcdcde;
 	border-radius: 4px;
 }
@@ -541,5 +648,212 @@
 
 	.wow-import__pages {
 		grid-template-columns: 1fr;
+	}
+}
+
+/* --- previously uploaded designs --- */
+
+.wow-import__designs-wrap {
+	margin-top: 1.2rem;
+}
+
+.wow-import__designs-wrap > h3 {
+	margin: 0 0 0.4rem;
+	color: var(--wow-admin-ink);
+	font-size: 13px;
+}
+
+.wow-import__designs {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+	gap: 0.6rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* --- page list with a preview per page --- */
+
+.wow-import__page-item {
+	display: flex;
+	align-items: stretch;
+	gap: 0.4rem;
+}
+
+.wow-import__page-item > .wow-import__page {
+	flex: 1 1 auto;
+}
+
+.wow-import__page-preview {
+	flex: 0 0 auto;
+	align-self: center;
+	min-height: 36px;
+}
+
+.wow-import__page-preview[aria-pressed="true"] {
+	color: var(--wow-admin-paper);
+	background: var(--wow-admin-accent);
+	border-color: var(--wow-admin-accent);
+}
+
+/* --- preview before build: design beside blocks --- */
+
+.wow-import__compare-wrap {
+	margin-top: 1.2rem;
+	padding: 1rem 1.1rem;
+	background: var(--wow-admin-soft);
+	border: 1px solid var(--wow-admin-line);
+	border-radius: 6px;
+}
+
+.wow-import__compare-wrap:focus {
+	outline: none;
+}
+
+.wow-import__compare-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 1.2rem;
+}
+
+.wow-import__compare-head > h3 {
+	margin: 0;
+	color: var(--wow-admin-ink);
+	font-size: 15px;
+}
+
+.wow-import__compare-head > .wow-import__actions {
+	margin: 0 0 0 auto;
+}
+
+.wow-import__compare-count {
+	margin: 0;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.wow-import__compare {
+	margin: 1rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.wow-import__compare-row {
+	margin: 0 0 1rem;
+	padding: 0.8rem 1rem;
+	background: var(--wow-admin-paper);
+	border: 1px solid var(--wow-admin-line);
+	border-radius: 6px;
+}
+
+.wow-import__compare-row.is-excluded {
+	border-style: dashed;
+}
+
+.wow-import__compare-row.is-excluded .wow-import__compare-panes {
+	opacity: 0.55;
+}
+
+.wow-import__compare-row-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.8rem;
+	margin-bottom: 0.5rem;
+}
+
+.wow-import__compare-row-head > strong {
+	color: var(--wow-admin-ink);
+	font-size: 14px;
+}
+
+.wow-import__compare-panes {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.8rem;
+}
+
+.wow-import__compare-pane > h4 {
+	margin: 0 0 0.3rem;
+	color: var(--wow-admin-muted);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.wow-import__compare-pane > .wow-import__preview {
+	margin-top: 0;
+}
+
+/*
+ * The design's own markup keeps its own light ground: its colours were
+ * written for one, and the dark ground the block preview uses would hide
+ * most of it.
+ */
+.wow-import__preview--design {
+	color: var(--wow-admin-ink);
+	background: var(--wow-admin-paper);
+	border: 1px solid var(--wow-admin-line);
+}
+
+/* --- stepwise build progress --- */
+
+.wow-import__progress {
+	margin-top: 1rem;
+	padding: 0.8rem 1rem;
+	background: var(--wow-admin-paper);
+	border: 1px solid var(--wow-admin-line);
+	border-radius: 6px;
+}
+
+.wow-import__bar {
+	display: block;
+	width: 100%;
+	height: 0.7rem;
+	accent-color: var(--wow-admin-accent);
+}
+
+.wow-import__progress-text {
+	margin: 0.4rem 0 0;
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+}
+
+/* --- what the build made --- */
+
+.wow-import__table-wrap {
+	margin-top: 0.8rem;
+	overflow-x: auto;
+}
+
+.wow-import__table td,
+.wow-import__table th {
+	vertical-align: middle;
+}
+
+.wow-import__table .wow-import__concerns {
+	margin-top: 0.3rem;
+}
+
+.wow-import__row-actions {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+@media (max-width: 782px) {
+
+	.wow-import__compare-panes {
+		grid-template-columns: 1fr;
+	}
+
+	.wow-import__page-item {
+		flex-direction: column;
+	}
+
+	.wow-import__page-preview {
+		align-self: stretch;
 	}
 }

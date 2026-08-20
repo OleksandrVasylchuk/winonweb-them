@@ -20,7 +20,11 @@
 	color: var(--wp--preset--color--border-strong);
 }
 
-/* The separator is decorative punctuation, not content. */
+/*
+ * The separator is decorative punctuation, not content.
+ * Literal breakpoint: media queries cannot read custom properties, so this
+ * mirrors --wp--custom--breakpoint--small in theme.json by hand.
+ */
 @media (max-width: 480px) {
 
 	.wow-colophon__credit::before {

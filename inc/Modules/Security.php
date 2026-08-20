@@ -48,7 +48,9 @@ final class Security implements Module {
 		header( 'X-Content-Type-Options: nosniff' );
 		header( 'Referrer-Policy: strict-origin-when-cross-origin' );
 		header( 'X-Frame-Options: SAMEORIGIN' );
-		header( 'Cross-Origin-Opener-Policy: same-origin' );
+		// `same-origin` would sever payment and OAuth popups (PayPal, Stripe,
+		// "Sign in with…") from their opener; allow-popups keeps them working.
+		header( 'Cross-Origin-Opener-Policy: same-origin-allow-popups' );
 		header( 'Permissions-Policy: geolocation=(), microphone=(), camera=(), browsing-topics=(), interest-cohort=()' );
 	}
 
@@ -102,8 +104,11 @@ final class Security implements Module {
 	/**
 	 * Read a POST field and sanitise it with the given callback.
 	 *
-	 * Callers must verify a nonce before calling this; the PHPCS annotation
-	 * documents that the check happens at the call site.
+	 * The caller owns the request check. Admin forms verify a nonce first;
+	 * the public contact form deliberately treats a failed nonce as a soft
+	 * signal for logged-out visitors (page caches serve stale nonces) and
+	 * relies on its honeypot, time trap and rate limit instead. The PHPCS
+	 * annotation documents that the decision happens at the call site.
 	 *
 	 * @param string   $key      Field name.
 	 * @param callable $callback Sanitising callback.

@@ -1,0 +1,275 @@
+/**
+ * First-run setup screen.
+ *
+ * Shares the visual language of the design import screen so the two read as
+ * one product rather than two plugins. Colours are the light variation's,
+ * which the contrast audit already clears against white — the dark palette's
+ * accent is 1.6:1 on an admin background and would fail here.
+ */
+
+.wow-setup {
+	--wow-admin-accent: #0e6f85;
+	--wow-admin-ink: #0a0a18;
+	--wow-admin-line: #dcdcde;
+	--wow-admin-muted: #50575e;
+}
+
+/* ------------------------------------------------------------- masthead */
+
+.wow-setup__masthead {
+	position: relative;
+	max-width: 60rem;
+	margin: 1.25rem 0 1.25rem;
+	padding: 1.6rem 1.75rem;
+	overflow: hidden;
+	color: #f2f5fb;
+	background:
+		radial-gradient(120% 140% at 8% 0%, rgba(34, 211, 238, 0.28), transparent 55%),
+		linear-gradient(135deg, #0a0a18, #1b1b3a 62%, #12122b);
+	border-radius: 10px;
+}
+
+.wow-setup__masthead > h1 {
+	margin: 0.35rem 0 0.5rem;
+	padding: 0;
+	color: #fff;
+	font-size: 26px;
+	font-weight: 600;
+	line-height: 1.15;
+}
+
+.wow-setup__brand {
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+	margin: 0;
+	color: #22d3ee;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+}
+
+.wow-setup__mark {
+	display: grid;
+	place-items: center;
+	width: 26px;
+	height: 26px;
+	color: #0a0a18;
+	background: #22d3ee;
+	border-radius: 50%;
+	font-size: 13px;
+	letter-spacing: 0;
+}
+
+.wow-setup__masthead .wow-setup__lede {
+	max-width: 46rem;
+	margin: 0;
+	color: #cdd6e6;
+	font-size: 14px;
+}
+
+/* ----------------------------------------------------------- progress rail */
+
+.wow-setup__rail {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem 1.4rem;
+	max-width: 60rem;
+	margin: 0 0 1rem;
+	padding: 0;
+	list-style: none;
+	counter-reset: wow-step;
+}
+
+.wow-setup__rail-step {
+	position: relative;
+	margin: 0;
+	color: var(--wow-admin-muted);
+	font-size: 13px;
+	counter-increment: wow-step;
+}
+
+.wow-setup__rail-step::before {
+	content: counter(wow-step);
+	display: inline-grid;
+	place-items: center;
+	width: 20px;
+	height: 20px;
+	margin-right: 0.45rem;
+	color: #fff;
+	background: #8c8f94;
+	border-radius: 50%;
+	font-size: 11px;
+	font-weight: 700;
+	vertical-align: -0.3em;
+}
+
+.wow-setup__rail-step.is-done::before,
+.wow-setup__rail-step.is-current::before {
+	background: var(--wow-admin-accent);
+}
+
+.wow-setup__rail-step.is-current {
+	color: var(--wow-admin-ink);
+	font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ panel */
+
+.wow-setup__panel {
+	max-width: 60rem;
+	margin: 0 0 1.5rem;
+	padding: 1.4rem 1.6rem 1.6rem;
+	background: #fff;
+	border: 1px solid var(--wow-admin-line);
+	border-radius: 6px;
+	box-shadow: 0 1px 2px rgba(10, 10, 24, 0.05);
+}
+
+.wow-setup__panel > h2 {
+	margin-top: 0;
+	font-size: 19px;
+}
+
+.wow-setup__note {
+	max-width: 46rem;
+	color: var(--wow-admin-muted);
+}
+
+.wow-setup__list {
+	max-width: 46rem;
+	margin: 0 0 1.2rem;
+	padding-left: 1.1rem;
+	list-style: disc;
+}
+
+.wow-setup__list li {
+	margin-bottom: 0.35rem;
+}
+
+.wow-setup__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+	margin: 1.4rem 0 0;
+	padding-top: 1.2rem;
+	border-top: 1px solid var(--wow-admin-line);
+}
+
+.wow-setup__logo img {
+	max-width: 240px;
+	height: auto;
+	padding: 0.6rem;
+	background: #f6f7f7;
+	border: 1px solid var(--wow-admin-line);
+	border-radius: 4px;
+}
+
+/* ------------------------------------------------------- variation chooser */
+
+.wow-setup__choices {
+	display: grid;
+	gap: 0.6rem;
+	margin: 1rem 0 0;
+	grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+}
+
+.wow-setup__choice {
+	display: grid;
+	align-items: center;
+	gap: 0 0.7rem;
+	padding: 0.85rem 1rem;
+	border: 1px solid var(--wow-admin-line);
+	border-radius: 6px;
+	cursor: pointer;
+	grid-template-columns: auto auto 1fr;
+}
+
+.wow-setup__choice:hover {
+	border-color: #8c8f94;
+}
+
+/*
+ * The whole card reacts to the radio inside it, so the hit area is the card
+ * and the focus ring is still on the control that has focus.
+ */
+.wow-setup__choice:focus-within {
+	border-color: var(--wow-admin-accent);
+	box-shadow: 0 0 0 1px var(--wow-admin-accent);
+}
+
+.wow-setup__choice:has(input:checked) {
+	border-color: var(--wow-admin-accent);
+	box-shadow: 0 0 0 1px var(--wow-admin-accent);
+}
+
+.wow-setup__swatch {
+	display: flex;
+	overflow: hidden;
+	width: 46px;
+	height: 30px;
+	border: 1px solid rgba(10, 10, 24, 0.15);
+	border-radius: 4px;
+}
+
+.wow-setup__swatch > span {
+	flex: 1;
+}
+
+.wow-setup__choice-text {
+	display: block;
+	min-width: 0;
+}
+
+.wow-setup__choice-text > strong {
+	display: block;
+	font-size: 13px;
+}
+
+.wow-setup__choice-text > span {
+	display: block;
+	color: var(--wow-admin-muted);
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+/* -------------------------------------------------------- dashboard widget */
+
+.wow-setup-widget__links {
+	margin: 0.6rem 0;
+	padding: 0;
+	list-style: none;
+}
+
+.wow-setup-widget__links li {
+	margin: 0 0 0.35rem;
+	padding-left: 1rem;
+	text-indent: -1rem;
+}
+
+.wow-setup-widget__links li::before {
+	content: "→";
+	margin-right: 0.4rem;
+	color: #8c8f94;
+}
+
+.wow-setup-widget__version {
+	margin: 0.8rem 0 0;
+	padding-top: 0.6rem;
+	border-top: 1px solid var(--wow-admin-line, #dcdcde);
+	color: #646970;
+	font-size: 12px;
+}
+
+@media screen and (max-width: 782px) {
+
+	.wow-setup__masthead {
+		padding: 1.2rem;
+	}
+
+	.wow-setup__panel {
+		padding: 1.1rem;
+	}
+}

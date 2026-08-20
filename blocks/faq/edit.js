@@ -19,7 +19,10 @@
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
 
-			var blockProps = useBlockProps( { className: 'wow-faq' } );
+			var blockProps = useBlockProps( {
+				className: 'wow-faq',
+				'data-empty-hint': __( 'Add a question to start the FAQ.', 'wow-signal' ),
+			} );
 			var innerProps = useInnerBlocksProps( blockProps, {
 				allowedBlocks: [ 'wow/faq-item' ],
 				template: TEMPLATE,

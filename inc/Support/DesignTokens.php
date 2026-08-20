@@ -150,10 +150,18 @@ final class DesignTokens {
 			 * A design's hero is very often a gradient, and reducing it to the
 			 * nearest flat swatch is the difference between a page that looks
 			 * like the archive and one that does not.
+			 *
+			 * A picture is kept as its url() so the converter can make the
+			 * band a Cover block. It is recorded only for the image itself:
+			 * the colour under it, if any, is not what the section shows.
 			 */
-			$color = str_contains( strtolower( $value ), 'gradient' )
-				? self::clean_gradient( $value, $vars )
-				: self::to_hex( $value, $vars );
+			if ( 1 === preg_match( '/url\(\s*["\']?[^"\')]+["\']?\s*\)/i', $value, $picture ) && ! str_contains( strtolower( $picture[0] ), 'data:' ) ) {
+				$color = $picture[0];
+			} else {
+				$color = str_contains( strtolower( $value ), 'gradient' )
+					? self::clean_gradient( $value, $vars )
+					: self::to_hex( $value, $vars );
+			}
 
 			if ( null === $color ) {
 				continue;
@@ -186,7 +194,7 @@ final class DesignTokens {
 	 * @param array<string, string> $vars  Custom properties.
 	 * @return string|null
 	 */
-	private static function clean_gradient( string $value, array $vars ): ?string {
+	public static function clean_gradient( string $value, array $vars ): ?string {
 		$value = (string) preg_replace_callback(
 			'/var\(\s*(--[a-z0-9\-_]+)\s*(?:,([^)]*))?\)/i',
 			static function ( array $ref ) use ( $vars ): string {
@@ -232,6 +240,36 @@ final class DesignTokens {
 	}
 
 	/**
+	 * Human-readable, translatable name for a palette slug.
+	 *
+	 * These are the labels the Site Editor shows in the colour picker, so
+	 * they go through the text domain like any other UI string. An unknown
+	 * slug falls back to the slug itself, title-cased.
+	 *
+	 * @param string $slug Palette slug.
+	 * @return string
+	 */
+	private static function palette_name( string $slug ): string {
+		$names = array(
+			'base'          => _x( 'Base', 'Palette colour name', 'wow-signal' ),
+			'surface'       => _x( 'Surface', 'Palette colour name', 'wow-signal' ),
+			'surface-2'     => _x( 'Surface raised', 'Palette colour name', 'wow-signal' ),
+			'border'        => _x( 'Border', 'Palette colour name', 'wow-signal' ),
+			'border-strong' => _x( 'Border strong', 'Palette colour name', 'wow-signal' ),
+			'contrast'      => _x( 'Contrast', 'Palette colour name', 'wow-signal' ),
+			'muted'         => _x( 'Muted', 'Palette colour name', 'wow-signal' ),
+			'accent'        => _x( 'Accent', 'Palette colour name', 'wow-signal' ),
+			'accent-ink'    => _x( 'Accent ink', 'Palette colour name', 'wow-signal' ),
+			'accent-2'      => _x( 'Accent 2', 'Palette colour name', 'wow-signal' ),
+			'accent-3'      => _x( 'Accent 3', 'Palette colour name', 'wow-signal' ),
+			'success'       => _x( 'Success', 'Palette colour name', 'wow-signal' ),
+			'warning'       => _x( 'Warning', 'Palette colour name', 'wow-signal' ),
+		);
+
+		return $names[ $slug ] ?? ucwords( str_replace( '-', ' ', $slug ) );
+	}
+
+	/**
 	 * Write the tokens into the site's global styles.
 	 *
 	 * @param array<string, mixed> $tokens extract() result.
@@ -243,7 +281,7 @@ final class DesignTokens {
 		foreach ( self::SLUGS as $slug ) {
 			$palette[] = array(
 				'slug'  => $slug,
-				'name'  => ucwords( str_replace( '-', ' ', $slug ) ),
+				'name'  => self::palette_name( $slug ),
 				'color' => (string) ( $tokens['colors'][ $slug ] ?? '#000000' ),
 			);
 		}
@@ -370,7 +408,7 @@ final class DesignTokens {
 	 * @param string $css Stylesheet text.
 	 * @return array<string, string>
 	 */
-	private static function custom_properties( string $css ): array {
+	public static function custom_properties( string $css ): array {
 		$vars = array();
 
 		if ( preg_match_all( '/(--[a-z0-9\-_]+)\s*:\s*([^;}]+)/i', $css, $found, PREG_SET_ORDER ) ) {
@@ -564,6 +602,49 @@ final class DesignTokens {
 	}
 
 	/**
+	 * Replace every var() reference inside a value, in place.
+	 *
+	 * Unlike resolve_var(), which answers "what colour is this?" and so returns
+	 * only the referenced value, this keeps the surrounding text: `0 var(--gap)`
+	 * becomes `0 22px`, which is what a shorthand needs before it can be split.
+	 * References are followed a few levels deep; a fallback is used when the
+	 * property is unknown, and an unresolvable reference is left untouched so
+	 * the caller can see it and skip the declaration.
+	 *
+	 * @param string                $value Declaration value.
+	 * @param array<string, string> $vars  Custom properties, lower-cased names.
+	 * @return string
+	 */
+	public static function substitute_vars( string $value, array $vars ): string {
+		$depth = 0;
+
+		while ( $depth < 4 && str_contains( $value, 'var(' ) ) {
+			++$depth;
+			$next = preg_replace_callback(
+				'/var\(\s*(--[a-z0-9\-_]+)\s*(?:,\s*((?:[^()]|\([^()]*\))*))?\)/i',
+				static function ( array $ref ) use ( $vars ): string {
+					$name = strtolower( $ref[1] );
+
+					if ( isset( $vars[ $name ] ) ) {
+						return trim( $vars[ $name ] );
+					}
+
+					return isset( $ref[2] ) && '' !== trim( $ref[2] ) ? trim( $ref[2] ) : $ref[0];
+				},
+				$value
+			);
+
+			if ( ! is_string( $next ) || $next === $value ) {
+				break;
+			}
+
+			$value = $next;
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Resolve a var() reference to its declared value.
 	 *
 	 * @param string                $value Declaration value.
@@ -596,7 +677,7 @@ final class DesignTokens {
 	 * @param array<string, string> $vars  Custom properties.
 	 * @return string|null
 	 */
-	private static function to_hex( string $value, array $vars ): ?string {
+	public static function to_hex( string $value, array $vars ): ?string {
 		$value = strtolower( trim( self::resolve_var( $value, $vars ) ) );
 		$value = trim( (string) preg_replace( '/\s*!important\s*$/', '', $value ) );
 

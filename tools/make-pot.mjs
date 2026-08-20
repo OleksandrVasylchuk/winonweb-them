@@ -21,6 +21,13 @@ import { dirname, resolve, join, relative } from 'node:path';
 const root = resolve( dirname( fileURLToPath( import.meta.url ) ), '..' );
 const DOMAIN = 'wow-signal';
 
+/** The theme version, read from the one place that owns it: style.css. */
+const VERSION = ( () => {
+	const header = readFileSync( resolve( root, 'style.css' ), 'utf8' ).slice( 0, 2048 );
+	const match = header.match( /^\s*(?:\*\s*)?Version:\s*(.+)$/m );
+	return match ? match[ 1 ].trim() : '0.0.0';
+} )();
+
 /** Gettext functions, mapped to which argument holds what. */
 const FUNCTIONS = {
 	__: { text: 0, domain: 1 },
@@ -317,7 +324,7 @@ const lines = [
 	'# This file is distributed under the GNU General Public License v2 or later.',
 	'msgid ""',
 	'msgstr ""',
-	'"Project-Id-Version: WOW — Signal 1.0.0\\n"',
+	`"Project-Id-Version: WOW — Signal ${ VERSION }\\n"`,
 	'"Report-Msgid-Bugs-To: https://www.winonweb.dev/\\n"',
 	'"MIME-Version: 1.0\\n"',
 	'"Content-Type: text/plain; charset=UTF-8\\n"',

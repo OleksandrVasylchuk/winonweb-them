@@ -60,8 +60,8 @@
 .wow-faq__marker {
 	position: relative;
 	flex: 0 0 auto;
-	width: 1rem;
-	height: 1rem;
+	width: var(--wp--custom--icon--md);
+	height: var(--wp--custom--icon--md);
 }
 
 .wow-faq__marker::before,
@@ -71,7 +71,7 @@
 	inset-block-start: 50%;
 	inset-inline-start: 0;
 	width: 100%;
-	height: 2px;
+	height: var(--wp--custom--hairline);
 	background: var(--wp--preset--color--accent);
 	translate: 0 -50%;
 	transition: rotate var(--wp--custom--transition--base), opacity var(--wp--custom--transition--fast);

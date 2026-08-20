@@ -26,11 +26,17 @@ if ( 0 === count( $block->inner_blocks ) ) {
 $wow_label = isset( $attributes['label'] ) ? trim( (string) $attributes['label'] ) : '';
 $wow_label = '' !== $wow_label ? $wow_label : __( 'Case studies', 'wow-signal' );
 
-$wow_width = isset( $attributes['slideWidth'] ) ? (string) $attributes['slideWidth'] : '22rem';
+$wow_width = isset( $attributes['slideWidth'] ) ? (string) $attributes['slideWidth'] : 'var(--wp--custom--slider--slide-width)';
 
-// Only a bare CSS length may reach the style attribute.
-if ( 1 !== preg_match( '/^\d+(\.\d+)?(rem|em|px|%|vw|ch)$/', $wow_width ) ) {
-	$wow_width = '22rem';
+/*
+ * Only a bare CSS length or one of the theme.json slider width tokens may
+ * reach the style attribute. Anything else falls back to the default token.
+ */
+if (
+	1 !== preg_match( '/^\d+(\.\d+)?(rem|em|px|%|vw|ch)$/', $wow_width )
+	&& 1 !== preg_match( '/^var\(--wp--custom--slider--slide-width(-narrow|-wide)?\)$/', $wow_width )
+) {
+	$wow_width = 'var(--wp--custom--slider--slide-width)';
 }
 
 $wow_uid = wp_unique_id( 'wow-slider-' );

@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button -->
-<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#wow_signal_contact"><?php echo esc_html_x( 'Get a free review', 'Pattern placeholder text', 'wow-signal' ); ?></a></div>
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/contact/#wow_signal_contact"><?php echo esc_html_x( 'Get a free review', 'Pattern placeholder text', 'wow-signal' ); ?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group --></section>

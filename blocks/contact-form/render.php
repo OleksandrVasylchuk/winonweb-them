@@ -91,7 +91,21 @@ if ( ! $wow_show_subject ) {
 <div <?php echo $wow_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by get_block_wrapper_attributes(). ?>>
 
 	<?php if ( $wow_sent ) : ?>
-		<p class="wow-contact__notice wow-contact__notice--success" role="status">
+		<?php
+		/*
+		 * The success redirect lands on this id, so the thank-you line is in
+		 * view even on a phone. tabindex="-1" lets view.js move focus here:
+		 * a role="status" region that is already present at load is not
+		 * announced on its own.
+		 */
+		?>
+		<p
+			class="wow-contact__notice wow-contact__notice--success"
+			id="<?php echo esc_attr( ContactForm::ACTION ); ?>-status"
+			role="status"
+			tabindex="-1"
+			data-wow-contact-status
+		>
 			<?php echo esc_html( $wow_success ); ?>
 		</p>
 	<?php endif; ?>

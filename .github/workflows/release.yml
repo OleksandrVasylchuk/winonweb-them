@@ -1,0 +1,94 @@
+# Publish a release when a version tag is pushed.
+#
+# The version lives in three files — style.css, readme.txt and package.json —
+# and `npm run build:zip` already refuses to package them when they disagree.
+# This workflow adds the fourth check: the tag itself must be "v" + that
+# version, so a tag can never point at a build that calls itself something
+# else.
+#
+# What it publishes: the theme ZIP, its SHA-256, and update.json — the
+# manifest inc/Modules/Updates.php fetches. Copy update.json and the ZIP to
+# the host named in the DOWNLOAD_BASE repository variable and every site
+# running the theme sees the new version under Appearance → Themes.
+#
+# Repository variable: DOWNLOAD_BASE, e.g. https://www.winonweb.dev/downloads/
+# Without it the manifest carries a placeholder host the theme refuses, so a
+# forgotten variable cannot publish a working-looking but broken manifest.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: The tag must match the theme version
+        run: |
+          version="$(sed -nE 's/^\s*\*?\s*Version:\s*(.+)\s*$/\1/p' style.css | head -n1)"
+          tag="${GITHUB_REF_NAME}"
+          echo "style.css: ${version} — tag: ${tag}"
+          if [ "v${version}" != "${tag}" ]; then
+            echo "::error::Tag ${tag} does not match style.css version ${version}. Bump style.css, readme.txt and package.json, then re-tag."
+            exit 1
+          fi
+          echo "THEME_VERSION=${version}" >> "$GITHUB_ENV"
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install PHP development dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node development dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Quality gates
+        run: npm test
+
+      - name: Package the theme and write the update manifest
+        env:
+          DOWNLOAD_BASE: ${{ vars.DOWNLOAD_BASE }}
+        run: npm run build:zip -- --download-base "${DOWNLOAD_BASE}"
+
+      - name: Read the checksum
+        id: sum
+        run: |
+          echo "sha256=$(cut -d' ' -f1 artifacts/release/wow-signal-${THEME_VERSION}.zip.sha256)" >> "$GITHUB_OUTPUT"
+
+      - name: Create the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: WOW — Signal ${{ env.THEME_VERSION }}
+          files: |
+            artifacts/release/wow-signal-${{ env.THEME_VERSION }}.zip
+            artifacts/release/wow-signal-${{ env.THEME_VERSION }}.zip.sha256
+            artifacts/release/update.json
+          body: |
+            **wow-signal-${{ env.THEME_VERSION }}.zip**
+
+            SHA-256: `${{ steps.sum.outputs.sha256 }}`
+
+            Upload the ZIP and `update.json` to `${{ vars.DOWNLOAD_BASE }}` (and the manifest
+            to the URL the theme fetches — see README → Updates). The checksum in
+            `update.json` is what every installed copy verifies the download against.
+
+            Changelog: see `readme.txt`.

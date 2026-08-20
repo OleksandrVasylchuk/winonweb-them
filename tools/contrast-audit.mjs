@@ -11,7 +11,7 @@
  * @package Wow\Signal
  */
 
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
@@ -115,17 +115,48 @@ const INFO = [
 	[ 'surface-2', 'surface', 'Raised card vs card (decorative)' ],
 ];
 
+/**
+ * Every palette the theme can render.
+ *
+ * The default is theme.json; the rest are discovered, so a style variation
+ * cannot be added without the contract being enforced on it. A variation that
+ * ships a partial palette is a failure, not a skip: WordPress replaces the
+ * theme palette wholesale, so the slugs it leaves out simply disappear.
+ */
 const THEMES = [
-	[ 'DARK — default (theme.json)', 'theme.json' ],
-	[ 'LIGHT — style variation (styles/light.json)', 'styles/light.json' ],
+	[ 'DEFAULT (theme.json)', 'theme.json' ],
+	...readdirSync( resolve( root, 'styles' ) )
+		.filter( ( name ) => name.endsWith( '.json' ) )
+		.sort()
+		.map( ( name ) => {
+			const path = `styles/${ name }`;
+			const title = JSON.parse( readFileSync( resolve( root, path ), 'utf8' ) )?.title ?? name;
+
+			return [ `VARIATION — ${ title } (${ path })`, path ];
+		} ),
 ];
 
 let failures = 0;
 let checks = 0;
+let audited = 0;
 
 for ( const [ label, file ] of THEMES ) {
 	const palette = paletteOf( file );
 	console.log( `\n=== ${ label } ===` );
+
+	/*
+	 * A variation is allowed to change only typography or layout. One that
+	 * defines no palette inherits the theme's, which has already been audited
+	 * above, so auditing it again would report the same numbers twice — and
+	 * treating its absent slugs as missing tokens would fail the build for a
+	 * file that is doing nothing wrong.
+	 */
+	if ( 0 === Object.keys( palette ).length ) {
+		console.log( '  no palette of its own — inherits the audited default' );
+		continue;
+	}
+
+	audited++;
 
 	for ( const [ fg, bg, min, purpose ] of CONTRACT ) {
 		if ( ! palette[ fg ] || ! palette[ bg ] ) {
@@ -156,7 +187,7 @@ for ( const [ label, file ] of THEMES ) {
 }
 
 console.log(
-	`\n${ checks } enforced checks across ${ THEMES.length } palettes — ` +
+	`\n${ checks } enforced checks across ${ audited } palettes — ` +
 		`${ failures } failure(s).`
 );
 

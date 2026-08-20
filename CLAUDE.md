@@ -20,8 +20,8 @@ are the files that run. Never introduce a bundler without being asked — the
 ## Core commands
 
 ```
-npm run test             # contrast + block markup + PHPCS
-npm run audit:contrast   # WCAG 2.2 AA over theme.json and styles/light.json
+npm run test             # contrast + block markup + PHPCS + unit tests
+npm run audit:contrast   # WCAG 2.2 AA over theme.json and every styles/*.json
 npm run lint:blocks      # template/pattern markup parses, references resolve
 npm run lint:php         # WordPress-Extra, must be zero
 npm run lint:html        # validates artifacts/html/*.html

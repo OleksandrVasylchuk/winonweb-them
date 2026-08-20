@@ -3,7 +3,7 @@
  */
 
 .wow-slider {
-	--wow-slide-width: 22rem;
+	--wow-slide-width: var(--wp--custom--slider--slide-width);
 
 	position: relative;
 	display: grid;
@@ -31,7 +31,7 @@
 }
 
 .wow-slider__slide {
-	flex: 0 0 min(var(--wow-slide-width), 82vw);
+	flex: 0 0 min(var(--wow-slide-width), var(--wp--custom--slider--slide-width-mobile));
 	scroll-snap-align: start;
 	margin: 0;
 }
@@ -66,32 +66,32 @@
 	transition: background-color var(--wp--custom--transition--fast), border-color var(--wp--custom--transition--fast);
 }
 
-.wow-slider__button:hover:not(:disabled) {
+.wow-slider__button:hover:not([aria-disabled="true"]) {
 	background: var(--wp--preset--color--surface-2);
 	border-color: var(--wp--preset--color--accent);
 }
 
-.wow-slider__button:disabled {
+.wow-slider__button[aria-disabled="true"] {
 	opacity: 0.4;
 	cursor: default;
 }
 
 /* Chevron drawn with two borders — no icon font, no SVG request. */
 .wow-slider__arrow {
-	width: 0.6rem;
-	height: 0.6rem;
-	border-top: 2px solid currentColor;
-	border-right: 2px solid currentColor;
+	width: var(--wp--custom--icon--sm);
+	height: var(--wp--custom--icon--sm);
+	border-top: var(--wp--custom--hairline) solid currentColor;
+	border-right: var(--wp--custom--hairline) solid currentColor;
 }
 
 .wow-slider__arrow--next {
 	rotate: 45deg;
-	translate: -2px 0;
+	translate: calc(var(--wp--custom--hairline) * -1) 0;
 }
 
 .wow-slider__arrow--prev {
 	rotate: -135deg;
-	translate: 2px 0;
+	translate: var(--wp--custom--hairline) 0;
 }
 
 /*
@@ -116,4 +116,15 @@
 	.wow-slider__button {
 		border-color: ButtonBorder;
 	}
+}
+
+/* The chevrons point the other way in a right-to-left document. */
+[dir="rtl"] .wow-slider__arrow--next {
+	rotate: -135deg;
+	translate: var(--wp--custom--hairline) 0;
+}
+
+[dir="rtl"] .wow-slider__arrow--prev {
+	rotate: 45deg;
+	translate: calc(var(--wp--custom--hairline) * -1) 0;
 }

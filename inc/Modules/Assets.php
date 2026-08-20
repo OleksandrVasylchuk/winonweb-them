@@ -34,14 +34,24 @@ defined( 'ABSPATH' ) || exit;
 final class Assets implements Module {
 
 	/**
-	 * Font file preloaded for the first paint.
+	 * Font subsets that exist on disk, keyed by slug.
 	 *
-	 * Only the Latin subset is preloaded: it covers digits, punctuation and the
-	 * Latin alphabet, so it is needed on every page. The Latin-Extended and
-	 * Cyrillic subsets are fetched lazily by the browser via unicode-range,
-	 * only when a glyph in that range is actually used.
+	 * The Latin subset covers digits, punctuation and the Latin alphabet, so
+	 * it is needed on every page. The others are fetched by the browser via
+	 * unicode-range only when a glyph in that range is used — which for a
+	 * Cyrillic-locale site is the very first word, so those sites preload it
+	 * too rather than discover it after layout.
 	 */
-	private const PRELOAD_FONT = '/assets/fonts/manrope-latin.woff2';
+	private const FONT_SUBSETS = array(
+		'latin'     => '/assets/fonts/manrope-latin.woff2',
+		'latin-ext' => '/assets/fonts/manrope-latin-ext.woff2',
+		'cyrillic'  => '/assets/fonts/manrope-cyrillic.woff2',
+	);
+
+	/**
+	 * Locale prefixes whose body copy is set in Cyrillic.
+	 */
+	private const CYRILLIC_LOCALES = array( 'uk', 'ru', 'bg', 'sr', 'be', 'mk', 'kk' );
 
 	/**
 	 * Hook the module.
@@ -59,14 +69,49 @@ final class Assets implements Module {
 	}
 
 	/**
-	 * Preload the Latin font subset so the first paint is not a swap.
+	 * Preload the font subsets the locale needs so the first paint is not a swap.
 	 *
 	 * @return void
 	 */
 	public function preload_font(): void {
-		printf(
-			'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin="anonymous">' . "\n",
-			esc_url( WOW_SIGNAL_URI . self::PRELOAD_FONT )
+		foreach ( $this->preload_subsets() as $slug ) {
+			printf(
+				'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin="anonymous">' . "\n",
+				esc_url( WOW_SIGNAL_URI . self::FONT_SUBSETS[ $slug ] )
+			);
+		}
+	}
+
+	/**
+	 * Which subsets to preload: Latin always, Cyrillic for Cyrillic locales.
+	 *
+	 * @return array<int, string> Subset slugs, each a key of FONT_SUBSETS.
+	 */
+	private function preload_subsets(): array {
+		$subsets = array( 'latin' );
+		$lang    = strtolower( substr( (string) get_locale(), 0, 2 ) );
+
+		if ( in_array( $lang, self::CYRILLIC_LOCALES, true ) ) {
+			$subsets[] = 'cyrillic';
+		}
+
+		/**
+		 * Filter the font subsets preloaded in the head.
+		 *
+		 * Slugs: 'latin', 'latin-ext', 'cyrillic'. Return an empty array to
+		 * preload nothing.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array<int, string> $subsets Subset slugs, in output order.
+		 */
+		$subsets = (array) apply_filters( 'wow_signal/preload_fonts', $subsets );
+
+		$known = array_filter(
+			$subsets,
+			static fn( $slug ): bool => is_string( $slug ) && isset( self::FONT_SUBSETS[ $slug ] )
 		);
+
+		return array_values( array_unique( $known ) );
 	}
 }

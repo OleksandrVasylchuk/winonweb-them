@@ -159,10 +159,12 @@ final class Blocks implements Module {
 				'label' => __( 'Check list', 'wow-signal' ),
 
 				/*
-				 * The check glyph is a CSS ::marker, so screen readers announce
-				 * a plain list and never read a decorative character.
+				 * The check glyph is a CSS ::before with empty content, so
+				 * screen readers announce a plain list and never read a
+				 * decorative character. Logical properties keep it on the
+				 * correct side in RTL.
 				 */
-				'css'   => '.wp-block-list.is-style-checks{list-style:none;padding-left:0}.wp-block-list.is-style-checks>li{position:relative;padding-left:1.9em;margin-bottom:var(--wp--preset--spacing--30)}.wp-block-list.is-style-checks>li::before{content:"";position:absolute;left:0;top:0.34em;width:1.05em;height:0.55em;border-left:2px solid var(--wp--preset--color--accent);border-bottom:2px solid var(--wp--preset--color--accent);transform:rotate(-45deg)}@media (forced-colors:active){.wp-block-list.is-style-checks>li::before{border-color:CanvasText}}',
+				'css'   => '.wp-block-list.is-style-checks{list-style:none;padding-inline-start:0}.wp-block-list.is-style-checks>li{position:relative;padding-inline-start:1.9em;margin-block-end:var(--wp--preset--spacing--30)}.wp-block-list.is-style-checks>li::before{content:"";position:absolute;inset-inline-start:0;inset-block-start:0.34em;width:1.05em;height:0.55em;border-left:2px solid var(--wp--preset--color--accent);border-bottom:2px solid var(--wp--preset--color--accent);transform:rotate(-45deg)}@media (forced-colors:active){.wp-block-list.is-style-checks>li::before{border-color:CanvasText}}',
 			),
 			array(
 				'block' => 'core/separator',

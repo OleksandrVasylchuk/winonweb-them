@@ -1,0 +1,177 @@
+# The theme's quality gates, run on every push and pull request.
+#
+# These are the same four commands a developer runs locally — the point of
+# running them here is that "it passed on my machine" stops being the only
+# evidence. Nothing here builds the theme: there is no build step, and adding
+# one would break the property that a client can upload the ZIP and activate it.
+#
+# lint:html is deliberately absent. It validates pages fetched from a running
+# WordPress install (npm run fetch:html), which CI has no way to provide; the
+# accessibility report records that it is run against a real site instead.
+
+name: Quality gates
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          # The theme's own floor. Testing on the oldest supported version is
+          # what makes "PHP 8.1+" in the readme a claim rather than a hope.
+          php-version: '8.1'
+          tools: composer
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install PHP development dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node development dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Colour contrast contract
+        run: npm run audit:contrast
+
+      - name: Block markup
+        run: npm run lint:blocks
+
+      - name: PHP coding standards
+        run: npm run lint:php
+
+      - name: Support unit tests
+        run: npm run test:unit
+
+      # Catches the mistake that cannot be taken back once a customer has the
+      # download: a release whose version numbers disagree, or one that would
+      # ship node_modules and the working notes.
+      - name: Package a release
+        run: npm run build:zip
+
+      - name: Keep the packaged theme
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-signal-theme
+          path: artifacts/release/*.zip
+          if-no-files-found: error
+
+  # The parts of the theme that only mean anything with a database under them:
+  # the contact form's POST flow, the design importer end to end, the SEO head,
+  # Site Health — then axe-core in a real browser against the running site.
+  # A throwaway WordPress is installed with WP-CLI against a MySQL service and
+  # the checkout is symlinked in as the active theme.
+  integration:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      WP_PATH: ${{ github.workspace }}/wordpress
+      WOW_WP_PATH: ${{ github.workspace }}/wordpress
+      WOW_WP_HOST: 127.0.0.1:8080
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: theme
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mysqli, zip, dom, mbstring, gd
+          tools: wp-cli
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node development dependencies
+        working-directory: theme
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Chromium for the accessibility gate
+        working-directory: theme
+        run: npx playwright install --with-deps chromium
+
+      - name: Install WordPress
+        run: |
+          wp core download --path="$WP_PATH" --locale=en_US
+          wp config create --path="$WP_PATH" --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1 \
+            --extra-php <<'PHP'
+          define( 'WP_DEBUG', true );
+          define( 'WP_DEBUG_LOG', true );
+          define( 'WP_DEBUG_DISPLAY', false );
+          define( 'FS_METHOD', 'direct' );
+          PHP
+          wp core install --path="$WP_PATH" --url=http://127.0.0.1:8080 --title="WOW Signal CI" \
+            --admin_user=admin --admin_password=admin --admin_email=ci@example.com --skip-email
+
+      - name: Activate the checkout as the theme
+        run: |
+          ln -s "$GITHUB_WORKSPACE/theme" "$WP_PATH/wp-content/themes/wow-signal"
+          wp theme activate wow-signal --path="$WP_PATH"
+          # Permalinks stay plain on purpose: php -S has no rewrite rules, and
+          # tools/axe.mjs falls back to the REST API when there is no sitemap.
+          # A post and a page so the archives and the audit have something to render.
+          wp post create --path="$WP_PATH" --post_type=post --post_status=publish --post_title="Hello from CI" \
+            --post_content='<!-- wp:paragraph --><p>A post so archives and the sitemap are not empty.</p><!-- /wp:paragraph -->'
+          wp post create --path="$WP_PATH" --post_type=page --post_status=publish --post_title="Contact" \
+            --post_content='<!-- wp:wow/contact-form /-->'
+
+      - name: Integration tests
+        working-directory: theme
+        run: npm run test:wp
+
+      - name: Serve the site
+        run: |
+          php -S 127.0.0.1:8080 -t "$WP_PATH" > php-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fs -o /dev/null http://127.0.0.1:8080/ && break
+            sleep 1
+          done
+          curl -fsI http://127.0.0.1:8080/ | head -1
+
+      - name: Accessibility (axe-core, WCAG 2.2 AA)
+        working-directory: theme
+        run: npm run audit:a11y -- http://127.0.0.1:8080 10
+
+      - name: Keep the logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-logs
+          path: |
+            php-server.log
+            wordpress/wp-content/debug.log
+          if-no-files-found: ignore

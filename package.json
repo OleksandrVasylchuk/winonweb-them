@@ -1,6 +1,6 @@
 {
     "name": "wow-signal",
-    "version": "1.0.0",
+    "version": "1.3.0",
     "private": true,
     "description": "WOW — Signal: a fast, accessible WordPress block theme by WOW — Win On Web.",
     "author": "WOW — Win On Web (https://www.winonweb.dev/)",
@@ -13,14 +13,24 @@
     "scripts": {
         "audit:contrast": "node tools/contrast-audit.mjs",
         "lint:blocks": "node tools/lint-blocks.mjs",
-        "lint:php": "composer lint",
+        "lint:php": "node tools/lint-php.mjs",
         "lint:html": "html-validate \"artifacts/html/*.html\"",
-        "test": "npm run audit:contrast && npm run lint:blocks && npm run lint:php",
+        "fetch:html": "node tools/fetch-html.mjs",
+        "test:unit": "node tools/test-unit.mjs",
+        "test:wp": "node tools/test-wp.mjs",
+        "test:all": "npm run test && npm run test:wp",
+        "audit:a11y": "node tools/axe.mjs",
+        "fixture:zip": "node tests/fixtures/build-fixture.mjs",
+        "test": "npm run audit:contrast && npm run lint:blocks && npm run lint:php && npm run test:unit",
         "make:pot": "node tools/make-pot.mjs",
         "make:mo": "node tools/make-mo.mjs",
-        "i18n": "npm run make:pot && npm run make:mo"
+        "i18n": "npm run make:pot && npm run make:mo",
+        "build:zip": "node tools/build-zip.mjs",
+        "release": "npm run test && npm run build:zip"
     },
     "devDependencies": {
-        "html-validate": "^8.24.2"
+        "axe-core": "^4.10.3",
+        "html-validate": "^8.24.2",
+        "playwright": "^1.54.0"
     }
 }

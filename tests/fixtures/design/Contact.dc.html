@@ -1,0 +1,32 @@
+<x-dc>
+<helmet>
+	<title>Contact — Fixture Co</title>
+	<meta charset="utf-8">
+	<link href="https://fonts.googleapis.com/css2?family=Sora:wght@700&family=IBM+Plex+Sans:wght@400&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="styles.css">
+</helmet>
+
+<dc-import name="SiteNav" hint-size="100%,70px"></dc-import>
+
+<section class="intro">
+	<h1>Tell us what you are building</h1>
+	<p>We answer within one working day. No sales call unless you want one.</p>
+</section>
+
+<section class="contact">
+	<h2>Write to us</h2>
+	<form action="#" method="post">
+		<label for="name">Name</label>
+		<input id="name" name="name" type="text" required>
+		<label for="email">Email</label>
+		<input id="email" name="email" type="email" required>
+		<label for="message">Message</label>
+		<textarea id="message" name="message" rows="5" required></textarea>
+		<button type="submit" class="button">Send</button>
+	</form>
+	<p class="small">Or email <a href="mailto:hello@fixture.example">hello@fixture.example</a>.</p>
+</section>
+
+<dc-import name="NewsletterPopup" hint-size="0px,0px"></dc-import>
+<dc-import name="SiteFooter" hint-size="100%,300px"></dc-import>
+</x-dc>

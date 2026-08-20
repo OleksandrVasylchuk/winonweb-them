@@ -53,7 +53,7 @@ if ( $wow_emit_schema ) {
 		}
 
 		$wow_question = isset( $wow_child['attrs']['question'] )
-			? trim( wp_strip_all_tags( (string) $wow_child['attrs']['question'] ) )
+			? trim( html_entity_decode( wp_strip_all_tags( (string) $wow_child['attrs']['question'] ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) )
 			: '';
 
 		$wow_answer = isset( $wow_child['innerBlocks'] ) && is_array( $wow_child['innerBlocks'] )

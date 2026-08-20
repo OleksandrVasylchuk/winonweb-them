@@ -37,7 +37,6 @@ final class Accessibility implements Module {
 		add_action( 'wp_body_open', array( $this, 'skip_link' ), 1 );
 		add_filter( 'excerpt_more', array( $this, 'excerpt_more' ) );
 		add_filter( 'the_content_more_link', array( $this, 'content_more_link' ), 10, 2 );
-		add_filter( 'nav_menu_link_attributes', array( $this, 'mark_current_page' ), 10, 3 );
 	}
 
 	/**
@@ -109,30 +108,5 @@ final class Accessibility implements Module {
 			esc_html( wp_strip_all_tags( $more ) ),
 			esc_html( (string) get_the_title() )
 		);
-	}
-
-	/**
-	 * Add aria-current="page" to the menu item for the page being viewed.
-	 *
-	 * WordPress only adds a CSS class, which tells a sighted user where they
-	 * are but tells a screen reader nothing (WCAG 4.1.2).
-	 *
-	 * @param array<string, string> $atts  Link attributes.
-	 * @param object                $item  Menu item.
-	 * @param object                $args  Menu arguments.
-	 * @return array<string, string>
-	 */
-	public function mark_current_page( array $atts, $item, $args ): array {
-		unset( $args );
-
-		$classes = isset( $item->classes ) && is_array( $item->classes ) ? $item->classes : array();
-
-		if ( in_array( 'current-menu-item', $classes, true ) ) {
-			$atts['aria-current'] = 'page';
-		} elseif ( in_array( 'current-menu-ancestor', $classes, true ) ) {
-			$atts['aria-current'] = 'true';
-		}
-
-		return $atts;
 	}
 }

@@ -46,13 +46,54 @@ final class CssIndex {
 	private array $tokens = array();
 
 	/**
+	 * Comment-free source text, kept so the design-wide custom property map
+	 * can be built on demand by DesignTokens::custom_properties().
+	 *
+	 * @var array<int, string>
+	 */
+	private array $sources = array();
+
+	/**
+	 * Selectors compiled for element matching, built on first use.
+	 *
+	 * @var array<int, array{chain:array<int,array<string,mixed>>, specificity:int, order:int, declarations:array<int,array{0:string,1:string,2:bool}>}>|null
+	 */
+	private ?array $matchers = null;
+
+	/**
+	 * Design-wide custom properties, resolved on first use.
+	 *
+	 * @var array<string, string>|null
+	 */
+	private ?array $vars = null;
+
+	/**
+	 * Per-element cache of the declarations that won the cascade.
+	 *
+	 * @var \WeakMap<\DOMElement, array<string, string>>
+	 */
+	private \WeakMap $declared;
+
+	/**
+	 * Per-element cache of the custom properties in scope.
+	 *
+	 * @var \WeakMap<\DOMElement, array<string, string>>
+	 */
+	private \WeakMap $scopes;
+
+	/**
 	 * Build an index from one or more stylesheets.
 	 *
 	 * @param array<int, string> $sources Raw CSS strings.
 	 */
 	public function __construct( array $sources ) {
+		$this->declared = new \WeakMap();
+		$this->scopes   = new \WeakMap();
+
 		foreach ( $sources as $css ) {
-			$this->parse( self::strip_comments( (string) $css ) );
+			$clean           = self::strip_comments( (string) $css );
+			$this->sources[] = $clean;
+			$this->parse( $clean );
 		}
 	}
 
@@ -203,7 +244,14 @@ final class CssIndex {
 	 * @return void
 	 */
 	private function record( string $selector, string $body, string $at ): void {
-		if ( preg_match( '#(^|,)\s*(:root|html)\s*(,|$)#i', $selector ) ) {
+		/*
+		 * :root and html are where tokens live by convention; body and a lone
+		 * class (`.page{--bg:#fff}`) are where exports scope them. Variant
+		 * selectors such as `.page.dark` or `html.theme-dark` do not qualify,
+		 * which — together with first-declaration-wins — keeps the default
+		 * theme rather than its dark override.
+		 */
+		if ( preg_match( '#(^|,)\s*(:root|html|body|\.[A-Za-z_][\w-]*)\s*(,|$)#i', $selector ) ) {
 			preg_match_all( '#(--[A-Za-z0-9_-]+)\s*:\s*([^;]+)#', $body, $matches, PREG_SET_ORDER );
 
 			foreach ( $matches as $match ) {
@@ -355,6 +403,734 @@ final class CssIndex {
 		}
 
 		return $tokens;
+	}
+
+	/**
+	 * Properties the element resolver reports.
+	 *
+	 * A deliberately short list: what a block can carry as an attribute, plus
+	 * the few layout facts (display, grid tracks, max-width) the converter
+	 * needs to decide between columns and a stack.
+	 *
+	 * @var array<int, string>
+	 */
+	private const RESOLVED = array(
+		'padding-top',
+		'padding-right',
+		'padding-bottom',
+		'padding-left',
+		'margin-top',
+		'margin-right',
+		'margin-bottom',
+		'margin-left',
+		'border-radius',
+		'border-width',
+		'border-style',
+		'border-color',
+		'row-gap',
+		'column-gap',
+		'font-size',
+		'font-weight',
+		'font-family',
+		'line-height',
+		'letter-spacing',
+		'text-transform',
+		'text-align',
+		'color',
+		'background-color',
+		'background-image',
+		'max-width',
+		'grid-template-columns',
+		'display',
+	);
+
+	/**
+	 * Properties a child takes from its parent when it sets none of its own.
+	 *
+	 * @var array<int, string>
+	 */
+	private const INHERITED = array( 'color', 'font-size', 'font-weight', 'font-family', 'line-height', 'letter-spacing', 'text-transform', 'text-align' );
+
+	/**
+	 * The styles an element ends up with: its own, plus what it inherits.
+	 *
+	 * "Computed-ish": the cascade is honoured for the selector shapes real
+	 * stylesheets use — type, class, id, descendant and child combinators,
+	 * comma lists, inline `style=""` — in specificity and source order, with
+	 * `var()` resolved through the design's custom properties, including ones
+	 * scoped on an ancestor. Pseudo-classes, attribute selectors and sibling
+	 * combinators are ignored, as are `max-width` media blocks: the result is
+	 * the design at desktop width in its resting state. No browser defaults
+	 * are added; a property the design never set is simply absent.
+	 *
+	 * Inheritance stops at the fragment root, so a body-level rule does not
+	 * put a colour on every paragraph.
+	 *
+	 * @param \DOMElement $node Element inside a parsed section.
+	 * @return array<string, string> Longhand property to resolved value.
+	 */
+	public function styles_for( \DOMElement $node ): array {
+		$styles = $this->declared_for( $node );
+		$parent = $node->parentNode;
+
+		while ( $parent instanceof \DOMElement && ! in_array( strtolower( $parent->tagName ), array( 'body', 'html' ), true ) ) {
+			$above = $this->declared_for( $parent );
+
+			foreach ( self::INHERITED as $property ) {
+				if ( ! isset( $styles[ $property ] ) && isset( $above[ $property ] ) ) {
+					$styles[ $property ] = $above[ $property ];
+				}
+			}
+
+			$parent = $parent->parentNode;
+		}
+
+		return $styles;
+	}
+
+	/**
+	 * Only what the design declared on this element itself.
+	 *
+	 * Headings reset font-size and font-weight in every browser, so for them
+	 * an inherited size is not what the design showed; this is the view that
+	 * answers "did the design say so about this element".
+	 *
+	 * @param \DOMElement $node Element inside a parsed section.
+	 * @return array<string, string> Longhand property to resolved value.
+	 */
+	public function declared_for( \DOMElement $node ): array {
+		if ( isset( $this->declared[ $node ] ) ) {
+			return $this->declared[ $node ];
+		}
+
+		$declarations = array();
+
+		foreach ( $this->matchers() as $matcher ) {
+			if ( ! self::matches( $matcher['chain'], $node ) ) {
+				continue;
+			}
+
+			foreach ( $matcher['declarations'] as $declaration ) {
+				$declarations[] = array( $declaration[0], $declaration[1], $declaration[2], $matcher['specificity'], $matcher['order'] );
+			}
+		}
+
+		// The style attribute beats every stylesheet rule.
+		foreach ( self::declarations( $node->getAttribute( 'style' ) ) as $index => $declaration ) {
+			$declarations[] = array( $declaration[0], $declaration[1], $declaration[2], 10000, $index );
+		}
+
+		usort(
+			$declarations,
+			static function ( array $a, array $b ): int {
+				return array( $a[2], $a[3], $a[4] ) <=> array( $b[2], $b[3], $b[4] );
+			}
+		);
+
+		// Custom properties first, so a value can use one declared alongside it.
+		$vars = $this->scope_above( $node );
+
+		foreach ( $declarations as $declaration ) {
+			if ( str_starts_with( $declaration[0], '--' ) ) {
+				$vars[ $declaration[0] ] = $declaration[1];
+			}
+		}
+
+		$styles = array();
+
+		foreach ( $declarations as $declaration ) {
+			if ( str_starts_with( $declaration[0], '--' ) ) {
+				continue;
+			}
+
+			$value = trim( DesignTokens::substitute_vars( $declaration[1], $vars ) );
+
+			// An unresolvable reference or a keyword that defers elsewhere says nothing usable.
+			if ( str_contains( $value, 'var(' ) || in_array( strtolower( $value ), array( 'inherit', 'initial', 'unset', 'revert', 'currentcolor' ), true ) ) {
+				foreach ( array_keys( self::expand( $declaration[0], '0' ) ) as $longhand ) {
+					unset( $styles[ $longhand ] );
+				}
+
+				continue;
+			}
+
+			foreach ( self::expand( $declaration[0], $value ) as $longhand => $resolved ) {
+				$styles[ $longhand ] = $resolved;
+			}
+		}
+
+		$this->scopes[ $node ]   = $vars;
+		$this->declared[ $node ] = array_intersect_key( $styles, array_flip( self::RESOLVED ) );
+
+		return $this->declared[ $node ];
+	}
+
+	/**
+	 * Custom properties visible to an element before its own declarations.
+	 *
+	 * @param \DOMElement $node Element.
+	 * @return array<string, string>
+	 */
+	private function scope_above( \DOMElement $node ): array {
+		$parent = $node->parentNode;
+
+		if ( $parent instanceof \DOMElement && ! in_array( strtolower( $parent->tagName ), array( 'body', 'html' ), true ) ) {
+			$this->declared_for( $parent );
+
+			return $this->scopes[ $parent ] ?? $this->global_vars();
+		}
+
+		return $this->global_vars();
+	}
+
+	/**
+	 * Every custom property the design declares, default theme first.
+	 *
+	 * The :root-style tokens gathered while parsing take precedence because
+	 * they are first-declaration-wins; DesignTokens::custom_properties() fills
+	 * in whatever else is declared anywhere, so a `--wc` set on a card still
+	 * resolves when the card is met out of context.
+	 *
+	 * @return array<string, string>
+	 */
+	private function global_vars(): array {
+		if ( null === $this->vars ) {
+			$everything = DesignTokens::custom_properties( implode( "\n", $this->sources ) );
+			$preferred  = array();
+
+			foreach ( $this->tokens as $name => $value ) {
+				$preferred[ strtolower( $name ) ] = $value;
+			}
+
+			$this->vars = $preferred + $everything;
+		}
+
+		return $this->vars;
+	}
+
+	/**
+	 * Rules compiled into something an element can be tested against.
+	 *
+	 * @return array<int, array{chain:array<int,array<string,mixed>>, specificity:int, order:int, declarations:array<int,array{0:string,1:string,2:bool}>}>
+	 */
+	private function matchers(): array {
+		if ( null !== $this->matchers ) {
+			return $this->matchers;
+		}
+
+		$this->matchers = array();
+
+		foreach ( $this->rules as $order => $rule ) {
+			if ( ! self::at_applies( $rule['at'] ) ) {
+				continue;
+			}
+
+			$declarations = self::declarations( $rule['body'] );
+
+			if ( array() === $declarations ) {
+				continue;
+			}
+
+			foreach ( self::split_top( $rule['selector'], ',' ) as $selector ) {
+				$compiled = self::compile( $selector );
+
+				if ( null === $compiled ) {
+					continue;
+				}
+
+				$this->matchers[] = array(
+					'chain'        => $compiled['chain'],
+					'specificity'  => $compiled['specificity'],
+					'order'        => $order,
+					'declarations' => $declarations,
+				);
+			}
+		}
+
+		return $this->matchers;
+	}
+
+	/**
+	 * Whether rules under an at-rule describe the desktop resting state.
+	 *
+	 * `min-width` blocks up to 1024px are the desktop defaults written
+	 * mobile-first; `max-width` blocks are the narrow-screen adjustments and
+	 * are skipped, as are print, dark-scheme and container queries.
+	 *
+	 * @param string $at At-rule prelude.
+	 * @return bool
+	 */
+	private static function at_applies( string $at ): bool {
+		if ( '' === $at ) {
+			return true;
+		}
+
+		$at = strtolower( $at );
+
+		if ( str_starts_with( $at, '@container' ) ) {
+			return false;
+		}
+
+		if ( ! str_starts_with( $at, '@media' ) ) {
+			return true;
+		}
+
+		if ( preg_match( '/max-width|print|prefers-color-scheme|orientation/', $at ) ) {
+			return false;
+		}
+
+		if ( preg_match( '/min-width\s*:\s*([\d.]+)\s*(px|em|rem)/', $at, $width ) ) {
+			$pixels = (float) $width[1] * ( 'px' === $width[2] ? 1 : 16 );
+
+			return $pixels <= 1024;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Parse a declaration block into name, value and importance.
+	 *
+	 * @param string $body Declarations.
+	 * @return array<int, array{0:string,1:string,2:bool}>
+	 */
+	private static function declarations( string $body ): array {
+		$out = array();
+
+		foreach ( self::split_top( $body, ';' ) as $declaration ) {
+			$colon = strpos( $declaration, ':' );
+
+			if ( false === $colon ) {
+				continue;
+			}
+
+			$name  = strtolower( trim( substr( $declaration, 0, $colon ) ) );
+			$value = trim( substr( $declaration, $colon + 1 ) );
+
+			if ( '' === $name || '' === $value || 1 !== preg_match( '/^-{0,2}[a-z][a-z0-9-]*$/', $name ) ) {
+				continue;
+			}
+
+			$important = false;
+
+			if ( 1 === preg_match( '/^(.*?)\s*!\s*important$/i', $value, $flag ) ) {
+				$value     = trim( $flag[1] );
+				$important = true;
+			}
+
+			$out[] = array( $name, $value, $important );
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Split on a character, ignoring occurrences inside parentheses or quotes.
+	 *
+	 * @param string $text      Text.
+	 * @param string $separator Single character.
+	 * @return array<int, string>
+	 */
+	private static function split_top( string $text, string $separator ): array {
+		$parts  = array();
+		$buffer = '';
+		$depth  = 0;
+		$quote  = '';
+		$length = strlen( $text );
+
+		for ( $i = 0; $i < $length; $i++ ) {
+			$char = $text[ $i ];
+
+			if ( '' !== $quote ) {
+				$buffer .= $char;
+
+				if ( $char === $quote ) {
+					$quote = '';
+				}
+
+				continue;
+			}
+
+			if ( '"' === $char || "'" === $char ) {
+				$quote   = $char;
+				$buffer .= $char;
+				continue;
+			}
+
+			if ( '(' === $char ) {
+				++$depth;
+			} elseif ( ')' === $char ) {
+				$depth = max( 0, $depth - 1 );
+			}
+
+			if ( $char === $separator && 0 === $depth ) {
+				$parts[] = trim( $buffer );
+				$buffer  = '';
+				continue;
+			}
+
+			$buffer .= $char;
+		}
+
+		$parts[] = trim( $buffer );
+
+		return array_values( array_filter( $parts, static fn( string $part ): bool => '' !== $part ) );
+	}
+
+	/**
+	 * Compile one selector into a chain of compounds, right-most last.
+	 *
+	 * Anything with a pseudo-class, pseudo-element, attribute selector,
+	 * sibling combinator or universal selector is declined: those describe
+	 * states and structure this resolver does not model.
+	 *
+	 * @param string $selector One selector, no commas.
+	 * @return array{chain:array<int,array<string,mixed>>, specificity:int}|null
+	 */
+	private static function compile( string $selector ): ?array {
+		$selector = trim( $selector );
+
+		if ( '' === $selector || 1 === preg_match( '/[:\[\]+~*]/', $selector ) ) {
+			return null;
+		}
+
+		$parts = preg_split( '/\s*(>)\s*|\s+/', $selector, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+
+		if ( ! is_array( $parts ) || array() === $parts ) {
+			return null;
+		}
+
+		$chain       = array();
+		$combinator  = ' ';
+		$specificity = 0;
+
+		foreach ( $parts as $part ) {
+			if ( '>' === $part ) {
+				$combinator = '>';
+				continue;
+			}
+
+			if ( 1 !== preg_match( '/^([a-zA-Z][\w-]*)?((?:[.#]-?[_a-zA-Z][\w-]*)*)$/', $part, $found ) ) {
+				return null;
+			}
+
+			$compound = array(
+				'tag'        => strtolower( $found[1] ),
+				'id'         => '',
+				'classes'    => array(),
+				'combinator' => $combinator,
+			);
+
+			if ( preg_match_all( '/([.#])(-?[_a-zA-Z][\w-]*)/', $found[2] ?? '', $qualifiers, PREG_SET_ORDER ) ) {
+				foreach ( $qualifiers as $qualifier ) {
+					if ( '#' === $qualifier[1] ) {
+						$compound['id'] = $qualifier[2];
+						$specificity   += 100;
+					} else {
+						$compound['classes'][] = $qualifier[2];
+						$specificity          += 10;
+					}
+				}
+			}
+
+			if ( '' !== $compound['tag'] ) {
+				++$specificity;
+			}
+
+			$chain[]    = $compound;
+			$combinator = ' ';
+		}
+
+		return array(
+			'chain'       => $chain,
+			'specificity' => $specificity,
+		);
+	}
+
+	/**
+	 * Test a compiled selector against an element, right to left.
+	 *
+	 * @param array<int, array<string, mixed>> $chain Compounds.
+	 * @param \DOMElement                      $node  Element.
+	 * @return bool
+	 */
+	private static function matches( array $chain, \DOMElement $node ): bool {
+		$last = count( $chain ) - 1;
+
+		if ( ! self::compound_matches( $chain[ $last ], $node ) ) {
+			return false;
+		}
+
+		return self::ancestors_match( $chain, $last - 1, $node, (string) $chain[ $last ]['combinator'] );
+	}
+
+	/**
+	 * Match the remaining compounds against the ancestors of a node.
+	 *
+	 * @param array<int, array<string, mixed>> $chain      Compounds.
+	 * @param int                              $index      Compound to match next.
+	 * @param \DOMElement                      $node       Element whose ancestors are searched.
+	 * @param string                           $combinator How the compound relates to the node: ' ' or '>'.
+	 * @return bool
+	 */
+	private static function ancestors_match( array $chain, int $index, \DOMElement $node, string $combinator ): bool {
+		if ( $index < 0 ) {
+			return true;
+		}
+
+		$parent = $node->parentNode;
+
+		while ( $parent instanceof \DOMElement ) {
+			if ( self::compound_matches( $chain[ $index ], $parent )
+				&& self::ancestors_match( $chain, $index - 1, $parent, (string) $chain[ $index ]['combinator'] ) ) {
+				return true;
+			}
+
+			if ( '>' === $combinator ) {
+				return false;
+			}
+
+			$parent = $parent->parentNode;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Does one compound (tag, id, classes) describe an element?
+	 *
+	 * @param array<string, mixed> $compound Compound.
+	 * @param \DOMElement          $node     Element.
+	 * @return bool
+	 */
+	private static function compound_matches( array $compound, \DOMElement $node ): bool {
+		if ( '' !== $compound['tag'] && strtolower( $node->tagName ) !== $compound['tag'] ) {
+			return false;
+		}
+
+		if ( '' !== $compound['id'] && $node->getAttribute( 'id' ) !== $compound['id'] ) {
+			return false;
+		}
+
+		if ( array() === $compound['classes'] ) {
+			return true;
+		}
+
+		$classes = preg_split( '/\s+/', trim( $node->getAttribute( 'class' ) ) );
+		$classes = is_array( $classes ) ? $classes : array();
+
+		foreach ( $compound['classes'] as $wanted ) {
+			if ( ! in_array( $wanted, $classes, true ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Break a shorthand into the longhands the converter reads.
+	 *
+	 * @param string $name  Property.
+	 * @param string $value Resolved value.
+	 * @return array<string, string>
+	 */
+	private static function expand( string $name, string $value ): array {
+		switch ( $name ) {
+			case 'padding':
+			case 'margin':
+				$sides = self::four_sides( $value );
+
+				return null === $sides ? array() : array(
+					$name . '-top'    => $sides[0],
+					$name . '-right'  => $sides[1],
+					$name . '-bottom' => $sides[2],
+					$name . '-left'   => $sides[3],
+				);
+
+			case 'border-radius':
+				$slash = strpos( $value, '/' );
+				$sides = self::four_sides( false === $slash ? $value : substr( $value, 0, $slash ) );
+
+				// Only a uniform radius is carried: a block holds one value.
+				if ( null === $sides || count( array_unique( $sides ) ) > 1 ) {
+					return array();
+				}
+
+				return array( 'border-radius' => $sides[0] );
+
+			case 'gap':
+			case 'grid-gap':
+				$parts = self::split_top( $value, ' ' );
+
+				return array(
+					'row-gap'    => $parts[0] ?? $value,
+					'column-gap' => $parts[1] ?? $parts[0] ?? $value,
+				);
+
+			case 'font':
+				return self::font_shorthand( $value );
+
+			case 'background':
+				return self::background_shorthand( $value );
+
+			case 'border':
+				return self::border_shorthand( $value );
+
+			default:
+				return in_array( $name, self::RESOLVED, true ) ? array( $name => $value ) : array();
+		}
+	}
+
+	/**
+	 * One to four values, in top/right/bottom/left order.
+	 *
+	 * @param string $value Shorthand value.
+	 * @return array{0:string,1:string,2:string,3:string}|null
+	 */
+	private static function four_sides( string $value ): ?array {
+		$parts = self::split_top( trim( $value ), ' ' );
+
+		switch ( count( $parts ) ) {
+			case 1:
+				return array( $parts[0], $parts[0], $parts[0], $parts[0] );
+			case 2:
+				return array( $parts[0], $parts[1], $parts[0], $parts[1] );
+			case 3:
+				return array( $parts[0], $parts[1], $parts[2], $parts[1] );
+			case 4:
+				return array( $parts[0], $parts[1], $parts[2], $parts[3] );
+			default:
+				return null;
+		}
+	}
+
+	/**
+	 * The `font` shorthand: optional style/weight, size, optional line-height, family.
+	 *
+	 * @param string $value Shorthand value.
+	 * @return array<string, string>
+	 */
+	private static function font_shorthand( string $value ): array {
+		$pattern = '/^(?:(italic|oblique|normal|small-caps|bold|bolder|lighter|[1-9]00)\s+)*'
+			. '([\d.]+(?:px|rem|em|%|pt)|(?:x+-)?(?:small|large)|medium)'
+			. '(?:\s*\/\s*([\d.]+(?:px|rem|em|%)?))?\s+(.+)$/i';
+
+		if ( 1 !== preg_match( $pattern, trim( $value ), $found ) ) {
+			return array();
+		}
+
+		$out = array(
+			'font-size'   => $found[2],
+			'font-family' => trim( $found[4] ),
+		);
+
+		if ( isset( $found[3] ) && '' !== $found[3] ) {
+			$out['line-height'] = $found[3];
+		}
+
+		$size_at = strpos( $value, $found[2] );
+		$before  = false === $size_at ? '' : substr( $value, 0, $size_at );
+
+		if ( preg_match( '/\b(bold|bolder|lighter|[1-9]00)\b/i', $before, $weight ) ) {
+			$out['font-weight'] = strtolower( $weight[1] );
+		}
+
+		return $out;
+	}
+
+	/**
+	 * The `background` shorthand: a colour, a gradient, a picture, or a stack.
+	 *
+	 * @param string $value Shorthand value.
+	 * @return array<string, string>
+	 */
+	private static function background_shorthand( string $value ): array {
+		// A shorthand resets both layers, so a gradient written later really does replace an earlier flat colour.
+		$out = array(
+			'background-color' => 'transparent',
+			'background-image' => 'none',
+		);
+
+		if ( preg_match( '/url\((?:[^()]|\([^()]*\))*\)/i', $value, $picture ) ) {
+			$out['background-image'] = $picture[0];
+		} elseif ( preg_match( '/(?:repeating-)?(?:linear|radial|conic)-gradient\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\)/i', $value ) ) {
+			$out['background-image'] = $value;
+		}
+
+		$rest = (string) preg_replace( '/(?:url|(?:repeating-)?(?:linear|radial|conic)-gradient)\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\)/i', ' ', $value );
+
+		if ( preg_match( '/#[0-9a-f]{3,8}\b|(?:rgba?|hsla?|oklch|color-mix)\((?:[^()]|\([^()]*\))*\)|\b(?:white|black|transparent)\b/i', $rest, $color ) ) {
+			$out['background-color'] = $color[0];
+		}
+
+		return $out;
+	}
+
+	/**
+	 * The `border` shorthand into width, style and colour.
+	 *
+	 * @param string $value Shorthand value.
+	 * @return array<string, string>
+	 */
+	private static function border_shorthand( string $value ): array {
+		$out = array();
+
+		if ( 'none' === strtolower( trim( $value ) ) || '0' === trim( $value ) ) {
+			return array(
+				'border-width' => '0',
+				'border-style' => 'none',
+			);
+		}
+
+		foreach ( self::split_top( $value, ' ' ) as $part ) {
+			$lower = strtolower( $part );
+
+			if ( 1 === preg_match( '/^(?:[\d.]+(?:px|rem|em|pt)?|thin|medium|thick)$/', $lower ) ) {
+				$out['border-width'] = $lower;
+			} elseif ( in_array( $lower, array( 'none', 'hidden', 'solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset' ), true ) ) {
+				$out['border-style'] = $lower;
+			} else {
+				$out['border-color'] = $part;
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * A length in CSS pixels, or null when it cannot be known statically.
+	 *
+	 * An em is read against the 16px default, which is right for padding on
+	 * a body-sized element and close enough elsewhere; percentages, viewport
+	 * units and calc() are declined rather than guessed.
+	 *
+	 * @param string $value Length.
+	 * @return float|null
+	 */
+	public static function px( string $value ): ?float {
+		$value = strtolower( trim( $value ) );
+
+		if ( 1 !== preg_match( '/^(-?\d*\.?\d+)(px|rem|em|pt)?$/', $value, $found ) ) {
+			return null;
+		}
+
+		$number = (float) $found[1];
+		$unit   = $found[2] ?? '';
+
+		if ( '' === $unit ) {
+			return 0.0 === $number ? 0.0 : null;
+		}
+
+		switch ( $unit ) {
+			case 'rem':
+			case 'em':
+				return $number * 16;
+			case 'pt':
+				return $number * 4 / 3;
+			default:
+				return $number;
+		}
 	}
 
 	/**

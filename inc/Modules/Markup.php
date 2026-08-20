@@ -31,6 +31,7 @@ final class Markup implements Module {
 	 */
 	public function register(): void {
 		add_filter( 'render_block', array( $this, 'refine_navigation' ), 10, 2 );
+		add_filter( 'render_block', array( $this, 'scope_table_headers' ), 10, 2 );
 		add_filter( 'comment_form_defaults', array( $this, 'comment_form_defaults' ) );
 		add_filter( 'comment_form_submit_button', array( $this, 'comment_submit_button' ) );
 	}
@@ -47,6 +48,10 @@ final class Markup implements Module {
 	 *    the <nav> landmark and the container <ul> inside it. The landmark is
 	 *    the one that should carry the name; on the list it is a second,
 	 *    duplicate accessible name for the same thing.
+	 * 3. Before a menu exists, core falls back to a page list and writes it as
+	 *    a <ul> directly inside the container <ul>, which is invalid HTML and
+	 *    announces as a nested list. The inner list is folded into the outer
+	 *    one so the items sit where list items belong.
 	 *
 	 * @param string               $block_content Rendered block HTML.
 	 * @param array<string, mixed> $block         Parsed block.
@@ -56,6 +61,12 @@ final class Markup implements Module {
 		if ( 'core/navigation' !== ( $block['blockName'] ?? '' ) || '' === trim( $block_content ) ) {
 			return $block_content;
 		}
+
+		$block_content = (string) preg_replace(
+			'#(<ul\b[^>]*\bclass="[^"]*\bwp-block-navigation__container\b[^"]*"[^>]*>)\s*<ul class="wp-block-page-list">(.*?)</ul>\s*</ul>#s',
+			'$1$2</ul>',
+			$block_content
+		);
 
 		$processor = new WP_HTML_Tag_Processor( $block_content );
 
@@ -74,6 +85,56 @@ final class Markup implements Module {
 			) {
 				$processor->remove_attribute( 'aria-label' );
 			}
+		}
+
+		return $processor->get_updated_html();
+	}
+
+	/**
+	 * Give every table header cell a scope.
+	 *
+	 * The core table block writes plain <th> elements. A screen reader can
+	 * usually guess a simple table, but on anything with both column and row
+	 * headers it has to be told which is which, and WCAG technique H63 asks for
+	 * it outright — validating the theme's own rendered pages against real
+	 * client tables is what surfaced this.
+	 *
+	 * A cell inside <thead> heads its column; anywhere else it heads its row.
+	 * An author who has already set scope by hand is left alone.
+	 *
+	 * @param string               $block_content Rendered block HTML.
+	 * @param array<string, mixed> $block         Parsed block.
+	 * @return string
+	 */
+	public function scope_table_headers( string $block_content, array $block ): string {
+		$name = $block['blockName'] ?? '';
+
+		if ( 'core/table' !== $name || false === stripos( $block_content, '<th' ) ) {
+			return $block_content;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $block_content );
+		$in_head   = false;
+
+		while ( $processor->next_tag() ) {
+			$tag = $processor->get_tag();
+
+			// Only opening tags are visited, so the section is known from these.
+			if ( 'THEAD' === $tag ) {
+				$in_head = true;
+				continue;
+			}
+
+			if ( 'TBODY' === $tag || 'TFOOT' === $tag ) {
+				$in_head = false;
+				continue;
+			}
+
+			if ( 'TH' !== $tag || null !== $processor->get_attribute( 'scope' ) ) {
+				continue;
+			}
+
+			$processor->set_attribute( 'scope', $in_head ? 'col' : 'row' );
 		}
 
 		return $processor->get_updated_html();

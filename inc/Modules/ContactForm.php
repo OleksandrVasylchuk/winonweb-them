@@ -19,7 +19,14 @@ defined( 'ABSPATH' ) || exit;
  *
  * Threat model, and how each part is answered:
  *
- * - CSRF                → wp_nonce_field() + wp_verify_nonce() on every POST.
+ * - CSRF                → wp_nonce_field() + wp_verify_nonce(). Enforced for
+ *                         logged-in users, whose session is what CSRF targets.
+ *                         For anonymous visitors the nonce is advisory only:
+ *                         full-page caches serve the same HTML (and the same
+ *                         nonce) for 12–24 hours, after which every visitor
+ *                         would be told their session expired. A logged-out
+ *                         request has no ambient authority to forge, so the
+ *                         honeypot, time trap and rate limit carry the load.
  * - Header injection    → the submitter's address is validated with
  *                         is_email() and only ever used in Reply-To.
  * - Open relay          → the recipient is NEVER read from the request. It
@@ -88,7 +95,15 @@ final class ContactForm implements Module {
 		$referer = wp_get_referer();
 		$back    = is_string( $referer ) && '' !== $referer ? $referer : home_url( '/' );
 
-		if ( ! Security::verify_nonce( self::ACTION, self::NONCE_FIELD ) ) {
+		/*
+		 * A stale nonce is only a hard failure for logged-in users. Logged-out
+		 * pages are commonly served from a full-page cache, so the nonce baked
+		 * into the HTML outlives its 12–24 hour validity and would otherwise
+		 * lock every anonymous visitor out with "session expired". Anonymous
+		 * requests carry no privileges worth forging, so they fall through to
+		 * the bot checks below instead.
+		 */
+		if ( is_user_logged_in() && ! Security::verify_nonce( self::ACTION, self::NONCE_FIELD ) ) {
 			$this->redirect_with_errors( $back, array( '_form' => __( 'Your session expired. Please try sending the message again.', 'wow-signal' ) ), array() );
 		}
 
@@ -104,9 +119,10 @@ final class ContactForm implements Module {
 		// Honeypot: a real browser leaves this off-screen field empty.
 		$honeypot = Security::post_field( 'wow_website', 'sanitize_text_field' );
 
-		// Time trap: humans do not complete a form in under three seconds.
+		// Time trap: humans do not complete a form in under three seconds. A
+		// missing timestamp counts as too fast — a browser always sends it.
 		$rendered_at = (int) Security::post_field( 'wow_rendered_at', 'absint', '0' );
-		$too_fast    = $rendered_at > 0 && ( time() - $rendered_at ) < self::MIN_FILL_SECONDS;
+		$too_fast    = $rendered_at <= 0 || ( time() - $rendered_at ) < self::MIN_FILL_SECONDS;
 
 		if ( '' !== $honeypot || $too_fast ) {
 			/*
@@ -137,6 +153,10 @@ final class ContactForm implements Module {
 				$submitted
 			);
 		}
+
+		// Only a message that actually went out counts towards the limit, so
+		// neither a few typos nor a broken mailer can lock a human out.
+		$this->count_submission();
 
 		$this->redirect_with_result( $back, 'sent' );
 	}
@@ -251,40 +271,79 @@ final class ContactForm implements Module {
 	}
 
 	/**
-	 * Check and increment the per-IP submission counter.
+	 * Transient key for the per-IP submission counter.
+	 *
+	 * @return string
+	 */
+	private function rate_limit_key(): string {
+		return 'wow_signal_rl_' . md5( $this->client_ip() );
+	}
+
+	/**
+	 * Check the per-IP submission counter without touching it.
 	 *
 	 * @return bool True when the request is under the limit.
 	 */
 	private function within_rate_limit(): bool {
-		$key = 'wow_signal_rl_' . md5( $this->client_ip() );
+		return (int) get_transient( $this->rate_limit_key() ) < self::RATE_LIMIT;
+	}
 
+	/**
+	 * Increment the per-IP submission counter.
+	 *
+	 * Called only once a submission has passed validation, so failed attempts
+	 * do not eat into the allowance.
+	 *
+	 * @return void
+	 */
+	private function count_submission(): void {
+		$key   = $this->rate_limit_key();
 		$count = (int) get_transient( $key );
 
-		if ( $count >= self::RATE_LIMIT ) {
-			return false;
-		}
-
 		set_transient( $key, $count + 1, self::RATE_WINDOW );
-
-		return true;
 	}
 
 	/**
 	 * Best-effort client IP, used only as a rate-limit bucket.
 	 *
-	 * Proxy headers are deliberately ignored: they are trivially spoofed, and
-	 * trusting them would let an attacker bypass the limit at will.
+	 * Proxy headers are deliberately ignored by default: they are trivially
+	 * spoofed, and trusting them would let an attacker bypass the limit at
+	 * will. A site that sits behind a proxy it controls can supply the real
+	 * address through the `wow_signal/contact_client_ip` filter:
+	 *
+	 *     add_filter( 'wow_signal/contact_client_ip', static function ( $ip ) {
+	 *         return $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $ip;
+	 *     } );
+	 *
+	 * The filtered value must be a valid IP address; anything else falls back
+	 * to REMOTE_ADDR.
 	 *
 	 * @return string
 	 */
 	private function client_ip(): string {
-		$ip = isset( $_SERVER['REMOTE_ADDR'] )
+		$remote = isset( $_SERVER['REMOTE_ADDR'] )
 			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
 			: '';
 
+		$remote = filter_var( $remote, FILTER_VALIDATE_IP );
+		$remote = is_string( $remote ) ? $remote : 'unknown';
+
+		/**
+		 * Filter the client IP used as the contact form rate-limit bucket.
+		 *
+		 * Only use this when a trusted proxy (Cloudflare, a load balancer)
+		 * sits in front of the site and sets a header the visitor cannot
+		 * spoof. Invalid values are ignored.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $ip The IP address from REMOTE_ADDR.
+		 */
+		$ip = (string) apply_filters( 'wow_signal/contact_client_ip', $remote );
+
 		$valid = filter_var( $ip, FILTER_VALIDATE_IP );
 
-		return is_string( $valid ) ? $valid : 'unknown';
+		return is_string( $valid ) ? $valid : $remote;
 	}
 
 	/**
@@ -297,7 +356,10 @@ final class ContactForm implements Module {
 	private function redirect_with_result( string $url, string $result ): void {
 		$target = add_query_arg( self::RESULT_ARG, $result, remove_query_arg( array( self::RESULT_ARG, self::TOKEN_ARG ), $url ) );
 
-		wp_safe_redirect( $target . '#' . self::ACTION, 303 );
+		// Success lands on the status notice itself so it is in view on a phone.
+		$anchor = 'sent' === $result ? self::ACTION . '-status' : self::ACTION;
+
+		wp_safe_redirect( $target . '#' . $anchor, 303 );
 		exit;
 	}
 
@@ -313,7 +375,8 @@ final class ContactForm implements Module {
 	 * @return void
 	 */
 	private function redirect_with_errors( string $url, array $errors, array $values ): void {
-		$token = wp_generate_password( 20, false, false );
+		// Lowercase hex: it must survive sanitize_key()-style lowercasing.
+		$token = bin2hex( random_bytes( 10 ) );
 
 		set_transient(
 			'wow_signal_contact_' . $token,
@@ -338,35 +401,62 @@ final class ContactForm implements Module {
 	}
 
 	/**
-	 * Read and delete the stored feedback for the current request.
+	 * Read the stored feedback for the current request.
+	 *
+	 * The result is memoised for the rest of the request and the transient is
+	 * only deleted at shutdown. Plugins routinely run the_content before the
+	 * page is output (SEO plugins building og:description, for instance); if
+	 * the first read consumed the transient, the visible render would show
+	 * nothing.
 	 *
 	 * @return array{errors: array<string, string>, values: array<string, string>}
 	 */
 	public static function consume_feedback(): array {
+		/**
+		 * Feedback already decoded during this request, keyed by token.
+		 *
+		 * @var array<string, array{errors: array<string, string>, values: array<string, string>}> $cache
+		 */
+		static $cache = array();
+
 		$empty = array(
 			'errors' => array(),
 			'values' => array(),
 		);
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display of a single-use token from a redirect.
-		$token = isset( $_GET[ self::TOKEN_ARG ] ) ? sanitize_key( wp_unslash( $_GET[ self::TOKEN_ARG ] ) ) : '';
+		$token = isset( $_GET[ self::TOKEN_ARG ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::TOKEN_ARG ] ) ) : '';
 
-		if ( '' === $token ) {
+		if ( 1 !== preg_match( '/^[a-f0-9]{20}$/', $token ) ) {
 			return $empty;
 		}
 
-		$stored = get_transient( 'wow_signal_contact_' . $token );
+		if ( isset( $cache[ $token ] ) ) {
+			return $cache[ $token ];
+		}
+
+		$key    = 'wow_signal_contact_' . $token;
+		$stored = get_transient( $key );
 
 		if ( ! is_array( $stored ) ) {
+			$cache[ $token ] = $empty;
+
 			return $empty;
 		}
 
-		delete_transient( 'wow_signal_contact_' . $token );
+		add_action(
+			'shutdown',
+			static function () use ( $key ): void {
+				delete_transient( $key );
+			}
+		);
 
-		return array(
+		$cache[ $token ] = array(
 			'errors' => isset( $stored['errors'] ) && is_array( $stored['errors'] ) ? array_map( 'strval', $stored['errors'] ) : array(),
 			'values' => isset( $stored['values'] ) && is_array( $stored['values'] ) ? array_map( 'strval', $stored['values'] ) : array(),
 		);
+
+		return $cache[ $token ];
 	}
 
 	/**
