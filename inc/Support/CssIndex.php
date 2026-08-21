@@ -441,7 +441,25 @@ final class CssIndex {
 		'background-image',
 		'max-width',
 		'grid-template-columns',
+		'flex-direction',
+		'flex-wrap',
+		'align-items',
+		'justify-content',
+		'box-shadow',
 		'display',
+
+		/*
+		 * Not read by the converter, which has no block to put them on.
+		 * They are here for the brief the model is given: an element the
+		 * design took out of the flow, or sized by ratio, is exactly the kind
+		 * of construction a structural conversion cannot express, and the
+		 * model can only say so if it is told.
+		 */
+		'position',
+		'width',
+		'min-height',
+		'aspect-ratio',
+		'opacity',
 	);
 
 	/**

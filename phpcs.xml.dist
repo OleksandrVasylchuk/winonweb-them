@@ -20,6 +20,16 @@
 	-->
 	<exclude-pattern>/tools/*</exclude-pattern>
 
+	<!--
+		Test fixtures. Not theme code and never loaded into WordPress: a design
+		archive, the HTML inside it, and a stand-in program the CLI transport
+		tests spawn as a separate process. The stand-in prints to a pipe rather
+		than to a page, and has no WordPress around it to borrow WP_Filesystem
+		from, so the escaping and filesystem rules have nothing to protect
+		there. The tests in tests/wp/ are linted as normal.
+	-->
+	<exclude-pattern>/tests/fixtures/*</exclude-pattern>
+
 	<arg name="basepath" value="."/>
 	<arg name="colors"/>
 	<arg name="extensions" value="php"/>

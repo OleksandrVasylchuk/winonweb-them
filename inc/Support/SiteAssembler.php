@@ -38,6 +38,42 @@ final class SiteAssembler {
 	private const PREVIOUS_FRONT = 'wow_signal_import_previous_front';
 
 	/**
+	 * Option holding the site title and logo as they were before an import.
+	 */
+	private const PREVIOUS_IDENTITY = 'wow_signal_import_previous_identity';
+
+	/**
+	 * Option holding the page that becomes the front page once it is published.
+	 */
+	private const PENDING_FRONT = 'wow_signal_import_pending_front';
+
+	/**
+	 * Make a published page the front page, remembering what was there before.
+	 *
+	 * The stash is written once: a second run must not overwrite it with the
+	 * first run's own front page.
+	 *
+	 * @param int $page Page ID.
+	 * @return void
+	 */
+	private static function set_front_page( int $page ): void {
+		if ( false === get_option( self::PREVIOUS_FRONT ) ) {
+			update_option(
+				self::PREVIOUS_FRONT,
+				array(
+					'show_on_front' => (string) get_option( 'show_on_front', 'posts' ),
+					'page_on_front' => (int) get_option( 'page_on_front', 0 ),
+				),
+				false
+			);
+		}
+
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $page );
+		delete_option( self::PENDING_FRONT );
+	}
+
+	/**
 	 * Build the site from one language of a design, in one call.
 	 *
 	 * A convenience over the four steps below, run back to back. The import
@@ -47,7 +83,7 @@ final class SiteAssembler {
 	 *
 	 * @param string               $root    Design root directory.
 	 * @param array<string, mixed> $index   DesignArchive::index() result.
-	 * @param array<string, mixed> $options language, publish, includes.
+	 * @param array<string, mixed> $options language, publish, includes, smart, refine, model, effort.
 	 * @return array<string, mixed>|WP_Error
 	 */
 	public static function build( string $root, array $index, array $options = array() ) {
@@ -77,7 +113,7 @@ final class SiteAssembler {
 	 *
 	 * @param string               $root    Design root directory.
 	 * @param array<string, mixed> $index   DesignArchive::index() result.
-	 * @param array<string, mixed> $options language, publish, includes.
+	 * @param array<string, mixed> $options language, publish, includes, smart, refine, model, effort.
 	 * @return array<string, mixed>|WP_Error
 	 */
 	public static function start( string $root, array $index, array $options = array() ) {
@@ -117,6 +153,22 @@ final class SiteAssembler {
 		$media = SiteBuilder::import_media( $root );
 		$media = is_wp_error( $media ) ? array() : $media;
 
+		/*
+		 * The design's own stylesheet, now that every picture it refers to
+		 * has a Media Library URL to be repointed at. The converter keeps the
+		 * design's class names on the blocks it builds; this is what those
+		 * classes still mean.
+		 */
+		$stylesheet = array(
+			'bytes'   => 0,
+			'rules'   => 0,
+			'dropped' => 0,
+		);
+
+		if ( class_exists( DesignStylesheet::class ) ) {
+			$stylesheet = DesignStylesheet::import( $root, $media );
+		}
+
 		return array(
 			'root'     => $root,
 			'publish'  => $publish,
@@ -125,15 +177,27 @@ final class SiteAssembler {
 			'colors'   => $tokens['colors'],
 			'media'    => $media,
 			'routes'   => array(),
+
+			/*
+			 * Whether this build asks a model to correct each section, and
+			 * whether it also asks for the rendered result to be reviewed.
+			 * Both are off unless the build screen turned them on; a build
+			 * that leaves them off never reaches the network at all.
+			 */
+			'smart'    => ! empty( $options['smart'] ) && SmartConverter::possible(),
+			'refine'   => ! empty( $options['refine'] ),
+			'model'    => isset( $options['model'] ) ? (string) $options['model'] : AnthropicClient::DEFAULT_MODEL,
+			'effort'   => isset( $options['effort'] ) ? (string) $options['effort'] : 'high',
 			'report'   => array(
-				'pages'    => array(),
-				'media'    => count( $media ),
-				'menu'     => 0,
-				'parts'    => array(),
-				'front'    => 0,
-				'palette'  => $tokens['colors'],
-				'fonts'    => $fonts,
-				'concerns' => self::palette_warnings( $tokens['colors'] ),
+				'pages'      => array(),
+				'media'      => count( $media ),
+				'menu'       => 0,
+				'parts'      => array(),
+				'front'      => 0,
+				'palette'    => $tokens['colors'],
+				'fonts'      => $fonts,
+				'stylesheet' => $stylesheet,
+				'concerns'   => self::palette_warnings( $tokens['colors'] ),
 			),
 		);
 	}
@@ -169,15 +233,22 @@ final class SiteAssembler {
 
 		$existing = isset( $job['routes'][ $file ]['id'] ) ? (int) $job['routes'][ $file ]['id'] : 0;
 
+		$smart = self::smart_converter( $job );
+
 		$made = self::build_page(
 			(string) $job['root'],
 			$page,
-			self::converter( $job ),
+			null !== $smart ? $smart->structural() : self::converter( $job ),
 			(array) $job['media'],
 			! empty( $job['publish'] ),
 			$includes,
-			$existing
+			$existing,
+			$smart
 		);
+
+		if ( null !== $smart ) {
+			self::record_calls( $job, $smart->calls() );
+		}
 
 		if ( is_wp_error( $made ) ) {
 			$job['report']['concerns'][] = $file . ' — ' . $made->get_error_message();
@@ -188,6 +259,108 @@ final class SiteAssembler {
 		$job['routes'][ $file ] = $made;
 
 		return $made;
+	}
+
+	/**
+	 * Add one page's model calls to the job's running tally.
+	 *
+	 * Kept on the job rather than billed as it goes, so a build that is
+	 * abandoned half way leaves the same trail as one that finished, and the
+	 * report at the end can state one figure for the whole thing.
+	 *
+	 * @param array<string, mixed>             $job   Job record, updated in place.
+	 * @param array<int, array<string, mixed>> $calls Calls from SmartConverter.
+	 * @return void
+	 */
+	private static function record_calls( array &$job, array $calls ): void {
+		$tally = isset( $job['report']['ai'] ) && is_array( $job['report']['ai'] )
+			? $job['report']['ai']
+			: array(
+				'calls'     => 0,
+				'failed'    => 0,
+				'discarded' => 0,
+				'input'     => 0,
+				'output'    => 0,
+				'cost'      => 0.0,
+				'notional'  => 0.0,
+				'transport' => '',
+				'errors'    => array(),
+			);
+
+		foreach ( $calls as $call ) {
+			++$tally['calls'];
+
+			if ( empty( $call['ok'] ) ) {
+				++$tally['failed'];
+
+				$error = (string) ( $call['error'] ?? '' );
+
+				if ( '' !== $error && ! in_array( $error, $tally['errors'], true ) ) {
+					$tally['errors'][] = $error;
+				}
+
+				continue;
+			}
+
+			if ( isset( $call['kept'] ) && false === $call['kept'] ) {
+				++$tally['discarded'];
+			}
+
+			$usage = is_array( $call['usage'] ?? null ) ? $call['usage'] : array();
+			$model = (string) ( $call['model'] ?? '' );
+
+			$tally['transport'] = (string) ( $call['transport'] ?? $tally['transport'] );
+			$tally['input']    += (int) ( $usage['input_tokens'] ?? 0 ) + (int) ( $usage['cache_read_input_tokens'] ?? 0 ) + (int) ( $usage['cache_creation_input_tokens'] ?? 0 );
+			$tally['output']   += (int) ( $usage['output_tokens'] ?? 0 );
+
+			// A subscription run through the CLI is billed to nobody; its figure is a comparison only.
+			if ( ! ModelGateway::is_billable( (string) ( $call['transport'] ?? 'api' ) ) ) {
+				$tally['notional'] += (float) ( $call['notional'] ?? 0.0 );
+			} else {
+				$tally['cost'] += Spend::cost( $usage, $model );
+			}
+		}
+
+		$job['report']['ai'] = $tally;
+	}
+
+	/**
+	 * The guided converter for this job, when the build asked for one.
+	 *
+	 * Null whenever the build did not ask, or when nothing on this machine can
+	 * reach a model — in which case every page converts structurally, exactly
+	 * as it did before this route existed.
+	 *
+	 * @param array<string, mixed> $job Job record.
+	 * @return SmartConverter|null
+	 */
+	private static function smart_converter( array $job ): ?SmartConverter {
+		if ( empty( $job['smart'] ) || ! SmartConverter::possible() ) {
+			return null;
+		}
+
+		$root = (string) $job['root'];
+
+		/*
+		 * One index for both, not one each. Parsing a design's stylesheets is
+		 * the expensive part of a page step, and the structural converter and
+		 * the brief need exactly the same answers out of it.
+		 */
+		$css = CssIndex::from_directory( $root );
+
+		$converter = new BlockConverter();
+		$converter->use_design( DesignTokens::section_backgrounds( $root ), (array) $job['colors'], $css );
+
+		return new SmartConverter(
+			$root,
+			$converter,
+			$css,
+			array(
+				'model'  => (string) ( $job['model'] ?? AnthropicClient::DEFAULT_MODEL ),
+				'effort' => (string) ( $job['effort'] ?? 'high' ),
+				'refine' => ! empty( $job['refine'] ),
+			)
+		);
 	}
 
 	/**
@@ -212,7 +385,8 @@ final class SiteAssembler {
 		$chrome = self::build_chrome(
 			(string) $job['root'],
 			(string) $job['pages'][0]['file'],
-			(array) $job['routes']
+			(array) $job['routes'],
+			self::converter( $job )
 		);
 
 		$job['report']['menu']         = $chrome['menu'];
@@ -258,24 +432,18 @@ final class SiteAssembler {
 		$front = self::front_page( $routes );
 
 		if ( 0 !== $front ) {
-			/*
-			 * Remember what the site showed before, once: a second run must
-			 * not overwrite the stash with the first run's own front page.
-			 */
-			if ( false === get_option( self::PREVIOUS_FRONT ) ) {
-				update_option(
-					self::PREVIOUS_FRONT,
-					array(
-						'show_on_front' => (string) get_option( 'show_on_front', 'posts' ),
-						'page_on_front' => (int) get_option( 'page_on_front', 0 ),
-					),
-					false
-				);
-			}
-
-			update_option( 'show_on_front', 'page' );
-			update_option( 'page_on_front', $front );
 			$report['front'] = $front;
+
+			/*
+			 * A draft cannot be the front page: visitors would get a 404 where
+			 * the home used to be. Until it is published the choice is only
+			 * remembered, and publish() applies it the moment it goes live.
+			 */
+			if ( 'publish' === get_post_status( $front ) ) {
+				self::set_front_page( $front );
+			} else {
+				update_option( self::PENDING_FRONT, $front, false );
+			}
 		}
 
 		/*
@@ -296,7 +464,31 @@ final class SiteAssembler {
 				(int) $routes[ $file ]['id'],
 				$file,
 				(int) $routes[ $file ]['sections'],
-				(array) $routes[ $file ]['concerns']
+				(array) $routes[ $file ]['concerns'],
+				(int) ( $routes[ $file ]['improved'] ?? 0 ),
+				array_map( 'strval', (array) ( $routes[ $file ]['changed'] ?? array() ) )
+			);
+		}
+
+		/*
+		 * A guided build that could not reach the model for some sections
+		 * still produced a site — from the structural conversion, which is
+		 * what those sections fell back to. Saying so is the difference
+		 * between a report that is true and one that is merely reassuring.
+		 */
+		$ai = isset( $report['ai'] ) && is_array( $report['ai'] ) ? $report['ai'] : array();
+
+		if ( (int) ( $ai['failed'] ?? 0 ) > 0 ) {
+			$report['concerns'][] = sprintf(
+				/* translators: 1: how many attempts failed, 2: the reason given for the first of them. */
+				_n(
+					'%1$d section could not be sent to the model and was converted structurally instead: %2$s',
+					'%1$d sections could not be sent to the model and were converted structurally instead: %2$s',
+					(int) $ai['failed'],
+					'wow-signal'
+				),
+				(int) $ai['failed'],
+				(string) ( $ai['errors'][0] ?? '' )
 			);
 		}
 
@@ -400,6 +592,17 @@ final class SiteAssembler {
 			$rows[] = self::page_row( $id, (string) get_post_meta( $id, self::OWNED_META, true ), 0, array() );
 		}
 
+		if ( array() !== $rows ) {
+			self::refresh_menus();
+
+			// The home page the build chose goes live with the page itself.
+			$pending = (int) get_option( self::PENDING_FRONT, 0 );
+
+			if ( $pending > 0 && 'publish' === get_post_status( $pending ) ) {
+				self::set_front_page( $pending );
+			}
+		}
+
 		return $rows;
 	}
 
@@ -410,9 +613,11 @@ final class SiteAssembler {
 	 * @param string             $file     Source file.
 	 * @param int                $sections Sections kept.
 	 * @param array<int, string> $concerns Concerns raised while converting.
+	 * @param int                $improved How many of those sections the model corrected.
+	 * @param array<int, string> $changed  What it changed, one phrase each.
 	 * @return array<string, mixed>
 	 */
-	private static function page_row( int $id, string $file, int $sections, array $concerns ): array {
+	private static function page_row( int $id, string $file, int $sections, array $concerns, int $improved = 0, array $changed = array() ): array {
 		$status = (string) get_post_status( $id );
 		$url    = (string) get_permalink( $id );
 
@@ -423,6 +628,8 @@ final class SiteAssembler {
 			'slug'      => (string) get_post_field( 'post_name', $id ),
 			'url'       => $url,
 			'sections'  => $sections,
+			'improved'  => $improved,
+			'changed'   => $changed,
 			'concerns'  => $concerns,
 			'status'    => $status,
 			'link'      => 'publish' === $status ? $url : (string) get_preview_post_link( $id ),
@@ -544,16 +751,19 @@ final class SiteAssembler {
 	 * @param bool                 $publish   Publish rather than draft.
 	 * @param array<int, int>|null $includes  Section positions to keep, or null for all.
 	 * @param int                  $existing  Page already made for this file, to update.
+	 * @param SmartConverter|null  $smart     Guided converter, when the build asked for one.
 	 * @return array<string, mixed>|WP_Error
 	 */
-	private static function build_page( string $root, array $page, BlockConverter $converter, array $media, bool $publish, ?array $includes = null, int $existing = 0 ) {
+	private static function build_page( string $root, array $page, BlockConverter $converter, array $media, bool $publish, ?array $includes = null, int $existing = 0, ?SmartConverter $smart = null ) {
 		$file      = (string) $page['file'];
-		$converted = self::convert_sections( $root, $file, $converter, $media, $includes );
+		$converted = self::convert_sections( $root, $file, $converter, $media, $includes, $smart );
 		$split     = $converted['split'];
 
 		$markup   = array();
 		$concerns = array();
+		$changed  = array();
 		$kept     = 0;
+		$improved = 0;
 
 		foreach ( $converted['sections'] as $section ) {
 			if ( ! empty( $section['excluded'] ) ) {
@@ -568,6 +778,12 @@ final class SiteAssembler {
 
 			$markup[] = (string) $section['markup'];
 			++$kept;
+
+			if ( 'structural' !== (string) ( $section['source'] ?? 'structural' ) ) {
+				++$improved;
+			}
+
+			$changed = array_merge( $changed, array_map( 'strval', (array) ( $section['changed'] ?? array() ) ) );
 		}
 
 		if ( array() === $markup ) {
@@ -626,6 +842,8 @@ final class SiteAssembler {
 			'slug'     => get_post_field( 'post_name', (int) $id ),
 			'url'      => (string) get_permalink( (int) $id ),
 			'sections' => $kept,
+			'improved' => $improved,
+			'changed'  => array_values( array_unique( $changed ) ),
 			'concerns' => array_values( array_unique( $concerns ) ),
 		);
 	}
@@ -642,12 +860,17 @@ final class SiteAssembler {
 	 * @param BlockConverter                          $converter Converter.
 	 * @param array<string, array{id:int,url:string}> $media     Imported media map.
 	 * @param array<int, int>|null                    $includes  Positions to keep, or null for all.
+	 * @param SmartConverter|null                     $smart     Guided converter, when the build asked for one.
 	 * @return array{split:array<string,mixed>,sections:array<int,array<string,mixed>>}
 	 */
-	private static function convert_sections( string $root, string $file, BlockConverter $converter, array $media, ?array $includes ) {
+	private static function convert_sections( string $root, string $file, BlockConverter $converter, array $media, ?array $includes, ?SmartConverter $smart = null ) {
 		$split    = SectionSplitter::split( trailingslashit( $root ) . $file );
 		$page_dir = (string) dirname( $file );
 		$sections = array();
+
+		if ( null !== $smart ) {
+			$smart->for_page( $file );
+		}
 
 		foreach ( $split['sections'] as $offset => $section ) {
 			$position = (int) $section['position'];
@@ -660,6 +883,8 @@ final class SiteAssembler {
 				'markup'   => '',
 				'concerns' => array(),
 				'excluded' => $excluded,
+				'source'   => 'structural',
+				'changed'  => array(),
 			);
 
 			if ( $excluded ) {
@@ -667,7 +892,19 @@ final class SiteAssembler {
 				continue;
 			}
 
-			$result = $converter->convert( $section, 0 === $offset );
+			$result = null !== $smart
+				? $smart->convert(
+					$section,
+					0 === $offset,
+					array(
+						'page' => (string) $split['title'],
+						'lang' => (string) $split['lang'],
+					)
+				)
+				: $converter->convert( $section, 0 === $offset );
+
+			$row['source']  = (string) ( $result['source'] ?? 'structural' );
+			$row['changed'] = array_map( 'strval', (array) ( $result['changed'] ?? array() ) );
 
 			if ( '' === trim( $result['markup'] ) ) {
 				$sections[] = $row;
@@ -909,32 +1146,7 @@ final class SiteAssembler {
 				continue;
 			}
 
-			$content = (string) preg_replace_callback(
-				'#href="([^"]+)"#i',
-				static function ( array $link ) use ( $lookup, &$unresolved ): string {
-					$href = $link[1];
-
-					if ( 1 === preg_match( '#^(https?:)?//|^(mailto|tel):|^\##i', $href ) ) {
-						return $link[0];
-					}
-
-					$parts  = explode( '#', $href, 2 );
-					$target = strtolower( basename( $parts[0] ) );
-
-					if ( ! isset( $lookup[ $target ] ) ) {
-						if ( 1 === preg_match( '/\.html?$/i', $target ) ) {
-							$unresolved[ $target ] = ( $unresolved[ $target ] ?? 0 ) + 1;
-						}
-
-						return $link[0];
-					}
-
-					$url = $lookup[ $target ] . ( isset( $parts[1] ) ? '#' . $parts[1] : '' );
-
-					return 'href="' . esc_url( $url ) . '"';
-				},
-				(string) $post->post_content
-			);
+			$content = self::relink_markup( (string) $post->post_content, $lookup, $unresolved );
 
 			if ( $content !== $post->post_content ) {
 				wp_update_post(
@@ -990,17 +1202,18 @@ final class SiteAssembler {
 	/**
 	 * Build the menu and the header and footer template parts.
 	 *
-	 * @param string                              $root   Design root.
-	 * @param string                              $file   A page to read the chrome from.
+	 * @param string                              $root      Design root.
+	 * @param string                              $file      A page to read the chrome from.
 	 * @param array<string, array<string, mixed>> $routes Created pages.
-	 * @return array{menu:int,parts:array<int,string>,parts_detail:array<int,array<string,mixed>>,menu_link:string}
+	 * @param BlockConverter|null                 $converter Converter primed with the design; the footer is converted with it.
 	 */
-	private static function build_chrome( string $root, string $file, array $routes ): array {
-		$split = SectionSplitter::split( trailingslashit( $root ) . $file );
+	private static function build_chrome( string $root, string $file, array $routes, ?BlockConverter $converter = null ): array {
+		$split = SectionSplitter::split( trailingslashit( $root ) . $file, $root );
 		$menu  = 0;
 		$parts = array();
 
-		$links = self::nav_links( (string) ( $split['header']['html'] ?? '' ), $routes );
+		$header_html = (string) ( $split['header']['html'] ?? '' );
+		$links       = self::nav_links( $header_html, $routes );
 
 		/*
 		 * Some exports keep the navigation in its own file rather than in
@@ -1008,15 +1221,18 @@ final class SiteAssembler {
 		 * a menu at all.
 		 */
 		if ( array() === $links ) {
-			$links = self::nav_links( self::chrome_file( $root, array( 'sitenav', 'siteheader', 'nav', 'header', 'menu' ) ), $routes );
+			$header_html = self::chrome_file( $root, array( 'sitenav', 'siteheader', 'nav', 'header', 'menu' ) );
+			$links       = self::nav_links( $header_html, $routes );
 		}
 
 		if ( array() !== $links ) {
 			$menu = self::create_menu( $links );
 		}
 
+		$identity = self::identity( $header_html, $root, (string) dirname( $file ) );
+
 		if ( 0 !== $menu ) {
-			$parts[] = self::write_part( 'header', self::header_markup( $menu ) );
+			$parts[] = self::write_part( 'header', self::header_markup( $menu, $identity['logo'] > 0 ) );
 		}
 
 		$footer_html = (string) ( $split['footer']['html'] ?? '' );
@@ -1025,7 +1241,20 @@ final class SiteAssembler {
 			$footer_html = self::chrome_file( $root, array( 'sitefooter', 'footer' ) );
 		}
 
-		$footer = self::footer_markup( $footer_html, $routes );
+		/*
+		 * The footer is converted like any section, so its columns, brand
+		 * block and small print come through as the design drew them. Only
+		 * when nothing converts does the plain link list stand in.
+		 */
+		$footer = '';
+
+		if ( null !== $converter && is_array( $split['footer'] ?? null ) ) {
+			$footer = self::footer_from_design( $split['footer'], $routes, $converter );
+		}
+
+		if ( '' === $footer ) {
+			$footer = self::footer_markup( $footer_html, $routes );
+		}
 
 		if ( '' !== $footer ) {
 			$parts[] = self::write_part( 'footer', $footer );
@@ -1089,7 +1318,9 @@ final class SiteAssembler {
 				continue;
 			}
 
-			$target = strtolower( basename( explode( '#', $href )[0] ) );
+			$pieces   = explode( '#', $href, 2 );
+			$target   = strtolower( basename( $pieces[0] ) );
+			$fragment = isset( $pieces[1] ) ? sanitize_title( $pieces[1] ) : '';
 
 			if ( ! isset( $lookup[ $target ] ) ) {
 				continue;
@@ -1106,15 +1337,18 @@ final class SiteAssembler {
 				continue;
 			}
 
-			if ( isset( $seen[ $made['id'] ] ) ) {
+			// Two anchors into the same page, such as its proof and newsletter sections, are two menu entries.
+			$key = $made['id'] . '#' . $fragment;
+
+			if ( isset( $seen[ $key ] ) ) {
 				continue;
 			}
 
-			$seen[ $made['id'] ] = true;
+			$seen[ $key ] = true;
 
 			$links[] = array(
 				'label' => $label,
-				'url'   => (string) $made['url'],
+				'url'   => (string) $made['url'] . ( '' !== $fragment ? '#' . $fragment : '' ),
 				'id'    => (int) $made['id'],
 			);
 		}
@@ -1218,15 +1452,7 @@ final class SiteAssembler {
 		$items = array();
 
 		foreach ( $links as $link ) {
-			$items[] = '<!-- wp:navigation-link ' . wp_json_encode(
-				array(
-					'label' => $link['label'],
-					'type'  => 'page',
-					'id'    => $link['id'],
-					'url'   => $link['url'],
-					'kind'  => 'post-type',
-				)
-			) . ' /-->';
+			$items[] = self::menu_item( (int) $link['id'], (string) $link['label'], (string) $link['url'] );
 		}
 
 		$id = wp_insert_post(
@@ -1244,24 +1470,460 @@ final class SiteAssembler {
 	}
 
 	/**
-	 * Header markup pointing at the created menu.
+	 * One menu entry, written so it renders whatever the page's status.
 	 *
-	 * @param int $menu Navigation post ID.
+	 * Core's navigation-link block draws nothing for a page that is still a
+	 * draft, and a build makes drafts by default — so a freshly built site
+	 * showed an empty menu. A draft is linked as a custom URL instead, and
+	 * refresh_menus() upgrades it to a page link once it is published.
+	 *
+	 * @param int    $id    Page ID.
+	 * @param string $label Menu label.
+	 * @param string $url   Page URL.
 	 * @return string
 	 */
-	private static function header_markup( int $menu ): string {
+	private static function menu_item( int $id, string $label, string $url ): string {
+		$published = 'publish' === get_post_status( $id );
+
+		$attrs = $published
+			? array(
+				'label' => $label,
+				'type'  => 'page',
+				'id'    => $id,
+				'url'   => $url,
+				'kind'  => 'post-type',
+			)
+			: array(
+				'label' => $label,
+				'url'   => $url,
+				'kind'  => 'custom',
+			);
+
+		return '<!-- wp:navigation-link ' . wp_json_encode( $attrs ) . ' /-->';
+	}
+
+	/**
+	 * Point menu entries at their pages once those pages are published.
+	 *
+	 * @return int Entries upgraded.
+	 */
+	public static function refresh_menus(): int {
+		$urls = array();
+
+		foreach ( self::owned_posts( array( 'page' ) ) as $page ) {
+			if ( 'publish' === $page->post_status ) {
+				$urls[ (string) get_permalink( $page ) ]               = (int) $page->ID;
+				$urls[ (string) home_url( '/?page_id=' . $page->ID ) ] = (int) $page->ID;
+			}
+		}
+
+		$upgraded = 0;
+
+		foreach ( self::owned_posts( array( 'wp_navigation' ) ) as $menu ) {
+			$blocks  = parse_blocks( (string) $menu->post_content );
+			$changed = false;
+
+			foreach ( $blocks as &$block ) {
+				if ( 'core/navigation-link' !== ( $block['blockName'] ?? '' ) || 'custom' !== ( $block['attrs']['kind'] ?? '' ) ) {
+					continue;
+				}
+
+				$url = (string) ( $block['attrs']['url'] ?? '' );
+
+				if ( ! isset( $urls[ $url ] ) ) {
+					continue;
+				}
+
+				$block['attrs'] = array(
+					'label' => (string) ( $block['attrs']['label'] ?? '' ),
+					'type'  => 'page',
+					'id'    => $urls[ $url ],
+					'url'   => (string) get_permalink( $urls[ $url ] ),
+					'kind'  => 'post-type',
+				);
+
+				$changed = true;
+				++$upgraded;
+			}
+
+			unset( $block );
+
+			if ( $changed ) {
+				wp_update_post(
+					array(
+						'ID'           => $menu->ID,
+						'post_content' => wp_slash( serialize_blocks( $blocks ) ),
+					)
+				);
+			}
+		}
+
+		return $upgraded;
+	}
+
+	/**
+	 * Take the site's name and logo from the design's header.
+	 *
+	 * A freshly installed site is called after its folder or database, and
+	 * that name would otherwise sit in the header of the imported design. The
+	 * header's brand link (or the first logo image) is the name the designer
+	 * meant. An owner who has already named the site is left alone; what was
+	 * there before is stashed once so reset() can put it back.
+	 *
+	 * @param string $header_html Header markup from the design.
+	 * @param string $root        Design root.
+	 * @param string $page_dir    Directory of the page the header came from.
+	 * @return array{logo:int,name:string}
+	 */
+	private static function identity( string $header_html, string $root, string $page_dir ): array {
+		$result = array(
+			'logo' => 0,
+			'name' => '',
+		);
+
+		if ( '' === trim( $header_html ) ) {
+			return $result;
+		}
+
+		$dom = new DOMDocument();
+		libxml_use_internal_errors( true );
+		$dom->loadHTML( '<?xml encoding="UTF-8"><html><body>' . $header_html . '</body></html>', LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING );
+		libxml_clear_errors();
+
+		$xpath = new DOMXPath( $dom );
+		$name  = '';
+		$logo  = '';
+
+		foreach ( $xpath->query( '//a' ) as $anchor ) {
+			if ( $anchor instanceof DOMElement && self::is_brand( $anchor ) ) {
+				/*
+				 * A brand is often a monogram beside the name — "RK" and
+				 * "Robert Khoubian". The longest piece is the name; the
+				 * aria-label, when the designer wrote one, is better still.
+				 */
+				$name = '';
+
+				foreach ( $anchor->childNodes as $piece ) {
+					$text = trim( (string) preg_replace( '/\s+/u', ' ', (string) $piece->textContent ) );
+
+					if ( mb_strlen( $text ) > mb_strlen( $name ) ) {
+						$name = $text;
+					}
+				}
+
+				$aria = trim( (string) preg_replace( '/\s+(home|homepage|start)$/i', '', $anchor->getAttribute( 'aria-label' ) ) );
+
+				if ( '' !== $aria && mb_strlen( $aria ) <= 60 ) {
+					$name = $aria;
+				}
+
+				$img  = $anchor->getElementsByTagName( 'img' )->item( 0 );
+				$logo = $img instanceof DOMElement ? trim( $img->getAttribute( 'src' ) ) : '';
+
+				// A brand link that is only a picture names the site in the picture's alt.
+				if ( '' === $name && $img instanceof DOMElement ) {
+					$name = trim( $img->getAttribute( 'alt' ) );
+				}
+				break;
+			}
+		}
+
+		if ( '' === $logo ) {
+			$img  = $xpath->query( '//img' )->item( 0 );
+			$logo = $img instanceof DOMElement ? trim( $img->getAttribute( 'src' ) ) : '';
+
+			if ( '' === $name && $img instanceof DOMElement ) {
+				$name = trim( $img->getAttribute( 'alt' ) );
+			}
+		}
+
+		$name = trim( (string) preg_replace( '/\s+/u', ' ', $name ) );
+
+		if ( mb_strlen( $name ) > 60 ) {
+			$name = '';
+		}
+
+		$logo_id = 0;
+
+		if ( '' !== $logo && 1 !== preg_match( '#^(https?:)?//#i', $logo ) && ! str_starts_with( $logo, 'data:' ) ) {
+			$map = SiteBuilder::import_media( $root );
+
+			if ( ! is_wp_error( $map ) ) {
+				$linked = SiteBuilder::relink_media( '<img src="' . esc_attr( $logo ) . '">', $map, $page_dir );
+
+				if ( 1 === preg_match( '/src="([^"]+)"/', $linked, $found ) ) {
+					$logo_id = (int) attachment_url_to_postid( html_entity_decode( $found[1] ) );
+				}
+			}
+		}
+
+		$blogname  = (string) get_option( 'blogname' );
+		$untouched = in_array(
+			strtolower( $blogname ),
+			array_map(
+				'strtolower',
+				array(
+					defined( 'DB_NAME' ) ? (string) DB_NAME : '',
+					basename( untrailingslashit( ABSPATH ) ),
+					basename( untrailingslashit( (string) home_url() ) ),
+					'wordpress',
+					'my wordpress',
+					'site title',
+					'',
+				)
+			),
+			true
+		);
+
+		if ( false === get_option( self::PREVIOUS_IDENTITY ) ) {
+			update_option(
+				self::PREVIOUS_IDENTITY,
+				array(
+					'blogname'    => $blogname,
+					'custom_logo' => (int) get_theme_mod( 'custom_logo', 0 ),
+				),
+				false
+			);
+		}
+
+		if ( '' !== $name && $untouched ) {
+			update_option( 'blogname', $name );
+			$result['name'] = $name;
+		}
+
+		if ( $logo_id > 0 ) {
+			set_theme_mod( 'custom_logo', $logo_id );
+			$result['logo'] = $logo_id;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Header markup pointing at the created menu.
+	 *
+	 * @param int  $menu     Navigation post ID.
+	 * @param bool $has_logo Whether the design supplied a logo image.
+	 * @return string
+	 */
+	private static function header_markup( int $menu, bool $has_logo = false ): string {
+		$brand = $has_logo
+			? "<!-- wp:site-logo {\"width\":160,\"shouldSyncIcon\":false} /-->\n\n"
+			: "<!-- wp:site-title {\"level\":0,\"fontSize\":\"medium\"} /-->\n\n";
+
 		return "<!-- wp:group {\"tagName\":\"div\",\"className\":\"wow-header\",\"align\":\"full\",\"style\":{\"spacing\":{\"padding\":{\"top\":\"var:preset|spacing|30\",\"bottom\":\"var:preset|spacing|30\"}}},\"layout\":{\"type\":\"constrained\"}} -->\n"
 			. '<div class="wp-block-group wow-header alignfull" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">'
 			. "<!-- wp:group {\"align\":\"wide\",\"layout\":{\"type\":\"flex\",\"justifyContent\":\"space-between\",\"flexWrap\":\"wrap\"}} -->\n"
 			. '<div class="wp-block-group alignwide">'
-			. "<!-- wp:site-title {\"level\":0,\"fontSize\":\"medium\"} /-->\n\n"
+			. $brand
 			. '<!-- wp:navigation {"ref":' . $menu . ',"overlayMenu":"mobile","fontSize":"small"} /-->'
 			. "</div>\n<!-- /wp:group -->"
 			. "</div>\n<!-- /wp:group -->";
 	}
 
 	/**
-	 * Footer markup carrying the design's closing links.
+	 * The design's footer, converted like any section and relinked.
+	 *
+	 * @param array<string, mixed>                $section   Footer section from SectionSplitter.
+	 * @param array<string, array<string, mixed>> $routes    Created pages.
+	 * @param BlockConverter                      $converter Converter primed with the design.
+	 * @return string Block markup, or an empty string when nothing converts.
+	 */
+	private static function footer_from_design( array $section, array $routes, BlockConverter $converter ): string {
+		$result = $converter->convert( $section, false );
+		$markup = trim( (string) ( $result['markup'] ?? '' ) );
+
+		if ( '' === $markup ) {
+			return '';
+		}
+
+		$validator = new BlockMarkupValidator();
+
+		if ( ! $validator->check( $markup ) ) {
+			return '';
+		}
+
+		$lookup = array();
+
+		foreach ( $routes as $file => $made ) {
+			$lookup[ strtolower( basename( (string) $file ) ) ] = (string) $made['url'];
+		}
+
+		$unresolved = array();
+
+		return self::dated( self::relink_markup( $markup, $lookup, $unresolved ) );
+	}
+
+	/**
+	 * Swap the design's frozen copyright line for one that keeps its year.
+	 *
+	 * A design is exported in a particular January and says so: "© 2026 Fixture
+	 * Co", written into the footer as literal text. Converted faithfully, every
+	 * site built from that archive is wrong from the next New Year onwards, and
+	 * nobody notices for eleven months.
+	 *
+	 * The theme has a block for exactly this. Swapping the paragraph for it
+	 * keeps what the line says — the year comes from the site's own clock and
+	 * timezone, the name from the site title, which the import has already set
+	 * from the design — and stops it going stale. A footer whose design never
+	 * had a copyright line gets the block appended instead, because the year is
+	 * the part that rots and every footer should have one.
+	 *
+	 * @param string $markup Converted footer markup.
+	 * @return string
+	 */
+	private static function dated( string $markup ): string {
+		if ( str_contains( $markup, 'wp:wow/colophon' ) ) {
+			return $markup;
+		}
+
+		/*
+		 * Parsed, not matched. A regular expression over block markup has to
+		 * find where one block's attributes end, and a lazy `{.*?}` will
+		 * happily run from an early block to a later one and swallow
+		 * everything between — which is how the first attempt at this quietly
+		 * deleted half a footer. WordPress ships the parser that answers the
+		 * question properly.
+		 */
+		$blocks = parse_blocks( $markup );
+
+		if ( self::swap_copyright( $blocks ) ) {
+			return serialize_blocks( $blocks );
+		}
+
+		// No copyright line in the design: give the footer one that cannot go stale.
+		self::append_colophon( $blocks );
+
+		return serialize_blocks( $blocks );
+	}
+
+	/**
+	 * Replace the first frozen copyright paragraph with the colophon block.
+	 *
+	 * @param array<int, array<string, mixed>> $blocks Parsed blocks, edited in place.
+	 * @return bool Whether one was found and replaced.
+	 */
+	private static function swap_copyright( array &$blocks ): bool {
+		foreach ( $blocks as $index => $block ) {
+			if ( 'core/paragraph' === ( $block['blockName'] ?? '' ) ) {
+				$text = trim( wp_strip_all_tags( (string) ( $block['innerHTML'] ?? '' ) ) );
+
+				/*
+				 * A year is required. "All rights reserved" on its own is a
+				 * sentence the design wrote and will still be true next year;
+				 * a date is the part that rots.
+				 */
+				$marked = 1 === preg_match( '/(©|&copy;|\(c\)|copyright)/i', $text );
+				$dated  = 1 === preg_match( '/\b(19|20)\d{2}\b/', $text );
+
+				if ( $marked && $dated ) {
+					$keep = array();
+
+					// The design's own colour and size for that line are worth keeping.
+					foreach ( array( 'textColor', 'fontSize', 'className', 'style' ) as $key ) {
+						if ( isset( $block['attrs'][ $key ] ) ) {
+							$keep[ $key ] = $block['attrs'][ $key ];
+						}
+					}
+
+					$blocks[ $index ] = array(
+						'blockName'    => 'wow/colophon',
+						'attrs'        => $keep,
+						'innerBlocks'  => array(),
+						'innerHTML'    => '',
+						'innerContent' => array(),
+					);
+
+					return true;
+				}
+			}
+
+			if ( ! empty( $block['innerBlocks'] ) && is_array( $block['innerBlocks'] ) ) {
+				$inner = $block['innerBlocks'];
+
+				if ( self::swap_copyright( $inner ) ) {
+					$blocks[ $index ]['innerBlocks'] = $inner;
+
+					/*
+					 * innerContent holds the literal chunks between child
+					 * blocks, with null standing for "the next child goes
+					 * here". The children changed but their count did not, so
+					 * the layout of that list is still correct.
+					 */
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Put a colophon at the end of the footer's innermost container.
+	 *
+	 * @param array<int, array<string, mixed>> $blocks Parsed blocks, edited in place.
+	 * @return void
+	 */
+	private static function append_colophon( array &$blocks ): void {
+		$colophon = array(
+			'blockName'    => 'wow/colophon',
+			'attrs'        => array(),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+
+		foreach ( $blocks as $index => $block ) {
+			if ( 'core/group' === ( $block['blockName'] ?? '' ) && is_array( $block['innerBlocks'] ?? null ) ) {
+				$blocks[ $index ]['innerBlocks'][]  = $colophon;
+				$blocks[ $index ]['innerContent'][] = null;
+
+				return;
+			}
+		}
+
+		$blocks[] = $colophon;
+	}
+
+	/**
+	 * Point a fragment's design links at the pages that were made from them.
+	 *
+	 * @param string                $content    Block markup.
+	 * @param array<string, string> $lookup     Design file name => page URL.
+	 * @param array<string, int>    $unresolved Counts of targets with no page, updated in place.
+	 * @return string
+	 */
+	private static function relink_markup( string $content, array $lookup, array &$unresolved ): string {
+		return (string) preg_replace_callback(
+			'#href="([^"]+)"#i',
+			static function ( array $link ) use ( $lookup, &$unresolved ): string {
+				$href = $link[1];
+
+				if ( 1 === preg_match( '#^(https?:)?//|^(mailto|tel):|^\##i', $href ) ) {
+					return $link[0];
+				}
+
+				$parts  = explode( '#', $href, 2 );
+				$target = strtolower( basename( $parts[0] ) );
+
+				if ( ! isset( $lookup[ $target ] ) ) {
+					if ( 1 === preg_match( '/\.html?$/i', $target ) ) {
+						$unresolved[ $target ] = ( $unresolved[ $target ] ?? 0 ) + 1;
+					}
+
+					return $link[0];
+				}
+
+				$url = $lookup[ $target ] . ( isset( $parts[1] ) ? '#' . $parts[1] : '' );
+
+				return 'href="' . esc_url( $url ) . '"';
+			},
+			$content
+		);
+	}
+
+	/**
+	 * Footer markup carrying the design's closing links (fallback).
 	 *
 	 * @param string                              $html   Footer markup from the design.
 	 * @param array<string, array<string, mixed>> $routes Created pages.
@@ -1395,8 +2057,12 @@ final class SiteAssembler {
 			++$counts['media'];
 		}
 
-		// Give the theme its own palette and type back.
+		// Give the theme its own palette and type back, and take the design's CSS out of Additional CSS.
 		DesignTokens::reset();
+
+		if ( class_exists( DesignStylesheet::class ) ) {
+			DesignStylesheet::reset();
+		}
 
 		if ( class_exists( DesignFonts::class ) ) {
 			$counts['fonts'] = (int) DesignFonts::reset();
@@ -1425,6 +2091,25 @@ final class SiteAssembler {
 		} elseif ( $deleted_front ) {
 			update_option( 'show_on_front', 'posts' );
 			delete_option( 'page_on_front' );
+		}
+
+		delete_option( self::PENDING_FRONT );
+
+		// The site's name and logo go back to what they were before the import.
+		$identity = get_option( self::PREVIOUS_IDENTITY );
+
+		if ( is_array( $identity ) ) {
+			update_option( 'blogname', (string) ( $identity['blogname'] ?? get_option( 'blogname' ) ) );
+
+			$logo = (int) ( $identity['custom_logo'] ?? 0 );
+
+			if ( $logo > 0 && null !== get_post( $logo ) ) {
+				set_theme_mod( 'custom_logo', $logo );
+			} else {
+				remove_theme_mod( 'custom_logo' );
+			}
+
+			delete_option( self::PREVIOUS_IDENTITY );
 		}
 
 		return $counts;
@@ -1464,12 +2149,13 @@ final class SiteAssembler {
 	/**
 	 * Posts this importer created.
 	 *
+	 * @param array<int, string>|null $types Post types to include; every owned type when null.
 	 * @return array<int, \WP_Post>
 	 */
-	private static function owned_posts(): array {
+	private static function owned_posts( ?array $types = null ): array {
 		return (array) get_posts(
 			array(
-				'post_type'      => array( 'page', 'wp_template_part', 'wp_navigation', 'wp_block' ),
+				'post_type'      => $types ?? array( 'page', 'wp_template_part', 'wp_navigation', 'wp_block' ),
 				'post_status'    => 'any',
 				'posts_per_page' => -1,
 				'meta_key'       => self::OWNED_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Import bookkeeping, not a front-end query.

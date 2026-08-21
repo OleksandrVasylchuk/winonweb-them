@@ -2,7 +2,7 @@
 # This file is distributed under the GNU General Public License v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WOW — Signal 1.3.0\n"
+"Project-Id-Version: WOW — Signal 1.4.0\n"
 "Report-Msgid-Bugs-To: https://www.winonweb.dev/\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,663 +11,762 @@ msgstr ""
 "X-Domain: wow-signal\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: assets/js/admin-import.js:101
-msgid "%s MB"
+#: assets/js/admin-import.js:1008
+msgid "Build the whole site, corrected and reviewed"
 msgstr ""
 
-#: assets/js/admin-import.js:1010
-msgid "Page"
+#: assets/js/admin-import.js:1009
+msgid "Build the whole site, corrected by Claude"
 msgstr ""
 
-#: assets/js/admin-import.js:1011
-msgid "Status"
+#: assets/js/admin-import.js:1013
+msgid "Build everything at once"
 msgstr ""
 
-#: assets/js/admin-import.js:1012
-msgid "Actions"
+#: assets/js/admin-import.js:1016
+msgid "Creates every page as a draft, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again. Press Preview on any page below to see what it will become and leave sections out."
 msgstr ""
 
 #: assets/js/admin-import.js:1022
+msgid "Publish pages immediately"
+msgstr ""
+
+#: assets/js/admin-import.js:1026
+msgid "Leave this off to review each page as a draft first."
+msgstr ""
+
+#: assets/js/admin-import.js:1033
+msgid "Keep the uploaded design for another run"
+msgstr ""
+
+#: assets/js/admin-import.js:1037
+msgid "Otherwise the unpacked files are removed from uploads once the build is done."
+msgstr ""
+
+#: assets/js/admin-import.js:1051
+msgid "Language to build:"
+msgstr ""
+
+#: assets/js/admin-import.js:1060
+msgid "Changed your mind, or got a new version of the design? Delete everything and drop the new archive in — nothing here is one-way."
+msgstr ""
+
+#: assets/js/admin-import.js:107
+msgid "%s MB"
+msgstr ""
+
+#: assets/js/admin-import.js:1070
+msgid "Delete everything and start over"
+msgstr ""
+
+#: assets/js/admin-import.js:1071
+msgid "Removes only what an import created. Your own pages are left alone."
+msgstr ""
+
+#: assets/js/admin-import.js:1104
+msgid "Reading the design, importing fonts and images…"
+msgstr ""
+
+#: assets/js/admin-import.js:111
+msgid "%s KB"
+msgstr ""
+
+#: assets/js/admin-import.js:1120
+msgid "Steps that did not complete:"
+msgstr ""
+
+#: assets/js/admin-import.js:1138 assets/js/admin-import.js:1795
+msgid "Cancel"
+msgstr ""
+
+#: assets/js/admin-import.js:1142
+msgid "Build cancelled. The pages made so far are still on the site as drafts."
+msgstr ""
+
+#: assets/js/admin-import.js:1152
+msgid "Delete what was built so far"
+msgstr ""
+
+#: assets/js/admin-import.js:1164
+msgid "Dismiss"
+msgstr ""
+
+#: assets/js/admin-import.js:1177
+msgid "Build progress"
+msgstr ""
+
+#: assets/js/admin-import.js:1182
+msgid "The build is complete."
+msgstr ""
+
+#: assets/js/admin-import.js:1187
+msgid "Cancelled after %1$d of %2$d steps."
+msgstr ""
+
+#: assets/js/admin-import.js:1194
+msgid "%1$d of %2$d steps done."
+msgstr ""
+
+#. translators: 1: steps done, 2: steps in total. */ return sprintf( __( '%1$d of %2$d steps done.', 'wow-signal' ), job.done, job.total ); } if ( job.smart && 'page' === step.key ) { return sprintf( /* translators: 1: what is being built, 2: steps done, 3: steps in total.
+#: assets/js/admin-import.js:1200
+msgid "Building %1$s with Claude, section by section (%2$d of %3$d) — this one takes a while"
+msgstr ""
+
+#. translators: 1: what is being built, 2: steps done, 3: steps in total. */ __( 'Building %1$s with Claude, section by section (%2$d of %3$d) — this one takes a while', 'wow-signal' ), stepLabel( step ), job.done + 1, job.total ); } return sprintf( /* translators: 1: what is being built, 2: steps done, 3: steps in total.
+#: assets/js/admin-import.js:1209
+msgid "Building %1$s (%2$d of %3$d)"
+msgstr ""
+
+#: assets/js/admin-import.js:1222
+msgid "the menu, header and footer"
+msgstr ""
+
+#: assets/js/admin-import.js:1225
+msgid "the front page and links"
+msgstr ""
+
+#: assets/js/admin-import.js:1236
+msgid "Structure only — the button above"
+msgstr ""
+
+#: assets/js/admin-import.js:1237
+msgid "Free, instant, no account. Headings, lists, cards and images become blocks."
+msgstr ""
+
+#: assets/js/admin-import.js:1240
+msgid "Your Claude subscription"
+msgstr ""
+
+#: assets/js/admin-import.js:1241
+msgid "Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button."
+msgstr ""
+
+#: assets/js/admin-import.js:1244
+msgid "An Anthropic API key"
+msgstr ""
+
+#: assets/js/admin-import.js:1245
+msgid "One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above."
+msgstr ""
+
+#: assets/js/admin-import.js:1248
+msgid "Claude Code on this machine"
+msgstr ""
+
+#: assets/js/admin-import.js:1249
+msgid "The same automatic route, run through the claude command instead of the API — so it uses the subscription that command is signed in to and adds nothing to a bill. Only possible where the binary is installed and PHP may start it, which usually means your own machine rather than a client's hosting."
+msgstr ""
+
+#: assets/js/admin-import.js:1261
+msgid "Four ways to convert — which should I use?"
+msgstr ""
+
+#: assets/js/admin-import.js:1279
+msgid "Page"
+msgstr ""
+
+#: assets/js/admin-import.js:1280
+msgid "Status"
+msgstr ""
+
+#: assets/js/admin-import.js:1281
+msgid "Actions"
+msgstr ""
+
+#: assets/js/admin-import.js:1291
 msgid "View"
 msgstr ""
 
-#: assets/js/admin-import.js:1023
+#: assets/js/admin-import.js:1292
 msgid "Edit"
 msgstr ""
 
-#: assets/js/admin-import.js:1031
+#: assets/js/admin-import.js:1300
 msgid "Publish"
 msgstr ""
 
 #. translators: %d: number of sections.
-#: assets/js/admin-import.js:1047
+#: assets/js/admin-import.js:1316
 msgid "(%d sections)"
 msgstr ""
 
-#: assets/js/admin-import.js:105
-msgid "%s KB"
+#. translators: %d: number of sections. */ __( '(%d sections)', 'wow-signal' ), page.sections ), } ), page.improved ? el( 'span', { class: 'wow-import__section-meta', text: ' ' + sprintf( /* translators: %d: number of sections Claude changed.
+#: assets/js/admin-import.js:1327
+msgid "Claude corrected %d of them."
+msgid_plural "Claude corrected %d of them."
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/js/admin-import.js:1339
+msgid "What Claude changed"
 msgstr ""
 
-#: assets/js/admin-import.js:1056
+#: assets/js/admin-import.js:1348
 msgid "Draft"
 msgstr ""
 
-#: assets/js/admin-import.js:1056
+#: assets/js/admin-import.js:1348
 msgid "Published"
 msgstr ""
 
-#: assets/js/admin-import.js:1067
+#: assets/js/admin-import.js:1359
 msgid "The site is built."
 msgstr ""
 
+#. translators: 1: number of calls, 2: tokens in, 3: tokens out, 4: what the same work would cost through the API.
+#: assets/js/admin-import.js:1370
+msgid "%1$d calls through Claude Code on this machine — %2$s tokens in, %3$s out. Nothing was billed; the same work through the API would have cost about %4$s."
+msgstr ""
+
+#. translators: 1: number of calls, 2: tokens in, 3: tokens out, 4: cost.
+#: assets/js/admin-import.js:1381
+msgid "%1$d calls to the Anthropic API — %2$s tokens in, %3$s out, about %4$s."
+msgstr ""
+
+#. translators: %d: number of replies that were thrown away.
+#: assets/js/admin-import.js:1400
+msgid "%d reply came back as markup the editor would have rejected, so that section kept its structural conversion. The section says so in its own notes."
+msgid_plural "%d replies came back as markup the editor would have rejected, so those sections kept their structural conversions. Each section says so in its own notes."
+msgstr[0] ""
+msgstr[1] ""
+
 #. translators: %d: number of draft pages.
-#: assets/js/admin-import.js:1079
+#: assets/js/admin-import.js:1422
 msgid "Publish %d draft page"
 msgid_plural "Publish all %d draft pages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:1101 assets/js/admin-import.js:1110
+#: assets/js/admin-import.js:1444 assets/js/admin-import.js:1453
 msgid "Edit in the Site Editor"
 msgstr ""
 
-#: assets/js/admin-import.js:1116
+#: assets/js/admin-import.js:1459
 msgid "Header, footer and menu:"
 msgstr ""
 
-#: assets/js/admin-import.js:1121 assets/js/admin-import.js:2018
+#: assets/js/admin-import.js:1464 assets/js/admin-import.js:2365
 msgid "Worth checking:"
 msgstr ""
 
-#: assets/js/admin-import.js:1125
+#: assets/js/admin-import.js:1468
 msgid "What the build made"
 msgstr ""
 
-#: assets/js/admin-import.js:1126
+#: assets/js/admin-import.js:1469
 msgid "Pages built"
 msgstr ""
 
-#: assets/js/admin-import.js:1132
+#: assets/js/admin-import.js:1475
 msgid "Publishing…"
 msgstr ""
 
 #. translators: %d: number of pages published.
-#: assets/js/admin-import.js:1156
+#: assets/js/admin-import.js:1499
 msgid "Published %d page."
 msgid_plural "Published %d pages."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:1188
+#: assets/js/admin-import.js:1531
 msgid "Starting the build — reading the design, importing fonts and images…"
 msgstr ""
 
 #. translators: 1: pages built, 2: images imported.
-#: assets/js/admin-import.js:1295
+#: assets/js/admin-import.js:1642
 msgid "Built and published %1$d pages and imported %2$d images. Look through them, then edit anything you like."
 msgstr ""
 
 #. translators: 1: pages built, 2: images imported. */ __( 'Built and published %1$d pages and imported %2$d images. Look through them, then edit anything you like.', 'wow-signal' ), report.pages.length, report.media ) : sprintf( /* translators: 1: pages built, 2: images imported.
-#: assets/js/admin-import.js:1301
+#: assets/js/admin-import.js:1648
 msgid "Built %1$d draft pages and imported %2$d images. Nothing is public yet — review each page and publish it when it is ready."
 msgstr ""
 
-#: assets/js/admin-import.js:1307
+#: assets/js/admin-import.js:1654
 msgid "The uploaded design has been removed from uploads."
 msgstr ""
 
-#: assets/js/admin-import.js:1325
+#: assets/js/admin-import.js:1672
 msgid "Undoing…"
 msgstr ""
 
 #. translators: 1: pages removed, 2: images removed.
-#: assets/js/admin-import.js:1335
+#: assets/js/admin-import.js:1682
 msgid "Removed %1$d pages and %2$d images. The site is back to how it was."
 msgstr ""
 
-#: assets/js/admin-import.js:1391
+#: assets/js/admin-import.js:1738
 msgid "This cannot be undone. Only content this import created is removed; pages, menus and images you made yourself stay exactly as they are."
 msgstr ""
 
-#: assets/js/admin-import.js:1402
+#: assets/js/admin-import.js:1749
 msgid "This removes the unpacked design files from uploads. Pages, images and fonts already imported are not affected — only the source archive goes, and it can be uploaded again."
 msgstr ""
 
-#: assets/js/admin-import.js:1439
+#: assets/js/admin-import.js:1786
 msgid "Delete now"
 msgstr ""
 
 #. translators: %s: the word to type, in capitals.
-#: assets/js/admin-import.js:1458
+#: assets/js/admin-import.js:1805
 msgid "Type %s to confirm"
 msgstr ""
 
-#: assets/js/admin-import.js:1473
+#: assets/js/admin-import.js:1820
 msgid "Removing the uploaded designs…"
 msgstr ""
 
 #. translators: %d: number of designs removed.
-#: assets/js/admin-import.js:1492
+#: assets/js/admin-import.js:1839
 msgid "Removed %d uploaded design."
 msgid_plural "Removed %d uploaded designs."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:1513
+#: assets/js/admin-import.js:1860
 msgid "Clean up"
 msgstr ""
 
 #. translators: 1: pages, 2: template parts, 3: menus, 4: images, 5: fonts.
-#: assets/js/admin-import.js:1520
+#: assets/js/admin-import.js:1867
 msgid "This import created %1$d pages, %2$d template parts, %3$d menus, %4$d images, %5$d fonts."
 msgstr ""
 
-#: assets/js/admin-import.js:1532
+#: assets/js/admin-import.js:1879
 msgid "Your own content is untouched — only what the import added is removed."
 msgstr ""
 
-#: assets/js/admin-import.js:1544
+#: assets/js/admin-import.js:1891
 msgid "Delete everything this import added"
 msgstr ""
 
 #. translators: 1: number of uploaded designs, 2: their size on disk.
-#: assets/js/admin-import.js:1562
+#: assets/js/admin-import.js:1909
 msgid "%1$d uploaded design is still unpacked in uploads, taking %2$s."
 msgid_plural "%1$d uploaded designs are still unpacked in uploads, taking %2$s."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: size on disk.
-#: assets/js/admin-import.js:1579
+#: assets/js/admin-import.js:1926
 msgid "Remove uploaded designs (%s)"
 msgstr ""
 
-#: assets/js/admin-import.js:1594
+#: assets/js/admin-import.js:1941
 msgid "Clean up a previous import"
 msgstr ""
 
 #. translators: %d: number of sections not yet converted.
-#: assets/js/admin-import.js:1618
+#: assets/js/admin-import.js:1965
 msgid "to convert %d remaining section"
 msgid_plural "to convert %d remaining sections"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: number of conversions run, 2: input tokens, 3: output tokens.
-#: assets/js/admin-import.js:1633
+#: assets/js/admin-import.js:1980
 msgid "spent so far · %1$d conversions · %2$s in, %3$s out"
 msgstr ""
 
 #. translators: %d: minutes until the hourly limit resets.
-#: assets/js/admin-import.js:1650
+#: assets/js/admin-import.js:1997
 msgid "conversions left this hour · resets in %d min"
 msgstr ""
 
-#: assets/js/admin-import.js:1665
+#: assets/js/admin-import.js:2012
 msgid "Estimated from published list prices — not a bill."
 msgstr ""
 
-#: assets/js/admin-import.js:167
-msgid "Something went wrong."
-msgstr ""
-
-#: assets/js/admin-import.js:1686
+#: assets/js/admin-import.js:2033
 msgid "3. Convert each section"
 msgstr ""
 
-#: assets/js/admin-import.js:1689
+#: assets/js/admin-import.js:2036
 msgid "Convert a section, read what it says, then keep it. Nothing reaches your site until you press Keep."
 msgstr ""
 
 #. translators: 1: number of sections, 2: estimated cost.
-#: assets/js/admin-import.js:1699
+#: assets/js/admin-import.js:2046
 msgid "Convert %1$d section — about %2$s"
 msgid_plural "Convert %1$d sections — about %2$s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:1703
+#: assets/js/admin-import.js:2050
 msgid "Every section is converted"
 msgstr ""
 
-#: assets/js/admin-import.js:1710
+#: assets/js/admin-import.js:2057
 msgid "Keep the whole page as a draft"
 msgstr ""
 
-#: assets/js/admin-import.js:1716
+#: assets/js/admin-import.js:2063
 msgid "Draft page created."
 msgstr ""
 
-#: assets/js/admin-import.js:1719 assets/js/admin-import.js:2042
+#: assets/js/admin-import.js:2066 assets/js/admin-import.js:2389
 msgid "Open it in the editor"
 msgstr ""
 
-#: assets/js/admin-import.js:1740
+#: assets/js/admin-import.js:2087
 msgid "Paste the whole reply here, including the opening [ and closing ]"
 msgstr ""
 
-#: assets/js/admin-import.js:1762
+#: assets/js/admin-import.js:2109
 msgid "The brief — select it all and copy"
 msgstr ""
 
-#: assets/js/admin-import.js:1769
+#: assets/js/admin-import.js:2116
 msgid "Copy the brief"
 msgstr ""
 
-#: assets/js/admin-import.js:1776
+#: assets/js/admin-import.js:2123
 msgid "No API key? Use your own Claude subscription instead"
 msgstr ""
 
-#: assets/js/admin-import.js:1778
+#: assets/js/admin-import.js:2125
 msgid "Copy the brief for this page."
 msgstr ""
 
-#: assets/js/admin-import.js:1779
+#: assets/js/admin-import.js:2126
 msgid "Paste it into your Claude conversation and send it."
 msgstr ""
 
-#: assets/js/admin-import.js:1780
+#: assets/js/admin-import.js:2127
 msgid "Copy the whole reply and paste it below."
 msgstr ""
 
-#: assets/js/admin-import.js:1788
+#: assets/js/admin-import.js:2135
 msgid "Claude’s reply"
 msgstr ""
 
-#: assets/js/admin-import.js:1795
+#: assets/js/admin-import.js:2142
 msgid "Read the reply"
 msgstr ""
 
-#: assets/js/admin-import.js:1808
+#: assets/js/admin-import.js:2155
 msgid "Building the brief…"
 msgstr ""
 
 #. translators: 1: number of sections, 2: size in kilobytes.
-#: assets/js/admin-import.js:1822
+#: assets/js/admin-import.js:2169
 msgid "Brief for %1$d sections, %2$d KB."
 msgstr ""
 
-#: assets/js/admin-import.js:1829
+#: assets/js/admin-import.js:2176
 msgid "Copied — now paste it into Claude"
 msgstr ""
 
-#: assets/js/admin-import.js:1830
+#: assets/js/admin-import.js:2177
 msgid "Copied. Paste it into Claude, then bring the reply back."
 msgstr ""
 
-#: assets/js/admin-import.js:1845
+#: assets/js/admin-import.js:2192
 msgid "The browser would not copy it, so it is in the box below — select it all and copy it yourself."
 msgstr ""
 
-#: assets/js/admin-import.js:1886
+#: assets/js/admin-import.js:2233
 msgid "The browser refused to copy."
 msgstr ""
 
-#: assets/js/admin-import.js:1893
+#: assets/js/admin-import.js:2240
 msgid "Paste the reply first."
 msgstr ""
 
-#: assets/js/admin-import.js:1897
+#: assets/js/admin-import.js:2244
 msgid "Reading the reply…"
 msgstr ""
 
-#: assets/js/admin-import.js:190
-msgid "Upload and read the design"
-msgstr ""
-
 #. translators: 1: sections received, 2: sections expected.
-#: assets/js/admin-import.js:1915
+#: assets/js/admin-import.js:2262
 msgid "Read %1$d sections, but this page has %2$d. Check the reply was not cut off."
 msgstr ""
 
 #. translators: 1: sections received, 2: sections expected. */ __( 'Read %1$d sections, but this page has %2$d. Check the reply was not cut off.', 'wow-signal' ), data.received, data.expected ), true ); return; } say( sprintf( /* translators: %d: number of sections.
-#: assets/js/admin-import.js:1927
+#: assets/js/admin-import.js:2274
 msgid "Read %d sections. Review each one before keeping it."
 msgstr ""
 
 #. translators: 1: element name, 2: word count, 3: image count.
-#: assets/js/admin-import.js:1946
+#: assets/js/admin-import.js:2293
 msgid "<%1$s> · %2$d words · %3$d images"
 msgstr ""
 
-#: assets/js/admin-import.js:1961
+#: assets/js/admin-import.js:2308
 msgid "Convert this section"
 msgstr ""
 
-#: assets/js/admin-import.js:1968
+#: assets/js/admin-import.js:2315
 msgid "Converting…"
 msgstr ""
 
-#: assets/js/admin-import.js:1975 assets/js/admin-import.js:2002
+#: assets/js/admin-import.js:2322 assets/js/admin-import.js:2349
 msgid "Try again"
 msgstr ""
 
-#: assets/js/admin-import.js:199
-msgid "Choose a ZIP file first."
-msgstr ""
-
-#: assets/js/admin-import.js:1996
+#: assets/js/admin-import.js:2343
 msgid "This conversion was refused:"
 msgstr ""
 
-#: assets/js/admin-import.js:2013
+#: assets/js/admin-import.js:2360
 msgid "You will be able to edit:"
 msgstr ""
 
-#: assets/js/admin-import.js:2023
+#: assets/js/admin-import.js:2370
 msgid "Quality notes:"
 msgstr ""
 
-#: assets/js/admin-import.js:2041
+#: assets/js/admin-import.js:2388
 msgid "Kept."
 msgstr ""
 
-#: assets/js/admin-import.js:2054
+#: assets/js/admin-import.js:2401
 msgid "Keep as a reusable section"
 msgstr ""
 
-#: assets/js/admin-import.js:2062
+#: assets/js/admin-import.js:2409
 msgid "Keep as a draft page"
 msgstr ""
 
-#: assets/js/admin-import.js:207
-msgid "Unpacking and reading the design…"
-msgstr ""
-
-#: assets/js/admin-import.js:2087
+#: assets/js/admin-import.js:2434
 msgid "Add your Anthropic API key in the connection settings first."
 msgstr ""
 
 #. translators: %s: section name.
-#: assets/js/admin-import.js:2093
+#: assets/js/admin-import.js:2440
 msgid "Converting “%s”…"
 msgstr ""
 
 #. translators: %s: section name.
-#: assets/js/admin-import.js:2120
+#: assets/js/admin-import.js:2467
 msgid "“%s” converted. Review it below."
 msgstr ""
 
 #. translators: %s: section name. */ __( '“%s” converted. Review it below.', 'wow-signal' ), section.label ) : sprintf( /* translators: %s: section name.
-#: assets/js/admin-import.js:2121
+#: assets/js/admin-import.js:2468
 msgid "“%s” was refused — see the reason below."
 msgstr ""
 
-#. translators: 1: number of files, 2: number of pages.
-#: assets/js/admin-import.js:215
-msgid "Read %1$d files and found %2$d pages."
-msgstr ""
-
-#: assets/js/admin-import.js:2155
+#: assets/js/admin-import.js:2502
 msgid "All sections converted. Review each one before keeping it."
 msgstr ""
 
-#: assets/js/admin-import.js:2183
+#: assets/js/admin-import.js:2530
 msgid "Convert at least one section first."
 msgstr ""
 
-#: assets/js/admin-import.js:2189
+#: assets/js/admin-import.js:2536
 msgid "Building the page…"
 msgstr ""
 
 #. translators: 1: sections kept, 2: sections left out.
-#: assets/js/admin-import.js:2212
+#: assets/js/admin-import.js:2559
 msgid "Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused."
 msgstr ""
 
 #. translators: 1: sections kept, 2: sections left out. */ __( 'Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused.', 'wow-signal' ), ordered.length, skipped ), true ); return; } say( sprintf( /* translators: %d: number of sections.
-#: assets/js/admin-import.js:2224
+#: assets/js/admin-import.js:2571
 msgid "Draft page created from all %d sections."
 msgstr ""
 
-#: assets/js/admin-import.js:2245
+#: assets/js/admin-import.js:259
+msgid "Something went wrong."
+msgstr ""
+
+#: assets/js/admin-import.js:2592
 msgid "Saved."
 msgstr ""
 
-#: assets/js/admin-import.js:229
+#: assets/js/admin-import.js:282
+msgid "Upload and read the design"
+msgstr ""
+
+#: assets/js/admin-import.js:291
+msgid "Choose a ZIP file first."
+msgstr ""
+
+#: assets/js/admin-import.js:299
+msgid "Unpacking and reading the design…"
+msgstr ""
+
+#. translators: 1: number of files, 2: number of pages.
+#: assets/js/admin-import.js:307
+msgid "Read %1$d files and found %2$d pages."
+msgstr ""
+
+#: assets/js/admin-import.js:321
 msgid "Design archive (.zip)"
 msgstr ""
 
-#: assets/js/admin-import.js:235
+#: assets/js/admin-import.js:327
 msgid "1. Upload the design"
 msgstr ""
 
 #. translators: 1: number of pages, 2: number of images.
-#: assets/js/admin-import.js:272
+#: assets/js/admin-import.js:364
 msgid "%1$d pages · %2$d images"
 msgstr ""
 
-#: assets/js/admin-import.js:283
+#: assets/js/admin-import.js:375
 msgid "Already uploaded"
 msgstr ""
 
 #. translators: 1: file path, 2: number of sections.
-#: assets/js/admin-import.js:342
+#: assets/js/admin-import.js:448
 msgid "%1$s — %2$d sections"
 msgstr ""
 
 #. translators: 1: file path, 2: number of sections. */ __( '%1$s — %2$d sections', 'wow-signal' ), page.file, page.sections ), } ), chosen ? el( 'span', { class: 'wow-import__page-meta', text: sprintf( /* translators: %d: number of sections chosen for the build.
-#: assets/js/admin-import.js:352
+#: assets/js/admin-import.js:458
 msgid "%d section chosen for the build"
 msgid_plural "%d sections chosen for the build"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:362 assets/js/admin-import.js:2033
+#: assets/js/admin-import.js:468 assets/js/admin-import.js:2380
 msgid "Preview"
 msgstr ""
 
-#: assets/js/admin-import.js:362
+#: assets/js/admin-import.js:468
 msgid "Previewing"
 msgstr ""
 
-#: assets/js/admin-import.js:371
+#: assets/js/admin-import.js:477
 msgid "2. Pick a page"
 msgstr ""
 
 #. translators: %s: comma-separated language codes.
-#: assets/js/admin-import.js:379
+#: assets/js/admin-import.js:485
 msgid "This design has %s. Import one language first; the others can be added later with a translation plugin."
 msgstr ""
 
 #. translators: %d: number of files.
-#: assets/js/admin-import.js:391
+#: assets/js/admin-import.js:497
 msgid "%d files were not unpacked"
 msgstr ""
 
 #. translators: %s: page title.
-#: assets/js/admin-import.js:428
+#: assets/js/admin-import.js:534
 msgid "Converting “%s” for the preview…"
 msgstr ""
 
 #. translators: 1: page title, 2: number of sections.
-#: assets/js/admin-import.js:454
+#: assets/js/admin-import.js:560
 msgid "“%1$s” previewed: %2$d sections. Untick any you do not want built."
 msgstr ""
 
-#: assets/js/admin-import.js:511
+#: assets/js/admin-import.js:617
 msgid "Converting the page…"
 msgstr ""
 
 #. translators: %s: page title.
-#: assets/js/admin-import.js:531
+#: assets/js/admin-import.js:637
 msgid "Preview: %s"
 msgstr ""
 
 #. translators: %s: page title. */ __( 'Preview: %s', 'wow-signal' ), data.title ), } ), el( 'p', { class: 'wow-import__compare-count', role: 'status', text: sprintf( /* translators: 1: sections included, 2: sections on the page.
-#: assets/js/admin-import.js:540
+#: assets/js/admin-import.js:646
 msgid "%1$d of %2$d sections included"
 msgstr ""
 
-#: assets/js/admin-import.js:550
+#: assets/js/admin-import.js:656
 msgid "Include all"
 msgstr ""
 
-#: assets/js/admin-import.js:561
+#: assets/js/admin-import.js:667
 msgid "Close preview"
 msgstr ""
 
-#: assets/js/admin-import.js:575
+#: assets/js/admin-import.js:681
 msgid "Left: the design as uploaded. Right: the blocks the build will make of it. Untick a section to leave it out of this page."
 msgstr ""
 
-#: assets/js/admin-import.js:619
+#: assets/js/admin-import.js:725
 msgid "Nothing here could become blocks."
 msgstr ""
 
-#: assets/js/admin-import.js:626
+#: assets/js/admin-import.js:732
 msgid "Include"
 msgstr ""
 
-#: assets/js/admin-import.js:639
+#: assets/js/admin-import.js:745
 msgid "Design"
 msgstr ""
 
-#: assets/js/admin-import.js:643
+#: assets/js/admin-import.js:749
 msgid "Blocks"
 msgstr ""
 
-#: assets/js/admin-import.js:653
+#: assets/js/admin-import.js:759
 msgid "Reading the page…"
 msgstr ""
 
 #. translators: 1: number of sections on the page, 2: number already converted.
-#: assets/js/admin-import.js:683
+#: assets/js/admin-import.js:789
 msgid "Found %1$d sections. %2$d were already converted earlier and have been brought back."
 msgstr ""
 
 #. translators: 1: number of sections on the page, 2: number already converted. */ __( 'Found %1$d sections. %2$d were already converted earlier and have been brought back.', 'wow-signal' ), result.sections.length, resumed ) : sprintf( /* translators: %d: number of sections.
-#: assets/js/admin-import.js:689
+#: assets/js/admin-import.js:795
 msgid "Found %d sections on this page."
 msgstr ""
 
-#: assets/js/admin-import.js:756
-msgid "Build the whole site"
+#: assets/js/admin-import.js:816
+msgid "Checking whether Claude can be reached from here…"
 msgstr ""
 
-#: assets/js/admin-import.js:764
-msgid "Build everything at once"
+#: assets/js/admin-import.js:824
+msgid "Claude Code is not installed here and no API key has been saved."
 msgstr ""
 
-#: assets/js/admin-import.js:767
-msgid "Creates every page as a draft, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again. Press Preview on any page below to see what it will become and leave sections out."
-msgstr ""
-
-#: assets/js/admin-import.js:77
+#: assets/js/admin-import.js:83
 msgid "under $0.01"
 msgstr ""
 
-#: assets/js/admin-import.js:773
-msgid "Publish pages immediately"
+#: assets/js/admin-import.js:832
+msgid "Correcting each section with Claude is not available yet. "
 msgstr ""
 
-#: assets/js/admin-import.js:777
-msgid "Leave this off to review each page as a draft first."
+#: assets/js/admin-import.js:834
+msgid "Open Connection settings above to set it up. The build below works without it."
 msgstr ""
 
-#: assets/js/admin-import.js:784
-msgid "Keep the uploaded design for another run"
+#: assets/js/admin-import.js:874
+msgid "Let Claude correct each section"
 msgstr ""
 
-#: assets/js/admin-import.js:788
-msgid "Otherwise the unpacked files are removed from uploads once the build is done."
+#: assets/js/admin-import.js:880
+msgid "The structural conversion is done first either way; Claude is shown that result, what the design's CSS resolves to, and a screenshot when the archive has one, and fixes what is wrong. A section it cannot improve is kept exactly as the structural conversion made it."
 msgstr ""
 
-#: assets/js/admin-import.js:796
-msgid "Language to build:"
+#: assets/js/admin-import.js:890
+msgid "and check the rendered result against the design"
 msgstr ""
 
-#: assets/js/admin-import.js:805
-msgid "Changed your mind, or got a new version of the design? Delete everything and drop the new archive in — nothing here is one-way."
+#: assets/js/admin-import.js:896
+msgid "A second pass per section: the blocks are rendered on the server and compared with the design. It catches what a conversion written blind cannot see, and doubles the time and the cost."
 msgstr ""
 
-#: assets/js/admin-import.js:815
-msgid "Delete everything and start over"
-msgstr ""
+#. translators: 1: number of model calls, 2: estimated cost.
+#: assets/js/admin-import.js:908
+msgid "About %1$d call to the Anthropic API — roughly %2$s at list prices, billed to your key."
+msgid_plural "About %1$d calls to the Anthropic API — roughly %2$s at list prices, billed to your key."
+msgstr[0] ""
+msgstr[1] ""
 
-#: assets/js/admin-import.js:816
-msgid "Removes only what an import created. Your own pages are left alone."
-msgstr ""
-
-#: assets/js/admin-import.js:849
-msgid "Reading the design, importing fonts and images…"
-msgstr ""
-
-#: assets/js/admin-import.js:865
-msgid "Steps that did not complete:"
-msgstr ""
-
-#: assets/js/admin-import.js:883 assets/js/admin-import.js:1448
-msgid "Cancel"
-msgstr ""
-
-#: assets/js/admin-import.js:887
-msgid "Build cancelled. The pages made so far are still on the site as drafts."
-msgstr ""
-
-#: assets/js/admin-import.js:897
-msgid "Delete what was built so far"
-msgstr ""
-
-#: assets/js/admin-import.js:909
-msgid "Dismiss"
-msgstr ""
-
-#: assets/js/admin-import.js:922
-msgid "Build progress"
-msgstr ""
-
-#: assets/js/admin-import.js:927
-msgid "The build is complete."
-msgstr ""
+#. translators: %d: number of model calls.
+#: assets/js/admin-import.js:919
+msgid "About %d call through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed per conversion."
+msgid_plural "About %d calls through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed per conversion."
+msgstr[0] ""
+msgstr[1] ""
 
 #: assets/js/admin-import.js:932
-msgid "Cancelled after %1$d of %2$d steps."
+msgid "Expect this to take minutes rather than seconds — a page is built section by section. Leave the tab open; closing it stops the build where it got to, and what it has already made stays."
 msgstr ""
 
-#: assets/js/admin-import.js:939
-msgid "%1$d of %2$d steps done."
-msgstr ""
-
-#. translators: 1: steps done, 2: steps in total. */ return sprintf( __( '%1$d of %2$d steps done.', 'wow-signal' ), job.done, job.total ); } return sprintf( /* translators: 1: what is being built, 2: steps done, 3: steps in total.
-#: assets/js/admin-import.js:944
-msgid "Building %1$s (%2$d of %3$d)"
-msgstr ""
-
-#: assets/js/admin-import.js:957
-msgid "the menu, header and footer"
-msgstr ""
-
-#: assets/js/admin-import.js:960
-msgid "the front page and links"
-msgstr ""
-
-#: assets/js/admin-import.js:971
-msgid "Structure only — the button above"
-msgstr ""
-
-#: assets/js/admin-import.js:972
-msgid "Free, instant, no account. Headings, lists, cards and images become blocks."
-msgstr ""
-
-#: assets/js/admin-import.js:975
-msgid "Your Claude subscription"
-msgstr ""
-
-#: assets/js/admin-import.js:976
-msgid "Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button."
-msgstr ""
-
-#: assets/js/admin-import.js:979
-msgid "An Anthropic API key"
-msgstr ""
-
-#: assets/js/admin-import.js:980
-msgid "One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above."
-msgstr ""
-
-#: assets/js/admin-import.js:992
-msgid "Three ways to convert — which should I use?"
+#: assets/js/admin-import.js:999
+msgid "Build the whole site"
 msgstr ""
 
 #: blocks/colophon/block.json
@@ -1245,124 +1344,171 @@ msgstr ""
 msgid "Show the designer credit"
 msgstr ""
 
-#: inc/Modules/Importer.php:108 inc/Modules/Importer.php:109 inc/Modules/Importer.php:313
+#: inc/Modules/Importer.php:113 inc/Modules/Importer.php:114 inc/Modules/Importer.php:401
 msgid "Design import"
 msgstr ""
 
+#: inc/Modules/Importer.php:1163
+msgid "That build is no longer running. Start it again."
+msgstr ""
+
+#: inc/Modules/Importer.php:1199 inc/Modules/Importer.php:1783 inc/Modules/Importer.php:1789 inc/Modules/Importer.php:1793
+msgid "That page is not in this design."
+msgstr ""
+
 #. translators: %d: section number on the page.
-#: inc/Modules/Importer.php:1219 inc/Support/SectionSplitter.php:1540
+#: inc/Modules/Importer.php:1440 inc/Support/SectionSplitter.php:1540
 msgid "Section %d"
 msgstr ""
 
-#: inc/Modules/Importer.php:1321
+#: inc/Modules/Importer.php:1586
 msgid "No file was received."
 msgstr ""
 
-#: inc/Modules/Importer.php:1327
+#: inc/Modules/Importer.php:1592
 msgid "The upload did not complete. The file may be larger than this server allows."
 msgstr ""
 
-#: inc/Modules/Importer.php:1336
+#: inc/Modules/Importer.php:1601
 msgid "That file did not arrive as an upload."
 msgstr ""
 
-#: inc/Modules/Importer.php:1342
+#: inc/Modules/Importer.php:1607
 msgid "Please upload a .zip archive."
 msgstr ""
 
-#: inc/Modules/Importer.php:1377 inc/Modules/Importer.php:1390 inc/Modules/Importer.php:1394 inc/Support/DesignFonts.php:111 inc/Support/SiteBuilder.php:130
+#: inc/Modules/Importer.php:1642 inc/Modules/Importer.php:1655 inc/Modules/Importer.php:1659 inc/Support/DesignFonts.php:111 inc/Support/SiteBuilder.php:130
 msgid "That design is not on this site."
 msgstr ""
 
-#: inc/Modules/Importer.php:1534
+#: inc/Modules/Importer.php:1799
 msgid "That is not an HTML page."
 msgstr ""
 
-#: inc/Modules/Importer.php:1572
+#: inc/Modules/Importer.php:1837
 msgid "That section is no longer in the page."
 msgstr ""
 
+#. translators: %s: why no model could be reached.
+#: inc/Modules/Importer.php:1903
+msgid "This is the structural conversion — no model was asked, because none can be reached from here. %s"
+msgstr ""
+
+#. translators: %s: the reason the model could not be reached.
+#: inc/Modules/Importer.php:1928
+msgid "The model could not be reached, so this is the structural conversion: %s"
+msgstr ""
+
 #. translators: %s: model ID.
-#: inc/Modules/Importer.php:1628
+#: inc/Modules/Importer.php:1953
 msgid "This reply came from %s, which has no known price — its cost is recorded as zero."
 msgstr ""
 
 #. translators: %d: number of conversions allowed per hour.
-#: inc/Modules/Importer.php:1738
+#: inc/Modules/Importer.php:2066
 msgid "That is %d conversions in an hour, which is the limit. Wait a little before continuing."
 msgstr ""
 
-#: inc/Modules/Importer.php:1849
+#: inc/Modules/Importer.php:2177
 msgid "Imported section"
 msgstr ""
 
-#: inc/Modules/Importer.php:299
+#: inc/Modules/Importer.php:222
+msgid "There is no file at that path, so it was not saved. Leave the field empty to let the theme look for the claude command itself."
+msgstr ""
+
+#: inc/Modules/Importer.php:376
 msgid "You do not have permission to import designs."
 msgstr ""
 
-#: inc/Modules/Importer.php:316
+#: inc/Modules/Importer.php:404
 msgid "Upload an HTML design as a ZIP. Build the whole site in one press as drafts, or convert sections one at a time and accept only the ones you like. Everything an import adds can be removed again in one step."
 msgstr ""
 
-#: inc/Modules/Importer.php:322
+#: inc/Modules/Importer.php:410
 msgid "Connection settings"
 msgstr ""
 
-#: inc/Modules/Importer.php:326
+#: inc/Modules/Importer.php:414
+msgid "Claude Code found on this machine"
+msgstr ""
+
+#: inc/Modules/Importer.php:420
 msgid "Key active — from wp-config.php"
 msgstr ""
 
 #. translators: %s: the last four characters of the key.
-#: inc/Modules/Importer.php:333
+#: inc/Modules/Importer.php:427
 msgid "Key active — ends in %s"
 msgstr ""
 
-#: inc/Modules/Importer.php:340
+#: inc/Modules/Importer.php:434
 msgid "No key — the free routes still work"
 msgstr ""
 
-#: inc/Modules/Importer.php:351 inc/Modules/SiteHealth.php:235
-msgid "Anthropic API key"
+#: inc/Modules/Importer.php:445
+msgid "How to reach the model"
 msgstr ""
 
-#: inc/Modules/Importer.php:356
+#: inc/Modules/Importer.php:457
+msgid "Two routes lead to the same place. On your own machine, Claude Code is already signed in to your subscription, so rebuilding a design as many times as it takes adds nothing to a bill. On a client's hosting there is no such binary and PHP is usually barred from starting one, so the API is what works there. Neither is needed for the structural import, which never leaves the server."
+msgstr ""
+
+#: inc/Modules/Importer.php:462
+msgid "This server does not allow PHP to start other programs, so only the API route can work here."
+msgstr ""
+
+#. translators: %s: path to the claude binary.
+#: inc/Modules/Importer.php:469
+msgid "Found at %s."
+msgstr ""
+
+#: inc/Modules/Importer.php:479
+msgid "Path to the claude command"
+msgstr ""
+
+#: inc/Modules/Importer.php:484 inc/Modules/Importer.php:511
 msgid "Set in wp-config.php."
 msgstr ""
 
-#: inc/Modules/Importer.php:357
+#: inc/Modules/Importer.php:485
+msgid "The path is defined as a constant and cannot be changed here."
+msgstr ""
+
+#: inc/Modules/Importer.php:499
+msgid "Only needed when the command is somewhere the web server cannot find on its own. Leave it empty and the theme looks along PATH. Remember that the web server runs as its own user: the binary has to be one that user may execute, and signed in as that user."
+msgstr ""
+
+#: inc/Modules/Importer.php:506 inc/Modules/SiteHealth.php:236
+msgid "Anthropic API key"
+msgstr ""
+
+#: inc/Modules/Importer.php:512
 msgid "The key is defined as a constant, so it is not stored in the database and cannot be changed here."
 msgstr ""
 
-#: inc/Modules/Importer.php:371
+#: inc/Modules/Importer.php:526
 msgid "Used only on the server; it is never sent to the browser. Clear the field and save to remove the stored key. For the strongest setup, put it in wp-config.php instead:"
 msgstr ""
 
-#: inc/Modules/Importer.php:379
+#: inc/Modules/Importer.php:534
 msgid "Model"
 msgstr ""
 
-#: inc/Modules/Importer.php:393
+#: inc/Modules/Importer.php:548
 msgid "Care taken per section"
 msgstr ""
 
-#: inc/Modules/Importer.php:404
+#: inc/Modules/Importer.php:559
 msgid "Higher settings take longer and cost more per section, and handle complicated layouts better."
 msgstr ""
 
-#: inc/Modules/Importer.php:410
+#: inc/Modules/Importer.php:565
 msgid "Save settings"
 msgstr ""
 
-#: inc/Modules/Importer.php:415
+#: inc/Modules/Importer.php:570
 msgid "This screen needs JavaScript."
-msgstr ""
-
-#: inc/Modules/Importer.php:948
-msgid "That build is no longer running. Start it again."
-msgstr ""
-
-#: inc/Modules/Importer.php:978 inc/Modules/Importer.php:1518 inc/Modules/Importer.php:1524 inc/Modules/Importer.php:1528
-msgid "That page is not in this design."
 msgstr ""
 
 #: inc/Modules/Onboarding.php:116
@@ -1417,7 +1563,7 @@ msgstr ""
 msgid "Documentation and support"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:232 inc/Modules/SiteHealth.php:220
+#: inc/Modules/Onboarding.php:232 inc/Modules/SiteHealth.php:221
 msgid "WOW — Signal"
 msgstr ""
 
@@ -1726,113 +1872,129 @@ msgstr ""
 msgid "Signal square (1:1)"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:103
+#: inc/Modules/SiteHealth.php:104
 msgid "The PHP extensions the design importer needs are installed"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:104
+#: inc/Modules/SiteHealth.php:105
 msgid "ZipArchive and DOM are available, so design archives can be unpacked and read."
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:111
+#: inc/Modules/SiteHealth.php:112
 msgid "A PHP extension the design importer needs is missing"
 msgstr ""
 
 #. translators: %s: comma-separated list of PHP extension names.
-#: inc/Modules/SiteHealth.php:114
+#: inc/Modules/SiteHealth.php:115
 msgid "The theme itself runs fine, but Appearance → Design import cannot work without: %s. Ask your host to enable the extension."
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:132
+#: inc/Modules/SiteHealth.php:133
 msgid "The uploads folder is writable"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:133
+#: inc/Modules/SiteHealth.php:134
 msgid "Design archives, their images and their fonts can be stored."
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:140
+#: inc/Modules/SiteHealth.php:141
 msgid "The uploads folder is not writable"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:141
+#: inc/Modules/SiteHealth.php:142
 msgid "Media uploads, the logo step of the theme setup and the design importer all need to write to wp-content/uploads. Check the folder’s permissions with your host."
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:172
+#: inc/Modules/SiteHealth.php:173
 msgid "The server can reach the services the design importer uses"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:173
+#: inc/Modules/SiteHealth.php:174
 msgid "api.anthropic.com and fonts.googleapis.com both answered."
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:180
+#: inc/Modules/SiteHealth.php:181
 msgid "The server cannot reach a service the design importer uses"
 msgstr ""
 
 #. translators: %s: list of blocked hosts with what each is used for.
-#: inc/Modules/SiteHealth.php:183
+#: inc/Modules/SiteHealth.php:184
 msgid "Everything else in the theme is unaffected. Blocked: %s. Usually a firewall rule on the host; the support desk can open outbound HTTPS to these hosts."
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:223
+#: inc/Modules/SiteHealth.php:224
 msgid "Theme version"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:227
+#: inc/Modules/SiteHealth.php:228
 msgid "PHP version"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:231
+#: inc/Modules/SiteHealth.php:232
 msgid "ZipArchive"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:232
+#: inc/Modules/SiteHealth.php:233
 msgid "Available"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:232
+#: inc/Modules/SiteHealth.php:233
 msgid "Missing"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:236
+#: inc/Modules/SiteHealth.php:237
 msgid "Configured"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:236
+#: inc/Modules/SiteHealth.php:237
 msgid "Not set"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:240
+#: inc/Modules/SiteHealth.php:249
+msgid "Claude Code command"
+msgstr ""
+
+#: inc/Modules/SiteHealth.php:253
 msgid "Font families imported from designs"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:244
+#: inc/Modules/SiteHealth.php:257
 msgid "Site language"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:267
+#: inc/Modules/SiteHealth.php:273
+msgid "Unavailable — this server does not let PHP start other programs"
+msgstr ""
+
+#: inc/Modules/SiteHealth.php:280
+msgid "Found at %s"
+msgstr ""
+
+#: inc/Modules/SiteHealth.php:281
+msgid "Not installed on this server"
+msgstr ""
+
+#: inc/Modules/SiteHealth.php:298
 msgid "Theme"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:40
+#: inc/Modules/SiteHealth.php:41
 msgid "design conversions through the Anthropic API"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:41
+#: inc/Modules/SiteHealth.php:42
 msgid "downloading a design’s Google Fonts"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:64
+#: inc/Modules/SiteHealth.php:65
 msgid "WOW — Signal: PHP extensions for the design importer"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:69
+#: inc/Modules/SiteHealth.php:70
 msgid "WOW — Signal: uploads folder is writable"
 msgstr ""
 
-#: inc/Modules/SiteHealth.php:74
+#: inc/Modules/SiteHealth.php:75
 msgid "WOW — Signal: outbound HTTPS for the design importer"
 msgstr ""
 
@@ -1879,44 +2041,44 @@ msgstr ""
 msgid "The reply was cut off before it finished. Ask for a smaller section, or split the design into two."
 msgstr ""
 
-#: inc/Support/AnthropicClient.php:278
+#: inc/Support/AnthropicClient.php:278 inc/Support/ClaudeCli.php:427
 msgid "The reply did not match the expected format."
 msgstr ""
 
-#: inc/Support/AnthropicClient.php:312
+#: inc/Support/AnthropicClient.php:389
 msgid "The request was rejected as invalid."
 msgstr ""
 
-#: inc/Support/AnthropicClient.php:313
+#: inc/Support/AnthropicClient.php:390
 msgid "The API key was not accepted. Check it and save again."
 msgstr ""
 
-#: inc/Support/AnthropicClient.php:314
+#: inc/Support/AnthropicClient.php:391
 msgid "This API key does not have access to the selected model."
 msgstr ""
 
-#: inc/Support/AnthropicClient.php:315
+#: inc/Support/AnthropicClient.php:392
 msgid "The selected model does not exist. Pick another one in the settings."
 msgstr ""
 
-#: inc/Support/AnthropicClient.php:316
+#: inc/Support/AnthropicClient.php:393
 msgid "The design you pasted is too large. Send one section at a time."
 msgstr ""
 
-#: inc/Support/AnthropicClient.php:317
+#: inc/Support/AnthropicClient.php:394
 msgid "Rate limit reached. Wait a minute and try again."
 msgstr ""
 
-#: inc/Support/AnthropicClient.php:318
+#: inc/Support/AnthropicClient.php:395
 msgid "Anthropic had a server error. Try again shortly."
 msgstr ""
 
-#: inc/Support/AnthropicClient.php:319
+#: inc/Support/AnthropicClient.php:396
 msgid "Anthropic is overloaded right now. Try again shortly."
 msgstr ""
 
 #. translators: %d: HTTP status code.
-#: inc/Support/AnthropicClient.php:324
+#: inc/Support/AnthropicClient.php:401
 msgid "The API returned an unexpected status (%d)."
 msgstr ""
 
@@ -1948,82 +2110,94 @@ msgstr ""
 msgid "Extra high — slowest, for complex layouts"
 msgstr ""
 
-#: inc/Support/BlockConverter.php:1015
+#: inc/Support/BlockConverter.php:1249 inc/Support/BlockConverter.php:2211
+msgid "List items"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:1318
 msgid "Figure and its caption"
 msgstr ""
 
-#: inc/Support/BlockConverter.php:1055 inc/Support/BlockConverter.php:1826
+#: inc/Support/BlockConverter.php:1358 inc/Support/BlockConverter.php:2353
 msgid "Quotation"
 msgstr ""
 
-#: inc/Support/BlockConverter.php:1394
+#: inc/Support/BlockConverter.php:1827
 msgid "Button label and link"
 msgstr ""
 
-#: inc/Support/BlockConverter.php:1451
+#: inc/Support/BlockConverter.php:1890
 msgid "Heading text"
 msgstr ""
 
-#: inc/Support/BlockConverter.php:1533
+#: inc/Support/BlockConverter.php:1974
 msgid "Small label above a heading"
 msgstr ""
 
-#: inc/Support/BlockConverter.php:1588
+#: inc/Support/BlockConverter.php:2031
 msgid "Body text"
 msgstr ""
 
-#: inc/Support/BlockConverter.php:1773
+#: inc/Support/BlockConverter.php:2293
 msgid "Image and its alt text"
 msgstr ""
 
-#: inc/Support/BlockConverter.php:1776
+#: inc/Support/BlockConverter.php:2296
 msgid "An image had no alt text in the design. Describe it in the editor, or mark it decorative."
 msgstr ""
 
-#: inc/Support/BlockConverter.php:1873
+#: inc/Support/BlockConverter.php:2406
 msgid "Table contents"
 msgstr ""
 
-#: inc/Support/BlockConverter.php:1949
+#: inc/Support/BlockConverter.php:2528
 msgid "A link ran a script instead of going somewhere; it now points nowhere."
 msgstr ""
 
-#: inc/Support/BlockConverter.php:2002
+#: inc/Support/BlockConverter.php:2615
+msgid "Form: recipient, labels and success message"
+msgstr ""
+
+#: inc/Support/BlockConverter.php:2616
+msgid "The design’s form was replaced with the theme’s Contact form block, which sends to the site’s admin address. Adjust its fields and recipient in the editor."
+msgstr ""
+
+#: inc/Support/BlockConverter.php:2629
 msgid "This section had a form. Add the theme’s Contact form block where it belongs — a form copied as markup would not send anything."
 msgstr ""
 
-#: inc/Support/BlockConverter.php:2008
+#: inc/Support/BlockConverter.php:2635
 msgid "Decorative vector artwork was left out. The theme’s gradients stand in for it; add a real image if you need the original."
 msgstr ""
 
-#: inc/Support/BlockConverter.php:2014
+#: inc/Support/BlockConverter.php:2641
 msgid "An embedded frame was left out. Use the matching embed block if you need it back."
 msgstr ""
 
-#: inc/Support/BlockConverter.php:274
-msgid "Some sizes from the design had no matching theme preset and were kept as exact values; adjust them in the Site Editor if you want them on the scale."
-msgstr ""
-
-#: inc/Support/BlockConverter.php:282
-msgid "This section held nothing that could become content."
-msgstr ""
-
 #. translators: 1: section label, 2: word count, 3: image count.
-#: inc/Support/BlockConverter.php:2946
+#: inc/Support/BlockConverter.php:3603
 msgid "\"%1$s\" — %2$d words and %3$d image(s), converted structurally into editable blocks."
 msgstr ""
 
-#: inc/Support/BlockConverter.php:405
+#: inc/Support/BlockConverter.php:465
+msgid "Some sizes from the design had no matching theme preset and were kept as exact values; adjust them in the Site Editor if you want them on the scale."
+msgstr ""
+
+#: inc/Support/BlockConverter.php:473
+msgid "This section held nothing that could become content."
+msgstr ""
+
+#: inc/Support/BlockConverter.php:599
 msgid "Background image"
 msgstr ""
 
-#. translators: %s: custom element name, e.g. hero-viz.
-#: inc/Support/BlockConverter.php:739
-msgid "A JS-rendered visual (%s) was left out. Add an image block where it stood if the page needs something there."
+#: inc/Support/BlockConverter.php:945
+msgid "Link text and target"
 msgstr ""
 
-#: inc/Support/BlockConverter.php:951 inc/Support/BlockConverter.php:1735
-msgid "List items"
+#. translators: %s: custom element name, e.g. hero-viz.
+#: inc/Support/BlockConverter.php:958
+msgid "A JS-rendered visual (%s) was left out. Add an image block where it stood if the page needs something there."
 msgstr ""
 
 #: inc/Support/BlockMarkupValidator.php:152
@@ -2125,19 +2299,67 @@ msgstr ""
 msgid "Soft"
 msgstr ""
 
-#: inc/Support/ConversionPrompt.php:411
+#: inc/Support/ClaudeCli.php:194
+msgid "This server does not allow PHP to start other programs, so the command-line route cannot be used here. Use an API key instead."
+msgstr ""
+
+#: inc/Support/ClaudeCli.php:203
+msgid "The claude command was not found. Install Claude Code on this machine, or enter the full path to the binary."
+msgstr ""
+
+#. translators: %d: process exit code.
+#: inc/Support/ClaudeCli.php:237
+msgid "The claude command exited with status %d instead of reporting its version."
+msgstr ""
+
+#: inc/Support/ClaudeCli.php:387
+msgid "The claude command produced no output."
+msgstr ""
+
+#. translators: %s: the first line the command printed.
+#: inc/Support/ClaudeCli.php:390
+msgid "The claude command did not return a result: %s"
+msgstr ""
+
+#: inc/Support/ClaudeCli.php:404
+msgid "The claude command reported a failure."
+msgstr ""
+
+#. translators: %s: the error the command reported.
+#: inc/Support/ClaudeCli.php:407
+msgid "The claude command reported a failure: %s"
+msgstr ""
+
+#: inc/Support/ClaudeCli.php:626
+msgid "The brief could not be written to a temporary file, so the claude command was not run."
+msgstr ""
+
+#: inc/Support/ClaudeCli.php:673
+msgid "The claude command could not be started. Check the path to the binary, and that the web server user is allowed to run it."
+msgstr ""
+
+#. translators: %d: number of seconds.
+#: inc/Support/ClaudeCli.php:704
+msgid "The claude command was still running after %d seconds and was stopped. Try a lower effort setting, or a smaller section."
+msgstr ""
+
+#: inc/Support/ClaudeCli.php:741
+msgid "There is no writable temporary directory for the claude command to read its brief from."
+msgstr ""
+
+#: inc/Support/ConversionPrompt.php:658
 msgid "Nothing was pasted."
 msgstr ""
 
-#: inc/Support/ConversionPrompt.php:425
+#: inc/Support/ConversionPrompt.php:672
 msgid "That does not look like the JSON list the brief asked for. Copy the whole reply, including the opening [ and closing ]."
 msgstr ""
 
-#: inc/Support/ConversionPrompt.php:434
+#: inc/Support/ConversionPrompt.php:681
 msgid "The pasted reply is not valid JSON. It may have been cut off — ask for it again and copy all of it."
 msgstr ""
 
-#: inc/Support/ConversionPrompt.php:470
+#: inc/Support/ConversionPrompt.php:717
 msgid "The pasted list has no sections with markup in it."
 msgstr ""
 
@@ -2165,56 +2387,123 @@ msgstr ""
 msgid "Could not create the designs folder inside uploads."
 msgstr ""
 
-#: inc/Support/DesignArchive.php:316
-msgid "This server has no ZIP support in PHP, so archives cannot be unpacked. Ask your host to enable the zip extension."
+#: inc/Support/DesignArchive.php:322
+msgid "The uploaded file is empty (0 bytes). Zip the design folder again and upload the new file."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:326
+msgid "a RAR archive"
+msgstr ""
+
+#: inc/Support/DesignArchive.php:327
+msgid "a 7-Zip archive"
+msgstr ""
+
+#: inc/Support/DesignArchive.php:328
+msgid "a gzip/tar.gz archive"
+msgstr ""
+
+#: inc/Support/DesignArchive.php:329
+msgid "a PDF"
+msgstr ""
+
+#: inc/Support/DesignArchive.php:330 inc/Support/DesignArchive.php:331
+msgid "an HTML page"
 msgstr ""
 
 #: inc/Support/DesignArchive.php:332
+msgid "a JSON file"
+msgstr ""
+
+#. translators: %s: what the file actually is, e.g. "a RAR archive".
+#: inc/Support/DesignArchive.php:339
+msgid "That file is %s with a .zip name, not a ZIP archive. Create a real ZIP of the design folder (right-click → Compress / Send to → Compressed folder) and upload that."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:347
+msgid "it is damaged or was not fully downloaded"
+msgstr ""
+
+#: inc/Support/DesignArchive.php:348
+msgid "its directory is unreadable"
+msgstr ""
+
+#: inc/Support/DesignArchive.php:349
+msgid "the server ran out of memory reading it"
+msgstr ""
+
+#: inc/Support/DesignArchive.php:350
+msgid "the server could not open the temporary file"
+msgstr ""
+
+#: inc/Support/DesignArchive.php:351
+msgid "the server could not read the temporary file"
+msgstr ""
+
+#: inc/Support/DesignArchive.php:352
+msgid "the server could not seek in the temporary file"
+msgstr ""
+
+#. translators: 1: reason, 2: libzip error code.
+#: inc/Support/DesignArchive.php:357
+msgid "That ZIP looks right but %1$s (code %2$d). Re-zip the folder and try again; if it keeps happening, the file may use a compression PHP cannot read — choose \"Deflate\"/standard ZIP in your archiver."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:358
+msgid "could not be opened"
+msgstr ""
+
+#. translators: 1: libzip error code, 2: file size in bytes.
+#: inc/Support/DesignArchive.php:365
+msgid "That file could not be opened as a ZIP archive (code %1$d, %2$s bytes). It does not start like a ZIP, so it is probably not one: zip the design folder itself and upload the result."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:382
+msgid "This server has no ZIP support in PHP, so archives cannot be unpacked. Ask your host to enable the zip extension."
+msgstr ""
+
+#: inc/Support/DesignArchive.php:406
 msgid "Could not create a folder for this design."
 msgstr ""
 
-#: inc/Support/DesignArchive.php:338
-msgid "That file could not be opened as a ZIP archive."
-msgstr ""
-
 #. translators: %d: maximum number of files.
-#: inc/Support/DesignArchive.php:350
+#: inc/Support/DesignArchive.php:425
 msgid "That archive holds more than %d files. Send the design folder on its own, without build output or dependencies."
 msgstr ""
 
-#: inc/Support/DesignArchive.php:361
+#: inc/Support/DesignArchive.php:436
 msgid "Could not resolve the destination folder."
 msgstr ""
 
-#: inc/Support/DesignArchive.php:403
+#: inc/Support/DesignArchive.php:478
 msgid "That archive unpacks to more than 200 MB. Remove videos, design binaries and node_modules before sending it."
 msgstr ""
 
 #. translators: %s: entry path inside the archive.
-#: inc/Support/DesignArchive.php:412
+#: inc/Support/DesignArchive.php:487
 msgid "%s — refused, the path points outside the folder"
 msgstr ""
 
-#: inc/Support/DesignArchive.php:458
+#: inc/Support/DesignArchive.php:533
 msgid "That archive unpacks to more than it declares, past the size limit. Remove videos, design binaries and node_modules before sending it."
 msgstr ""
 
-#: inc/Support/DesignArchive.php:470
+#: inc/Support/DesignArchive.php:545
 msgid "Nothing usable was found in that archive. It should contain the design HTML, its stylesheets and its images."
 msgstr ""
 
 #. translators: %s: entry path inside the archive.
-#: inc/Support/DesignArchive.php:517
+#: inc/Support/DesignArchive.php:592
 msgid "%s — refused, executable files are never unpacked"
 msgstr ""
 
 #. translators: %s: entry path inside the archive. */ __( '%s — refused, executable files are never unpacked', 'wow-signal' ), $name ); } if ( ! in_array( $extension, self::ALLOWED_EXTENSIONS, true ) ) { return sprintf( /* translators: %s: entry path inside the archive.
-#: inc/Support/DesignArchive.php:525
+#: inc/Support/DesignArchive.php:600
 msgid "%s — skipped, not a design file"
 msgstr ""
 
 #. translators: %s: entry path inside the archive. */ __( '%s — skipped, not a design file', 'wow-signal' ), $name ); } if ( $size > self::MAX_FILE_BYTES ) { return sprintf( /* translators: %s: entry path inside the archive.
-#: inc/Support/DesignArchive.php:533
+#: inc/Support/DesignArchive.php:608
 msgid "%s — skipped, larger than 12 MB"
 msgstr ""
 
@@ -2246,69 +2535,97 @@ msgstr ""
 msgid "%s could not be written."
 msgstr ""
 
-#: inc/Support/DesignTokens.php:254
+#: inc/Support/DesignTokens.php:256
 msgctxt "Palette colour name"
 msgid "Base"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:255
+#: inc/Support/DesignTokens.php:257
 msgctxt "Palette colour name"
 msgid "Surface"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:256
+#: inc/Support/DesignTokens.php:258
 msgctxt "Palette colour name"
 msgid "Surface raised"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:257
+#: inc/Support/DesignTokens.php:259
 msgctxt "Palette colour name"
 msgid "Border"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:258
+#: inc/Support/DesignTokens.php:260
 msgctxt "Palette colour name"
 msgid "Border strong"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:259
+#: inc/Support/DesignTokens.php:261
 msgctxt "Palette colour name"
 msgid "Contrast"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:260
+#: inc/Support/DesignTokens.php:262
 msgctxt "Palette colour name"
 msgid "Muted"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:261
+#: inc/Support/DesignTokens.php:263
 msgctxt "Palette colour name"
 msgid "Accent"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:262
+#: inc/Support/DesignTokens.php:264
 msgctxt "Palette colour name"
 msgid "Accent ink"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:263
+#: inc/Support/DesignTokens.php:265
 msgctxt "Palette colour name"
 msgid "Accent 2"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:264
+#: inc/Support/DesignTokens.php:266
 msgctxt "Palette colour name"
 msgid "Accent 3"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:265
+#: inc/Support/DesignTokens.php:267
 msgctxt "Palette colour name"
 msgid "Success"
 msgstr ""
 
-#: inc/Support/DesignTokens.php:266
+#: inc/Support/DesignTokens.php:268
 msgctxt "Palette colour name"
 msgid "Warning"
+msgstr ""
+
+#: inc/Support/ModelGateway.php:135
+msgid "Not checked — this site is set to use the API."
+msgstr ""
+
+#: inc/Support/ModelGateway.php:144
+msgid "No Anthropic API key is saved yet."
+msgstr ""
+
+#: inc/Support/ModelGateway.php:146
+msgid "Neither route is set up: Claude Code is not installed here, and no API key has been saved."
+msgstr ""
+
+#: inc/Support/ModelGateway.php:216
+msgid "There is no way to reach a model from here yet. Install Claude Code on this machine, or add an Anthropic API key under Appearance → Design import."
+msgstr ""
+
+#: inc/Support/ModelGateway.php:51
+msgid "Automatic — the command line when this machine has it, the API otherwise"
+msgstr ""
+
+#: inc/Support/ModelGateway.php:52
+msgid "Claude Code on this machine — uses the signed-in subscription, no API charges"
+msgstr ""
+
+#: inc/Support/ModelGateway.php:53
+msgid "Anthropic API — works on any host, billed per conversion"
 msgstr ""
 
 #. translators: 1: name of the element the design's script would have rendered, 2: relative path of the screenshot used instead.
@@ -2316,86 +2633,111 @@ msgstr ""
 msgid "A JS-rendered visual (%1$s) was replaced with the design's screenshot %2$s. Swap it for a real image or embed when the site is live."
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:1040 inc/Support/SiteAssembler.php:1327
+#. translators: %s: comma-separated list of template variable names.
+#: inc/Support/SiteAssembler.php:1001
+msgid "The design left placeholders to fill in: %s"
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:1269 inc/Support/SiteAssembler.php:1989
 msgid "Footer"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:1040 inc/Support/SiteAssembler.php:1327
+#: inc/Support/SiteAssembler.php:1269 inc/Support/SiteAssembler.php:1989
 msgid "Header"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:1236 assets/js/admin-import.js:1109
+#: inc/Support/SiteAssembler.php:131
+msgid "No pages were found in that language."
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:1462 assets/js/admin-import.js:1452
 msgid "Main navigation"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:163
+#: inc/Support/SiteAssembler.php:227
 msgid "That page is not part of this build."
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:236
+#: inc/Support/SiteAssembler.php:410
 msgid "None of the pages could be converted."
 msgstr ""
 
 #. translators: 1: link target, 2: how many links point at it.
-#: inc/Support/SiteAssembler.php:247
+#: inc/Support/SiteAssembler.php:421
 msgid "%2$d link points at \"%1$s\", which is not a page on this site. Check the design or remove the link."
 msgid_plural "%2$d links point at \"%1$s\", which is not a page on this site. Check the design or remove the links."
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Support/SiteAssembler.php:446
+#. translators: 1: how many attempts failed, 2: the reason given for the first of them.
+#: inc/Support/SiteAssembler.php:484
+msgid "%1$d section could not be sent to the model and was converted structurally instead: %2$s"
+msgid_plural "%1$d sections could not be sent to the model and were converted structurally instead: %2$s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/Support/SiteAssembler.php:653
 msgid "body text on the page background"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:447
+#: inc/Support/SiteAssembler.php:654
 msgid "secondary text on the page background"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:448
+#: inc/Support/SiteAssembler.php:655
 msgid "text on cards"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:449
+#: inc/Support/SiteAssembler.php:656
 msgid "form field borders"
 msgstr ""
 
 #. translators: 1: what the pair is used for, 2: measured ratio, 3: required ratio.
-#: inc/Support/SiteAssembler.php:469
+#: inc/Support/SiteAssembler.php:676
 msgid "The design's colours give %1$s a contrast of %2$s:1, below the %3$s:1 that WCAG 2.2 AA asks for. Adjust it in Appearance → Editor → Styles before launch."
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:574
+#: inc/Support/SiteAssembler.php:790
 msgid "Nothing on this page could be converted."
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:586
+#: inc/Support/SiteAssembler.php:802
 msgid "This page had no heading of its own, so its title was added as the top heading."
 msgstr ""
 
 #. translators: 1: section label, 2: reason.
-#: inc/Support/SiteAssembler.php:682
+#: inc/Support/SiteAssembler.php:919
 msgid "Section \"%1$s\" was left out: %2$s"
 msgstr ""
 
 #. translators: %s: comma-separated list of "visual → screenshot" pairs.
-#: inc/Support/SiteAssembler.php:735
+#: inc/Support/SiteAssembler.php:972
 msgid "JS-rendered visuals were stood in for by screenshots from the design: %s"
 msgstr ""
 
 #. translators: 1: number of lists, 2: number of items.
-#: inc/Support/SiteAssembler.php:748
+#: inc/Support/SiteAssembler.php:985
 msgid "%1$d list was filled from the design’s own data (%2$d items)."
 msgid_plural "%1$d lists were filled from the design’s own data (%2$d items)."
 msgstr[0] ""
 msgstr[1] ""
 
-#. translators: %s: comma-separated list of template variable names.
-#: inc/Support/SiteAssembler.php:764
-msgid "The design left placeholders to fill in: %s"
+#: inc/Support/SmartConverter.php:424 inc/Support/SmartConverter.php:507
+msgid "the retry could not be sent"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:95
-msgid "No pages were found in that language."
+#: inc/Support/SmartConverter.php:635
+msgid "the reply contained no markup"
+msgstr ""
+
+#. translators: %s: what the validator objected to.
+#: inc/Support/SmartConverter.php:681
+msgid "Claude proposed a correction to this section that would not have been valid block markup, so the section was left as it was (%s)."
+msgstr ""
+
+#. translators: %s: what the validator objected to. */ __( 'Claude proposed a correction to this section that would not have been valid block markup, so the section was left as it was (%s).', 'wow-signal' ), $why ) : sprintf( /* translators: %s: what the validator objected to.
+#: inc/Support/SmartConverter.php:686
+msgid "Claude answered for this section but the result was not valid block markup, so the structural conversion was kept (%s)."
 msgstr ""
 
 #: inc/Support/StyleVariations.php:42

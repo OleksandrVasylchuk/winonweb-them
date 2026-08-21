@@ -4,7 +4,7 @@ Contributors: winonweb
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GNU General Public License v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: full-site-editing, block-patterns, block-styles, accessibility-ready, translation-ready, custom-colors, custom-logo, custom-menu, editor-style, featured-images, wide-blocks, one-column, two-columns, right-sidebar, blog, portfolio, e-commerce
@@ -68,10 +68,21 @@ Appearance → Editor → Styles. Every pattern and block style reads its colour
 
 == Upgrade Notice ==
 
+= 1.4.0 =
+Adds a guided design import: Claude corrects each converted section, either through your Anthropic API key or through Claude Code on the machine, using its subscription. Off unless you turn it on, and the offline import is unchanged.
+
 = 1.3.0 =
 Adds self-hosted updates, Site Health checks and a safer design import. Your colours, logo, pages and menus live in the database and are not touched by the update.
 
 == Changelog ==
+
+= 1.4.0 =
+* Design import: a guided conversion. The structural conversion still runs first and offline; with it turned on, Claude is then handed that result, a brief of what the design's CSS actually resolves to for every element, and a screenshot where the archive has one, and corrects what is wrong. A section it cannot improve is kept exactly as the structural conversion made it — the offline result is the floor, and nothing the model returns is used until it has passed the same block validator as everything else.
+* Design import: two ways to reach the model. An Anthropic API key works on any host. Where Claude Code is installed and PHP is allowed to start it — a developer's own machine rather than a client's hosting — the theme runs the conversion through the `claude` command instead, which uses the subscription that command is signed in to and adds nothing to a bill. Which route a build will take, and what it will cost, is on the screen before the button.
+* Design import: an optional second pass. The produced blocks are rendered on the server with `do_blocks()` and compared with the design, which catches what a conversion written blind cannot see. It doubles the time and the cost, and it says so.
+* Design import: a rejected answer is retried once, with the validator's complaint and the original brief attached. What usually fails is the typing rather than the judgement.
+* Design import: the language picker now builds the language it shows. A multilingual archive was being built in full — every language, three times the pages — while the picker read as one.
+* Design import: the report says what the model changed, what it could not carry, and what came back unusable. A section that fell back to the structural conversion says so rather than looking like one the model approved of.
 
 = 1.3.0 =
 * Updates. The theme now checks the studio's server for new versions and offers them under Appearance → Themes like any other theme. Every package is verified against a published SHA-256 checksum before it is unpacked. What leaves the site is the installed version and a one-way hash of the site address, nothing more; the `wow_signal/check_updates` filter switches the check off entirely.

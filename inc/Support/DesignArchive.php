@@ -303,6 +303,72 @@ final class DesignArchive {
 	}
 
 	/**
+	 * Say why a file would not open as a ZIP, in terms the uploader can act on.
+	 *
+	 * "Could not be opened" sends people hunting through server settings when
+	 * the answer is usually on their own disk: a RAR renamed to .zip, a
+	 * download that stopped half-way, or a folder dragged onto the form. The
+	 * first bytes of the file and libzip's own error code tell which.
+	 *
+	 * @param string $path Uploaded file.
+	 * @param int    $code ZipArchive::open() error code.
+	 * @return string
+	 */
+	private static function open_failure_message( string $path, int $code ): string {
+		$size = is_readable( $path ) ? (int) filesize( $path ) : 0;
+		$head = $size > 0 ? (string) file_get_contents( $path, false, null, 0, 8 ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Eight bytes of a temp upload, for a diagnostic only.
+
+		if ( 0 === $size ) {
+			return __( 'The uploaded file is empty (0 bytes). Zip the design folder again and upload the new file.', 'wow-signal' );
+		}
+
+		$kinds = array(
+			'Rar!'       => __( 'a RAR archive', 'wow-signal' ),
+			"7z\xBC\xAF" => __( 'a 7-Zip archive', 'wow-signal' ),
+			"\x1F\x8B"   => __( 'a gzip/tar.gz archive', 'wow-signal' ),
+			'%PDF'       => __( 'a PDF', 'wow-signal' ),
+			'<!DO'       => __( 'an HTML page', 'wow-signal' ),
+			'<htm'       => __( 'an HTML page', 'wow-signal' ),
+			'{'          => __( 'a JSON file', 'wow-signal' ),
+		);
+
+		foreach ( $kinds as $magic => $kind ) {
+			if ( str_starts_with( $head, $magic ) ) {
+				return sprintf(
+					/* translators: %s: what the file actually is, e.g. "a RAR archive". */
+					__( 'That file is %s with a .zip name, not a ZIP archive. Create a real ZIP of the design folder (right-click → Compress / Send to → Compressed folder) and upload that.', 'wow-signal' ),
+					$kind
+				);
+			}
+		}
+
+		if ( str_starts_with( $head, "PK\x03\x04" ) || str_starts_with( $head, "PK\x05\x06" ) ) {
+			$reasons = array(
+				ZipArchive::ER_INCONS => __( 'it is damaged or was not fully downloaded', 'wow-signal' ),
+				ZipArchive::ER_NOZIP  => __( 'its directory is unreadable', 'wow-signal' ),
+				ZipArchive::ER_MEMORY => __( 'the server ran out of memory reading it', 'wow-signal' ),
+				ZipArchive::ER_OPEN   => __( 'the server could not open the temporary file', 'wow-signal' ),
+				ZipArchive::ER_READ   => __( 'the server could not read the temporary file', 'wow-signal' ),
+				ZipArchive::ER_SEEK   => __( 'the server could not seek in the temporary file', 'wow-signal' ),
+			);
+
+			return sprintf(
+				/* translators: 1: reason, 2: libzip error code. */
+				__( 'That ZIP looks right but %1$s (code %2$d). Re-zip the folder and try again; if it keeps happening, the file may use a compression PHP cannot read — choose "Deflate"/standard ZIP in your archiver.', 'wow-signal' ),
+				$reasons[ $code ] ?? __( 'could not be opened', 'wow-signal' ),
+				$code
+			);
+		}
+
+		return sprintf(
+			/* translators: 1: libzip error code, 2: file size in bytes. */
+			__( 'That file could not be opened as a ZIP archive (code %1$d, %2$s bytes). It does not start like a ZIP, so it is probably not one: zip the design folder itself and upload the result.', 'wow-signal' ),
+			$code,
+			number_format_i18n( $size )
+		);
+	}
+
+	/**
 	 * Extract an uploaded ZIP into its own sub-directory.
 	 *
 	 * @param string $zip_path Absolute path of the uploaded temporary file.
@@ -323,19 +389,28 @@ final class DesignArchive {
 			return $base;
 		}
 
-		$slug = sanitize_title( $label );
+		/*
+		 * The slug travels in REST URLs that accept [a-z0-9-] only.
+		 * sanitize_title() percent-encodes anything non-Latin — a file called
+		 * "архів.zip" became "%d0%b0…" and no route would match it again.
+		 * Keep ASCII only; a name with nothing left falls back to "design".
+		 */
+		$slug = strtolower( remove_accents( $label ) );
+		$slug = trim( (string) preg_replace( '/[^a-z0-9]+/', '-', $slug ), '-' );
+		$slug = substr( $slug, 0, 60 );
 		$slug = '' !== $slug ? $slug : 'design';
-		$slug = $slug . '-' . wp_generate_password( 6, false, false );
+		$slug = $slug . '-' . strtolower( wp_generate_password( 6, false, false ) );
 		$root = trailingslashit( $base ) . $slug;
 
 		if ( ! wp_mkdir_p( $root ) ) {
 			return new WP_Error( 'wow_signal_mkdir', __( 'Could not create a folder for this design.', 'wow-signal' ) );
 		}
 
-		$zip = new ZipArchive();
+		$zip    = new ZipArchive();
+		$opened = $zip->open( $zip_path );
 
-		if ( true !== $zip->open( $zip_path ) ) {
-			return new WP_Error( 'wow_signal_bad_zip', __( 'That file could not be opened as a ZIP archive.', 'wow-signal' ) );
+		if ( true !== $opened ) {
+			return new WP_Error( 'wow_signal_bad_zip', self::open_failure_message( $zip_path, is_int( $opened ) ? $opened : 0 ) );
 		}
 
 		$count = $zip->numFiles;
@@ -688,6 +763,130 @@ final class DesignArchive {
 		}
 
 		return null === $first ? '' : $first . '/';
+	}
+
+	/**
+	 * Screenshots of the finished design, when the archive carries any.
+	 *
+	 * Claude Design exports a `screenshots/` folder beside the HTML, and a
+	 * hand-built archive sometimes has one too. They are worth finding: a
+	 * picture of the intended result answers questions no amount of markup
+	 * can — how much air a section has, whether a rule is a divider or a
+	 * highlight, which of two headings is meant to dominate.
+	 *
+	 * Nothing here assumes the folder exists. A design without screenshots
+	 * converts exactly as it did before; it just gets less help.
+	 *
+	 * @param string $root Absolute path of the unpacked design.
+	 * @return array<string, string> Lower-case basename without extension => absolute path.
+	 */
+	public static function screenshots( string $root ): array {
+		$root = rtrim( str_replace( '\\', '/', $root ), '/' );
+
+		if ( '' === $root || ! is_dir( $root ) ) {
+			return array();
+		}
+
+		$shots = array();
+
+		/*
+		 * The folders are looked for, rather than every file in the archive
+		 * being walked and filtered. A design can hold thousands of images and
+		 * a build asks this question once per page; scanning all of them to
+		 * find the handful in `screenshots/` is work done over and over for an
+		 * answer two directory reads already have. Two levels deep covers both
+		 * shapes a real archive comes in: the folder at the root, and the
+		 * folder inside the single wrapper directory a ZIP usually adds.
+		 */
+		foreach ( self::screenshot_dirs( $root ) as $dir ) {
+			$entries = glob( $dir . '/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', GLOB_BRACE );
+
+			foreach ( $entries ? $entries : array() as $entry ) {
+				$path = str_replace( '\\', '/', $entry );
+				$key  = strtolower( pathinfo( $path, PATHINFO_FILENAME ) );
+
+				if ( ! isset( $shots[ $key ] ) ) {
+					$shots[ $key ] = $path;
+				}
+			}
+		}
+
+		return $shots;
+	}
+
+	/**
+	 * Directories in the archive that hold screenshots rather than content.
+	 *
+	 * @param string $root Absolute path of the unpacked design, slashes forward.
+	 * @return array<int, string>
+	 */
+	private static function screenshot_dirs( string $root ): array {
+		$names = array( 'screenshots', 'screenshot', 'previews', 'preview', 'shots' );
+		$found = array();
+
+		$bases    = array( $root );
+		$children = glob( $root . '/*', GLOB_ONLYDIR );
+
+		foreach ( $children ? $children : array() as $child ) {
+			$bases[] = str_replace( '\\', '/', $child );
+		}
+
+		foreach ( $bases as $base ) {
+			foreach ( $names as $name ) {
+				$dir = $base . '/' . $name;
+
+				if ( is_dir( $dir ) ) {
+					$found[] = $dir;
+				}
+			}
+		}
+
+		return $found;
+	}
+
+	/**
+	 * The screenshot that shows one page, when there is one.
+	 *
+	 * Matched on the page's own file name first — `en/about.html` against
+	 * `about.png` — then on the names a front page is filed under, because an
+	 * archive's home screenshot is as often `home` as `index`.
+	 *
+	 * @param string $root Absolute path of the unpacked design.
+	 * @param string $file Page file, relative to the root.
+	 * @return string Absolute path, or an empty string.
+	 */
+	public static function screenshot_for( string $root, string $file ): string {
+		$shots = self::screenshots( $root );
+
+		if ( array() === $shots ) {
+			return '';
+		}
+
+		$name = strtolower( (string) preg_replace( '/\.(dc\.)?html?$/i', '', basename( $file ) ) );
+
+		$candidates = array( $name );
+
+		if ( 'index' === $name || 'home' === $name ) {
+			$candidates = array( 'index', 'home', 'homepage', 'front' );
+		}
+
+		foreach ( $candidates as $candidate ) {
+			if ( isset( $shots[ $candidate ] ) ) {
+				return $shots[ $candidate ];
+			}
+		}
+
+		/*
+		 * A screenshot named for the page with something appended —
+		 * "about-desktop", "index@2x" — still shows the page.
+		 */
+		foreach ( $shots as $key => $path ) {
+			if ( str_starts_with( $key, $name ) ) {
+				return $path;
+			}
+		}
+
+		return '';
 	}
 
 	/**

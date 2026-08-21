@@ -159,7 +159,7 @@ final class AnthropicClient {
 			'messages'      => array(
 				array(
 					'role'    => 'user',
-					'content' => $prompt,
+					'content' => self::content( $prompt, isset( $options['images'] ) && is_array( $options['images'] ) ? array_map( 'strval', $options['images'] ) : array() ),
 				),
 			),
 
@@ -282,6 +282,83 @@ final class AnthropicClient {
 		$payload['_model'] = isset( $parsed['model'] ) ? (string) $parsed['model'] : $model;
 
 		return $payload;
+	}
+
+	/**
+	 * Formats the API accepts as an image block, by file extension.
+	 *
+	 * @var array<string, string>
+	 */
+	private const IMAGE_TYPES = array(
+		'png'  => 'image/png',
+		'jpg'  => 'image/jpeg',
+		'jpeg' => 'image/jpeg',
+		'gif'  => 'image/gif',
+		'webp' => 'image/webp',
+	);
+
+	/**
+	 * Bytes a single image may weigh before it is left out.
+	 *
+	 * The API's own ceiling is higher, but base64 inflates a file by a third
+	 * and the whole request still has to fit. A screenshot past this is a
+	 * screenshot that would push the section's markup out of the window.
+	 */
+	private const MAX_IMAGE_BYTES = 3500000;
+
+	/**
+	 * The user turn: the text, preceded by any screenshots.
+	 *
+	 * Images go first on purpose. The instructions that follow refer to what
+	 * is in them ("the section outlined in the screenshot"), and a reference
+	 * reads better after its subject than before it.
+	 *
+	 * @param string             $prompt User message.
+	 * @param array<int, string> $images Absolute paths to screenshots.
+	 * @return string|array<int, array<string, mixed>> Plain text, or content blocks.
+	 */
+	private static function content( string $prompt, array $images ) {
+		$blocks = array();
+
+		foreach ( $images as $path ) {
+			$extension = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
+
+			if ( ! isset( self::IMAGE_TYPES[ $extension ] ) || ! is_file( $path ) ) {
+				continue;
+			}
+
+			$size = (int) filesize( $path );
+
+			if ( $size <= 0 || $size > self::MAX_IMAGE_BYTES ) {
+				continue;
+			}
+
+			$bytes = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- A local file inside the design this request is converting.
+
+			if ( ! is_string( $bytes ) || '' === $bytes ) {
+				continue;
+			}
+
+			$blocks[] = array(
+				'type'   => 'image',
+				'source' => array(
+					'type'       => 'base64',
+					'media_type' => self::IMAGE_TYPES[ $extension ],
+					'data'       => base64_encode( $bytes ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- The API's wire format for an image, not obfuscation.
+				),
+			);
+		}
+
+		if ( array() === $blocks ) {
+			return $prompt;
+		}
+
+		$blocks[] = array(
+			'type' => 'text',
+			'text' => $prompt,
+		);
+
+		return $blocks;
 	}
 
 	/**

@@ -182,17 +182,25 @@ final class Spend {
 	/**
 	 * Add one conversion to the current user's running total.
 	 *
-	 * @param array<string, mixed> $usage Usage block from the API.
-	 * @param string               $model Model that produced it.
+	 * @param array<string, mixed> $usage    Usage block from the API.
+	 * @param string               $model    Model that produced it.
+	 * @param bool                 $billable Whether the tokens were actually charged.
+	 *                                       A conversion run through the local
+	 *                                       Claude Code CLI on a subscription
+	 *                                       is not: its tokens are counted, so
+	 *                                       the size of the work is still
+	 *                                       visible, but adding money to the
+	 *                                       total would claim a charge that
+	 *                                       never appeared on an invoice.
 	 * @return array{conversions:int,input:int,output:int,cost:float} The new totals.
 	 */
-	public static function record( array $usage, string $model ): array {
+	public static function record( array $usage, string $model, bool $billable = true ): array {
 		$totals = self::totals();
 
 		$totals['conversions'] = $totals['conversions'] + 1;
 		$totals['input']       = $totals['input'] + (int) ( $usage['input_tokens'] ?? 0 ) + (int) ( $usage['cache_read_input_tokens'] ?? 0 ) + (int) ( $usage['cache_creation_input_tokens'] ?? 0 );
 		$totals['output']      = $totals['output'] + (int) ( $usage['output_tokens'] ?? 0 );
-		$totals['cost']        = $totals['cost'] + self::cost( $usage, $model );
+		$totals['cost']        = $totals['cost'] + ( $billable ? self::cost( $usage, $model ) : 0.0 );
 
 		update_user_meta( get_current_user_id(), self::META, $totals );
 

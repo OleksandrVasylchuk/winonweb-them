@@ -78,15 +78,26 @@ wow_test(
 	'Importer: unpack, build, reset',
 	static function (): void {
 		$baseline = SiteAssembler::summary();
+		$existing = wow_imported_media();
 
-		if ( array_sum( $baseline ) > 0 ) {
-			/*
-			 * reset() deletes files, and file deletion survives the rollback.
-			 * On a site that already holds an import that would destroy real
-			 * media, so the test declines rather than risk it.
-			 */
-			wow_skip( 'this site already has imported content (' . wp_json_encode( $baseline ) . '); reset() would remove its files, so the importer test is not run here.' );
-			return;
+		/*
+		 * A site that already holds an import is the normal state of a
+		 * developer's machine, and it used to make this whole file skip —
+		 * every check in it, on every run, for the sake of the last one.
+		 *
+		 * Everything up to reset() is safe on such a site: the build's own
+		 * rows are rolled back with the transaction, and the files it writes
+		 * are cleaned up by the harness. So it runs, with the counts read as
+		 * deltas against what was already there rather than as totals.
+		 *
+		 * reset() is the exception and stays guarded. It deletes files, file
+		 * deletion survives a rollback, and on a site with a real import that
+		 * would destroy somebody's media.
+		 */
+		$clean = 0 === array_sum( $baseline );
+
+		if ( ! $clean ) {
+			wow_info( 'this site already holds an import (' . wp_json_encode( $baseline ) . '), so counts are read as deltas and the reset() checks are skipped — run these on a disposable install for those.' );
 		}
 
 		// Taken before anything is written, so the leftovers after reset() can be listed.
@@ -219,9 +230,34 @@ wow_test(
 			wow_assert( ! str_contains( $content, 'Contact.dc.html' ), 'Home: links to other design pages were rewritten', $content );
 			wow_assert( str_contains( $content, (string) $by_file['Contact.dc.html']['url'] ), 'Home: the hero button now points at the Contact page' );
 
-			wow_assert( 'page' === get_option( 'show_on_front' ), 'front page mode is "page"', get_option( 'show_on_front' ) );
-			wow_assert( (int) get_option( 'page_on_front' ) === $home->ID, 'Home is the front page', get_option( 'page_on_front' ) );
 			wow_assert( $home->ID === (int) $report['front'], 'report names Home as the front page', $report['front'] );
+
+			/*
+			 * Drafts never become the front page — a visitor would get a 404
+			 * where the home used to be. The choice is held until Home is
+			 * published, then applied together with the menu upgrade.
+			 */
+			wow_assert( (int) get_option( 'page_on_front' ) === $dummy, 'a draft Home leaves the front page as it was', get_option( 'page_on_front' ) );
+			wow_assert( (int) get_option( 'wow_signal_import_pending_front' ) === $home->ID, 'Home is remembered as the pending front page', get_option( 'wow_signal_import_pending_front' ) );
+
+			$nav = get_posts(
+				array(
+					'post_type'      => 'wp_navigation',
+					'post_status'    => 'any',
+					'posts_per_page' => 1,
+					'meta_key'       => SiteAssembler::OWNED_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Test bookkeeping.
+				)
+			);
+			$nav = $nav[0] ?? null;
+			wow_assert( null !== $nav && str_contains( (string) $nav->post_content, '"kind":"custom"' ) && ! str_contains( (string) $nav->post_content, '"kind":"post-type"' ), 'menu links to drafts are custom links (core would render page links to drafts as nothing)', $nav ? $nav->post_content : null );
+
+			$published = SiteAssembler::publish( array( $home->ID ) );
+			wow_assert( 1 === count( $published ) && 'publish' === get_post_status( $home->ID ), 'publish() publishes Home', $published );
+			wow_assert( 'page' === get_option( 'show_on_front' ) && (int) get_option( 'page_on_front' ) === $home->ID, 'publishing Home makes it the front page', get_option( 'page_on_front' ) );
+			wow_assert( false === get_option( 'wow_signal_import_pending_front' ), 'the pending front page was cleared' );
+
+			$nav = null !== $nav ? get_post( $nav->ID ) : null;
+			wow_assert( null !== $nav && str_contains( (string) $nav->post_content, '"kind":"post-type"' ) && str_contains( (string) $nav->post_content, '"id":' . $home->ID ), 'the Home menu link was upgraded to a page link on publish', $nav ? $nav->post_content : null );
 		}
 
 		$stash = get_option( 'wow_signal_import_previous_front' );
@@ -229,8 +265,10 @@ wow_test(
 
 		// ---- media -------------------------------------------------------
 
-		$media = wow_imported_media();
-		wow_assert( count( $media ) === (int) $report['media'], 'report media count matches the attachments on the site', array( $report['media'], count( $media ) ) );
+		// This build's own attachments, not every import's that has ever run here.
+		$media = array_diff_key( wow_imported_media(), $existing );
+
+		wow_assert( count( $media ) === (int) $report['media'], 'report media count matches the attachments this build added', array( $report['media'], count( $media ) ) );
 		wow_assert( count( $media ) >= 4, 'logo, band, one, two and the data: PNG became attachments (siblings share one)', $media );
 
 		$logo = get_posts(
@@ -264,7 +302,8 @@ wow_test(
 
 		// ---- chrome ------------------------------------------------------
 
-		$menu = wow_owned_post( 'wp_navigation', 'navigation' );
+		// By id from the report, so a menu a previous import left cannot be mistaken for this one's.
+		$menu = (int) $report['menu'] > 0 ? get_post( (int) $report['menu'] ) : null;
 
 		if ( wow_assert( $menu instanceof WP_Post, 'a navigation menu was created' ) ) {
 			wow_assert( $menu->ID === (int) $report['menu'], 'report names the menu', $report['menu'] );
@@ -274,7 +313,14 @@ wow_test(
 				wow_assert( str_contains( $menu->post_content, '"label":"' . $label . '"' ), 'menu links to ' . $label );
 			}
 
-			wow_assert( str_contains( $menu->post_content, '"id":' . (int) $by_file['About.dc.html']['id'] ), 'menu links carry the page id' );
+			/*
+			 * A build makes drafts, and core's navigation-link draws nothing
+			 * for a draft page — so a draft is linked by URL, and
+			 * refresh_menus() upgrades it to a page reference on publish. The
+			 * link still has to point at the page this build made.
+			 */
+			wow_assert( str_contains( $menu->post_content, (string) $by_file['About.dc.html']['url'] ), 'menu links point at the pages this build made', $menu->post_content );
+			wow_assert( str_contains( $menu->post_content, '"kind":"custom"' ), 'and do so as URLs while the pages are still drafts', $menu->post_content );
 		}
 
 		wow_assert( in_array( 'header', (array) $report['parts'], true ) && in_array( 'footer', (array) $report['parts'], true ), 'header and footer parts were written', $report['parts'] );
@@ -298,8 +344,26 @@ wow_test(
 		$footer = wow_owned_post( 'wp_template_part', 'part:footer' );
 
 		if ( wow_assert( $footer instanceof WP_Post, 'footer part exists with OWNED meta' ) ) {
-			wow_assert( str_contains( $footer->post_content, 'wp:wow/colophon' ), 'footer part ends with the colophon' );
+			wow_assert( str_contains( $footer->post_content, 'wp:wow/colophon' ), 'footer part carries the colophon' );
 			wow_assert( str_contains( $footer->post_content, (string) $by_file['About.dc.html']['url'] ), 'footer part links to the About page' );
+
+			/*
+			 * The design's footer says "© 2026 Fixture Co" as literal text.
+			 * Converted faithfully, every site built from that archive would
+			 * be wrong from the next New Year, and nobody would notice for
+			 * eleven months — so the line becomes the block that reads the
+			 * clock. What the swap must not do is take any of the footer with
+			 * it: the first attempt at this replaced everything from the
+			 * first paragraph to the copyright line, and the test that caught
+			 * it is this one.
+			 */
+			wow_assert( ! str_contains( $footer->post_content, '© 2026' ), 'the frozen copyright year is gone', $footer->post_content );
+			wow_assert( str_contains( $footer->post_content, 'A fixture, not a company' ), 'and the rest of the footer copy survived the swap', $footer->post_content );
+			wow_assert( str_contains( $footer->post_content, 'wp:columns' ), 'along with its column layout' );
+
+			$footer_blocks = parse_blocks( $footer->post_content );
+
+			wow_assert( trim( serialize_blocks( $footer_blocks ) ) === trim( $footer->post_content ), 'the footer still round-trips through the block parser', $footer->post_content );
 		}
 
 		// ---- fonts -------------------------------------------------------
@@ -322,13 +386,28 @@ wow_test(
 
 		$summary = SiteAssembler::summary();
 
-		wow_assert( count( $pages ) === $summary['pages'], 'summary counts the pages', $summary );
-		wow_assert( count( (array) $report['parts'] ) === $summary['parts'], 'summary counts the parts', $summary );
-		wow_assert( ( $menu ? 1 : 0 ) === $summary['menus'], 'summary counts the menu', $summary );
-		wow_assert( (int) $report['media'] === $summary['media'], 'summary counts the media', $summary );
-		wow_assert( count( $fonts['families'] ) === $summary['fonts'], 'summary counts the font families', $summary );
+		/*
+		 * Read as deltas. On a clean site the baseline is all zeros and these
+		 * are the same assertions they always were; on a site that already
+		 * holds an import they still say exactly what this build added.
+		 */
+		wow_assert( count( $pages ) === $summary['pages'] - $baseline['pages'], 'summary counts the pages this build made', array( $summary, $baseline ) );
+
+		/*
+		 * Parts are one per area, not one per import: a second build rewrites
+		 * the header and footer it finds rather than adding a second pair. So
+		 * the count is what exists, not what changed.
+		 */
+		wow_assert( count( (array) $report['parts'] ) === $summary['parts'], 'summary counts the parts', array( $summary, $report['parts'] ) );
+		wow_assert( ( $menu ? 1 : 0 ) === $summary['menus'] - $baseline['menus'], 'summary counts the menu', array( $summary, $baseline ) );
+		wow_assert( (int) $report['media'] === $summary['media'] - $baseline['media'], 'summary counts the media', array( $summary, $baseline ) );
+		wow_assert( count( $fonts['families'] ) === $summary['fonts'] - $baseline['fonts'], 'summary counts the font families', array( $summary, $baseline ) );
 
 		// ---- reset -------------------------------------------------------
+
+		if ( ! $clean ) {
+			return;
+		}
 
 		$uploads = wp_upload_dir();
 		$basedir = rtrim( str_replace( '\\', '/', (string) $uploads['basedir'] ), '/' ) . '/';

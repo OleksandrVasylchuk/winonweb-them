@@ -12,6 +12,7 @@ namespace Wow\Signal\Modules;
 
 use Wow\Signal\Contracts\Module;
 use Wow\Signal\Support\AnthropicClient;
+use Wow\Signal\Support\ClaudeCli;
 use Wow\Signal\Support\DesignFonts;
 use WP_REST_Response;
 
@@ -236,6 +237,18 @@ final class SiteHealth implements Module {
 					'value'   => '' !== AnthropicClient::api_key() ? __( 'Configured', 'wow-signal' ) : __( 'Not set', 'wow-signal' ),
 					'private' => true,
 				),
+
+				/*
+				 * The other route to a model. Reported without running the
+				 * binary: Site Health loads on a page request like any other,
+				 * and probing a broken install would hold it open. What is
+				 * shown here is what can be known for free — whether PHP may
+				 * start a process at all, and whether the command is findable.
+				 */
+				'cli'     => array(
+					'label' => __( 'Claude Code command', 'wow-signal' ),
+					'value' => self::cli_summary(),
+				),
 				'fonts'   => array(
 					'label' => __( 'Font families imported from designs', 'wow-signal' ),
 					'value' => (string) $fonts,
@@ -248,6 +261,24 @@ final class SiteHealth implements Module {
 		);
 
 		return $info;
+	}
+
+	/**
+	 * Whether the local Claude Code route could work on this server.
+	 *
+	 * @return string
+	 */
+	private static function cli_summary(): string {
+		if ( ! ClaudeCli::can_spawn() ) {
+			return __( 'Unavailable — this server does not let PHP start other programs', 'wow-signal' );
+		}
+
+		$binary = ClaudeCli::binary();
+
+		return '' !== $binary
+			/* translators: %s: path to the claude binary. */
+			? sprintf( __( 'Found at %s', 'wow-signal' ), $binary )
+			: __( 'Not installed on this server', 'wow-signal' );
 	}
 
 	/**

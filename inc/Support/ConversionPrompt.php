@@ -82,11 +82,38 @@ final class ConversionPrompt {
 	}
 
 	/**
+	 * The JSON shape a guided conversion must take.
+	 *
+	 * Same four keys as {@see self::schema()}, plus the one thing only a
+	 * guided conversion can report: what it changed about the structural
+	 * conversion it was given, and why. That list is what the import report
+	 * shows when somebody asks what the model actually did for the money.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function guided_schema(): array {
+		$schema = self::schema();
+
+		$schema['required'][] = 'changed';
+
+		$schema['properties']['changed'] = array(
+			'type'        => 'array',
+			'description' => 'Each fix you made to the structural conversion you were given, in one short phrase — "made the five cards a five-column grid instead of a stack". Empty when the structural conversion was already right and you returned it unchanged.',
+			'items'       => array( 'type' => 'string' ),
+		);
+
+		return $schema;
+	}
+
+	/**
 	 * The system prompt, built from the live theme.
 	 *
+	 * @param bool $guided Whether the model is being handed a structural
+	 *                     conversion, a resolved-CSS brief and screenshots to
+	 *                     work from, rather than the raw section alone.
 	 * @return string
 	 */
-	public static function system(): string {
+	public static function system( bool $guided = false ): string {
 		$lines = array();
 
 		$lines[] = 'You convert one section of a static HTML design into WordPress Gutenberg block markup for the WOW — Signal block theme.';
@@ -138,9 +165,145 @@ final class ConversionPrompt {
 		$lines[] = '- Text that is part of an image in the design becomes real text in the markup.';
 		$lines[] = '';
 
+		if ( $guided ) {
+			$lines   = array_merge( $lines, self::guidance() );
+			$lines[] = '';
+		}
+
 		$lines[] = '## The reply';
 		$lines[] = '';
 		$lines[] = '`markup` is the block markup. `summary` is one sentence for the reviewer. `editable` lists what the owner can change, in their words — "the headline", "each of the three service cards", "the button text and link". `concerns` is for anything you could not carry across faithfully; leave it empty rather than padding it.';
+
+		if ( $guided ) {
+			$lines[] = '';
+			$lines[] = '`changed` lists what you fixed about the structural conversion, one short phrase each. An empty list means you judged it already correct and returned it as it was — which is a perfectly good answer and happens often.';
+		}
+
+		return implode( "\n", $lines );
+	}
+
+	/**
+	 * How to use the material a guided conversion is handed.
+	 *
+	 * The structural converter in this theme is good at the mechanical part —
+	 * headings, lists, buttons, images, the design's own class names and
+	 * colours — and blind in exactly one place: it decides what a container
+	 * *means*. Its known failure is reading a wrapper as a stack when the
+	 * design's CSS made it a grid, and the reverse. That is what the resolved
+	 * CSS and the screenshot are for, and why the instruction below is to fix
+	 * that class of thing rather than to rewrite from scratch: a rewrite loses
+	 * the parts that were already right and costs several times as much.
+	 *
+	 * @return array<int, string>
+	 */
+	private static function guidance(): array {
+		$lines = array();
+
+		$lines[] = '## What you are given, and what to do with it';
+		$lines[] = '';
+		$lines[] = 'You are not converting from nothing. Along with the section\'s HTML you get:';
+		$lines[] = '';
+		$lines[] = '1. **A structural conversion** — block markup this theme produced from the same section mechanically. It is usually close. Its headings, copy, links, image paths, class names and colours are reliable and were taken from the design itself.';
+		$lines[] = '2. **A resolved-CSS brief** — what the design\'s stylesheets actually compute to for each element, with the cascade already run and every `var()` substituted. `grid: 1.06fr .72fr` in that brief is a fact about the design, not a guess.';
+		$lines[] = '3. **A screenshot**, when the archive had one — the finished design as a person sees it.';
+		$lines[] = '';
+		$lines[] = '**Start from the structural conversion and correct it.** Return it unchanged when it is right. Do not rebuild a section that needs one attribute moved, and never replace its copy, links or image paths with your own reading of the HTML — those are already correct, and re-typing them is how a name or a URL quietly changes.';
+		$lines[] = '';
+		$lines[] = 'What actually goes wrong, in the order it is worth checking:';
+		$lines[] = '';
+		$lines[] = '- **Columns read as a stack, or a stack read as columns.** The brief settles it. `display:grid` with three tracks is `core/columns` with three `core/column` children, whatever the HTML nesting suggests; `display:block` is a stack even when the children look like cards. Uneven tracks (`1.06fr .72fr`) become column widths in the same proportion — roughly 60% and 40% — not two equal halves.';
+		$lines[] = '- **A container that carries the design\'s look.** When the brief gives an element a background, a radius, a border or a shadow, that treatment belongs on the block it became — not on a fresh wrapper group around it, which doubles the padding and draws the card twice.';
+		$lines[] = '- **Emphasis lost.** The brief\'s font sizes and weights say which heading dominates. Map them onto the theme\'s preset scale, keeping the design\'s order of emphasis even when the exact size falls between two presets.';
+		$lines[] = '- **Something the blocks cannot hold.** An element the brief marks `absolute-positioned`, or `driven by JavaScript`, has no block equivalent. Put its content in the flow where it belongs and say what was lost in `concerns`. Do not approximate it with spacers and negative margins.';
+		$lines[] = '';
+		$lines[] = 'The structural conversion is not authoritative about any of that. Where it and the brief disagree, the brief is right.';
+
+		return $lines;
+	}
+
+	/**
+	 * The message for a guided conversion of one section.
+	 *
+	 * @param array<string, mixed> $section Section record from SectionSplitter.
+	 * @param array<string, mixed> $given   baseline markup, facts brief, css slice, shot flag.
+	 * @param array<string, mixed> $context Page-level context: page, lang, is_first.
+	 * @return string
+	 */
+	public static function brief( array $section, array $given, array $context = array() ): string {
+		$page     = isset( $context['page'] ) ? (string) $context['page'] : '';
+		$lang     = isset( $context['lang'] ) ? (string) $context['lang'] : '';
+		$first    = ! empty( $context['is_first'] );
+		$baseline = isset( $given['baseline'] ) ? (string) $given['baseline'] : '';
+		$facts    = isset( $given['facts'] ) ? (string) $given['facts'] : '';
+		$css      = isset( $given['css'] ) ? (string) $given['css'] : '';
+
+		$lines = array();
+
+		$lines[] = 'Convert the section below, starting from the structural conversion further down.';
+		$lines[] = '';
+
+		if ( '' !== $page ) {
+			$lines[] = sprintf( 'It is section %d of the page "%s".', (int) $section['position'] + 1, $page );
+		}
+
+		if ( '' !== $lang ) {
+			$lines[] = sprintf( 'The page language is "%s" — keep the copy in that language exactly as written.', $lang );
+		}
+
+		$lines[] = $first
+			? 'This is the first section on the page, so its main heading is the page\'s only `h1`.'
+			: 'This is not the first section on the page, so its top heading is an `h2` at most.';
+
+		$lines = array_merge( $lines, self::pictures( $given, (int) $section['position'] + 1 ) );
+
+		$lines[] = '';
+		$lines[] = '### The section markup';
+		$lines[] = '';
+		$lines[] = '```html';
+		$lines[] = (string) $section['html'];
+		$lines[] = '```';
+
+		if ( '' !== trim( $facts ) ) {
+			$lines[] = '';
+			$lines[] = '### What the design\'s CSS resolves to';
+			$lines[] = '';
+			$lines[] = 'The cascade has already been run for you. Every value here is what that element computes to at desktop width, with `var()` substituted. Indentation follows the nesting of the section.';
+			$lines[] = '';
+			$lines[] = '```';
+			$lines[] = $facts;
+			$lines[] = '```';
+		}
+
+		if ( '' !== trim( $baseline ) ) {
+			$lines[] = '';
+			$lines[] = '### The structural conversion to correct';
+			$lines[] = '';
+			$lines[] = '```html';
+			$lines[] = $baseline;
+			$lines[] = '```';
+		} else {
+			$lines[] = '';
+			$lines[] = '### The structural conversion';
+			$lines[] = '';
+			$lines[] = 'It produced nothing usable for this section, so build the markup yourself from the section and the brief above.';
+		}
+
+		/*
+		 * The raw stylesheet is a fallback for a section no brief could be
+		 * made for — not a companion to one. Sending both spends the context
+		 * window twice on the same facts, and invites the model to re-run a
+		 * cascade that has already been run for it.
+		 */
+		if ( '' === trim( $facts ) && '' !== trim( $css ) ) {
+			$lines[] = '';
+			$lines[] = '### The CSS that applies to it';
+			$lines[] = '';
+			$lines[] = 'Read it for layout, hierarchy and emphasis, and translate it into theme presets — never copy its values literally.';
+			$lines[] = '';
+			$lines[] = '```css';
+			$lines[] = $css;
+			$lines[] = '```';
+		}
 
 		return implode( "\n", $lines );
 	}
@@ -390,6 +553,90 @@ final class ConversionPrompt {
 				$lines[] = '```';
 			}
 		}
+
+		return implode( "\n", $lines );
+	}
+
+	/**
+	 * Say what the attached pictures are, when there are any.
+	 *
+	 * Two different things arrive as images and they are read completely
+	 * differently. A close-up is the section's own visual — a chart the design
+	 * drew with JavaScript, which the markup cannot describe at all — and it
+	 * is the authority on what that element looks like. A page screenshot is
+	 * context: the section is somewhere inside it, and the model has to find
+	 * it rather than describe the whole page. Left unlabelled, a model handed
+	 * both will happily convert the wrong one.
+	 *
+	 * @param array<string, mixed> $given    Brief material: shot, closeups.
+	 * @param int                  $position Human-facing section number.
+	 * @return array<int, string>
+	 */
+	private static function pictures( array $given, int $position ): array {
+		$closeups = isset( $given['closeups'] ) ? (int) $given['closeups'] : 0;
+		$shot     = ! empty( $given['shot'] );
+
+		if ( 0 === $closeups && ! $shot ) {
+			return array();
+		}
+
+		$lines   = array();
+		$lines[] = '';
+
+		if ( $closeups > 0 ) {
+			$lines[] = sprintf(
+				'The first %s a close-up of a visual inside this section — something the design drew with JavaScript, which the markup below cannot describe. It already appears in the markup as an `<img>`: keep that image exactly where it is, and use the picture to write an `alt` that says what it actually shows.',
+				1 === $closeups ? 'attached image is' : 'two attached images are each'
+			);
+		}
+
+		if ( $shot ) {
+			$lines[] = sprintf(
+				'A screenshot of the whole finished page is attached%s. Section %d is one part of it — find that part by its heading and copy, and read its spacing and emphasis against the rest of the page. Do not convert anything that is not in the markup below.',
+				$closeups > 0 ? ' after those' : '',
+				$position
+			);
+		}
+
+		return $lines;
+	}
+
+	/**
+	 * Ask again, with what was wrong with the last answer.
+	 *
+	 * The whole original brief is repeated rather than referred back to. It
+	 * costs prompt tokens that are almost entirely cache hits by now, and it
+	 * removes the failure mode where a model, handed only its own broken
+	 * output and a complaint, fixes the syntax while quietly losing half the
+	 * copy — because the section it was converting is no longer in front of it.
+	 *
+	 * @param string $brief    The brief that was sent the first time.
+	 * @param string $returned The markup that came back and failed.
+	 * @param string $problem  What the validator objected to.
+	 * @return string
+	 */
+	public static function correction( string $brief, string $returned, string $problem ): string {
+		$lines = array();
+
+		$lines[] = 'Your last answer to this could not be used. Fix it and return the whole section again.';
+		$lines[] = '';
+		$lines[] = '### What was wrong';
+		$lines[] = '';
+		$lines[] = $problem;
+		$lines[] = '';
+		$lines[] = 'Change only what that complaint is about. The layout decisions in your answer were accepted — do not reconsider them, do not rewrite the copy, and do not drop anything to make the problem go away. Block settings are JSON inside the `<!-- wp:name { … } -->` comment: every brace and bracket paired, keys and string values in double quotes, no trailing commas, and no comment or ellipsis anywhere inside them.';
+		$lines[] = '';
+		$lines[] = '### What you returned';
+		$lines[] = '';
+		$lines[] = '```html';
+		$lines[] = '' !== trim( $returned ) ? $returned : '(nothing)';
+		$lines[] = '```';
+		$lines[] = '';
+		$lines[] = '---';
+		$lines[] = '';
+		$lines[] = '### The original task, unchanged';
+		$lines[] = '';
+		$lines[] = $brief;
 
 		return implode( "\n", $lines );
 	}

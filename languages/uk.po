@@ -3,7 +3,7 @@
 # This file is distributed under the GNU General Public License v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WOW — Signal 1.3.0\n"
+"Project-Id-Version: WOW — Signal 1.4.0\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -12,170 +12,342 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Domain: wow-signal\n"
 
-#: assets/js/admin-import.js:101
+#: assets/js/admin-import.js:1008
+msgid "Build the whole site, corrected and reviewed"
+msgstr "Зібрати весь сайт, із виправленням і перевіркою"
+
+#: assets/js/admin-import.js:1009
+msgid "Build the whole site, corrected by Claude"
+msgstr "Зібрати весь сайт, із виправленням від Claude"
+
+#: assets/js/admin-import.js:1013
+msgid "Build everything at once"
+msgstr "Зібрати все одразу"
+
+#: assets/js/admin-import.js:1016
+msgid "Creates every page as a draft, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again. Press Preview on any page below to see what it will become and leave sections out."
+msgstr "Створює кожну сторінку як чернетку, імпортує зображення, будує меню, шапку й підвал і призначає головну сторінку. Без API-ключа й без діалогу. Це можна скасувати й повторити. Натисніть «Перегляд» на будь-якій сторінці нижче, щоб побачити, чим вона стане, і прибрати зайві секції."
+
+#: assets/js/admin-import.js:1022
+msgid "Publish pages immediately"
+msgstr "Опублікувати сторінки одразу"
+
+#: assets/js/admin-import.js:1026
+msgid "Leave this off to review each page as a draft first."
+msgstr "Залиште вимкненим, щоб спершу переглянути кожну сторінку як чернетку."
+
+#: assets/js/admin-import.js:1033
+msgid "Keep the uploaded design for another run"
+msgstr "Залишити завантажений дизайн для наступного запуску"
+
+#: assets/js/admin-import.js:1037
+msgid "Otherwise the unpacked files are removed from uploads once the build is done."
+msgstr "Інакше розпаковані файли буде видалено з uploads після завершення білду."
+
+#: assets/js/admin-import.js:1051
+msgid "Language to build:"
+msgstr "Мова для збірки:"
+
+#: assets/js/admin-import.js:1060
+msgid "Changed your mind, or got a new version of the design? Delete everything and drop the new archive in — nothing here is one-way."
+msgstr "Передумали або маєте нову версію дизайну? Видаліть усе й закиньте новий архів — тут ніщо не робиться в один бік."
+
+#: assets/js/admin-import.js:107
 msgid "%s MB"
 msgstr "%s МБ"
 
-#: assets/js/admin-import.js:1010
+#: assets/js/admin-import.js:1070
+msgid "Delete everything and start over"
+msgstr "Видалити все й почати заново"
+
+#: assets/js/admin-import.js:1071
+msgid "Removes only what an import created. Your own pages are left alone."
+msgstr "Видаляє лише те, що створив імпорт. Ваші власні сторінки не чіпає."
+
+#: assets/js/admin-import.js:1104
+msgid "Reading the design, importing fonts and images…"
+msgstr "Читаємо дизайн, імпортуємо шрифти й зображення…"
+
+#: assets/js/admin-import.js:111
+msgid "%s KB"
+msgstr "%s КБ"
+
+#: assets/js/admin-import.js:1120
+msgid "Steps that did not complete:"
+msgstr "Кроки, що не завершились:"
+
+#: assets/js/admin-import.js:1138 assets/js/admin-import.js:1795
+msgid "Cancel"
+msgstr "Скасувати"
+
+#: assets/js/admin-import.js:1142
+msgid "Build cancelled. The pages made so far are still on the site as drafts."
+msgstr "Білд скасовано. Уже створені сторінки залишаються на сайті як чернетки."
+
+#: assets/js/admin-import.js:1152
+msgid "Delete what was built so far"
+msgstr "Видалити створене досі"
+
+#: assets/js/admin-import.js:1164
+msgid "Dismiss"
+msgstr "Закрити"
+
+#: assets/js/admin-import.js:1177
+msgid "Build progress"
+msgstr "Перебіг білду"
+
+#: assets/js/admin-import.js:1182
+msgid "The build is complete."
+msgstr "Білд завершено."
+
+#: assets/js/admin-import.js:1187
+msgid "Cancelled after %1$d of %2$d steps."
+msgstr "Скасовано після %1$d з %2$d кроків."
+
+#: assets/js/admin-import.js:1194
+msgid "%1$d of %2$d steps done."
+msgstr "Виконано %1$d з %2$d кроків."
+
+#. translators: 1: steps done, 2: steps in total. */ return sprintf( __( '%1$d of %2$d steps done.', 'wow-signal' ), job.done, job.total ); } if ( job.smart && 'page' === step.key ) { return sprintf( /* translators: 1: what is being built, 2: steps done, 3: steps in total.
+#: assets/js/admin-import.js:1200
+msgid "Building %1$s with Claude, section by section (%2$d of %3$d) — this one takes a while"
+msgstr "Будуємо %1$s разом із Claude, секція за секцією (%2$d з %3$d) — це надовго"
+
+#. translators: 1: what is being built, 2: steps done, 3: steps in total. */ __( 'Building %1$s with Claude, section by section (%2$d of %3$d) — this one takes a while', 'wow-signal' ), stepLabel( step ), job.done + 1, job.total ); } return sprintf( /* translators: 1: what is being built, 2: steps done, 3: steps in total.
+#: assets/js/admin-import.js:1209
+msgid "Building %1$s (%2$d of %3$d)"
+msgstr "Будуємо %1$s (%2$d з %3$d)"
+
+#: assets/js/admin-import.js:1222
+msgid "the menu, header and footer"
+msgstr "меню, шапка й підвал"
+
+#: assets/js/admin-import.js:1225
+msgid "the front page and links"
+msgstr "головна сторінка й посилання"
+
+#: assets/js/admin-import.js:1236
+msgid "Structure only — the button above"
+msgstr "Тільки структура — кнопка вище"
+
+#: assets/js/admin-import.js:1237
+msgid "Free, instant, no account. Headings, lists, cards and images become blocks."
+msgstr "Безкоштовно, миттєво, без реєстрації. Заголовки, списки, картки й зображення стають блоками."
+
+#: assets/js/admin-import.js:1240
+msgid "Your Claude subscription"
+msgstr "Ваша підписка Claude"
+
+#: assets/js/admin-import.js:1241
+msgid "Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button."
+msgstr "Безкоштовно з будь-яким тарифом. Виберіть сторінку нижче, скопіюйте завдання у свій чат Claude і вставте відповідь назад. Якісніше, ніж кнопка."
+
+#: assets/js/admin-import.js:1244
+msgid "An Anthropic API key"
+msgstr "Ключ API Anthropic"
+
+#: assets/js/admin-import.js:1245
+msgid "One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above."
+msgstr "Один клік на сторінку, без копіювання. Приблизно один–три долари за весь сайт. Ключ вказується в «Налаштуваннях підключення» вище."
+
+#: assets/js/admin-import.js:1248
+msgid "Claude Code on this machine"
+msgstr "Claude Code на цій машині"
+
+#: assets/js/admin-import.js:1249
+msgid "The same automatic route, run through the claude command instead of the API — so it uses the subscription that command is signed in to and adds nothing to a bill. Only possible where the binary is installed and PHP may start it, which usually means your own machine rather than a client's hosting."
+msgstr "Той самий автоматичний шлях, але через команду claude, а не через API — тож він користується підпискою, під якою ця команда авторизована, і нічого не додає до рахунку. Можливий лише там, де програму встановлено і PHP дозволено її запускати, тобто зазвичай на вашій машині, а не на хостингу клієнта."
+
+#: assets/js/admin-import.js:1261
+msgid "Four ways to convert — which should I use?"
+msgstr "Чотири способи конвертації — який обрати?"
+
+#: assets/js/admin-import.js:1279
 msgid "Page"
 msgstr "Сторінка"
 
-#: assets/js/admin-import.js:1011
+#: assets/js/admin-import.js:1280
 msgid "Status"
 msgstr "Статус"
 
-#: assets/js/admin-import.js:1012
+#: assets/js/admin-import.js:1281
 msgid "Actions"
 msgstr "Дії"
 
-#: assets/js/admin-import.js:1022
+#: assets/js/admin-import.js:1291
 msgid "View"
 msgstr "Переглянути"
 
-#: assets/js/admin-import.js:1023
+#: assets/js/admin-import.js:1292
 msgid "Edit"
 msgstr "Редагувати"
 
-#: assets/js/admin-import.js:1031
+#: assets/js/admin-import.js:1300
 msgid "Publish"
 msgstr "Опублікувати"
 
 #. translators: %d: number of sections.
-#: assets/js/admin-import.js:1047
+#: assets/js/admin-import.js:1316
 msgid "(%d sections)"
 msgstr "(секцій: %d)"
 
-#: assets/js/admin-import.js:105
-msgid "%s KB"
-msgstr "%s КБ"
+#. translators: %d: number of sections. */ __( '(%d sections)', 'wow-signal' ), page.sections ), } ), page.improved ? el( 'span', { class: 'wow-import__section-meta', text: ' ' + sprintf( /* translators: %d: number of sections Claude changed.
+#: assets/js/admin-import.js:1327
+msgid "Claude corrected %d of them."
+msgid_plural "Claude corrected %d of them."
+msgstr[0] "Claude виправив %d із них."
+msgstr[1] "Claude виправив %d із них."
+msgstr[2] "Claude виправив %d із них."
 
-#: assets/js/admin-import.js:1056
+#: assets/js/admin-import.js:1339
+msgid "What Claude changed"
+msgstr "Що змінив Claude"
+
+#: assets/js/admin-import.js:1348
 msgid "Draft"
 msgstr "Чернетка"
 
-#: assets/js/admin-import.js:1056
+#: assets/js/admin-import.js:1348
 msgid "Published"
 msgstr "Опубліковано"
 
-#: assets/js/admin-import.js:1067
+#: assets/js/admin-import.js:1359
 msgid "The site is built."
 msgstr "Сайт зібрано."
 
+#. translators: 1: number of calls, 2: tokens in, 3: tokens out, 4: what the same work would cost through the API.
+#: assets/js/admin-import.js:1370
+msgid "%1$d calls through Claude Code on this machine — %2$s tokens in, %3$s out. Nothing was billed; the same work through the API would have cost about %4$s."
+msgstr "%1$d викликів через Claude Code на цій машині — %2$s токенів на вхід, %3$s на вихід. Нічого не списано; та сама робота через API коштувала б близько %4$s."
+
+#. translators: 1: number of calls, 2: tokens in, 3: tokens out, 4: cost.
+#: assets/js/admin-import.js:1381
+msgid "%1$d calls to the Anthropic API — %2$s tokens in, %3$s out, about %4$s."
+msgstr "%1$d викликів до Anthropic API — %2$s токенів на вхід, %3$s на вихід, приблизно %4$s."
+
+#. translators: %d: number of replies that were thrown away.
+#: assets/js/admin-import.js:1400
+msgid "%d reply came back as markup the editor would have rejected, so that section kept its structural conversion. The section says so in its own notes."
+msgid_plural "%d replies came back as markup the editor would have rejected, so those sections kept their structural conversions. Each section says so in its own notes."
+msgstr[0] "%d відповідь повернулася розміткою, яку редактор відхилив би, тож ця секція лишилася зі структурною конвертацією. Про це сказано в її власних нотатках."
+msgstr[1] "%d відповіді повернулися розміткою, яку редактор відхилив би, тож ці секції лишилися зі структурною конвертацією. Про це сказано в їхніх власних нотатках."
+msgstr[2] "%d відповідей повернулися розміткою, яку редактор відхилив би, тож ці секції лишилися зі структурною конвертацією. Про це сказано в їхніх власних нотатках."
+
 #. translators: %d: number of draft pages.
-#: assets/js/admin-import.js:1079
+#: assets/js/admin-import.js:1422
 msgid "Publish %d draft page"
 msgid_plural "Publish all %d draft pages"
 msgstr[0] "Опублікувати %d чернетку"
 msgstr[1] "Опублікувати всі %d чернетки"
 msgstr[2] "Опублікувати всі %d чернеток"
 
-#: assets/js/admin-import.js:1101 assets/js/admin-import.js:1110
+#: assets/js/admin-import.js:1444 assets/js/admin-import.js:1453
 msgid "Edit in the Site Editor"
 msgstr "Редагувати в редакторі сайту"
 
-#: assets/js/admin-import.js:1116
+#: assets/js/admin-import.js:1459
 msgid "Header, footer and menu:"
 msgstr "Шапка, підвал і меню:"
 
-#: assets/js/admin-import.js:1121 assets/js/admin-import.js:2018
+#: assets/js/admin-import.js:1464 assets/js/admin-import.js:2365
 msgid "Worth checking:"
 msgstr "Варто перевірити:"
 
-#: assets/js/admin-import.js:1125
+#: assets/js/admin-import.js:1468
 msgid "What the build made"
 msgstr "Що створив білд"
 
-#: assets/js/admin-import.js:1126
+#: assets/js/admin-import.js:1469
 msgid "Pages built"
 msgstr "Створені сторінки"
 
-#: assets/js/admin-import.js:1132
+#: assets/js/admin-import.js:1475
 msgid "Publishing…"
 msgstr "Публікація…"
 
 #. translators: %d: number of pages published.
-#: assets/js/admin-import.js:1156
+#: assets/js/admin-import.js:1499
 msgid "Published %d page."
 msgid_plural "Published %d pages."
 msgstr[0] "Опубліковано %d сторінку."
 msgstr[1] "Опубліковано %d сторінки."
 msgstr[2] "Опубліковано %d сторінок."
 
-#: assets/js/admin-import.js:1188
+#: assets/js/admin-import.js:1531
 msgid "Starting the build — reading the design, importing fonts and images…"
 msgstr "Починаємо білд — читаємо дизайн, імпортуємо шрифти й зображення…"
 
 #. translators: 1: pages built, 2: images imported.
-#: assets/js/admin-import.js:1295
+#: assets/js/admin-import.js:1642
 msgid "Built and published %1$d pages and imported %2$d images. Look through them, then edit anything you like."
 msgstr "Створено й опубліковано %1$d сторінок, імпортовано %2$d зображень. Перегляньте їх і редагуйте що завгодно."
 
 #. translators: 1: pages built, 2: images imported. */ __( 'Built and published %1$d pages and imported %2$d images. Look through them, then edit anything you like.', 'wow-signal' ), report.pages.length, report.media ) : sprintf( /* translators: 1: pages built, 2: images imported.
-#: assets/js/admin-import.js:1301
+#: assets/js/admin-import.js:1648
 msgid "Built %1$d draft pages and imported %2$d images. Nothing is public yet — review each page and publish it when it is ready."
 msgstr "Створено %1$d чернеток сторінок, імпортовано %2$d зображень. Нічого ще не опубліковано — перегляньте кожну сторінку й опублікуйте, коли буде готова."
 
-#: assets/js/admin-import.js:1307
+#: assets/js/admin-import.js:1654
 msgid "The uploaded design has been removed from uploads."
 msgstr "Завантажений дизайн видалено з uploads."
 
-#: assets/js/admin-import.js:1325
+#: assets/js/admin-import.js:1672
 msgid "Undoing…"
 msgstr "Скасовую…"
 
 #. translators: 1: pages removed, 2: images removed.
-#: assets/js/admin-import.js:1335
+#: assets/js/admin-import.js:1682
 msgid "Removed %1$d pages and %2$d images. The site is back to how it was."
 msgstr "Видалено %1$d сторінок і %2$d зображень. Сайт повернуто у попередній стан."
 
-#: assets/js/admin-import.js:1391
+#: assets/js/admin-import.js:1738
 msgid "This cannot be undone. Only content this import created is removed; pages, menus and images you made yourself stay exactly as they are."
 msgstr "Цю дію не можна скасувати. Видаляється лише те, що створив імпорт; сторінки, меню й зображення, які ви зробили самі, залишаються без змін."
 
-#: assets/js/admin-import.js:1402
+#: assets/js/admin-import.js:1749
 msgid "This removes the unpacked design files from uploads. Pages, images and fonts already imported are not affected — only the source archive goes, and it can be uploaded again."
 msgstr "Це видаляє розпаковані файли дизайну з uploads. Уже імпортовані сторінки, зображення та шрифти не зачіпаються — зникає лише вихідний архів, і його можна завантажити знову."
 
-#: assets/js/admin-import.js:1439
+#: assets/js/admin-import.js:1786
 msgid "Delete now"
 msgstr "Видалити зараз"
 
 #. translators: %s: the word to type, in capitals.
-#: assets/js/admin-import.js:1458
+#: assets/js/admin-import.js:1805
 msgid "Type %s to confirm"
 msgstr "Введіть %s для підтвердження"
 
-#: assets/js/admin-import.js:1473
+#: assets/js/admin-import.js:1820
 msgid "Removing the uploaded designs…"
 msgstr "Видаляємо завантажені дизайни…"
 
 #. translators: %d: number of designs removed.
-#: assets/js/admin-import.js:1492
+#: assets/js/admin-import.js:1839
 msgid "Removed %d uploaded design."
 msgid_plural "Removed %d uploaded designs."
 msgstr[0] "Видалено %d завантажений дизайн."
 msgstr[1] "Видалено %d завантажені дизайни."
 msgstr[2] "Видалено %d завантажених дизайнів."
 
-#: assets/js/admin-import.js:1513
+#: assets/js/admin-import.js:1860
 msgid "Clean up"
 msgstr "Очистити"
 
 #. translators: 1: pages, 2: template parts, 3: menus, 4: images, 5: fonts.
-#: assets/js/admin-import.js:1520
+#: assets/js/admin-import.js:1867
 msgid "This import created %1$d pages, %2$d template parts, %3$d menus, %4$d images, %5$d fonts."
 msgstr "Імпорт створив сторінок: %1$d, частин шаблонів: %2$d, меню: %3$d, зображень: %4$d, шрифтів: %5$d."
 
-#: assets/js/admin-import.js:1532
+#: assets/js/admin-import.js:1879
 msgid "Your own content is untouched — only what the import added is removed."
 msgstr "Ваш власний вміст не чіпається — видаляється лише те, що додав імпорт."
 
-#: assets/js/admin-import.js:1544
+#: assets/js/admin-import.js:1891
 msgid "Delete everything this import added"
 msgstr "Видалити все, що додав імпорт"
 
 #. translators: 1: number of uploaded designs, 2: their size on disk.
-#: assets/js/admin-import.js:1562
+#: assets/js/admin-import.js:1909
 msgid "%1$d uploaded design is still unpacked in uploads, taking %2$s."
 msgid_plural "%1$d uploaded designs are still unpacked in uploads, taking %2$s."
 msgstr[0] "%1$d завантажений дизайн усе ще розпакований в uploads і займає %2$s."
@@ -183,16 +355,16 @@ msgstr[1] "%1$d завантажені дизайни все ще розпако
 msgstr[2] "%1$d завантажених дизайнів усе ще розпаковані в uploads і займають %2$s."
 
 #. translators: %s: size on disk.
-#: assets/js/admin-import.js:1579
+#: assets/js/admin-import.js:1926
 msgid "Remove uploaded designs (%s)"
 msgstr "Видалити завантажені дизайни (%s)"
 
-#: assets/js/admin-import.js:1594
+#: assets/js/admin-import.js:1941
 msgid "Clean up a previous import"
 msgstr "Очистити попередній імпорт"
 
 #. translators: %d: number of sections not yet converted.
-#: assets/js/admin-import.js:1618
+#: assets/js/admin-import.js:1965
 msgid "to convert %d remaining section"
 msgid_plural "to convert %d remaining sections"
 msgstr[0] "щоб конвертувати %d секцію, що лишилась"
@@ -200,483 +372,414 @@ msgstr[1] "щоб конвертувати %d секції, що лишилис�
 msgstr[2] "щоб конвертувати %d секцій, що лишились"
 
 #. translators: 1: number of conversions run, 2: input tokens, 3: output tokens.
-#: assets/js/admin-import.js:1633
+#: assets/js/admin-import.js:1980
 msgid "spent so far · %1$d conversions · %2$s in, %3$s out"
 msgstr "витрачено · %1$d конвертацій · %2$s на вхід, %3$s на вихід"
 
 #. translators: %d: minutes until the hourly limit resets.
-#: assets/js/admin-import.js:1650
+#: assets/js/admin-import.js:1997
 msgid "conversions left this hour · resets in %d min"
 msgstr "конвертацій лишилось цієї години · оновиться через %d хв"
 
-#: assets/js/admin-import.js:1665
+#: assets/js/admin-import.js:2012
 msgid "Estimated from published list prices — not a bill."
 msgstr "Оцінка за опублікованими цінами — це не рахунок."
 
-#: assets/js/admin-import.js:167
-msgid "Something went wrong."
-msgstr "Щось пішло не так."
-
-#: assets/js/admin-import.js:1686
+#: assets/js/admin-import.js:2033
 msgid "3. Convert each section"
 msgstr "3. Конвертуйте кожну секцію"
 
-#: assets/js/admin-import.js:1689
+#: assets/js/admin-import.js:2036
 msgid "Convert a section, read what it says, then keep it. Nothing reaches your site until you press Keep."
 msgstr "Сконвертуйте секцію, прочитайте опис і залиште її. Нічого не потрапляє на сайт, доки ви не натиснете «Залишити»."
 
 #. translators: 1: number of sections, 2: estimated cost.
-#: assets/js/admin-import.js:1699
+#: assets/js/admin-import.js:2046
 msgid "Convert %1$d section — about %2$s"
 msgid_plural "Convert %1$d sections — about %2$s"
 msgstr[0] "Конвертувати %1$d секцію — приблизно %2$s"
 msgstr[1] "Конвертувати %1$d секції — приблизно %2$s"
 msgstr[2] "Конвертувати %1$d секцій — приблизно %2$s"
 
-#: assets/js/admin-import.js:1703
+#: assets/js/admin-import.js:2050
 msgid "Every section is converted"
 msgstr "Усі секції конвертовано"
 
-#: assets/js/admin-import.js:1710
+#: assets/js/admin-import.js:2057
 msgid "Keep the whole page as a draft"
 msgstr "Залишити цілу сторінку як чернетку"
 
-#: assets/js/admin-import.js:1716
+#: assets/js/admin-import.js:2063
 msgid "Draft page created."
 msgstr "Чернетку сторінки створено."
 
-#: assets/js/admin-import.js:1719 assets/js/admin-import.js:2042
+#: assets/js/admin-import.js:2066 assets/js/admin-import.js:2389
 msgid "Open it in the editor"
 msgstr "Відкрити в редакторі"
 
-#: assets/js/admin-import.js:1740
+#: assets/js/admin-import.js:2087
 msgid "Paste the whole reply here, including the opening [ and closing ]"
 msgstr "Вставте сюди всю відповідь, разом із відкривною [ і закривною ]"
 
-#: assets/js/admin-import.js:1762
+#: assets/js/admin-import.js:2109
 msgid "The brief — select it all and copy"
 msgstr "Завдання — виділіть усе й скопіюйте"
 
-#: assets/js/admin-import.js:1769
+#: assets/js/admin-import.js:2116
 msgid "Copy the brief"
 msgstr "Скопіювати завдання"
 
-#: assets/js/admin-import.js:1776
+#: assets/js/admin-import.js:2123
 msgid "No API key? Use your own Claude subscription instead"
 msgstr "Немає ключа API? Скористайтеся власною підпискою Claude"
 
-#: assets/js/admin-import.js:1778
+#: assets/js/admin-import.js:2125
 msgid "Copy the brief for this page."
 msgstr "Скопіюйте завдання для цієї сторінки."
 
-#: assets/js/admin-import.js:1779
+#: assets/js/admin-import.js:2126
 msgid "Paste it into your Claude conversation and send it."
 msgstr "Вставте його у свій чат із Claude і надішліть."
 
-#: assets/js/admin-import.js:1780
+#: assets/js/admin-import.js:2127
 msgid "Copy the whole reply and paste it below."
 msgstr "Скопіюйте всю відповідь і вставте нижче."
 
-#: assets/js/admin-import.js:1788
+#: assets/js/admin-import.js:2135
 msgid "Claude’s reply"
 msgstr "Відповідь Claude"
 
-#: assets/js/admin-import.js:1795
+#: assets/js/admin-import.js:2142
 msgid "Read the reply"
 msgstr "Прочитати відповідь"
 
-#: assets/js/admin-import.js:1808
+#: assets/js/admin-import.js:2155
 msgid "Building the brief…"
 msgstr "Готую завдання…"
 
 #. translators: 1: number of sections, 2: size in kilobytes.
-#: assets/js/admin-import.js:1822
+#: assets/js/admin-import.js:2169
 msgid "Brief for %1$d sections, %2$d KB."
 msgstr "Завдання на %1$d секцій, %2$d КБ."
 
-#: assets/js/admin-import.js:1829
+#: assets/js/admin-import.js:2176
 msgid "Copied — now paste it into Claude"
 msgstr "Скопійовано — тепер вставте в Claude"
 
-#: assets/js/admin-import.js:1830
+#: assets/js/admin-import.js:2177
 msgid "Copied. Paste it into Claude, then bring the reply back."
 msgstr "Скопійовано. Вставте в Claude й поверніть відповідь сюди."
 
-#: assets/js/admin-import.js:1845
+#: assets/js/admin-import.js:2192
 msgid "The browser would not copy it, so it is in the box below — select it all and copy it yourself."
 msgstr "Браузер не дав скопіювати, тож завдання в полі нижче — виділіть усе й скопіюйте вручну."
 
-#: assets/js/admin-import.js:1886
+#: assets/js/admin-import.js:2233
 msgid "The browser refused to copy."
 msgstr "Браузер відмовився копіювати."
 
-#: assets/js/admin-import.js:1893
+#: assets/js/admin-import.js:2240
 msgid "Paste the reply first."
 msgstr "Спершу вставте відповідь."
 
-#: assets/js/admin-import.js:1897
+#: assets/js/admin-import.js:2244
 msgid "Reading the reply…"
 msgstr "Читаю відповідь…"
 
-#: assets/js/admin-import.js:190
-msgid "Upload and read the design"
-msgstr "Завантажити й прочитати дизайн"
-
 #. translators: 1: sections received, 2: sections expected.
-#: assets/js/admin-import.js:1915
+#: assets/js/admin-import.js:2262
 msgid "Read %1$d sections, but this page has %2$d. Check the reply was not cut off."
 msgstr "Прочитано %1$d секцій, а на сторінці їх %2$d. Перевірте, чи відповідь не обірвалася."
 
 #. translators: 1: sections received, 2: sections expected. */ __( 'Read %1$d sections, but this page has %2$d. Check the reply was not cut off.', 'wow-signal' ), data.received, data.expected ), true ); return; } say( sprintf( /* translators: %d: number of sections.
-#: assets/js/admin-import.js:1927
+#: assets/js/admin-import.js:2274
 msgid "Read %d sections. Review each one before keeping it."
 msgstr "Прочитано %d секцій. Перегляньте кожну, перш ніж залишати."
 
 #. translators: 1: element name, 2: word count, 3: image count.
-#: assets/js/admin-import.js:1946
+#: assets/js/admin-import.js:2293
 msgid "<%1$s> · %2$d words · %3$d images"
 msgstr "<%1$s> · слів: %2$d · зображень: %3$d"
 
-#: assets/js/admin-import.js:1961
+#: assets/js/admin-import.js:2308
 msgid "Convert this section"
 msgstr "Конвертувати цю секцію"
 
-#: assets/js/admin-import.js:1968
+#: assets/js/admin-import.js:2315
 msgid "Converting…"
 msgstr "Конвертую…"
 
-#: assets/js/admin-import.js:1975 assets/js/admin-import.js:2002
+#: assets/js/admin-import.js:2322 assets/js/admin-import.js:2349
 msgid "Try again"
 msgstr "Спробувати ще раз"
 
-#: assets/js/admin-import.js:199
-msgid "Choose a ZIP file first."
-msgstr "Спершу виберіть ZIP-файл."
-
-#: assets/js/admin-import.js:1996
+#: assets/js/admin-import.js:2343
 msgid "This conversion was refused:"
 msgstr "Цю конвертацію відхилено:"
 
-#: assets/js/admin-import.js:2013
+#: assets/js/admin-import.js:2360
 msgid "You will be able to edit:"
 msgstr "Ви зможете редагувати:"
 
-#: assets/js/admin-import.js:2023
+#: assets/js/admin-import.js:2370
 msgid "Quality notes:"
 msgstr "Зауваження щодо якості:"
 
-#: assets/js/admin-import.js:2041
+#: assets/js/admin-import.js:2388
 msgid "Kept."
 msgstr "Залишено."
 
-#: assets/js/admin-import.js:2054
+#: assets/js/admin-import.js:2401
 msgid "Keep as a reusable section"
 msgstr "Зберегти як повторюваний блок"
 
-#: assets/js/admin-import.js:2062
+#: assets/js/admin-import.js:2409
 msgid "Keep as a draft page"
 msgstr "Залишити як чернетку сторінки"
 
-#: assets/js/admin-import.js:207
-msgid "Unpacking and reading the design…"
-msgstr "Розпаковую та читаю дизайн…"
-
-#: assets/js/admin-import.js:2087
+#: assets/js/admin-import.js:2434
 msgid "Add your Anthropic API key in the connection settings first."
 msgstr "Спершу додайте ключ API Anthropic у налаштуваннях підключення."
 
 #. translators: %s: section name.
-#: assets/js/admin-import.js:2093
+#: assets/js/admin-import.js:2440
 msgid "Converting “%s”…"
 msgstr "Конвертую «%s»…"
 
 #. translators: %s: section name.
-#: assets/js/admin-import.js:2120
+#: assets/js/admin-import.js:2467
 msgid "“%s” converted. Review it below."
 msgstr "«%s» сконвертовано. Перегляньте результат нижче."
 
 #. translators: %s: section name. */ __( '“%s” converted. Review it below.', 'wow-signal' ), section.label ) : sprintf( /* translators: %s: section name.
-#: assets/js/admin-import.js:2121
+#: assets/js/admin-import.js:2468
 msgid "“%s” was refused — see the reason below."
 msgstr "«%s» відхилено — причина нижче."
 
-#. translators: 1: number of files, 2: number of pages.
-#: assets/js/admin-import.js:215
-msgid "Read %1$d files and found %2$d pages."
-msgstr "Прочитано %1$d файлів, знайдено %2$d сторінок."
-
-#: assets/js/admin-import.js:2155
+#: assets/js/admin-import.js:2502
 msgid "All sections converted. Review each one before keeping it."
 msgstr "Усі секції сконвертовано. Перегляньте кожну, перш ніж залишати."
 
-#: assets/js/admin-import.js:2183
+#: assets/js/admin-import.js:2530
 msgid "Convert at least one section first."
 msgstr "Спершу сконвертуйте хоча б одну секцію."
 
-#: assets/js/admin-import.js:2189
+#: assets/js/admin-import.js:2536
 msgid "Building the page…"
 msgstr "Збираю сторінку…"
 
 #. translators: 1: sections kept, 2: sections left out.
-#: assets/js/admin-import.js:2212
+#: assets/js/admin-import.js:2559
 msgid "Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused."
 msgstr "Чернетку створено з %1$d секцій. %2$d не увійшли: не сконвертовані або відхилені."
 
 #. translators: 1: sections kept, 2: sections left out. */ __( 'Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused.', 'wow-signal' ), ordered.length, skipped ), true ); return; } say( sprintf( /* translators: %d: number of sections.
-#: assets/js/admin-import.js:2224
+#: assets/js/admin-import.js:2571
 msgid "Draft page created from all %d sections."
 msgstr "Чернетку створено з усіх %d секцій."
 
-#: assets/js/admin-import.js:2245
+#: assets/js/admin-import.js:259
+msgid "Something went wrong."
+msgstr "Щось пішло не так."
+
+#: assets/js/admin-import.js:2592
 msgid "Saved."
 msgstr "Збережено."
 
-#: assets/js/admin-import.js:229
+#: assets/js/admin-import.js:282
+msgid "Upload and read the design"
+msgstr "Завантажити й прочитати дизайн"
+
+#: assets/js/admin-import.js:291
+msgid "Choose a ZIP file first."
+msgstr "Спершу виберіть ZIP-файл."
+
+#: assets/js/admin-import.js:299
+msgid "Unpacking and reading the design…"
+msgstr "Розпаковую та читаю дизайн…"
+
+#. translators: 1: number of files, 2: number of pages.
+#: assets/js/admin-import.js:307
+msgid "Read %1$d files and found %2$d pages."
+msgstr "Прочитано %1$d файлів, знайдено %2$d сторінок."
+
+#: assets/js/admin-import.js:321
 msgid "Design archive (.zip)"
 msgstr "Архів дизайну (.zip)"
 
-#: assets/js/admin-import.js:235
+#: assets/js/admin-import.js:327
 msgid "1. Upload the design"
 msgstr "1. Завантажте дизайн"
 
 #. translators: 1: number of pages, 2: number of images.
-#: assets/js/admin-import.js:272
+#: assets/js/admin-import.js:364
 msgid "%1$d pages · %2$d images"
 msgstr "Сторінок: %1$d · зображень: %2$d"
 
-#: assets/js/admin-import.js:283
+#: assets/js/admin-import.js:375
 msgid "Already uploaded"
 msgstr "Уже завантажено"
 
 #. translators: 1: file path, 2: number of sections.
-#: assets/js/admin-import.js:342
+#: assets/js/admin-import.js:448
 msgid "%1$s — %2$d sections"
 msgstr "%1$s — секцій: %2$d"
 
 #. translators: 1: file path, 2: number of sections. */ __( '%1$s — %2$d sections', 'wow-signal' ), page.file, page.sections ), } ), chosen ? el( 'span', { class: 'wow-import__page-meta', text: sprintf( /* translators: %d: number of sections chosen for the build.
-#: assets/js/admin-import.js:352
+#: assets/js/admin-import.js:458
 msgid "%d section chosen for the build"
 msgid_plural "%d sections chosen for the build"
 msgstr[0] "Для білду вибрано %d секцію"
 msgstr[1] "Для білду вибрано %d секції"
 msgstr[2] "Для білду вибрано %d секцій"
 
-#: assets/js/admin-import.js:362 assets/js/admin-import.js:2033
+#: assets/js/admin-import.js:468 assets/js/admin-import.js:2380
 msgid "Preview"
 msgstr "Перегляд"
 
-#: assets/js/admin-import.js:362
+#: assets/js/admin-import.js:468
 msgid "Previewing"
 msgstr "Перегляд"
 
-#: assets/js/admin-import.js:371
+#: assets/js/admin-import.js:477
 msgid "2. Pick a page"
 msgstr "2. Виберіть сторінку"
 
 #. translators: %s: comma-separated language codes.
-#: assets/js/admin-import.js:379
+#: assets/js/admin-import.js:485
 msgid "This design has %s. Import one language first; the others can be added later with a translation plugin."
 msgstr "Цей дизайн має %s. Спершу імпортуйте одну мову; решту можна додати пізніше плагіном перекладу."
 
 #. translators: %d: number of files.
-#: assets/js/admin-import.js:391
+#: assets/js/admin-import.js:497
 msgid "%d files were not unpacked"
 msgstr "Не розпаковано файлів: %d"
 
 #. translators: %s: page title.
-#: assets/js/admin-import.js:428
+#: assets/js/admin-import.js:534
 msgid "Converting “%s” for the preview…"
 msgstr "Конвертуємо «%s» для перегляду…"
 
 #. translators: 1: page title, 2: number of sections.
-#: assets/js/admin-import.js:454
+#: assets/js/admin-import.js:560
 msgid "“%1$s” previewed: %2$d sections. Untick any you do not want built."
 msgstr "«%1$s» переглянуто: секцій — %2$d. Зніміть позначку з тих, які не треба будувати."
 
-#: assets/js/admin-import.js:511
+#: assets/js/admin-import.js:617
 msgid "Converting the page…"
 msgstr "Конвертуємо сторінку…"
 
 #. translators: %s: page title.
-#: assets/js/admin-import.js:531
+#: assets/js/admin-import.js:637
 msgid "Preview: %s"
 msgstr "Перегляд: %s"
 
 #. translators: %s: page title. */ __( 'Preview: %s', 'wow-signal' ), data.title ), } ), el( 'p', { class: 'wow-import__compare-count', role: 'status', text: sprintf( /* translators: 1: sections included, 2: sections on the page.
-#: assets/js/admin-import.js:540
+#: assets/js/admin-import.js:646
 msgid "%1$d of %2$d sections included"
 msgstr "Включено %1$d з %2$d секцій"
 
-#: assets/js/admin-import.js:550
+#: assets/js/admin-import.js:656
 msgid "Include all"
 msgstr "Включити всі"
 
-#: assets/js/admin-import.js:561
+#: assets/js/admin-import.js:667
 msgid "Close preview"
 msgstr "Закрити перегляд"
 
-#: assets/js/admin-import.js:575
+#: assets/js/admin-import.js:681
 msgid "Left: the design as uploaded. Right: the blocks the build will make of it. Untick a section to leave it out of this page."
 msgstr "Ліворуч: дизайн, як його завантажено. Праворуч: блоки, які з нього зробить білд. Зніміть позначку із секції, щоб не включати її в цю сторінку."
 
-#: assets/js/admin-import.js:619
+#: assets/js/admin-import.js:725
 msgid "Nothing here could become blocks."
 msgstr "Тут нічого не можна перетворити на блоки."
 
-#: assets/js/admin-import.js:626
+#: assets/js/admin-import.js:732
 msgid "Include"
 msgstr "Включити"
 
-#: assets/js/admin-import.js:639
+#: assets/js/admin-import.js:745
 msgid "Design"
 msgstr "Дизайн"
 
-#: assets/js/admin-import.js:643
+#: assets/js/admin-import.js:749
 msgid "Blocks"
 msgstr "Блоки"
 
-#: assets/js/admin-import.js:653
+#: assets/js/admin-import.js:759
 msgid "Reading the page…"
 msgstr "Читаю сторінку…"
 
 #. translators: 1: number of sections on the page, 2: number already converted.
-#: assets/js/admin-import.js:683
+#: assets/js/admin-import.js:789
 msgid "Found %1$d sections. %2$d were already converted earlier and have been brought back."
 msgstr "Знайдено %1$d секцій. %2$d уже були конвертовані раніше — їх повернуто."
 
 #. translators: 1: number of sections on the page, 2: number already converted. */ __( 'Found %1$d sections. %2$d were already converted earlier and have been brought back.', 'wow-signal' ), result.sections.length, resumed ) : sprintf( /* translators: %d: number of sections.
-#: assets/js/admin-import.js:689
+#: assets/js/admin-import.js:795
 msgid "Found %d sections on this page."
 msgstr "На цій сторінці знайдено секцій: %d"
 
-#: assets/js/admin-import.js:756
-msgid "Build the whole site"
-msgstr "Побудувати весь сайт"
+#: assets/js/admin-import.js:816
+msgid "Checking whether Claude can be reached from here…"
+msgstr "Перевіряємо, чи можна звідси дістатися до Claude…"
 
-#: assets/js/admin-import.js:764
-msgid "Build everything at once"
-msgstr "Зібрати все одразу"
+#: assets/js/admin-import.js:824
+msgid "Claude Code is not installed here and no API key has been saved."
+msgstr "Claude Code тут не встановлено, і жодного ключа API не збережено."
 
-#: assets/js/admin-import.js:767
-msgid "Creates every page as a draft, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again. Press Preview on any page below to see what it will become and leave sections out."
-msgstr "Створює кожну сторінку як чернетку, імпортує зображення, будує меню, шапку й підвал і призначає головну сторінку. Без API-ключа й без діалогу. Це можна скасувати й повторити. Натисніть «Перегляд» на будь-якій сторінці нижче, щоб побачити, чим вона стане, і прибрати зайві секції."
-
-#: assets/js/admin-import.js:77
+#: assets/js/admin-import.js:83
 msgid "under $0.01"
 msgstr "менше $0,01"
 
-#: assets/js/admin-import.js:773
-msgid "Publish pages immediately"
-msgstr "Опублікувати сторінки одразу"
+#: assets/js/admin-import.js:832
+msgid "Correcting each section with Claude is not available yet. "
+msgstr "Виправлення секцій за допомогою Claude поки недоступне. "
 
-#: assets/js/admin-import.js:777
-msgid "Leave this off to review each page as a draft first."
-msgstr "Залиште вимкненим, щоб спершу переглянути кожну сторінку як чернетку."
+#: assets/js/admin-import.js:834
+msgid "Open Connection settings above to set it up. The build below works without it."
+msgstr "Відкрийте «Налаштування з’єднання» вище, щоб його налаштувати. Білд нижче працює й без цього."
 
-#: assets/js/admin-import.js:784
-msgid "Keep the uploaded design for another run"
-msgstr "Залишити завантажений дизайн для наступного запуску"
+#: assets/js/admin-import.js:874
+msgid "Let Claude correct each section"
+msgstr "Дозволити Claude виправити кожну секцію"
 
-#: assets/js/admin-import.js:788
-msgid "Otherwise the unpacked files are removed from uploads once the build is done."
-msgstr "Інакше розпаковані файли буде видалено з uploads після завершення білду."
+#: assets/js/admin-import.js:880
+msgid "The structural conversion is done first either way; Claude is shown that result, what the design's CSS resolves to, and a screenshot when the archive has one, and fixes what is wrong. A section it cannot improve is kept exactly as the structural conversion made it."
+msgstr "Структурна конвертація в будь-якому разі виконується першою; Claude отримує її результат, те, у що розв’язується CSS дизайну, і скріншот, якщо він є в архіві, і виправляє те, що не так. Секція, яку він не може покращити, лишається точно такою, якою її зробила структурна конвертація."
 
-#: assets/js/admin-import.js:796
-msgid "Language to build:"
-msgstr "Мова для збірки:"
+#: assets/js/admin-import.js:890
+msgid "and check the rendered result against the design"
+msgstr "і звірити відрендерений результат із дизайном"
 
-#: assets/js/admin-import.js:805
-msgid "Changed your mind, or got a new version of the design? Delete everything and drop the new archive in — nothing here is one-way."
-msgstr "Передумали або маєте нову версію дизайну? Видаліть усе й закиньте новий архів — тут ніщо не робиться в один бік."
+#: assets/js/admin-import.js:896
+msgid "A second pass per section: the blocks are rendered on the server and compared with the design. It catches what a conversion written blind cannot see, and doubles the time and the cost."
+msgstr "Другий прохід на кожну секцію: блоки рендеряться на сервері й порівнюються з дизайном. Це ловить те, чого не бачить конвертація «наосліп», і подвоює час та вартість."
 
-#: assets/js/admin-import.js:815
-msgid "Delete everything and start over"
-msgstr "Видалити все й почати заново"
+#. translators: 1: number of model calls, 2: estimated cost.
+#: assets/js/admin-import.js:908
+msgid "About %1$d call to the Anthropic API — roughly %2$s at list prices, billed to your key."
+msgid_plural "About %1$d calls to the Anthropic API — roughly %2$s at list prices, billed to your key."
+msgstr[0] "Приблизно %1$d виклик до Anthropic API — близько %2$s за прайсом, списується з вашого ключа."
+msgstr[1] "Приблизно %1$d виклики до Anthropic API — близько %2$s за прайсом, списується з вашого ключа."
+msgstr[2] "Приблизно %1$d викликів до Anthropic API — близько %2$s за прайсом, списується з вашого ключа."
 
-#: assets/js/admin-import.js:816
-msgid "Removes only what an import created. Your own pages are left alone."
-msgstr "Видаляє лише те, що створив імпорт. Ваші власні сторінки не чіпає."
-
-#: assets/js/admin-import.js:849
-msgid "Reading the design, importing fonts and images…"
-msgstr "Читаємо дизайн, імпортуємо шрифти й зображення…"
-
-#: assets/js/admin-import.js:865
-msgid "Steps that did not complete:"
-msgstr "Кроки, що не завершились:"
-
-#: assets/js/admin-import.js:883 assets/js/admin-import.js:1448
-msgid "Cancel"
-msgstr "Скасувати"
-
-#: assets/js/admin-import.js:887
-msgid "Build cancelled. The pages made so far are still on the site as drafts."
-msgstr "Білд скасовано. Уже створені сторінки залишаються на сайті як чернетки."
-
-#: assets/js/admin-import.js:897
-msgid "Delete what was built so far"
-msgstr "Видалити створене досі"
-
-#: assets/js/admin-import.js:909
-msgid "Dismiss"
-msgstr "Закрити"
-
-#: assets/js/admin-import.js:922
-msgid "Build progress"
-msgstr "Перебіг білду"
-
-#: assets/js/admin-import.js:927
-msgid "The build is complete."
-msgstr "Білд завершено."
+#. translators: %d: number of model calls.
+#: assets/js/admin-import.js:919
+msgid "About %d call through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed per conversion."
+msgid_plural "About %d calls through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed per conversion."
+msgstr[0] "Приблизно %d виклик через Claude Code на цій машині, який користується підпискою, під якою авторизований. За конвертацію нічого не списується."
+msgstr[1] "Приблизно %d виклики через Claude Code на цій машині, який користується підпискою, під якою авторизований. За конвертацію нічого не списується."
+msgstr[2] "Приблизно %d викликів через Claude Code на цій машині, який користується підпискою, під якою авторизований. За конвертацію нічого не списується."
 
 #: assets/js/admin-import.js:932
-msgid "Cancelled after %1$d of %2$d steps."
-msgstr "Скасовано після %1$d з %2$d кроків."
+msgid "Expect this to take minutes rather than seconds — a page is built section by section. Leave the tab open; closing it stops the build where it got to, and what it has already made stays."
+msgstr "Розраховуйте на хвилини, а не секунди — сторінка будується секція за секцією. Не закривайте вкладку: закриття зупинить білд там, де він дійшов, а вже створене лишиться."
 
-#: assets/js/admin-import.js:939
-msgid "%1$d of %2$d steps done."
-msgstr "Виконано %1$d з %2$d кроків."
-
-#. translators: 1: steps done, 2: steps in total. */ return sprintf( __( '%1$d of %2$d steps done.', 'wow-signal' ), job.done, job.total ); } return sprintf( /* translators: 1: what is being built, 2: steps done, 3: steps in total.
-#: assets/js/admin-import.js:944
-msgid "Building %1$s (%2$d of %3$d)"
-msgstr "Будуємо %1$s (%2$d з %3$d)"
-
-#: assets/js/admin-import.js:957
-msgid "the menu, header and footer"
-msgstr "меню, шапка й підвал"
-
-#: assets/js/admin-import.js:960
-msgid "the front page and links"
-msgstr "головна сторінка й посилання"
-
-#: assets/js/admin-import.js:971
-msgid "Structure only — the button above"
-msgstr "Тільки структура — кнопка вище"
-
-#: assets/js/admin-import.js:972
-msgid "Free, instant, no account. Headings, lists, cards and images become blocks."
-msgstr "Безкоштовно, миттєво, без реєстрації. Заголовки, списки, картки й зображення стають блоками."
-
-#: assets/js/admin-import.js:975
-msgid "Your Claude subscription"
-msgstr "Ваша підписка Claude"
-
-#: assets/js/admin-import.js:976
-msgid "Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button."
-msgstr "Безкоштовно з будь-яким тарифом. Виберіть сторінку нижче, скопіюйте завдання у свій чат Claude і вставте відповідь назад. Якісніше, ніж кнопка."
-
-#: assets/js/admin-import.js:979
-msgid "An Anthropic API key"
-msgstr "Ключ API Anthropic"
-
-#: assets/js/admin-import.js:980
-msgid "One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above."
-msgstr "Один клік на сторінку, без копіювання. Приблизно один–три долари за весь сайт. Ключ вказується в «Налаштуваннях підключення» вище."
-
-#: assets/js/admin-import.js:992
-msgid "Three ways to convert — which should I use?"
-msgstr "Три способи конвертації — який обрати?"
+#: assets/js/admin-import.js:999
+msgid "Build the whole site"
+msgstr "Побудувати весь сайт"
 
 #: blocks/colophon/block.json
 msgctxt "block title"
@@ -1253,125 +1356,172 @@ msgstr "Показувати внизу кожної сторінки невел
 msgid "Show the designer credit"
 msgstr "Показувати підпис дизайнера"
 
-#: inc/Modules/Importer.php:108 inc/Modules/Importer.php:109 inc/Modules/Importer.php:313
+#: inc/Modules/Importer.php:113 inc/Modules/Importer.php:114 inc/Modules/Importer.php:401
 msgid "Design import"
 msgstr "Імпорт дизайну"
 
+#: inc/Modules/Importer.php:1163
+msgid "That build is no longer running. Start it again."
+msgstr "Цей білд уже не виконується. Запустіть його знову."
+
+#: inc/Modules/Importer.php:1199 inc/Modules/Importer.php:1783 inc/Modules/Importer.php:1789 inc/Modules/Importer.php:1793
+msgid "That page is not in this design."
+msgstr "Такої сторінки в цьому дизайні немає."
+
 #. translators: %d: section number on the page.
-#: inc/Modules/Importer.php:1219 inc/Support/SectionSplitter.php:1540
+#: inc/Modules/Importer.php:1440 inc/Support/SectionSplitter.php:1540
 msgid "Section %d"
 msgstr "Секція %d"
 
-#: inc/Modules/Importer.php:1321
+#: inc/Modules/Importer.php:1586
 msgid "No file was received."
 msgstr "Файл не надійшов."
 
-#: inc/Modules/Importer.php:1327
+#: inc/Modules/Importer.php:1592
 msgid "The upload did not complete. The file may be larger than this server allows."
 msgstr "Завантаження не завершилося. Можливо, файл більший, ніж дозволяє цей сервер."
 
-#: inc/Modules/Importer.php:1336
+#: inc/Modules/Importer.php:1601
 msgid "That file did not arrive as an upload."
 msgstr "Цей файл надійшов не як завантаження."
 
-#: inc/Modules/Importer.php:1342
+#: inc/Modules/Importer.php:1607
 msgid "Please upload a .zip archive."
 msgstr "Завантажте, будь ласка, архів .zip."
 
-#: inc/Modules/Importer.php:1377 inc/Modules/Importer.php:1390 inc/Modules/Importer.php:1394 inc/Support/DesignFonts.php:111 inc/Support/SiteBuilder.php:130
+#: inc/Modules/Importer.php:1642 inc/Modules/Importer.php:1655 inc/Modules/Importer.php:1659 inc/Support/DesignFonts.php:111 inc/Support/SiteBuilder.php:130
 msgid "That design is not on this site."
 msgstr "Такого дизайну на цьому сайті немає."
 
-#: inc/Modules/Importer.php:1534
+#: inc/Modules/Importer.php:1799
 msgid "That is not an HTML page."
 msgstr "Це не HTML-сторінка."
 
-#: inc/Modules/Importer.php:1572
+#: inc/Modules/Importer.php:1837
 msgid "That section is no longer in the page."
 msgstr "Цієї секції вже немає на сторінці."
 
+#. translators: %s: why no model could be reached.
+#: inc/Modules/Importer.php:1903
+msgid "This is the structural conversion — no model was asked, because none can be reached from here. %s"
+msgstr "Це структурна конвертація — модель не питали, бо звідси до неї не дістатися. %s"
+
+#. translators: %s: the reason the model could not be reached.
+#: inc/Modules/Importer.php:1928
+msgid "The model could not be reached, so this is the structural conversion: %s"
+msgstr "До моделі не вдалося достукатися, тож це структурна конвертація: %s"
+
 #. translators: %s: model ID.
-#: inc/Modules/Importer.php:1628
+#: inc/Modules/Importer.php:1953
 msgid "This reply came from %s, which has no known price — its cost is recorded as zero."
 msgstr "Відповідь надійшла від %s, ціна якої невідома — її вартість записано як нуль."
 
 #. translators: %d: number of conversions allowed per hour.
-#: inc/Modules/Importer.php:1738
+#: inc/Modules/Importer.php:2066
 msgid "That is %d conversions in an hour, which is the limit. Wait a little before continuing."
 msgstr "Це %d конвертацій за годину — досягнуто ліміт. Зачекайте трохи, перш ніж продовжити."
 
-#: inc/Modules/Importer.php:1849
+#: inc/Modules/Importer.php:2177
 msgid "Imported section"
 msgstr "Імпортована секція"
 
-#: inc/Modules/Importer.php:299
+#: inc/Modules/Importer.php:222
+msgid "There is no file at that path, so it was not saved. Leave the field empty to let the theme look for the claude command itself."
+msgstr "За цим шляхом немає файлу, тож його не збережено. Залиште поле порожнім, щоб тема сама знайшла команду claude."
+
+#: inc/Modules/Importer.php:376
 msgid "You do not have permission to import designs."
 msgstr "У вас немає прав на імпорт дизайнів."
 
-#: inc/Modules/Importer.php:316
+#: inc/Modules/Importer.php:404
 msgid "Upload an HTML design as a ZIP. Build the whole site in one press as drafts, or convert sections one at a time and accept only the ones you like. Everything an import adds can be removed again in one step."
 msgstr "Завантажте HTML-дизайн у ZIP. Зберіть увесь сайт одним натисканням як чернетки або конвертуйте секції по одній і приймайте лише ті, що подобаються. Усе, що додає імпорт, можна прибрати одним кроком."
 
-#: inc/Modules/Importer.php:322
+#: inc/Modules/Importer.php:410
 msgid "Connection settings"
 msgstr "Налаштування підключення"
 
-#: inc/Modules/Importer.php:326
+#: inc/Modules/Importer.php:414
+msgid "Claude Code found on this machine"
+msgstr "Claude Code знайдено на цій машині"
+
+#: inc/Modules/Importer.php:420
 msgid "Key active — from wp-config.php"
 msgstr "Ключ активний — із wp-config.php"
 
 #. translators: %s: the last four characters of the key.
-#: inc/Modules/Importer.php:333
+#: inc/Modules/Importer.php:427
 msgid "Key active — ends in %s"
 msgstr "Ключ активний — закінчується на %s"
 
-#: inc/Modules/Importer.php:340
+#: inc/Modules/Importer.php:434
 msgid "No key — the free routes still work"
 msgstr "Ключа немає — безкоштовні способи працюють"
 
-#: inc/Modules/Importer.php:351 inc/Modules/SiteHealth.php:235
-msgid "Anthropic API key"
-msgstr "Ключ API Anthropic"
+#: inc/Modules/Importer.php:445
+msgid "How to reach the model"
+msgstr "Як дістатися до моделі"
 
-#: inc/Modules/Importer.php:356
+#: inc/Modules/Importer.php:457
+msgid "Two routes lead to the same place. On your own machine, Claude Code is already signed in to your subscription, so rebuilding a design as many times as it takes adds nothing to a bill. On a client's hosting there is no such binary and PHP is usually barred from starting one, so the API is what works there. Neither is needed for the structural import, which never leaves the server."
+msgstr "Два шляхи ведуть в одне місце. На вашій машині Claude Code уже авторизований під вашою підпискою, тож перезбирати дизайн скільки завгодно разів не додає нічого до рахунку. На хостингу клієнта такої програми немає, а PHP зазвичай заборонено її запускати, тож там працює API. Для структурного імпорту не потрібне ні те, ні інше — він узагалі не виходить за межі сервера."
+
+#: inc/Modules/Importer.php:462
+msgid "This server does not allow PHP to start other programs, so only the API route can work here."
+msgstr "Цей сервер не дозволяє PHP запускати інші програми, тож тут спрацює лише шлях через API."
+
+#. translators: %s: path to the claude binary.
+#: inc/Modules/Importer.php:469
+msgid "Found at %s."
+msgstr "Знайдено за шляхом %s."
+
+#: inc/Modules/Importer.php:479
+msgid "Path to the claude command"
+msgstr "Шлях до команди claude"
+
+#: inc/Modules/Importer.php:484 inc/Modules/Importer.php:511
 msgid "Set in wp-config.php."
 msgstr "Задано у wp-config.php."
 
-#: inc/Modules/Importer.php:357
+#: inc/Modules/Importer.php:485
+msgid "The path is defined as a constant and cannot be changed here."
+msgstr "Шлях задано константою, тож змінити його тут не можна."
+
+#: inc/Modules/Importer.php:499
+msgid "Only needed when the command is somewhere the web server cannot find on its own. Leave it empty and the theme looks along PATH. Remember that the web server runs as its own user: the binary has to be one that user may execute, and signed in as that user."
+msgstr "Потрібно лише тоді, коли команда лежить там, де вебсервер сам її не знайде. Залиште порожнім — і тема шукатиме її в PATH. Пам’ятайте, що вебсервер працює під власним користувачем: програму має бути дозволено запускати саме йому, і авторизована вона має бути теж під ним."
+
+#: inc/Modules/Importer.php:506 inc/Modules/SiteHealth.php:236
+msgid "Anthropic API key"
+msgstr "Ключ API Anthropic"
+
+#: inc/Modules/Importer.php:512
 msgid "The key is defined as a constant, so it is not stored in the database and cannot be changed here."
 msgstr "Ключ визначено як константу, тож він не зберігається в базі даних і його не можна змінити тут."
 
-#: inc/Modules/Importer.php:371
+#: inc/Modules/Importer.php:526
 msgid "Used only on the server; it is never sent to the browser. Clear the field and save to remove the stored key. For the strongest setup, put it in wp-config.php instead:"
 msgstr "Використовується лише на сервері й ніколи не передається в браузер. Очистіть поле та збережіть, щоб видалити збережений ключ. Для найнадійнішого налаштування помістіть його у wp-config.php:"
 
-#: inc/Modules/Importer.php:379
+#: inc/Modules/Importer.php:534
 msgid "Model"
 msgstr "Модель"
 
-#: inc/Modules/Importer.php:393
+#: inc/Modules/Importer.php:548
 msgid "Care taken per section"
 msgstr "Ретельність опрацювання секції"
 
-#: inc/Modules/Importer.php:404
+#: inc/Modules/Importer.php:559
 msgid "Higher settings take longer and cost more per section, and handle complicated layouts better."
 msgstr "Вищі значення потребують більше часу й коштів на секцію, але краще справляються зі складними макетами."
 
-#: inc/Modules/Importer.php:410
+#: inc/Modules/Importer.php:565
 msgid "Save settings"
 msgstr "Зберегти налаштування"
 
-#: inc/Modules/Importer.php:415
+#: inc/Modules/Importer.php:570
 msgid "This screen needs JavaScript."
 msgstr "Для цього екрана потрібен JavaScript."
-
-#: inc/Modules/Importer.php:948
-msgid "That build is no longer running. Start it again."
-msgstr "Цей білд уже не виконується. Запустіть його знову."
-
-#: inc/Modules/Importer.php:978 inc/Modules/Importer.php:1518 inc/Modules/Importer.php:1524 inc/Modules/Importer.php:1528
-msgid "That page is not in this design."
-msgstr "Такої сторінки в цьому дизайні немає."
 
 #: inc/Modules/Onboarding.php:116
 msgid "Set up WOW — Signal"
@@ -1425,7 +1575,7 @@ msgstr "Більше допомоги"
 msgid "Documentation and support"
 msgstr "Документація та підтримка"
 
-#: inc/Modules/Onboarding.php:232 inc/Modules/SiteHealth.php:220
+#: inc/Modules/Onboarding.php:232 inc/Modules/SiteHealth.php:221
 msgid "WOW — Signal"
 msgstr "WOW — Signal"
 
@@ -1734,113 +1884,129 @@ msgstr "Широка Signal (16:9)"
 msgid "Signal square (1:1)"
 msgstr "Квадрат Signal (1:1)"
 
-#: inc/Modules/SiteHealth.php:103
+#: inc/Modules/SiteHealth.php:104
 msgid "The PHP extensions the design importer needs are installed"
 msgstr "PHP-розширення, потрібні імпортеру дизайнів, встановлені"
 
-#: inc/Modules/SiteHealth.php:104
+#: inc/Modules/SiteHealth.php:105
 msgid "ZipArchive and DOM are available, so design archives can be unpacked and read."
 msgstr "ZipArchive і DOM доступні, тож архіви дизайнів можна розпаковувати й читати."
 
-#: inc/Modules/SiteHealth.php:111
+#: inc/Modules/SiteHealth.php:112
 msgid "A PHP extension the design importer needs is missing"
 msgstr "Бракує PHP-розширення, потрібного імпортеру дизайнів"
 
 #. translators: %s: comma-separated list of PHP extension names.
-#: inc/Modules/SiteHealth.php:114
+#: inc/Modules/SiteHealth.php:115
 msgid "The theme itself runs fine, but Appearance → Design import cannot work without: %s. Ask your host to enable the extension."
 msgstr "Сама тема працює нормально, але Вигляд → Імпорт дизайну не працюватиме без: %s. Попросіть хостинг увімкнути розширення."
 
-#: inc/Modules/SiteHealth.php:132
+#: inc/Modules/SiteHealth.php:133
 msgid "The uploads folder is writable"
 msgstr "Тека завантажень доступна для запису"
 
-#: inc/Modules/SiteHealth.php:133
+#: inc/Modules/SiteHealth.php:134
 msgid "Design archives, their images and their fonts can be stored."
 msgstr "Архіви дизайнів, їхні зображення та шрифти можна зберігати."
 
-#: inc/Modules/SiteHealth.php:140
+#: inc/Modules/SiteHealth.php:141
 msgid "The uploads folder is not writable"
 msgstr "Тека завантажень недоступна для запису"
 
-#: inc/Modules/SiteHealth.php:141
+#: inc/Modules/SiteHealth.php:142
 msgid "Media uploads, the logo step of the theme setup and the design importer all need to write to wp-content/uploads. Check the folder’s permissions with your host."
 msgstr "Завантаження медіа, крок з логотипом у налаштуванні теми та імпортер дизайнів мають писати у wp-content/uploads. Перевірте права на теку з хостингом."
 
-#: inc/Modules/SiteHealth.php:172
+#: inc/Modules/SiteHealth.php:173
 msgid "The server can reach the services the design importer uses"
 msgstr "Сервер має доступ до сервісів, які використовує імпортер дизайнів"
 
-#: inc/Modules/SiteHealth.php:173
+#: inc/Modules/SiteHealth.php:174
 msgid "api.anthropic.com and fonts.googleapis.com both answered."
 msgstr "api.anthropic.com і fonts.googleapis.com відповіли."
 
-#: inc/Modules/SiteHealth.php:180
+#: inc/Modules/SiteHealth.php:181
 msgid "The server cannot reach a service the design importer uses"
 msgstr "Сервер не має доступу до сервісу, який використовує імпортер дизайнів"
 
 #. translators: %s: list of blocked hosts with what each is used for.
-#: inc/Modules/SiteHealth.php:183
+#: inc/Modules/SiteHealth.php:184
 msgid "Everything else in the theme is unaffected. Blocked: %s. Usually a firewall rule on the host; the support desk can open outbound HTTPS to these hosts."
 msgstr "Решта теми працює без змін. Заблоковано: %s. Зазвичай це правило фаєрволу на хостингу; підтримка може відкрити вихідний HTTPS до цих хостів."
 
-#: inc/Modules/SiteHealth.php:223
+#: inc/Modules/SiteHealth.php:224
 msgid "Theme version"
 msgstr "Версія теми"
 
-#: inc/Modules/SiteHealth.php:227
+#: inc/Modules/SiteHealth.php:228
 msgid "PHP version"
 msgstr "Версія PHP"
 
-#: inc/Modules/SiteHealth.php:231
+#: inc/Modules/SiteHealth.php:232
 msgid "ZipArchive"
 msgstr "ZipArchive"
 
-#: inc/Modules/SiteHealth.php:232
+#: inc/Modules/SiteHealth.php:233
 msgid "Available"
 msgstr "Доступно"
 
-#: inc/Modules/SiteHealth.php:232
+#: inc/Modules/SiteHealth.php:233
 msgid "Missing"
 msgstr "Відсутнє"
 
-#: inc/Modules/SiteHealth.php:236
+#: inc/Modules/SiteHealth.php:237
 msgid "Configured"
 msgstr "Налаштовано"
 
-#: inc/Modules/SiteHealth.php:236
+#: inc/Modules/SiteHealth.php:237
 msgid "Not set"
 msgstr "Не задано"
 
-#: inc/Modules/SiteHealth.php:240
+#: inc/Modules/SiteHealth.php:249
+msgid "Claude Code command"
+msgstr "Команда Claude Code"
+
+#: inc/Modules/SiteHealth.php:253
 msgid "Font families imported from designs"
 msgstr "Сімейства шрифтів, імпортовані з дизайнів"
 
-#: inc/Modules/SiteHealth.php:244
+#: inc/Modules/SiteHealth.php:257
 msgid "Site language"
 msgstr "Мова сайту"
 
-#: inc/Modules/SiteHealth.php:267
+#: inc/Modules/SiteHealth.php:273
+msgid "Unavailable — this server does not let PHP start other programs"
+msgstr "Недоступно — цей сервер не дозволяє PHP запускати інші програми"
+
+#: inc/Modules/SiteHealth.php:280
+msgid "Found at %s"
+msgstr "Знайдено за шляхом %s"
+
+#: inc/Modules/SiteHealth.php:281
+msgid "Not installed on this server"
+msgstr "Не встановлено на цьому сервері"
+
+#: inc/Modules/SiteHealth.php:298
 msgid "Theme"
 msgstr "Тема"
 
-#: inc/Modules/SiteHealth.php:40
+#: inc/Modules/SiteHealth.php:41
 msgid "design conversions through the Anthropic API"
 msgstr "конвертація дизайнів через Anthropic API"
 
-#: inc/Modules/SiteHealth.php:41
+#: inc/Modules/SiteHealth.php:42
 msgid "downloading a design’s Google Fonts"
 msgstr "завантаження Google Fonts дизайну"
 
-#: inc/Modules/SiteHealth.php:64
+#: inc/Modules/SiteHealth.php:65
 msgid "WOW — Signal: PHP extensions for the design importer"
 msgstr "WOW — Signal: PHP-розширення для імпортера дизайнів"
 
-#: inc/Modules/SiteHealth.php:69
+#: inc/Modules/SiteHealth.php:70
 msgid "WOW — Signal: uploads folder is writable"
 msgstr "WOW — Signal: тека завантажень доступна для запису"
 
-#: inc/Modules/SiteHealth.php:74
+#: inc/Modules/SiteHealth.php:75
 msgid "WOW — Signal: outbound HTTPS for the design importer"
 msgstr "WOW — Signal: вихідний HTTPS для імпортера дизайнів"
 
@@ -1888,44 +2054,44 @@ msgstr "Anthropic відхилив цей запит. Переформулюйт
 msgid "The reply was cut off before it finished. Ask for a smaller section, or split the design into two."
 msgstr "Відповідь обірвалася, не завершившись. Попросіть меншу секцію або розділіть дизайн на дві частини."
 
-#: inc/Support/AnthropicClient.php:278
+#: inc/Support/AnthropicClient.php:278 inc/Support/ClaudeCli.php:427
 msgid "The reply did not match the expected format."
 msgstr "Відповідь не відповідає очікуваному формату."
 
-#: inc/Support/AnthropicClient.php:312
+#: inc/Support/AnthropicClient.php:389
 msgid "The request was rejected as invalid."
 msgstr "Запит відхилено як некоректний."
 
-#: inc/Support/AnthropicClient.php:313
+#: inc/Support/AnthropicClient.php:390
 msgid "The API key was not accepted. Check it and save again."
 msgstr "Ключ API не прийнято. Перевірте його та збережіть ще раз."
 
-#: inc/Support/AnthropicClient.php:314
+#: inc/Support/AnthropicClient.php:391
 msgid "This API key does not have access to the selected model."
 msgstr "Цей ключ API не має доступу до обраної моделі."
 
-#: inc/Support/AnthropicClient.php:315
+#: inc/Support/AnthropicClient.php:392
 msgid "The selected model does not exist. Pick another one in the settings."
 msgstr "Обраної моделі не існує. Виберіть іншу в налаштуваннях."
 
-#: inc/Support/AnthropicClient.php:316
+#: inc/Support/AnthropicClient.php:393
 msgid "The design you pasted is too large. Send one section at a time."
 msgstr "Надісланий дизайн завеликий. Надсилайте по одній секції за раз."
 
-#: inc/Support/AnthropicClient.php:317
+#: inc/Support/AnthropicClient.php:394
 msgid "Rate limit reached. Wait a minute and try again."
 msgstr "Досягнуто ліміт запитів. Зачекайте хвилину та спробуйте ще раз."
 
-#: inc/Support/AnthropicClient.php:318
+#: inc/Support/AnthropicClient.php:395
 msgid "Anthropic had a server error. Try again shortly."
 msgstr "На боці Anthropic сталася помилка сервера. Спробуйте трохи згодом."
 
-#: inc/Support/AnthropicClient.php:319
+#: inc/Support/AnthropicClient.php:396
 msgid "Anthropic is overloaded right now. Try again shortly."
 msgstr "Anthropic зараз перевантажений. Спробуйте трохи згодом."
 
 #. translators: %d: HTTP status code.
-#: inc/Support/AnthropicClient.php:324
+#: inc/Support/AnthropicClient.php:401
 msgid "The API returned an unexpected status (%d)."
 msgstr "API повернуло неочікуваний статус (%d)."
 
@@ -1957,83 +2123,95 @@ msgstr "Висока — рекомендовано"
 msgid "Extra high — slowest, for complex layouts"
 msgstr "Дуже висока — найповільніше, для складних макетів"
 
-#: inc/Support/BlockConverter.php:1015
+#: inc/Support/BlockConverter.php:1249 inc/Support/BlockConverter.php:2211
+msgid "List items"
+msgstr "Пункти списку"
+
+#: inc/Support/BlockConverter.php:1318
 msgid "Figure and its caption"
 msgstr "Число та його підпис"
 
-#: inc/Support/BlockConverter.php:1055 inc/Support/BlockConverter.php:1826
+#: inc/Support/BlockConverter.php:1358 inc/Support/BlockConverter.php:2353
 msgid "Quotation"
 msgstr "Цитата"
 
-#: inc/Support/BlockConverter.php:1394
+#: inc/Support/BlockConverter.php:1827
 msgid "Button label and link"
 msgstr "Напис і посилання кнопки"
 
-#: inc/Support/BlockConverter.php:1451
+#: inc/Support/BlockConverter.php:1890
 msgid "Heading text"
 msgstr "Текст заголовка"
 
-#: inc/Support/BlockConverter.php:1533
+#: inc/Support/BlockConverter.php:1974
 msgid "Small label above a heading"
 msgstr "Маленький напис над заголовком"
 
-#: inc/Support/BlockConverter.php:1588
+#: inc/Support/BlockConverter.php:2031
 msgid "Body text"
 msgstr "Основний текст"
 
-#: inc/Support/BlockConverter.php:1773
+#: inc/Support/BlockConverter.php:2293
 msgid "Image and its alt text"
 msgstr "Зображення та його альтернативний текст"
 
-#: inc/Support/BlockConverter.php:1776
+#: inc/Support/BlockConverter.php:2296
 msgid "An image had no alt text in the design. Describe it in the editor, or mark it decorative."
 msgstr "У дизайні зображення не мало альтернативного тексту. Опишіть його в редакторі або позначте декоративним."
 
-#: inc/Support/BlockConverter.php:1873
+#: inc/Support/BlockConverter.php:2406
 msgid "Table contents"
 msgstr "Вміст таблиці"
 
-#: inc/Support/BlockConverter.php:1949
+#: inc/Support/BlockConverter.php:2528
 msgid "A link ran a script instead of going somewhere; it now points nowhere."
 msgstr "Посилання запускало скрипт замість переходу; тепер воно нікуди не веде."
 
-#: inc/Support/BlockConverter.php:2002
+#: inc/Support/BlockConverter.php:2615
+msgid "Form: recipient, labels and success message"
+msgstr "Форма: отримувач, підписи й повідомлення про успіх"
+
+#: inc/Support/BlockConverter.php:2616
+msgid "The design’s form was replaced with the theme’s Contact form block, which sends to the site’s admin address. Adjust its fields and recipient in the editor."
+msgstr "Форму з дизайну замінено блоком «Контактна форма» теми, який надсилає на адресу адміністратора сайту. Поля й отримувача можна змінити в редакторі."
+
+#: inc/Support/BlockConverter.php:2629
 msgid "This section had a form. Add the theme’s Contact form block where it belongs — a form copied as markup would not send anything."
 msgstr "У цій секції була форма. Додайте блок «Контактна форма» з теми на її місце — скопійована розмітка форми нічого б не надсилала."
 
-#: inc/Support/BlockConverter.php:2008
+#: inc/Support/BlockConverter.php:2635
 msgid "Decorative vector artwork was left out. The theme’s gradients stand in for it; add a real image if you need the original."
 msgstr "Декоративну векторну графіку не перенесено. Її замінюють градієнти теми; додайте справжнє зображення, якщо потрібен оригінал."
 
-#: inc/Support/BlockConverter.php:2014
+#: inc/Support/BlockConverter.php:2641
 msgid "An embedded frame was left out. Use the matching embed block if you need it back."
 msgstr "Вбудований фрейм не перенесено. Скористайтеся відповідним блоком вставки, якщо він потрібен."
 
-#: inc/Support/BlockConverter.php:274
-msgid "Some sizes from the design had no matching theme preset and were kept as exact values; adjust them in the Site Editor if you want them on the scale."
-msgstr "Деякі розміри з дизайну не мали відповідного пресета теми й збережені як точні значення; підлаштуйте їх у редакторі сайту, якщо хочете перевести на шкалу."
-
-#: inc/Support/BlockConverter.php:282
-msgid "This section held nothing that could become content."
-msgstr "У цій секції не було нічого, що могло б стати вмістом."
-
 #. translators: 1: section label, 2: word count, 3: image count.
-#: inc/Support/BlockConverter.php:2946
+#: inc/Support/BlockConverter.php:3603
 msgid "\"%1$s\" — %2$d words and %3$d image(s), converted structurally into editable blocks."
 msgstr "«%1$s» — слів: %2$d, зображень: %3$d; структурно перетворено на редаговані блоки."
 
-#: inc/Support/BlockConverter.php:405
+#: inc/Support/BlockConverter.php:465
+msgid "Some sizes from the design had no matching theme preset and were kept as exact values; adjust them in the Site Editor if you want them on the scale."
+msgstr "Деякі розміри з дизайну не мали відповідного пресета теми й збережені як точні значення; підлаштуйте їх у редакторі сайту, якщо хочете перевести на шкалу."
+
+#: inc/Support/BlockConverter.php:473
+msgid "This section held nothing that could become content."
+msgstr "У цій секції не було нічого, що могло б стати вмістом."
+
+#: inc/Support/BlockConverter.php:599
 msgid "Background image"
 msgstr "Фонове зображення"
 
+#: inc/Support/BlockConverter.php:945
+msgid "Link text and target"
+msgstr "Текст і адреса посилання"
+
 #. translators: %s: custom element name, e.g. hero-viz.
-#: inc/Support/BlockConverter.php:739
+#: inc/Support/BlockConverter.php:958
 msgid "A JS-rendered visual (%s) was left out. Add an image block where it stood if the page needs something there."
 msgstr "Візуал, що малюється JavaScript (%s), пропущено. Додайте блок зображення на його місце, якщо сторінці там щось потрібно."
-
-#: inc/Support/BlockConverter.php:951 inc/Support/BlockConverter.php:1735
-msgid "List items"
-msgstr "Пункти списку"
 
 #: inc/Support/BlockMarkupValidator.php:152
 msgid "The conversion produced nothing."
@@ -2134,19 +2312,67 @@ msgstr "Згасання Signal — від акценту до прозорог�
 msgid "Soft"
 msgstr "Мʼяка"
 
-#: inc/Support/ConversionPrompt.php:411
+#: inc/Support/ClaudeCli.php:194
+msgid "This server does not allow PHP to start other programs, so the command-line route cannot be used here. Use an API key instead."
+msgstr "Цей сервер не дозволяє PHP запускати інші програми, тож шлях через командний рядок тут не спрацює. Скористайтеся ключем API."
+
+#: inc/Support/ClaudeCli.php:203
+msgid "The claude command was not found. Install Claude Code on this machine, or enter the full path to the binary."
+msgstr "Команду claude не знайдено. Встановіть Claude Code на цій машині або вкажіть повний шлях до програми."
+
+#. translators: %d: process exit code.
+#: inc/Support/ClaudeCli.php:237
+msgid "The claude command exited with status %d instead of reporting its version."
+msgstr "Команда claude завершилася зі статусом %d замість того, щоб повідомити свою версію."
+
+#: inc/Support/ClaudeCli.php:387
+msgid "The claude command produced no output."
+msgstr "Команда claude нічого не вивела."
+
+#. translators: %s: the first line the command printed.
+#: inc/Support/ClaudeCli.php:390
+msgid "The claude command did not return a result: %s"
+msgstr "Команда claude не повернула результату: %s"
+
+#: inc/Support/ClaudeCli.php:404
+msgid "The claude command reported a failure."
+msgstr "Команда claude повідомила про помилку."
+
+#. translators: %s: the error the command reported.
+#: inc/Support/ClaudeCli.php:407
+msgid "The claude command reported a failure: %s"
+msgstr "Команда claude повідомила про помилку: %s"
+
+#: inc/Support/ClaudeCli.php:626
+msgid "The brief could not be written to a temporary file, so the claude command was not run."
+msgstr "Бриф не вдалося записати у тимчасовий файл, тож команду claude не запускали."
+
+#: inc/Support/ClaudeCli.php:673
+msgid "The claude command could not be started. Check the path to the binary, and that the web server user is allowed to run it."
+msgstr "Не вдалося запустити команду claude. Перевірте шлях до програми і те, чи дозволено користувачеві вебсервера її запускати."
+
+#. translators: %d: number of seconds.
+#: inc/Support/ClaudeCli.php:704
+msgid "The claude command was still running after %d seconds and was stopped. Try a lower effort setting, or a smaller section."
+msgstr "Команда claude працювала довше за %d секунд і була зупинена. Спробуйте нижчий рівень старанності або меншу секцію."
+
+#: inc/Support/ClaudeCli.php:741
+msgid "There is no writable temporary directory for the claude command to read its brief from."
+msgstr "Немає доступної для запису тимчасової теки, з якої команда claude могла б прочитати свій бриф."
+
+#: inc/Support/ConversionPrompt.php:658
 msgid "Nothing was pasted."
 msgstr "Нічого не вставлено."
 
-#: inc/Support/ConversionPrompt.php:425
+#: inc/Support/ConversionPrompt.php:672
 msgid "That does not look like the JSON list the brief asked for. Copy the whole reply, including the opening [ and closing ]."
 msgstr "Це не схоже на список JSON, який просило завдання. Скопіюйте всю відповідь, разом із відкривною [ і закривною ]."
 
-#: inc/Support/ConversionPrompt.php:434
+#: inc/Support/ConversionPrompt.php:681
 msgid "The pasted reply is not valid JSON. It may have been cut off — ask for it again and copy all of it."
 msgstr "Вставлена відповідь не є коректним JSON. Можливо, вона обірвалася — попросіть її ще раз і скопіюйте повністю."
 
-#: inc/Support/ConversionPrompt.php:470
+#: inc/Support/ConversionPrompt.php:717
 msgid "The pasted list has no sections with markup in it."
 msgstr "У вставленому списку немає жодної секції з розміткою."
 
@@ -2174,56 +2400,123 @@ msgstr "Основне"
 msgid "Could not create the designs folder inside uploads."
 msgstr "Не вдалося створити теку дизайнів усередині uploads."
 
-#: inc/Support/DesignArchive.php:316
+#: inc/Support/DesignArchive.php:322
+msgid "The uploaded file is empty (0 bytes). Zip the design folder again and upload the new file."
+msgstr "Завантажений файл порожній (0 байт). Заархівуйте теку дизайну ще раз і завантажте новий файл."
+
+#: inc/Support/DesignArchive.php:326
+msgid "a RAR archive"
+msgstr "RAR-архів"
+
+#: inc/Support/DesignArchive.php:327
+msgid "a 7-Zip archive"
+msgstr "7-Zip-архів"
+
+#: inc/Support/DesignArchive.php:328
+msgid "a gzip/tar.gz archive"
+msgstr "gzip/tar.gz-архів"
+
+#: inc/Support/DesignArchive.php:329
+msgid "a PDF"
+msgstr "PDF"
+
+#: inc/Support/DesignArchive.php:330 inc/Support/DesignArchive.php:331
+msgid "an HTML page"
+msgstr "HTML-сторінка"
+
+#: inc/Support/DesignArchive.php:332
+msgid "a JSON file"
+msgstr "JSON-файл"
+
+#. translators: %s: what the file actually is, e.g. "a RAR archive".
+#: inc/Support/DesignArchive.php:339
+msgid "That file is %s with a .zip name, not a ZIP archive. Create a real ZIP of the design folder (right-click → Compress / Send to → Compressed folder) and upload that."
+msgstr "Цей файл — %s з розширенням .zip, а не ZIP-архів. Створіть справжній ZIP теки дизайну (права кнопка → Стиснути / Надіслати → Стиснута папка) і завантажте його."
+
+#: inc/Support/DesignArchive.php:347
+msgid "it is damaged or was not fully downloaded"
+msgstr "він пошкоджений або завантажився не повністю"
+
+#: inc/Support/DesignArchive.php:348
+msgid "its directory is unreadable"
+msgstr "його зміст не читається"
+
+#: inc/Support/DesignArchive.php:349
+msgid "the server ran out of memory reading it"
+msgstr "серверу забракло пам’яті під час читання"
+
+#: inc/Support/DesignArchive.php:350
+msgid "the server could not open the temporary file"
+msgstr "сервер не зміг відкрити тимчасовий файл"
+
+#: inc/Support/DesignArchive.php:351
+msgid "the server could not read the temporary file"
+msgstr "сервер не зміг прочитати тимчасовий файл"
+
+#: inc/Support/DesignArchive.php:352
+msgid "the server could not seek in the temporary file"
+msgstr "сервер не зміг переміститися тимчасовим файлом"
+
+#. translators: 1: reason, 2: libzip error code.
+#: inc/Support/DesignArchive.php:357
+msgid "That ZIP looks right but %1$s (code %2$d). Re-zip the folder and try again; if it keeps happening, the file may use a compression PHP cannot read — choose \"Deflate\"/standard ZIP in your archiver."
+msgstr "ZIP виглядає правильно, але %1$s (код %2$d). Заархівуйте теку ще раз і спробуйте знову; якщо повторюється — можливо, використано стиснення, яке PHP не читає: виберіть в архіваторі «Deflate»/стандартний ZIP."
+
+#: inc/Support/DesignArchive.php:358
+msgid "could not be opened"
+msgstr "не вдалося відкрити"
+
+#. translators: 1: libzip error code, 2: file size in bytes.
+#: inc/Support/DesignArchive.php:365
+msgid "That file could not be opened as a ZIP archive (code %1$d, %2$s bytes). It does not start like a ZIP, so it is probably not one: zip the design folder itself and upload the result."
+msgstr "Цей файл не вдалося відкрити як ZIP-архів (код %1$d, байт: %2$s). Він не починається як ZIP, тож, імовірно, ним не є: заархівуйте саму теку дизайну й завантажте результат."
+
+#: inc/Support/DesignArchive.php:382
 msgid "This server has no ZIP support in PHP, so archives cannot be unpacked. Ask your host to enable the zip extension."
 msgstr "На цьому сервері PHP не підтримує ZIP, тож архіви неможливо розпакувати. Попросіть хостинг увімкнути розширення zip."
 
-#: inc/Support/DesignArchive.php:332
+#: inc/Support/DesignArchive.php:406
 msgid "Could not create a folder for this design."
 msgstr "Не вдалося створити теку для цього дизайну."
 
-#: inc/Support/DesignArchive.php:338
-msgid "That file could not be opened as a ZIP archive."
-msgstr "Цей файл не вдалося відкрити як ZIP-архів."
-
 #. translators: %d: maximum number of files.
-#: inc/Support/DesignArchive.php:350
+#: inc/Support/DesignArchive.php:425
 msgid "That archive holds more than %d files. Send the design folder on its own, without build output or dependencies."
 msgstr "Цей архів містить більше ніж %d файлів. Надішліть саму теку дизайну, без результатів збірки та залежностей."
 
-#: inc/Support/DesignArchive.php:361
+#: inc/Support/DesignArchive.php:436
 msgid "Could not resolve the destination folder."
 msgstr "Не вдалося визначити теку призначення."
 
-#: inc/Support/DesignArchive.php:403
+#: inc/Support/DesignArchive.php:478
 msgid "That archive unpacks to more than 200 MB. Remove videos, design binaries and node_modules before sending it."
 msgstr "Цей архів розпаковується у понад 200 МБ. Приберіть відео, бінарні файли дизайну та node_modules, перш ніж надсилати."
 
 #. translators: %s: entry path inside the archive.
-#: inc/Support/DesignArchive.php:412
+#: inc/Support/DesignArchive.php:487
 msgid "%s — refused, the path points outside the folder"
 msgstr "%s — відхилено, шлях веде за межі теки"
 
-#: inc/Support/DesignArchive.php:458
+#: inc/Support/DesignArchive.php:533
 msgid "That archive unpacks to more than it declares, past the size limit. Remove videos, design binaries and node_modules before sending it."
 msgstr "Архів розпаковується у більший обсяг, ніж заявляє, понад ліміт розміру. Приберіть відео, бінарні файли дизайну та node_modules перед надсиланням."
 
-#: inc/Support/DesignArchive.php:470
+#: inc/Support/DesignArchive.php:545
 msgid "Nothing usable was found in that archive. It should contain the design HTML, its stylesheets and its images."
 msgstr "У цьому архіві не знайдено нічого придатного. Він має містити HTML дизайну, його таблиці стилів та зображення."
 
 #. translators: %s: entry path inside the archive.
-#: inc/Support/DesignArchive.php:517
+#: inc/Support/DesignArchive.php:592
 msgid "%s — refused, executable files are never unpacked"
 msgstr "%s — відхилено, виконувані файли ніколи не розпаковуються"
 
 #. translators: %s: entry path inside the archive. */ __( '%s — refused, executable files are never unpacked', 'wow-signal' ), $name ); } if ( ! in_array( $extension, self::ALLOWED_EXTENSIONS, true ) ) { return sprintf( /* translators: %s: entry path inside the archive.
-#: inc/Support/DesignArchive.php:525
+#: inc/Support/DesignArchive.php:600
 msgid "%s — skipped, not a design file"
 msgstr "%s — пропущено, це не файл дизайну"
 
 #. translators: %s: entry path inside the archive. */ __( '%s — skipped, not a design file', 'wow-signal' ), $name ); } if ( $size > self::MAX_FILE_BYTES ) { return sprintf( /* translators: %s: entry path inside the archive.
-#: inc/Support/DesignArchive.php:533
+#: inc/Support/DesignArchive.php:608
 msgid "%s — skipped, larger than 12 MB"
 msgstr "%s — пропущено, більший за 12 МБ"
 
@@ -2255,159 +2548,213 @@ msgstr "%s не є придатним файлом шрифту."
 msgid "%s could not be written."
 msgstr "%s не вдалося записати."
 
-#: inc/Support/DesignTokens.php:254
+#: inc/Support/DesignTokens.php:256
 msgctxt "Palette colour name"
 msgid "Base"
 msgstr "Основа"
 
-#: inc/Support/DesignTokens.php:255
+#: inc/Support/DesignTokens.php:257
 msgctxt "Palette colour name"
 msgid "Surface"
 msgstr "Поверхня"
 
-#: inc/Support/DesignTokens.php:256
+#: inc/Support/DesignTokens.php:258
 msgctxt "Palette colour name"
 msgid "Surface raised"
 msgstr "Піднята поверхня"
 
-#: inc/Support/DesignTokens.php:257
+#: inc/Support/DesignTokens.php:259
 msgctxt "Palette colour name"
 msgid "Border"
 msgstr "Межа"
 
-#: inc/Support/DesignTokens.php:258
+#: inc/Support/DesignTokens.php:260
 msgctxt "Palette colour name"
 msgid "Border strong"
 msgstr "Межа виразна"
 
-#: inc/Support/DesignTokens.php:259
+#: inc/Support/DesignTokens.php:261
 msgctxt "Palette colour name"
 msgid "Contrast"
 msgstr "Контраст"
 
-#: inc/Support/DesignTokens.php:260
+#: inc/Support/DesignTokens.php:262
 msgctxt "Palette colour name"
 msgid "Muted"
 msgstr "Приглушений"
 
-#: inc/Support/DesignTokens.php:261
+#: inc/Support/DesignTokens.php:263
 msgctxt "Palette colour name"
 msgid "Accent"
 msgstr "Акцент"
 
-#: inc/Support/DesignTokens.php:262
+#: inc/Support/DesignTokens.php:264
 msgctxt "Palette colour name"
 msgid "Accent ink"
 msgstr "Акцент для тексту"
 
-#: inc/Support/DesignTokens.php:263
+#: inc/Support/DesignTokens.php:265
 msgctxt "Palette colour name"
 msgid "Accent 2"
 msgstr "Акцент 2"
 
-#: inc/Support/DesignTokens.php:264
+#: inc/Support/DesignTokens.php:266
 msgctxt "Palette colour name"
 msgid "Accent 3"
 msgstr "Акцент 3"
 
-#: inc/Support/DesignTokens.php:265
+#: inc/Support/DesignTokens.php:267
 msgctxt "Palette colour name"
 msgid "Success"
 msgstr "Успіх"
 
-#: inc/Support/DesignTokens.php:266
+#: inc/Support/DesignTokens.php:268
 msgctxt "Palette colour name"
 msgid "Warning"
 msgstr "Попередження"
+
+#: inc/Support/ModelGateway.php:135
+msgid "Not checked — this site is set to use the API."
+msgstr "Не перевірялося — цей сайт налаштовано на роботу через API."
+
+#: inc/Support/ModelGateway.php:144
+msgid "No Anthropic API key is saved yet."
+msgstr "Ключ Anthropic API ще не збережено."
+
+#: inc/Support/ModelGateway.php:146
+msgid "Neither route is set up: Claude Code is not installed here, and no API key has been saved."
+msgstr "Не налаштовано жодного шляху: Claude Code тут не встановлено, і ключа API не збережено."
+
+#: inc/Support/ModelGateway.php:216
+msgid "There is no way to reach a model from here yet. Install Claude Code on this machine, or add an Anthropic API key under Appearance → Design import."
+msgstr "Звідси поки що ніяк не дістатися до моделі. Встановіть Claude Code на цій машині або додайте ключ Anthropic API у «Вигляд → Імпорт дизайну»."
+
+#: inc/Support/ModelGateway.php:51
+msgid "Automatic — the command line when this machine has it, the API otherwise"
+msgstr "Автоматично — командний рядок, якщо він є на цій машині, інакше API"
+
+#: inc/Support/ModelGateway.php:52
+msgid "Claude Code on this machine — uses the signed-in subscription, no API charges"
+msgstr "Claude Code на цій машині — користується авторизованою підпискою, без списань за API"
+
+#: inc/Support/ModelGateway.php:53
+msgid "Anthropic API — works on any host, billed per conversion"
+msgstr "Anthropic API — працює на будь-якому хостингу, оплата за кожну конвертацію"
 
 #. translators: 1: name of the element the design's script would have rendered, 2: relative path of the screenshot used instead.
 #: inc/Support/SectionSplitter.php:799
 msgid "A JS-rendered visual (%1$s) was replaced with the design's screenshot %2$s. Swap it for a real image or embed when the site is live."
 msgstr "Візуал, що малюється JavaScript (%1$s), замінено скріншотом дизайну %2$s. Замініть його на справжнє зображення або вбудований елемент перед запуском сайту."
 
-#: inc/Support/SiteAssembler.php:1040 inc/Support/SiteAssembler.php:1327
+#. translators: %s: comma-separated list of template variable names.
+#: inc/Support/SiteAssembler.php:1001
+msgid "The design left placeholders to fill in: %s"
+msgstr "У дизайні залишились незаповнені плейсхолдери: %s"
+
+#: inc/Support/SiteAssembler.php:1269 inc/Support/SiteAssembler.php:1989
 msgid "Footer"
 msgstr "Підвал"
 
-#: inc/Support/SiteAssembler.php:1040 inc/Support/SiteAssembler.php:1327
+#: inc/Support/SiteAssembler.php:1269 inc/Support/SiteAssembler.php:1989
 msgid "Header"
 msgstr "Шапка"
 
-#: inc/Support/SiteAssembler.php:1236 assets/js/admin-import.js:1109
+#: inc/Support/SiteAssembler.php:131
+msgid "No pages were found in that language."
+msgstr "Сторінок цією мовою не знайдено."
+
+#: inc/Support/SiteAssembler.php:1462 assets/js/admin-import.js:1452
 msgid "Main navigation"
 msgstr "Головна навігація"
 
-#: inc/Support/SiteAssembler.php:163
+#: inc/Support/SiteAssembler.php:227
 msgid "That page is not part of this build."
 msgstr "Ця сторінка не входить у цей білд."
 
-#: inc/Support/SiteAssembler.php:236
+#: inc/Support/SiteAssembler.php:410
 msgid "None of the pages could be converted."
 msgstr "Жодну зі сторінок не вдалося сконвертувати."
 
 #. translators: 1: link target, 2: how many links point at it.
-#: inc/Support/SiteAssembler.php:247
+#: inc/Support/SiteAssembler.php:421
 msgid "%2$d link points at \"%1$s\", which is not a page on this site. Check the design or remove the link."
 msgid_plural "%2$d links point at \"%1$s\", which is not a page on this site. Check the design or remove the links."
 msgstr[0] "%2$d посилання веде на «%1$s», якої немає на цьому сайті. Перевірте дизайн або приберіть посилання."
 msgstr[1] "%2$d посилання ведуть на «%1$s», якої немає на цьому сайті. Перевірте дизайн або приберіть посилання."
 msgstr[2] "%2$d посилань ведуть на «%1$s», якої немає на цьому сайті. Перевірте дизайн або приберіть посилання."
 
-#: inc/Support/SiteAssembler.php:446
+#. translators: 1: how many attempts failed, 2: the reason given for the first of them.
+#: inc/Support/SiteAssembler.php:484
+msgid "%1$d section could not be sent to the model and was converted structurally instead: %2$s"
+msgid_plural "%1$d sections could not be sent to the model and were converted structurally instead: %2$s"
+msgstr[0] "%1$d секцію не вдалося надіслати моделі, тож її сконвертовано структурно: %2$s"
+msgstr[1] "%1$d секції не вдалося надіслати моделі, тож їх сконвертовано структурно: %2$s"
+msgstr[2] "%1$d секцій не вдалося надіслати моделі, тож їх сконвертовано структурно: %2$s"
+
+#: inc/Support/SiteAssembler.php:653
 msgid "body text on the page background"
 msgstr "основного тексту на тлі сторінки"
 
-#: inc/Support/SiteAssembler.php:447
+#: inc/Support/SiteAssembler.php:654
 msgid "secondary text on the page background"
 msgstr "другорядного тексту на тлі сторінки"
 
-#: inc/Support/SiteAssembler.php:448
+#: inc/Support/SiteAssembler.php:655
 msgid "text on cards"
 msgstr "тексту на картках"
 
-#: inc/Support/SiteAssembler.php:449
+#: inc/Support/SiteAssembler.php:656
 msgid "form field borders"
 msgstr "рамок полів форми"
 
 #. translators: 1: what the pair is used for, 2: measured ratio, 3: required ratio.
-#: inc/Support/SiteAssembler.php:469
+#: inc/Support/SiteAssembler.php:676
 msgid "The design's colours give %1$s a contrast of %2$s:1, below the %3$s:1 that WCAG 2.2 AA asks for. Adjust it in Appearance → Editor → Styles before launch."
 msgstr "Кольори дизайну дають для %1$s контраст %2$s:1 — нижче за %3$s:1, який вимагає WCAG 2.2 AA. Виправте це у «Вигляд → Редактор → Стилі» до запуску."
 
-#: inc/Support/SiteAssembler.php:574
+#: inc/Support/SiteAssembler.php:790
 msgid "Nothing on this page could be converted."
 msgstr "На цій сторінці не вдалося сконвертувати нічого."
 
-#: inc/Support/SiteAssembler.php:586
+#: inc/Support/SiteAssembler.php:802
 msgid "This page had no heading of its own, so its title was added as the top heading."
 msgstr "Ця сторінка не мала власного заголовка, тож її назву додано як головний заголовок."
 
 #. translators: 1: section label, 2: reason.
-#: inc/Support/SiteAssembler.php:682
+#: inc/Support/SiteAssembler.php:919
 msgid "Section \"%1$s\" was left out: %2$s"
 msgstr "Секцію «%1$s» пропущено: %2$s"
 
 #. translators: %s: comma-separated list of "visual → screenshot" pairs.
-#: inc/Support/SiteAssembler.php:735
+#: inc/Support/SiteAssembler.php:972
 msgid "JS-rendered visuals were stood in for by screenshots from the design: %s"
 msgstr "Візуали, що малюються JavaScript, замінено скріншотами з дизайну: %s"
 
 #. translators: 1: number of lists, 2: number of items.
-#: inc/Support/SiteAssembler.php:748
+#: inc/Support/SiteAssembler.php:985
 msgid "%1$d list was filled from the design’s own data (%2$d items)."
 msgid_plural "%1$d lists were filled from the design’s own data (%2$d items)."
 msgstr[0] "%1$d список наповнено з власних даних дизайну (елементів: %2$d)."
 msgstr[1] "%1$d списки наповнено з власних даних дизайну (елементів: %2$d)."
 msgstr[2] "%1$d списків наповнено з власних даних дизайну (елементів: %2$d)."
 
-#. translators: %s: comma-separated list of template variable names.
-#: inc/Support/SiteAssembler.php:764
-msgid "The design left placeholders to fill in: %s"
-msgstr "У дизайні залишились незаповнені плейсхолдери: %s"
+#: inc/Support/SmartConverter.php:424 inc/Support/SmartConverter.php:507
+msgid "the retry could not be sent"
+msgstr "повторну спробу не вдалося надіслати"
 
-#: inc/Support/SiteAssembler.php:95
-msgid "No pages were found in that language."
-msgstr "Сторінок цією мовою не знайдено."
+#: inc/Support/SmartConverter.php:635
+msgid "the reply contained no markup"
+msgstr "у відповіді не було розмітки"
+
+#. translators: %s: what the validator objected to.
+#: inc/Support/SmartConverter.php:681
+msgid "Claude proposed a correction to this section that would not have been valid block markup, so the section was left as it was (%s)."
+msgstr "Claude запропонував для цієї секції виправлення, яке не було б коректною розміткою блоків, тож секцію лишено як була (%s)."
+
+#. translators: %s: what the validator objected to. */ __( 'Claude proposed a correction to this section that would not have been valid block markup, so the section was left as it was (%s).', 'wow-signal' ), $why ) : sprintf( /* translators: %s: what the validator objected to.
+#: inc/Support/SmartConverter.php:686
+msgid "Claude answered for this section but the result was not valid block markup, so the structural conversion was kept (%s)."
+msgstr "Claude відповів щодо цієї секції, але результат не був коректною розміткою блоків, тож збережено структурну конвертацію (%s)."
 
 #: inc/Support/StyleVariations.php:42
 msgid "Signal — the theme default"

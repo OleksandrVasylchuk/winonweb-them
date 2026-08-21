@@ -23,7 +23,7 @@
 
 .wow-import__masthead {
 	position: relative;
-	max-width: 60rem;
+	max-width: none;
 	margin: 1.25rem 0 1.5rem;
 	padding: 1.6rem 1.75rem;
 	overflow: hidden;
@@ -73,7 +73,7 @@
 }
 
 .wow-import__lede {
-	max-width: 46rem;
+	max-width: none;
 	font-size: 14px;
 }
 
@@ -86,7 +86,7 @@
 }
 
 .wow-import__settings {
-	max-width: 60rem;
+	max-width: none;
 	margin: 1rem 0 1.5rem;
 	padding: 0 1.5rem;
 	background: var(--wow-admin-paper);
@@ -175,7 +175,7 @@
 .wow-import__field {
 	display: block;
 	width: 100%;
-	max-width: 34rem;
+	max-width: none;
 	min-height: 36px;
 	padding: 0.35rem 0.6rem;
 	border: 1px solid #8c8f94;
@@ -215,7 +215,7 @@
 
 .wow-import__step {
 	position: relative;
-	max-width: 60rem;
+	max-width: none;
 	margin: 0 0 1.5rem;
 	padding: 1.35rem 1.6rem;
 	background: var(--wow-admin-paper);
@@ -232,12 +232,12 @@
 }
 
 .wow-import__hint {
-	max-width: 46rem;
+	max-width: none;
 	color: #50575e;
 }
 
 .wow-import__status {
-	max-width: 60rem;
+	max-width: none;
 	margin: 0 0 1rem;
 	padding: 0.65rem 0.95rem;
 	min-height: 1.2em;
@@ -317,7 +317,7 @@
  * design: what a previous import left behind, and the way to take it out.
  */
 .wow-import__cleanup {
-	max-width: 60rem;
+	max-width: none;
 	margin: 1rem 0 1.5rem;
 	padding: 1.1rem 1.25rem;
 	color: var(--wow-admin-ink);
@@ -351,6 +351,48 @@
 
 .wow-import__choice > .wow-import__hint {
 	margin: 0;
+}
+
+/*
+ * Putting a model in the loop, boxed off from the free options above it.
+ *
+ * The border is the point: everything outside it costs nothing and touches no
+ * network, everything inside it may do both. Somebody scanning this screen
+ * should be able to see which is which without reading a word.
+ */
+.wow-import__smart {
+	margin: 0.9rem 0 0;
+	padding: 0.7rem 0.9rem;
+	background: var(--wow-admin-soft);
+	border: 1px solid var(--wow-admin-line);
+	border-left: 3px solid var(--wow-admin-accent);
+	border-radius: 4px;
+}
+
+.wow-import__smart > .wow-import__choice:first-child {
+	margin-top: 0;
+}
+
+/* The review pass is a refinement of the choice above it, and sits under it. */
+.wow-import__choice--nested {
+	margin-left: 1.6rem;
+}
+
+.wow-import__estimate {
+	margin: 0.6rem 0 0;
+	color: var(--wow-admin-muted);
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+}
+
+.wow-import__changes {
+	margin-top: 0.3rem;
+	font-size: 12px;
+}
+
+.wow-import__changes > summary {
+	color: var(--wow-admin-muted);
+	cursor: pointer;
 }
 
 .wow-import__confirm {
@@ -390,7 +432,7 @@
 
 .wow-import__routes {
 	margin: 0.6rem 0 0;
-	max-width: 46rem;
+	max-width: none;
 }
 
 .wow-import__routes dt {
@@ -496,7 +538,7 @@
 }
 
 .wow-import__bridge-steps {
-	max-width: 46rem;
+	max-width: none;
 	margin: 0 0 1rem 1.2rem;
 	font-size: 13px;
 	color: #50575e;
@@ -505,7 +547,7 @@
 .wow-import__paste {
 	display: block;
 	width: 100%;
-	max-width: 60rem;
+	max-width: none;
 	font-family: Consolas, Monaco, monospace;
 	font-size: 12px;
 }
@@ -856,4 +898,17 @@
 	.wow-import__page-preview {
 		align-self: stretch;
 	}
+}
+
+/* While a preview is open the screen uses the whole window: two panes of page need the room. */
+.wow-import.is-previewing .wow-import__step,
+.wow-import.is-previewing .wow-import__status,
+.wow-import.is-previewing .wow-import__settings,
+.wow-import.is-previewing .wow-import__cleanup,
+.wow-import.is-previewing .wow-import__masthead {
+	max-width: none;
+}
+
+.wow-import.is-previewing .wow-import__compare-wrap {
+	margin-inline: 0;
 }

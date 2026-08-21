@@ -42,6 +42,12 @@
 		publish: false,
 		language: '',
 		keepArchive: false,
+		// Whether the model corrects each section, and whether it also reviews its own work.
+		smart: false,
+		refine: false,
+		// The live verdict from /model: which route works from here, and why not.
+		model: null,
+		modelChecking: false,
 		// Designs already unpacked on the server, and what they weigh.
 		designs: [],
 		archive: ( cfg.summary && cfg.summary.archive ) || null,
@@ -116,6 +122,92 @@
 
 			return total + ( Number( section.estimate ) || 0 );
 		}, 0 );
+	}
+
+	/**
+	 * The pages a build would actually touch, in the chosen language.
+	 *
+	 * A multilingual archive holds the same site three times over. Counting
+	 * all of it would treble every figure on this panel, and the one figure
+	 * that matters here is money.
+	 */
+	function plannedPages() {
+		var design = state.design;
+
+		if ( ! design || ! design.pages ) {
+			return [];
+		}
+
+		if ( ! state.language ) {
+			return design.pages;
+		}
+
+		var prefix = state.language + '/';
+
+		var inLanguage = design.pages.filter( function ( page ) {
+			var path = page.path || page.file || '';
+
+			return 0 === path.indexOf( prefix ) || path.indexOf( '/' + prefix ) > -1;
+		} );
+
+		// A design whose files are not filed by language is one site, not none.
+		return inLanguage.length ? inLanguage : design.pages;
+	}
+
+	/**
+	 * How many sections a build of the current design would convert.
+	 *
+	 * Sections chosen in a preview win over the design's own count: leaving
+	 * four sections out of a page changes what the build costs, and a figure
+	 * that ignored that would be wrong in the direction that matters.
+	 */
+	function plannedSections() {
+		return plannedPages().reduce( function ( total, page ) {
+			var chosen = state.includes[ page.file ];
+
+			if ( chosen ) {
+				return total + chosen.length;
+			}
+
+			return total + ( Number( page.sections ) || 1 );
+		}, 0 );
+	}
+
+	/**
+	 * Roughly what a guided build would cost through the API, in dollars.
+	 *
+	 * The server priced each page when it indexed the design; this adds up the
+	 * ones this build would actually convert, and doubles it when the review
+	 * pass is on because that is a second call per section.
+	 */
+	function plannedCost() {
+		var total = plannedPages().reduce( function ( sum, page ) {
+			return sum + ( Number( page.estimate ) || 0 );
+		}, 0 );
+
+		return total * ( state.refine ? 2 : 1 );
+	}
+
+	/** Whether a model can be reached from this machine at all. */
+	function modelReady() {
+		return !! ( state.model && state.model.ready );
+	}
+
+	/** Ask the server which route works from here. */
+	function loadModel() {
+		state.modelChecking = true;
+
+		apiFetch( { path: '/wow-signal/v1/model' } )
+			.then( function ( status ) {
+				state.model = status;
+			} )
+			.catch( function () {
+				state.model = { ready: false, route: '', reason: '' };
+			} )
+			.then( function () {
+				state.modelChecking = false;
+				render();
+			} );
 	}
 
 	/** How many sections still need converting. */
@@ -293,6 +385,20 @@
 		state.preview = null;
 		state.includes = {};
 		state.savedPage = null;
+
+		/*
+		 * Match the state to what the language picker shows.
+		 *
+		 * The picker lists the archive's languages and renders the first as
+		 * selected, but an empty language means "every page in the archive" to
+		 * the server. Left alone, a three-language design reads as "building
+		 * en" on screen and quietly creates the Russian and Chinese pages too
+		 * — three times the pages, three times the cost of a guided build.
+		 */
+		state.language =
+			design && design.languages && design.languages.length > 1
+				? design.languages[ 0 ]
+				: '';
 	}
 
 	function loadDesigns() {
@@ -698,6 +804,143 @@
 	}
 
 	/*
+	 * The choice that puts a model in the loop, and everything the person
+	 * pressing it deserves to know first: which route it will take, what it
+	 * will cost, and how much longer it will take. Off unless chosen — the
+	 * structural build stays the default, and stays free.
+	 */
+	function renderSmartChoice() {
+		if ( state.modelChecking ) {
+			return el( 'p', {
+				class: 'wow-import__hint',
+				text: __( 'Checking whether Claude can be reached from here…', 'wow-signal' ),
+			} );
+		}
+
+		if ( ! modelReady() ) {
+			var why = ( state.model && state.model.reason ) || '';
+
+			if ( ! why && ! cfg.hasKey && ! cfg.cliFound ) {
+				why = __( 'Claude Code is not installed here and no API key has been saved.', 'wow-signal' );
+			}
+
+			if ( ! why ) {
+				return null;
+			}
+
+			return el( 'p', { class: 'wow-import__hint' }, [
+				el( 'strong', { text: __( 'Correcting each section with Claude is not available yet. ', 'wow-signal' ) } ),
+				el( 'span', { text: why + ' ' } ),
+				el( 'span', { text: __( 'Open Connection settings above to set it up. The build below works without it.', 'wow-signal' ) } ),
+			] );
+		}
+
+		var smart = el( 'input', {
+			type: 'checkbox',
+			id: 'wow-import-smart',
+			onChange: function ( event ) {
+				state.smart = !! event.target.checked;
+
+				if ( ! state.smart ) {
+					state.refine = false;
+				}
+
+				render();
+			},
+		} );
+
+		smart.checked = state.smart;
+
+		var refine = el( 'input', {
+			type: 'checkbox',
+			id: 'wow-import-refine',
+			disabled: state.smart ? null : 'disabled',
+			onChange: function ( event ) {
+				state.refine = !! event.target.checked;
+				render();
+			},
+		} );
+
+		refine.checked = state.refine;
+
+		var billed = 'api' === state.model.route;
+		var calls = plannedSections() * ( state.refine ? 2 : 1 );
+
+		var lines = [
+			el( 'p', { class: 'wow-import__choice' }, [
+				smart,
+				el( 'label', {
+					for: 'wow-import-smart',
+					text: ' ' + __( 'Let Claude correct each section', 'wow-signal' ),
+				} ),
+				el( 'span', {
+					class: 'wow-import__hint',
+					text:
+						' ' +
+						__(
+							'The structural conversion is done first either way; Claude is shown that result, what the design\'s CSS resolves to, and a screenshot when the archive has one, and fixes what is wrong. A section it cannot improve is kept exactly as the structural conversion made it.',
+							'wow-signal'
+						),
+				} ),
+			] ),
+			el( 'p', { class: 'wow-import__choice wow-import__choice--nested' }, [
+				refine,
+				el( 'label', {
+					for: 'wow-import-refine',
+					text: ' ' + __( 'and check the rendered result against the design', 'wow-signal' ),
+				} ),
+				el( 'span', {
+					class: 'wow-import__hint',
+					text:
+						' ' +
+						__(
+							'A second pass per section: the blocks are rendered on the server and compared with the design. It catches what a conversion written blind cannot see, and doubles the time and the cost.',
+							'wow-signal'
+						),
+				} ),
+			] ),
+		];
+
+		if ( state.smart ) {
+			var route = billed
+				? sprintf(
+						/* translators: 1: number of model calls, 2: estimated cost. */
+						_n(
+							'About %1$d call to the Anthropic API — roughly %2$s at list prices, billed to your key.',
+							'About %1$d calls to the Anthropic API — roughly %2$s at list prices, billed to your key.',
+							calls,
+							'wow-signal'
+						),
+						calls,
+						money( plannedCost() )
+				  )
+				: sprintf(
+						/* translators: %d: number of model calls. */
+						_n(
+							'About %d call through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed per conversion.',
+							'About %d calls through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed per conversion.',
+							calls,
+							'wow-signal'
+						),
+						calls
+				  );
+
+			lines.push( el( 'p', { class: 'wow-import__estimate', text: route } ) );
+			lines.push(
+				el( 'p', {
+					class: 'wow-import__hint',
+					text: __(
+						'Expect this to take minutes rather than seconds — a page is built section by section. Leave the tab open; closing it stops the build where it got to, and what it has already made stays.',
+						'wow-signal'
+					),
+				} )
+			);
+		}
+
+		return el( 'div', { class: 'wow-import__smart' }, lines );
+	}
+
+	/*
 	 * The one-press path. It uses the structural converter rather than a
 	 * model, so it needs no key, costs nothing and can be undone and repeated
 	 * — which is what makes it safe to offer as the first thing on the screen
@@ -760,6 +1003,12 @@
 			},
 		} );
 
+		if ( state.smart && modelReady() ) {
+			build.textContent = state.refine
+				? __( 'Build the whole site, corrected and reviewed', 'wow-signal' )
+				: __( 'Build the whole site, corrected by Claude', 'wow-signal' );
+		}
+
 		var body = [
 			el( 'h3', { text: __( 'Build everything at once', 'wow-signal' ) } ),
 			el( 'p', {
@@ -789,6 +1038,12 @@
 				} ),
 			] ),
 		];
+
+		var smart = renderSmartChoice();
+
+		if ( smart ) {
+			body.push( smart );
+		}
 
 		if ( choices.length ) {
 			body.push(
@@ -939,6 +1194,16 @@
 			return sprintf( __( '%1$d of %2$d steps done.', 'wow-signal' ), job.done, job.total );
 		}
 
+		if ( job.smart && 'page' === step.key ) {
+			return sprintf(
+				/* translators: 1: what is being built, 2: steps done, 3: steps in total. */
+				__( 'Building %1$s with Claude, section by section (%2$d of %3$d) — this one takes a while', 'wow-signal' ),
+				stepLabel( step ),
+				job.done + 1,
+				job.total
+			);
+		}
+
 		return sprintf(
 			/* translators: 1: what is being built, 2: steps done, 3: steps in total. */
 			__( 'Building %1$s (%2$d of %3$d)', 'wow-signal' ),
@@ -979,6 +1244,10 @@
 				__( 'An Anthropic API key', 'wow-signal' ),
 				__( 'One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above.', 'wow-signal' ),
 			],
+			[
+				__( 'Claude Code on this machine', 'wow-signal' ),
+				__( 'The same automatic route, run through the claude command instead of the API — so it uses the subscription that command is signed in to and adds nothing to a bill. Only possible where the binary is installed and PHP may start it, which usually means your own machine rather than a client\'s hosting.', 'wow-signal' ),
+			],
 		];
 
 		var list = el( 'dl', { class: 'wow-import__routes' } );
@@ -989,7 +1258,7 @@
 		} );
 
 		return el( 'details', { class: 'wow-import__routes-wrap' }, [
-			el( 'summary', { text: __( 'Three ways to convert — which should I use?', 'wow-signal' ) } ),
+			el( 'summary', { text: __( 'Four ways to convert — which should I use?', 'wow-signal' ) } ),
 			list,
 		] );
 	}
@@ -1048,6 +1317,29 @@
 								page.sections
 							),
 						} ),
+						page.improved
+							? el( 'span', {
+									class: 'wow-import__section-meta',
+									text:
+										' ' +
+										sprintf(
+											/* translators: %d: number of sections Claude changed. */
+											_n(
+												'Claude corrected %d of them.',
+												'Claude corrected %d of them.',
+												page.improved,
+												'wow-signal'
+											),
+											page.improved
+										),
+							  } )
+							: null,
+						page.changed && page.changed.length
+							? el( 'details', { class: 'wow-import__changes' }, [
+									el( 'summary', { text: __( 'What Claude changed', 'wow-signal' ) } ),
+									bullets( page.changed, 'wow-import__concerns' ),
+							  ] )
+							: null,
 						page.concerns && page.concerns.length ? bullets( page.concerns, 'wow-import__concerns' ) : null,
 					] ),
 					el( 'td', {}, [
@@ -1065,8 +1357,59 @@
 
 		var out = [
 			el( 'p', { class: 'wow-import__saved' }, [ el( 'strong', { text: __( 'The site is built.', 'wow-signal' ) } ) ] ),
-			el( 'div', { class: 'wow-import__table-wrap' }, [ table ] ),
 		];
+
+		if ( report.ai && report.ai.calls ) {
+			out.push(
+				el( 'p', {
+					class: 'wow-import__estimate',
+					text:
+						'cli' === report.ai.transport
+							? sprintf(
+									/* translators: 1: number of calls, 2: tokens in, 3: tokens out, 4: what the same work would cost through the API. */
+									__(
+										'%1$d calls through Claude Code on this machine — %2$s tokens in, %3$s out. Nothing was billed; the same work through the API would have cost about %4$s.',
+										'wow-signal'
+									),
+									report.ai.calls,
+									tokens( report.ai.input ),
+									tokens( report.ai.output ),
+									money( report.ai.notional )
+							  )
+							: sprintf(
+									/* translators: 1: number of calls, 2: tokens in, 3: tokens out, 4: cost. */
+									__(
+										'%1$d calls to the Anthropic API — %2$s tokens in, %3$s out, about %4$s.',
+										'wow-signal'
+									),
+									report.ai.calls,
+									tokens( report.ai.input ),
+									tokens( report.ai.output ),
+									money( report.ai.cost )
+							  ),
+				} )
+			);
+		}
+
+		if ( report.ai && report.ai.discarded ) {
+			out.push(
+				el( 'p', {
+					class: 'wow-import__estimate',
+					text: sprintf(
+						/* translators: %d: number of replies that were thrown away. */
+						_n(
+							'%d reply came back as markup the editor would have rejected, so that section kept its structural conversion. The section says so in its own notes.',
+							'%d replies came back as markup the editor would have rejected, so those sections kept their structural conversions. Each section says so in its own notes.',
+							report.ai.discarded,
+							'wow-signal'
+						),
+						report.ai.discarded
+					),
+				} )
+			);
+		}
+
+		out.push( el( 'div', { class: 'wow-import__table-wrap' }, [ table ] ) );
 
 		if ( drafts.length ) {
 			out.push(
@@ -1196,6 +1539,8 @@
 				publish: !! publish,
 				keep_archive: !! state.keepArchive,
 				includes: includes,
+				smart: !! ( state.smart && modelReady() ),
+				refine: !! ( state.smart && state.refine && modelReady() ),
 			},
 		} )
 			.then( function ( start ) {
@@ -1208,6 +1553,8 @@
 					running: true,
 					errors: [],
 					publish: !! publish,
+					smart: !! start.smart,
+					refine: !! start.refine,
 				};
 				render();
 				nextStep();
@@ -2252,6 +2599,13 @@
 	// ---------------------------------------------------------------- render
 
 	function render() {
+		// A side-by-side preview needs the whole window, not the 60rem column.
+		var screen = app.closest( '.wow-import' );
+
+		if ( screen ) {
+			screen.classList.toggle( 'is-previewing', !! state.preview );
+		}
+
 		/*
 		 * The live region is created once and kept across renders. Destroying
 		 * and recreating it in the same task as say() would leave screen
@@ -2303,4 +2657,5 @@
 
 	render();
 	loadDesigns();
+	loadModel();
 } )( window.wp );

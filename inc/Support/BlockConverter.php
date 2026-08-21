@@ -208,6 +208,185 @@ final class BlockConverter {
 	private const TOLERANCE = 0.12;
 
 	/**
+	 * Class-name prefixes that mean something to WordPress or the theme.
+	 *
+	 * A design class with one of these would collide with block supports,
+	 * style variations or the theme's own CSS, so it is never carried over.
+	 *
+	 * @var array<int, string>
+	 */
+	private const RESERVED_PREFIXES = array( 'wp-', 'is-', 'has-', 'align', 'wow-', 'screen-reader', 'entry-' );
+
+	/**
+	 * Exact WordPress body/post classes a design may echo; `page-hero` and
+	 * `site-footer` are the design's own and stay.
+	 */
+	private const RESERVED_PATTERN = '/^(post|page)-(id-)?\d+$|^page-template|^post-type-|^type-|^status-|^hentry$|^logged-in$|^admin-bar$|^site-(title|logo|tagline)$|^custom-logo/';
+
+	/**
+	 * Bare state words a script would have toggled; meaningless on a static block.
+	 *
+	 * @var array<int, string>
+	 */
+	private const STATE_WORDS = array( 'active', 'open', 'hidden', 'visible', 'show', 'collapsed' );
+
+	/**
+	 * Most design classes a single block carries.
+	 *
+	 * @var int
+	 */
+	private const MAX_CARRIED = 6;
+
+	/**
+	 * The current section's own classes, carried onto its band.
+	 *
+	 * @var array<int, string>
+	 */
+	private array $section_classes = array();
+
+	/**
+	 * The section's root element; its classes go on the band, not on an inner panel.
+	 *
+	 * @var DOMElement|null
+	 */
+	private ?DOMElement $root = null;
+
+	/**
+	 * Every design class carried onto a block so far, as a set.
+	 *
+	 * @var array<string, true>
+	 */
+	private array $carried = array();
+
+	/**
+	 * How many blocks received at least one design class.
+	 *
+	 * @var int
+	 */
+	private int $classed_blocks = 0;
+
+	/**
+	 * Design classes that ended up on blocks, across every section converted.
+	 *
+	 * The stylesheet importer uses this to keep only the rules that can still
+	 * match something.
+	 *
+	 * @return array<int, string>
+	 */
+	public function carried_classes(): array {
+		return array_keys( $this->carried );
+	}
+
+	/**
+	 * Counters for the report.
+	 *
+	 * @return array{classed_blocks:int,classes:int}
+	 */
+	public function stats(): array {
+		return array(
+			'classed_blocks' => $this->classed_blocks,
+			'classes'        => count( $this->carried ),
+		);
+	}
+
+	/**
+	 * The design's own classes on an element, filtered to the ones worth keeping.
+	 *
+	 * @param array<int, string> $raw     Class names as written in the design.
+	 * @param bool               $section Whether these sit on a section, where dark/light are meaningful.
+	 * @return array<int, string>
+	 */
+	private function design_classes( array $raw, bool $section = false ): array {
+		$kept = array();
+
+		foreach ( $raw as $class ) {
+			$class = trim( (string) $class );
+
+			// A class that needs sanitising is one the stylesheet could not have matched anyway.
+			if ( '' === $class || sanitize_html_class( $class ) !== $class || isset( $kept[ $class ] ) ) {
+				continue;
+			}
+
+			$lower = strtolower( $class );
+
+			foreach ( self::RESERVED_PREFIXES as $prefix ) {
+				if ( str_starts_with( $lower, $prefix ) ) {
+					continue 2;
+				}
+			}
+
+			if ( 1 === preg_match( self::RESERVED_PATTERN, $lower ) ) {
+				continue;
+			}
+
+			if ( in_array( $lower, self::STATE_WORDS, true ) ) {
+				continue;
+			}
+
+			if ( ! $section && in_array( $lower, array( 'dark', 'light' ), true ) ) {
+				continue;
+			}
+
+			$kept[ $class ] = true;
+
+			if ( count( $kept ) >= self::MAX_CARRIED ) {
+				break;
+			}
+		}
+
+		return array_keys( $kept );
+	}
+
+	/**
+	 * Put an element's design classes on the block being built from it.
+	 *
+	 * The class goes in two places, because WordPress keeps them in two: the
+	 * `className` attribute the editor reads, and the wrapper's class list in
+	 * the saved HTML. A block with one and not the other is flagged as
+	 * modified the moment it is opened.
+	 *
+	 * @param DOMElement|null      $node    Source element; null carries nothing.
+	 * @param array<string, mixed> $attrs   Block attributes, extended in place.
+	 * @param array<int, string>   $classes Wrapper class list, extended in place.
+	 * @return void
+	 */
+	private function carry( ?DOMElement $node, array &$attrs, array &$classes ): void {
+		if ( null === $node || $node === $this->root ) {
+			return;
+		}
+
+		$list = preg_split( '/\s+/', $node->getAttribute( 'class' ) );
+
+		$this->carry_classes( $this->design_classes( is_array( $list ) ? $list : array() ), $attrs, $classes );
+	}
+
+	/**
+	 * Put an already-filtered class list on a block.
+	 *
+	 * @param array<int, string>   $kept    Filtered design classes.
+	 * @param array<string, mixed> $attrs   Block attributes, extended in place.
+	 * @param array<int, string>   $classes Wrapper class list, extended in place.
+	 * @return void
+	 */
+	private function carry_classes( array $kept, array &$attrs, array &$classes ): void {
+		$kept = array_values( array_diff( $kept, $classes ) );
+
+		if ( array() === $kept ) {
+			return;
+		}
+
+		$existing           = isset( $attrs['className'] ) ? trim( (string) $attrs['className'] ) : '';
+		$attrs['className'] = trim( $existing . ' ' . implode( ' ', $kept ) );
+
+		foreach ( $kept as $class ) {
+			$classes[]               = $class;
+			$this->carried[ $class ] = true;
+		}
+
+		++$this->classed_blocks;
+	}
+
+	/**
 	 * Teach the converter what the design's own colours are.
 	 *
 	 * Without this every band falls back to the page colour, which is honest
@@ -253,6 +432,18 @@ final class BlockConverter {
 
 		$dom  = self::load( (string) $section['html'] );
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+
+		$this->root            = null;
+		$this->section_classes = $this->design_classes( array_map( 'strval', (array) ( $section['classes'] ?? array() ) ), true );
+
+		if ( $body instanceof DOMElement ) {
+			foreach ( $body->childNodes as $child ) {
+				if ( $child instanceof DOMElement ) {
+					$this->root = $child;
+					break;
+				}
+			}
+		}
 
 		$this->cover = $body instanceof DOMElement ? $this->background_image( $section, $body ) : '';
 
@@ -370,6 +561,9 @@ final class BlockConverter {
 			$classes[]          = 'has-text-color';
 		}
 
+		// The section's own classes, so the design's stylesheet still finds it.
+		$this->carry_classes( $this->section_classes, $attrs, $classes );
+
 		return '<!-- wp:group ' . wp_json_encode( $attrs ) . " -->\n"
 			. '<section class="' . implode( ' ', $classes ) . '" style="' . $css . '">'
 			. $inner
@@ -404,8 +598,12 @@ final class BlockConverter {
 
 		$this->editable[] = __( 'Background image', 'wow-signal' );
 
+		$classes = array( 'wp-block-cover', 'alignfull' );
+
+		$this->carry_classes( $this->section_classes, $attrs, $classes );
+
 		return '<!-- wp:cover ' . wp_json_encode( $attrs ) . " -->\n"
-			. '<section class="wp-block-cover alignfull" style="' . $css . '">'
+			. '<section class="' . implode( ' ', $classes ) . '" style="' . $css . '">'
 			. '<span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span>'
 			. '<img class="wp-block-cover__image-background" alt="" src="' . $this->esc_ref( $this->cover ) . '" data-object-fit="cover"/>'
 			. '<div class="wp-block-cover__inner-container">'
@@ -679,6 +877,10 @@ final class BlockConverter {
 
 		$tag = strtolower( $node->tagName );
 
+		if ( 'form' === $tag ) {
+			return $this->form( $node );
+		}
+
 		if ( in_array( $tag, self::DROP, true ) ) {
 			$this->note_dropped( $tag );
 
@@ -725,7 +927,24 @@ final class BlockConverter {
 				return '';
 
 			case 'a':
-				return $this->is_button( $node ) ? $this->buttons( array( $node ) ) : $this->text_element( $node );
+				if ( $this->is_button( $node ) ) {
+					return $this->buttons( array( $node ) );
+				}
+
+				/*
+				 * A stand-alone link ("View report →") is a paragraph whose
+				 * whole text is the link. Converting it as plain text would
+				 * keep the words and lose where they went.
+				 */
+				$label = $this->inline( $node );
+
+				if ( '' === trim( wp_strip_all_tags( $label ) ) ) {
+					return '';
+				}
+
+				$this->editable[] = __( 'Link text and target', 'wow-signal' );
+
+				return $this->styled_text( $node, '<a href="' . $this->esc_ref( $this->href( $node ) ) . '">' . $label . '</a>' );
 
 			default:
 				/*
@@ -757,7 +976,7 @@ final class BlockConverter {
 		$buttons = $this->button_links( $node );
 
 		if ( array() !== $buttons ) {
-			return $this->buttons( $buttons );
+			return $this->buttons( $buttons, $node );
 		}
 
 		/*
@@ -787,21 +1006,50 @@ final class BlockConverter {
 		$cards = $this->card_children( $node );
 
 		/*
-		 * Only at the top of a section. Columns inside columns inside columns
-		 * is how a two-digit number ends up printed one character per line;
-		 * below the first nesting the children simply stack, which is what
-		 * the design does at narrow widths anyway.
+		 * With the design's CSS at hand the question has a real answer: the
+		 * element is a row only if the design laid it out as one
+		 * (`display:grid` or a row-direction flex). A plain block holding a
+		 * section head and a card grid stacks, exactly as it does in the
+		 * design — splitting it into two columns would squeeze the grid
+		 * into the right half. Without CSS, fall back to the old guess and
+		 * keep it to the top of the section.
 		 */
-		if ( count( $cards ) >= 2 && $this->depth < 1 ) {
+		$layout    = $this->layout_of( $node );
+		$max_depth = null === $this->css ? 1 : 2;
+		$is_row    = null === $this->css ? true : in_array( $layout, array( 'grid', 'row' ), true );
+
+		if ( count( $cards ) >= 2 && $is_row && $this->depth < $max_depth ) {
+			/*
+			 * A painted grid — a newsletter card holding copy and a form — is
+			 * a panel with columns inside, so its background, border and
+			 * padding wrap the row rather than vanish.
+			 */
+			$box     = $this->boxed( $node, false );
+			$dark    = $this->on_dark;
+			$surface = $this->surface;
+
+			if ( null !== $box && null !== $box['dark'] ) {
+				$this->on_dark = (bool) $box['dark'];
+				$this->surface = (string) $box['surface'];
+			}
+
 			++$this->depth;
-			$out = $this->columns( $cards );
+			$out = $this->columns( $cards, $box );
 			--$this->depth;
+
+			$this->on_dark = $dark;
+			$this->surface = $surface;
 
 			return $out;
 		}
 
 		if ( $this->is_inline_only( $node ) ) {
-			$stacked = $this->stacked_children( $node );
+			/*
+			 * A flex row of chips ("Canada", "United States") sits on one
+			 * line in the design; stacking each span as its own paragraph
+			 * would turn a row of pills into a column of lines.
+			 */
+			$stacked = 'row' === $layout ? array() : $this->stacked_children( $node );
 
 			if ( array() !== $stacked ) {
 				return $this->stack( $stacked );
@@ -828,6 +1076,44 @@ final class BlockConverter {
 	}
 
 	/**
+	 * How the design lays an element's children out: grid, row, column, or block.
+	 *
+	 * @param DOMElement $node Container.
+	 * @return string grid|row|column|block|unknown
+	 */
+	private function layout_of( DOMElement $node ): string {
+		if ( null === $this->css ) {
+			return 'unknown';
+		}
+
+		$declared = $this->css->declared_for( $node );
+		$display  = strtolower( trim( (string) ( $declared['display'] ?? '' ) ) );
+
+		if ( 'grid' === $display || 'inline-grid' === $display ) {
+			/*
+			 * A grid with one track (or none declared) is a vertical list
+			 * that happens to use grid for its gap — rows, not columns.
+			 */
+			$template = strtolower( trim( (string) ( $declared['grid-template-columns'] ?? '' ) ) );
+			$tracks   = self::grid_tracks( $template );
+
+			if ( '' === $template || 'none' === $template || 1 === $tracks || ( 0 === $tracks && ! str_contains( $template, 'repeat(' ) && 1 !== preg_match( '/\s/', $template ) ) ) {
+				return 'column';
+			}
+
+			return 'grid';
+		}
+
+		if ( 'flex' === $display || 'inline-flex' === $display ) {
+			$direction = strtolower( trim( (string) ( $declared['flex-direction'] ?? 'row' ) ) );
+
+			return str_starts_with( $direction, 'column' ) ? 'column' : 'row';
+		}
+
+		return '' === $display ? 'block' : $display;
+	}
+
+	/**
 	 * Wrap a painted container's children in a Group carrying its treatment.
 	 *
 	 * @param DOMElement           $node Container.
@@ -835,8 +1121,18 @@ final class BlockConverter {
 	 * @return string
 	 */
 	private function panel( DOMElement $node, array $box ): string {
-		$inner = $this->within( $box, $node );
+		return $this->panel_markup( $node, $box, $this->within( $box, $node ) );
+	}
 
+	/**
+	 * The Group markup for a painted container around already-converted content.
+	 *
+	 * @param DOMElement           $node  Container.
+	 * @param array<string, mixed> $box   Treatment from boxed().
+	 * @param string               $inner Converted inner blocks.
+	 * @return string
+	 */
+	private function panel_markup( DOMElement $node, array $box, string $inner ): string {
 		if ( '' === trim( $inner ) ) {
 			return '';
 		}
@@ -846,6 +1142,8 @@ final class BlockConverter {
 		$attrs['layout'] = array( 'type' => 'constrained' );
 		$classes         = array_merge( array( 'wp-block-group', 'alignwide' ), $box['classes'] );
 		$style           = '' === $box['css'] ? '' : ' style="' . $box['css'] . '"';
+
+		$this->carry( $node, $attrs, $classes );
 
 		return '<!-- wp:group ' . wp_json_encode( $attrs ) . " -->\n"
 			. '<div class="' . implode( ' ', $classes ) . '"' . $style . '>'
@@ -956,8 +1254,13 @@ final class BlockConverter {
 			$out[] = "<!-- wp:list-item -->\n<li>" . esc_html( $item ) . "</li>\n<!-- /wp:list-item -->";
 		}
 
-		return "<!-- wp:list {\"className\":\"is-style-checks\"} -->\n"
-			. '<ul class="wp-block-list is-style-checks">'
+		$attrs   = array( 'className' => 'is-style-checks' );
+		$classes = array( 'wp-block-list', 'is-style-checks' );
+
+		$this->carry( $node, $attrs, $classes );
+
+		return '<!-- wp:list ' . wp_json_encode( $attrs ) . " -->\n"
+			. '<ul class="' . implode( ' ', $classes ) . '">'
 			. implode( "\n\n", $out )
 			. "</ul>\n<!-- /wp:list -->";
 	}
@@ -1054,7 +1357,13 @@ final class BlockConverter {
 
 		$this->editable[] = __( 'Quotation', 'wow-signal' );
 
-		return "<!-- wp:quote -->\n<blockquote class=\"wp-block-quote\">"
+		$attrs   = array();
+		$classes = array( 'wp-block-quote' );
+
+		$this->carry( $node, $attrs, $classes );
+
+		return '<!-- wp:quote' . ( array() === $attrs ? '' : ' ' . wp_json_encode( $attrs ) ) . " -->\n"
+			. '<blockquote class="' . implode( ' ', $classes ) . '">'
 			. "<!-- wp:paragraph -->\n<p>" . $this->inline( $node ) . "</p>\n<!-- /wp:paragraph -->"
 			. "</blockquote>\n<!-- /wp:quote -->";
 	}
@@ -1140,7 +1449,7 @@ final class BlockConverter {
 			if ( $child instanceof DOMElement ) {
 				$tag = strtolower( $child->tagName );
 
-				if ( in_array( $tag, array( 'div', 'article', 'li', 'section', 'aside' ), true ) ) {
+				if ( in_array( $tag, array( 'div', 'article', 'li', 'section', 'aside', 'nav', 'figure', 'form' ), true ) ) {
 					$candidates[] = $child;
 					continue;
 				}
@@ -1172,17 +1481,29 @@ final class BlockConverter {
 	/**
 	 * Wrap card children in a columns block.
 	 *
-	 * @param array<int, DOMElement> $cards Card elements.
+	 * @param array<int, DOMElement>    $cards Card elements.
+	 * @param array<string, mixed>|null $box   Treatment of the grid container itself, worn by the row.
 	 * @return string
 	 */
-	private function columns( array $cards ): string {
+	private function columns( array $cards, ?array $box = null ): string {
 		$columns = array();
 		$parent  = $cards[0]->parentNode;
 		$grid    = $parent instanceof DOMElement && null !== $this->css ? $this->css->declared_for( $parent ) : array();
 
-		foreach ( $cards as $card ) {
+		// Unequal tracks ("1.06fr .72fr") become column widths; equal ones stay fluid.
+		$weights = self::track_weights( (string) ( $grid['grid-template-columns'] ?? '' ), count( $cards ) );
+
+		/*
+		 * Vertical alignment lives on each column: core pins the row itself to
+		 * `align-items:normal !important` and centres through the column's own
+		 * `is-vertically-aligned-*` class.
+		 */
+		$align_items = strtolower( trim( (string) ( $grid['align-items'] ?? '' ) ) );
+		$vertical    = 'center' === $align_items ? 'center' : ( in_array( $align_items, array( 'end', 'flex-end' ), true ) ? 'bottom' : '' );
+
+		foreach ( $cards as $index => $card ) {
 			$box   = $this->boxed( $card, true );
-			$inner = $this->within( $box, $card );
+			$inner = 'form' === strtolower( $card->tagName ) ? $this->form( $card ) : $this->within( $box, $card );
 
 			if ( '' === trim( $inner ) ) {
 				continue;
@@ -1190,7 +1511,21 @@ final class BlockConverter {
 
 			$attrs   = null === $box ? array() : $box['attrs'];
 			$classes = array_merge( array( 'wp-block-column' ), null === $box ? array() : $box['classes'] );
-			$style   = null === $box || '' === $box['css'] ? '' : ' style="' . $box['css'] . '"';
+			$css     = null === $box ? '' : $box['css'];
+
+			if ( '' !== $vertical ) {
+				$attrs   = array( 'verticalAlignment' => $vertical ) + $attrs;
+				$classes = array_merge( array( 'wp-block-column', 'is-vertically-aligned-' . $vertical ), array_slice( $classes, 1 ) );
+			}
+
+			if ( null !== $weights && isset( $weights[ $index ] ) ) {
+				$attrs['width'] = $weights[ $index ];
+				$css            = ( '' === $css ? '' : $css . ';' ) . 'flex-basis:' . $weights[ $index ];
+			}
+
+			$style = '' === $css ? '' : ' style="' . $css . '"';
+
+			$this->carry( $card, $attrs, $classes );
 
 			$columns[] = '<!-- wp:column' . ( array() === $attrs ? '' : ' ' . wp_json_encode( $attrs ) ) . " -->\n"
 				. '<div class="' . implode( ' ', $classes ) . '"' . $style . '>'
@@ -1210,13 +1545,41 @@ final class BlockConverter {
 		 * card treatment at all: the theme's card colour is chosen against the
 		 * page, not against a band that inverts it.
 		 */
-		$as_cards = count( $columns ) >= 3 && ! $this->on_dark;
+		// With the design's own CSS carried along, its cards style themselves.
+		$as_cards = count( $columns ) >= 3 && ! $this->on_dark && null === $this->css;
 		$attrs    = array( 'align' => 'wide' );
 		$class    = '';
+		$row_css  = '';
+
+		/*
+		 * A painted grid wears its paint itself. Wrapping it in a Group would
+		 * make that Group the design's grid container and its one child —
+		 * the whole row — a single grid item, squeezed into the first track.
+		 */
+		if ( null !== $box ) {
+			$attrs   = array_replace_recursive( $attrs, $box['attrs'] );
+			$class  .= '' === implode( '', $box['classes'] ) ? '' : ' ' . implode( ' ', $box['classes'] );
+			$row_css = (string) $box['css'];
+		}
+
+		// The row carries the same alignment, as the editor writes it.
+		if ( '' !== $vertical ) {
+			$attrs['verticalAlignment'] = $vertical;
+			$class                     .= ' are-vertically-aligned-' . $vertical;
+		}
 
 		if ( $as_cards ) {
 			$attrs['className'] = 'is-style-cards';
 			$class              = ' is-style-cards';
+		}
+
+		// The grid's own classes on the column set.
+		$grid_classes = array();
+
+		$this->carry( $parent instanceof DOMElement ? $parent : null, $attrs, $grid_classes );
+
+		if ( array() !== $grid_classes ) {
+			$class .= ' ' . implode( ' ', $grid_classes );
 		}
 
 		// The design's own gutter, when it stated one.
@@ -1233,18 +1596,79 @@ final class BlockConverter {
 		 * three at a time, which is what the design's grid did at every width
 		 * below its widest.
 		 */
-		$tracks  = self::grid_tracks( (string) ( $grid['grid-template-columns'] ?? '' ) );
-		$per_row = $tracks >= 2 && $tracks <= 4 ? $tracks : ( count( $columns ) > 4 ? 3 : count( $columns ) );
+		$tracks = self::grid_tracks( (string) ( $grid['grid-template-columns'] ?? '' ) );
+
+		/*
+		 * `repeat(auto-fit, minmax(220px, 1fr))` lays out as many as fit the
+		 * content width; estimate that from the design's own container width.
+		 */
+		if ( 0 === $tracks && 1 === preg_match( '/minmax\(\s*(\d+(?:\.\d+)?)(px|rem|em)/i', (string) ( $grid['grid-template-columns'] ?? '' ), $min ) ) {
+			$min_px = 'px' === strtolower( $min[2] ) ? (float) $min[1] : (float) $min[1] * 16;
+			$tracks = $min_px > 0 ? (int) floor( 1180 / ( $min_px + 18 ) ) : 0;
+		}
+
+		// Only a declared track count is trusted past four across.
+		$per_row = $tracks >= 2 && $tracks <= 6 ? $tracks : ( count( $columns ) > 4 ? 3 : count( $columns ) );
 		$rows    = array();
 
 		foreach ( array_chunk( $columns, $per_row ) as $row ) {
 			$rows[] = '<!-- wp:columns ' . wp_json_encode( $attrs ) . " -->\n"
-				. '<div class="wp-block-columns alignwide' . $class . '">'
+				. '<div class="wp-block-columns alignwide' . $class . '"' . ( '' === $row_css ? '' : ' style="' . $row_css . '"' ) . '>'
 				. implode( "\n\n", $row )
 				. "</div>\n<!-- /wp:columns -->";
 		}
 
 		return implode( "\n\n", $rows );
+	}
+
+	/**
+	 * Column widths from an explicit, unequal track list.
+	 *
+	 * `minmax(0,1.06fr) minmax(360px,.72fr)` is 60% / 40%. Equal tracks, a
+	 * repeat(), or a list that does not match the column count return null so
+	 * the columns stay fluid.
+	 *
+	 * @param string $value grid-template-columns.
+	 * @param int    $count Columns being laid out.
+	 * @return array<int, string>|null Percentages, e.g. "59.55%".
+	 */
+	private static function track_weights( string $value, int $count ): ?array {
+		$value = trim( $value );
+
+		if ( '' === $value || $count < 2 || str_contains( strtolower( $value ), 'repeat(' ) ) {
+			return null;
+		}
+
+		// Split on spaces outside parentheses.
+		$tokens = preg_split( '/\s+(?![^()]*\))/', $value );
+		$tokens = is_array( $tokens ) ? array_values( array_filter( $tokens, 'strlen' ) ) : array();
+
+		if ( count( $tokens ) !== $count ) {
+			return null;
+		}
+
+		$weights = array();
+
+		foreach ( $tokens as $token ) {
+			if ( 1 === preg_match( '/(\d*\.?\d+)fr\s*\)?$/i', $token, $fr ) ) {
+				$weights[] = (float) $fr[1];
+			} elseif ( 'auto' === strtolower( $token ) || '1fr' === strtolower( $token ) ) {
+				$weights[] = 1.0;
+			} else {
+				return null;
+			}
+		}
+
+		$sum = array_sum( $weights );
+
+		if ( $sum <= 0 || count( array_unique( array_map( 'strval', $weights ) ) ) < 2 ) {
+			return null;
+		}
+
+		return array_map(
+			static fn( float $weight ): string => rtrim( rtrim( number_format( $weight / $sum * 100, 2, '.', '' ), '0' ), '.' ) . '%',
+			$weights
+		);
 	}
 
 	/**
@@ -1324,10 +1748,11 @@ final class BlockConverter {
 	/**
 	 * A row of buttons.
 	 *
-	 * @param array<int, DOMElement> $links Anchors.
+	 * @param array<int, DOMElement> $links   Anchors.
+	 * @param DOMElement|null        $wrapper The element holding the row, whose classes go on the Buttons block.
 	 * @return string
 	 */
-	private function buttons( array $links ): string {
+	private function buttons( array $links, ?DOMElement $wrapper = null ): string {
 		$out = array();
 
 		foreach ( $links as $index => $link ) {
@@ -1349,6 +1774,14 @@ final class BlockConverter {
 				$attrs['className'] = 'is-style-outline';
 				$classes[]          = 'is-style-outline';
 			}
+
+			/*
+			 * The anchor's classes are deliberately not carried. They would
+			 * land on the block wrapper, not the <a>, and the design's `.btn`
+			 * padding and min-height would then draw a second pill around the
+			 * real one. The colours, radius and padding the design gave the
+			 * button are already on the block as attributes.
+			 */
 
 			/*
 			 * The outline style draws itself in the body-text colour, so on an
@@ -1398,7 +1831,13 @@ final class BlockConverter {
 			return '';
 		}
 
-		return "<!-- wp:buttons -->\n<div class=\"wp-block-buttons\">"
+		$row_attrs   = array();
+		$row_classes = array( 'wp-block-buttons' );
+
+		$this->carry( $wrapper, $row_attrs, $row_classes );
+
+		return '<!-- wp:buttons' . ( array() === $row_attrs ? '' : ' ' . wp_json_encode( $row_attrs ) ) . " -->\n"
+			. '<div class="' . implode( ' ', $row_classes ) . '">'
 			. implode( "\n\n", $out )
 			. "</div>\n<!-- /wp:buttons -->";
 	}
@@ -1496,6 +1935,8 @@ final class BlockConverter {
 			}
 		}
 
+		$this->carry( $node, $attrs, $classes );
+
 		$style = '' === $design['css'] ? '' : ' style="' . $design['css'] . '"';
 
 		return '<!-- wp:heading ' . wp_json_encode( $attrs ) . " -->\n"
@@ -1574,6 +2015,8 @@ final class BlockConverter {
 			if ( isset( $attrs['fontSize'] ) ) {
 				$classes[] = 'has-' . $attrs['fontSize'] . '-font-size';
 			}
+
+			$this->carry( $node, $attrs, $classes );
 
 			return '<!-- wp:paragraph ' . wp_json_encode( $attrs ) . " -->\n"
 				. '<p class="' . implode( ' ', $classes ) . '" style="' . self::typography_css( $attrs['style']['typography'] ) . '">'
@@ -1673,6 +2116,8 @@ final class BlockConverter {
 			}
 		}
 
+		$this->carry( $node, $attrs, $classes );
+
 		$open  = array() === $attrs ? '<!-- wp:paragraph -->' : '<!-- wp:paragraph ' . wp_json_encode( $attrs ) . ' -->';
 		$class = array() === $classes ? '' : ' class="' . implode( ' ', $classes ) . '"';
 		$style = '' === $design['css'] ? '' : ' style="' . $design['css'] . '"';
@@ -1689,6 +2134,16 @@ final class BlockConverter {
 	 */
 	private function is_eyebrow( DOMElement $node, string $plain ): bool {
 		if ( mb_strlen( $plain ) > 48 || '' === $plain ) {
+			return false;
+		}
+
+		// A stand-alone link ("RKMII™" in a footer column) is navigation, not a label.
+		if ( 'a' === strtolower( $node->tagName ) ) {
+			return false;
+		}
+
+		// A row of chips is several short items, not one label.
+		if ( 'row' === $this->layout_of( $node ) && $node->getElementsByTagName( 'span' )->length > 1 ) {
 			return false;
 		}
 
@@ -1712,14 +2167,35 @@ final class BlockConverter {
 	 * @return string
 	 */
 	private function list( DOMElement $node, bool $ordered ): string {
-		$items = array();
+		$items  = array();
+		$ticked = 0;
+		$total  = 0;
 
 		foreach ( $node->childNodes as $child ) {
 			if ( ! $child instanceof DOMElement || 'li' !== strtolower( $child->tagName ) ) {
 				continue;
 			}
 
-			$text = $this->inline( $child );
+			++$total;
+
+			/*
+			 * Designs draw a tick either as a glyph or as a span with a
+			 * "check" class. Both are the theme's Check list style; the glyph
+			 * itself must not end up welded to the first word.
+			 */
+			$marker = $this->leading_marker( $child );
+
+			if ( null !== $marker ) {
+				++$ticked;
+				$child->removeChild( $marker );
+			}
+
+			$text = trim( $this->inline( $child ) );
+			$text = (string) preg_replace( '/^(?:[\x{2713}\x{2714}\x{2705}\x{2022}\x{25AA}\x{25CF}\x{2043}\x{2192}\x{25B8}]|&#10003;|&#10004;)\s*/u', '', $text, 1, $glyphs );
+
+			if ( $glyphs > 0 && null === $marker ) {
+				++$ticked;
+			}
 
 			if ( '' === trim( wp_strip_all_tags( $text ) ) ) {
 				continue;
@@ -1734,22 +2210,66 @@ final class BlockConverter {
 
 		$this->editable[] = __( 'List items', 'wow-signal' );
 
-		$tag   = $ordered ? 'ol' : 'ul';
-		$attrs = $ordered ? ' {"ordered":true}' : '';
+		$checks  = ! $ordered && $total > 0 && $ticked === $total;
+		$tag     = $ordered ? 'ol' : 'ul';
+		$attrs   = $ordered ? array( 'ordered' => true ) : array();
+		$classes = array( 'wp-block-list' );
 
-		return '<!-- wp:list' . $attrs . " -->\n"
-			. '<' . $tag . ' class="wp-block-list">'
+		if ( $checks ) {
+			$attrs['className'] = 'is-style-checks';
+			$classes[]          = 'is-style-checks';
+		}
+
+		$this->carry( $node, $attrs, $classes );
+
+		return '<!-- wp:list' . ( array() === $attrs ? '' : ' ' . wp_json_encode( $attrs ) ) . " -->\n"
+			. '<' . $tag . ' class="' . implode( ' ', $classes ) . '">'
 			. implode( "\n\n", $items )
 			. '</' . $tag . ">\n<!-- /wp:list -->";
 	}
 
 	/**
+	 * The tick element a list item opens with, if any.
+	 *
+	 * @param DOMElement $item List item.
+	 * @return DOMElement|null
+	 */
+	private function leading_marker( DOMElement $item ): ?DOMElement {
+		foreach ( $item->childNodes as $child ) {
+			if ( XML_TEXT_NODE === $child->nodeType ) {
+				if ( '' !== trim( (string) $child->nodeValue ) ) {
+					return null;
+				}
+
+				continue;
+			}
+
+			if ( ! $child instanceof DOMElement ) {
+				continue;
+			}
+
+			$class = strtolower( $child->getAttribute( 'class' ) );
+			$text  = trim( (string) $child->textContent );
+			$glyph = 1 === preg_match( '/^[\x{2713}\x{2714}\x{2705}\x{2022}\x{25AA}\x{25CF}\x{2043}\x{2192}\x{25B8}]?$/u', $text );
+
+			if ( ( str_contains( $class, 'check' ) || str_contains( $class, 'tick' ) || str_contains( $class, 'icon' ) ) && ( $glyph || '' === $text || 'svg' === strtolower( $child->tagName ) ) ) {
+				return $child;
+			}
+
+			return null;
+		}
+
+		return null;
+	}
+
+	/**
 	 * An image.
 	 *
-	 * @param DOMElement $node Image element.
+	 * @param DOMElement      $node   Image element.
+	 * @param DOMElement|null $figure The figure wrapping it, whose classes the block also takes.
 	 * @return string
 	 */
-	private function image( DOMElement $node ): string {
+	private function image( DOMElement $node, ?DOMElement $figure = null ): string {
 		$src = trim( $node->getAttribute( 'src' ) );
 
 		// A lazy-loaded image keeps its real file in a data attribute.
@@ -1776,8 +2296,15 @@ final class BlockConverter {
 			$this->concerns[] = __( 'An image had no alt text in the design. Describe it in the editor, or mark it decorative.', 'wow-signal' );
 		}
 
-		return "<!-- wp:image {\"sizeSlug\":\"large\"} -->\n"
-			. '<figure class="wp-block-image size-large">'
+		// The figure's classes first, then the picture's own, all on the block.
+		$attrs   = array( 'sizeSlug' => 'large' );
+		$classes = array( 'wp-block-image', 'size-large' );
+
+		$this->carry( $figure, $attrs, $classes );
+		$this->carry( $node, $attrs, $classes );
+
+		return '<!-- wp:image ' . wp_json_encode( $attrs ) . " -->\n"
+			. '<figure class="' . implode( ' ', $classes ) . '">'
 			. '<img src="' . $this->esc_ref( $src ) . '" alt="' . esc_attr( $alt ) . '"/>'
 			. "</figure>\n<!-- /wp:image -->";
 	}
@@ -1807,7 +2334,7 @@ final class BlockConverter {
 			return $this->children( $node );
 		}
 
-		return $this->image( $img );
+		return $this->image( $img, $node );
 	}
 
 	/**
@@ -1825,7 +2352,13 @@ final class BlockConverter {
 
 		$this->editable[] = __( 'Quotation', 'wow-signal' );
 
-		return "<!-- wp:quote -->\n<blockquote class=\"wp-block-quote\">" . $inner . "</blockquote>\n<!-- /wp:quote -->";
+		$attrs   = array();
+		$classes = array( 'wp-block-quote' );
+
+		$this->carry( $node, $attrs, $classes );
+
+		return '<!-- wp:quote' . ( array() === $attrs ? '' : ' ' . wp_json_encode( $attrs ) ) . " -->\n"
+			. '<blockquote class="' . implode( ' ', $classes ) . '">' . $inner . "</blockquote>\n<!-- /wp:quote -->";
 	}
 
 	/**
@@ -1872,7 +2405,12 @@ final class BlockConverter {
 
 		$this->editable[] = __( 'Table contents', 'wow-signal' );
 
-		$html = '<figure class="wp-block-table"><table class="has-fixed-layout">';
+		$attrs   = array( 'hasFixedLayout' => true );
+		$classes = array( 'wp-block-table' );
+
+		$this->carry( $node, $attrs, $classes );
+
+		$html = '<figure class="' . implode( ' ', $classes ) . '"><table class="has-fixed-layout">';
 
 		if ( array() !== $rows['head'] ) {
 			$html .= '<thead>' . implode( '', $rows['head'] ) . '</thead>';
@@ -1880,7 +2418,7 @@ final class BlockConverter {
 
 		$html .= '<tbody>' . implode( '', $rows['body'] ) . '</tbody></table></figure>';
 
-		return "<!-- wp:table {\"hasFixedLayout\":true} -->\n" . $html . "\n<!-- /wp:table -->";
+		return '<!-- wp:table ' . wp_json_encode( $attrs ) . " -->\n" . $html . "\n<!-- /wp:table -->";
 	}
 
 	/**
@@ -1890,11 +2428,13 @@ final class BlockConverter {
 	 * @return string
 	 */
 	private function inline( DOMNode $node ): string {
-		$out = '';
+		$out      = '';
+		$previous = null;
 
 		foreach ( $node->childNodes as $child ) {
 			if ( XML_TEXT_NODE === $child->nodeType ) {
-				$out .= esc_html( (string) $child->nodeValue );
+				$out     .= esc_html( (string) $child->nodeValue );
+				$previous = $child;
 				continue;
 			}
 
@@ -1907,6 +2447,18 @@ final class BlockConverter {
 			if ( in_array( $tag, self::DROP, true ) ) {
 				continue;
 			}
+
+			/*
+			 * Two inline elements butted together with no text between them
+			 * ("<span>Latest</span><a>China</a>") were separated by CSS in the
+			 * design. Flattened to one paragraph they would read as one word,
+			 * so a space stands in for the gap the layout used to give them.
+			 */
+			if ( $previous instanceof DOMElement && '' !== $out && 1 !== preg_match( '/\s$/u', $out ) && '' !== trim( (string) $child->textContent ) ) {
+				$out .= ' ';
+			}
+
+			$previous = $child;
 
 			if ( 'br' === $tag ) {
 				$out .= '<br>';
@@ -1925,6 +2477,33 @@ final class BlockConverter {
 
 			// Keep the emphasis, drop every attribute that could carry styling.
 			$keep = in_array( $tag, array( 'strong', 'b', 'em', 'i', 'code', 'sub', 'sup', 'mark' ), true ) ? $tag : null;
+
+			/*
+			 * A classed span is a chip, a tag, a highlight — something the
+			 * design's own CSS paints. With that CSS carried to the site the
+			 * class is what keeps a "Canada" pill a pill, so it stays; every
+			 * other attribute still goes.
+			 */
+			// "© <span id="year"></span>" — the design's script filled the year; here it is a fact.
+			if ( 'span' === $tag && '' === trim( (string) $child->textContent ) && 1 === preg_match( '/\byear\b/i', $child->getAttribute( 'id' ) . ' ' . $child->getAttribute( 'class' ) ) ) {
+				$out     .= esc_html( gmdate( 'Y' ) );
+				$previous = $child;
+				continue;
+			}
+
+			if ( null === $keep && 'span' === $tag && null !== $this->css ) {
+				$raw          = preg_split( '/\s+/', trim( $child->getAttribute( 'class' ) ) );
+				$span_classes = $this->design_classes( is_array( $raw ) ? $raw : array() );
+
+				// Bare spans in a flex row are chips too: `.country-chips span { … }` needs the element to exist.
+				$chip = array() === $span_classes && $node instanceof DOMElement && 'row' === $this->layout_of( $node );
+
+				if ( array() !== $span_classes || $chip ) {
+					$attr = array() === $span_classes ? '' : ' class="' . esc_attr( implode( ' ', $span_classes ) ) . '"';
+					$out .= '<span' . $attr . '>' . $this->inline( $child ) . '</span>';
+					continue;
+				}
+			}
 
 			$out .= null === $keep ? $this->inline( $child ) : '<' . $keep . '>' . $this->inline( $child ) . '</' . $keep . '>';
 		}
@@ -1989,6 +2568,54 @@ final class BlockConverter {
 		}
 
 		return '' !== trim( (string) $node->textContent );
+	}
+
+	/**
+	 * A form becomes the theme's contact form, which actually sends.
+	 *
+	 * The design's markup would post nowhere. The theme's block keeps the
+	 * place, the button label and the intent; a newsletter sign-up and a
+	 * contact form differ only in copy, which the owner edits in place.
+	 *
+	 * @param DOMElement $node Form element.
+	 * @return string
+	 */
+	private function form( DOMElement $node ): string {
+		$label = '';
+
+		foreach ( array( 'button', 'input' ) as $tag ) {
+			foreach ( $node->getElementsByTagName( $tag ) as $control ) {
+				if ( ! $control instanceof DOMElement ) {
+					continue;
+				}
+
+				$type = strtolower( $control->getAttribute( 'type' ) );
+
+				if ( 'input' === $tag && 'submit' !== $type ) {
+					continue;
+				}
+
+				$label = 'input' === $tag ? trim( $control->getAttribute( 'value' ) ) : trim( (string) $control->textContent );
+
+				if ( '' !== $label ) {
+					break 2;
+				}
+			}
+		}
+
+		$attrs = array();
+
+		if ( '' !== $label && mb_strlen( $label ) <= 60 ) {
+			$attrs['submitLabel'] = $label;
+		}
+
+		$classes = array();
+		$this->carry( $node, $attrs, $classes );
+
+		$this->editable[] = __( 'Form: recipient, labels and success message', 'wow-signal' );
+		$this->concerns[] = __( 'The design’s form was replaced with the theme’s Contact form block, which sends to the site’s admin address. Adjust its fields and recipient in the editor.', 'wow-signal' );
+
+		return '<!-- wp:wow/contact-form' . ( array() === $attrs ? '' : ' ' . wp_json_encode( $attrs ) ) . ' /-->';
 	}
 
 	/**
@@ -2181,6 +2808,18 @@ final class BlockConverter {
 			}
 		}
 
+		/*
+		 * A heading the design sets in a different face from its siblings
+		 * (a serif section title over a sans page) keeps that face. Only a
+		 * declaration on the element itself counts — an inherited family is
+		 * the site's, not the block's.
+		 */
+		$family = trim( (string) ( $reset['font-family'] ?? '' ) );
+
+		if ( $heading && '' !== $family && 1 !== preg_match( '/[<>{};]|url\(|expression/i', $family ) ) {
+			$typo['fontFamily'] = $family;
+		}
+
 		$weight = strtolower( trim( (string) ( $reset['font-weight'] ?? '' ) ) );
 		$weight = array(
 			'bold'   => '700',
@@ -2320,7 +2959,8 @@ final class BlockConverter {
 			return null;
 		}
 
-		$slug = $this->nearest_any_slug( $hex, 4000 );
+		// Text never borrows a fill or hairline slug, however close the hex: those roles move independently.
+		$slug = $this->nearest_any_slug( $hex, 4000, array( 'border', 'border-strong', 'surface', 'surface-2' ) );
 
 		// For text, the readable sibling of the brand colour is the one to name.
 		if ( 'accent' === $slug && isset( $this->palette['accent-ink'] ) && self::colour_distance( $hex, $this->palette['accent-ink'] ) <= 4000 ) {
@@ -2337,15 +2977,20 @@ final class BlockConverter {
 	/**
 	 * The palette entry closest to a colour, from the whole palette.
 	 *
-	 * @param string $hex   Colour.
-	 * @param int    $limit Largest squared distance still counted as a match.
+	 * @param string             $hex     Colour.
+	 * @param int                $limit   Largest squared distance still counted as a match.
+	 * @param array<int, string> $exclude Slugs that must not be chosen, whatever the distance.
 	 * @return string
 	 */
-	private function nearest_any_slug( string $hex, int $limit ): string {
+	private function nearest_any_slug( string $hex, int $limit, array $exclude = array() ): string {
 		$best     = '';
 		$distance = PHP_INT_MAX;
 
 		foreach ( $this->palette as $slug => $candidate ) {
+			if ( in_array( (string) $slug, $exclude, true ) ) {
+				continue;
+			}
+
 			$gap = self::colour_distance( $hex, $candidate );
 
 			if ( $gap < $distance ) {
@@ -2395,7 +3040,19 @@ final class BlockConverter {
 		}
 
 		if ( null === $background && null === $border ) {
-			if ( ! $card || ( ( null === $radius || $radius <= 0 ) && array() === $padding ) ) {
+			/*
+			 * A translucent panel (`rgba(255,255,255,.06)` over a dark hero)
+			 * has no palette colour to map to, but it is still a box the
+			 * design drew — its carried class paints it once the design's
+			 * CSS is on the site. A framed container (radius and padding)
+			 * counts the same way.
+			 */
+			$paint       = (string) ( $styles['background-color'] ?? '' ) . ' ' . (string) ( $styles['background'] ?? '' ) . ' ' . (string) ( $styles['border-color'] ?? '' ) . ' ' . (string) ( $styles['border'] ?? '' );
+			$translucent = 1 === preg_match( '/\b(rgba|hsla|color-mix)\(/i', $paint );
+			$framed      = null !== $radius && $radius > 0 && array() !== $padding;
+			$empty       = ( null === $radius || $radius <= 0 ) && array() === $padding;
+
+			if ( $card ? $empty : ! ( $framed || $translucent ) ) {
 				return null;
 			}
 		}

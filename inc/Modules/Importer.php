@@ -16,14 +16,19 @@ use WP_REST_Response;
 use WP_REST_Server;
 use Wow\Signal\Contracts\Module;
 use Wow\Signal\Support\AnthropicClient;
+use Wow\Signal\Support\BlockConverter;
 use Wow\Signal\Support\BlockMarkupValidator;
+use Wow\Signal\Support\ClaudeCli;
 use Wow\Signal\Support\ConversionPrompt;
 use Wow\Signal\Support\CssIndex;
 use Wow\Signal\Support\DesignArchive;
+use Wow\Signal\Support\DesignTokens;
 use Wow\Signal\Support\ImportSession;
+use Wow\Signal\Support\ModelGateway;
 use Wow\Signal\Support\SectionSplitter;
 use Wow\Signal\Support\SiteAssembler;
 use Wow\Signal\Support\SiteBuilder;
+use Wow\Signal\Support\SmartConverter;
 use Wow\Signal\Support\Spend;
 
 defined( 'ABSPATH' ) || exit;
@@ -159,6 +164,68 @@ final class Importer implements Module {
 				},
 			)
 		);
+
+		register_setting(
+			'wow_signal_ai',
+			ModelGateway::OPTION_TRANSPORT,
+			array(
+				'type'              => 'string',
+				'default'           => 'auto',
+				'show_in_rest'      => false,
+				'sanitize_callback' => static function ( $value ): string {
+					$value = is_string( $value ) ? $value : '';
+
+					return array_key_exists( $value, ModelGateway::transports() ) ? $value : 'auto';
+				},
+			)
+		);
+
+		register_setting(
+			'wow_signal_ai',
+			ClaudeCli::OPTION_BINARY,
+			array(
+				'type'              => 'string',
+				'default'           => '',
+				'show_in_rest'      => false,
+				'sanitize_callback' => array( $this, 'sanitize_binary' ),
+			)
+		);
+	}
+
+	/**
+	 * Keep the stored CLI path to something that is actually a file.
+	 *
+	 * The value is only ever handed to proc_open() as argv[0], never to a
+	 * shell, so shell metacharacters have nothing to escape into. The check
+	 * that matters is the plain one: an administrator who mistypes the path
+	 * should be told now rather than by a failed conversion later.
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return string
+	 */
+	public function sanitize_binary( $value ): string {
+		$value = is_string( $value ) ? trim( $value ) : '';
+
+		// A changed path invalidates whatever the last probe concluded.
+		ClaudeCli::forget();
+
+		if ( '' === $value ) {
+			return '';
+		}
+
+		$value = str_replace( '\\', '/', $value );
+
+		if ( ! is_file( $value ) ) {
+			add_settings_error(
+				ClaudeCli::OPTION_BINARY,
+				'wow_signal_cli_missing',
+				__( 'There is no file at that path, so it was not saved. Leave the field empty to let the theme look for the claude command itself.', 'wow-signal' )
+			);
+
+			return '';
+		}
+
+		return $value;
 	}
 
 	/**
@@ -227,6 +294,16 @@ final class Importer implements Module {
 					'keyLocked' => AnthropicClient::key_is_constant(),
 					'siteUrl'   => esc_url_raw( admin_url() ),
 					'summary'   => $this->import_summary(),
+
+					/*
+					 * What is known without running anything. Whether the
+					 * command actually works is asked for separately, once the
+					 * screen is up, so a broken install cannot hold up the
+					 * page load.
+					 */
+					'transport' => ModelGateway::preference(),
+					'cliFound'  => '' !== ClaudeCli::binary(),
+					'canSpawn'  => ClaudeCli::can_spawn(),
 				)
 			) . ';',
 			'before'
@@ -302,6 +379,17 @@ final class Importer implements Module {
 		$models  = AnthropicClient::models();
 		$efforts = AnthropicClient::effort_levels();
 		$key     = AnthropicClient::api_key();
+
+		/*
+		 * Nothing here runs the binary. Finding the file and asking php.ini
+		 * whether processes may be started are both free; actually running
+		 * `claude --version` is not, and an admin page load is the wrong
+		 * place to spend twenty seconds discovering a broken install. The
+		 * live verdict comes from the /model endpoint once the screen is up.
+		 */
+		$transports = ModelGateway::transports();
+		$cli_path   = ClaudeCli::binary();
+		$can_spawn  = ClaudeCli::can_spawn();
 		?>
 		<div class="wrap wow-import">
 			<div class="wow-import__masthead">
@@ -317,9 +405,15 @@ final class Importer implements Module {
 				</p>
 			</div>
 
-			<details class="wow-import__settings" <?php echo '' === $key ? 'open' : ''; ?>>
+			<details class="wow-import__settings" <?php echo '' === $key && '' === $cli_path ? 'open' : ''; ?>>
 				<summary>
 					<?php esc_html_e( 'Connection settings', 'wow-signal' ); ?>
+
+					<?php if ( '' !== $cli_path && $can_spawn ) : ?>
+						<span class="wow-import__badge is-on">
+							<?php esc_html_e( 'Claude Code found on this machine', 'wow-signal' ); ?>
+						</span>
+					<?php endif; ?>
 
 					<?php if ( AnthropicClient::key_is_constant() ) : ?>
 						<span class="wow-import__badge is-on">
@@ -335,7 +429,7 @@ final class Importer implements Module {
 							);
 							?>
 						</span>
-					<?php else : ?>
+					<?php elseif ( '' === $cli_path ) : ?>
 						<span class="wow-import__badge is-off">
 							<?php esc_html_e( 'No key — the free routes still work', 'wow-signal' ); ?>
 						</span>
@@ -346,6 +440,67 @@ final class Importer implements Module {
 					<?php settings_fields( 'wow_signal_ai' ); ?>
 
 					<table class="form-table" role="presentation">
+						<tr>
+							<th scope="row">
+								<label for="wow-transport"><?php esc_html_e( 'How to reach the model', 'wow-signal' ); ?></label>
+							</th>
+							<td>
+								<select id="wow-transport" class="wow-import__field" name="<?php echo esc_attr( ModelGateway::OPTION_TRANSPORT ); ?>">
+									<?php foreach ( $transports as $id => $label ) : ?>
+										<option value="<?php echo esc_attr( $id ); ?>" <?php selected( ModelGateway::preference(), $id ); ?>>
+											<?php echo esc_html( $label ); ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+
+								<p class="description">
+									<?php esc_html_e( 'Two routes lead to the same place. On your own machine, Claude Code is already signed in to your subscription, so rebuilding a design as many times as it takes adds nothing to a bill. On a client\'s hosting there is no such binary and PHP is usually barred from starting one, so the API is what works there. Neither is needed for the structural import, which never leaves the server.', 'wow-signal' ); ?>
+								</p>
+
+								<?php if ( ! $can_spawn ) : ?>
+									<p class="description">
+										<strong><?php esc_html_e( 'This server does not allow PHP to start other programs, so only the API route can work here.', 'wow-signal' ); ?></strong>
+									</p>
+								<?php elseif ( '' !== $cli_path ) : ?>
+									<p class="description">
+										<?php
+										printf(
+											/* translators: %s: path to the claude binary. */
+											esc_html__( 'Found at %s.', 'wow-signal' ),
+											'<code>' . esc_html( $cli_path ) . '</code>'
+										);
+										?>
+									</p>
+								<?php endif; ?>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label for="wow-cli"><?php esc_html_e( 'Path to the claude command', 'wow-signal' ); ?></label>
+							</th>
+							<td>
+								<?php if ( ClaudeCli::binary_is_constant() ) : ?>
+									<p>
+										<strong><?php esc_html_e( 'Set in wp-config.php.', 'wow-signal' ); ?></strong>
+										<?php esc_html_e( 'The path is defined as a constant and cannot be changed here.', 'wow-signal' ); ?>
+									</p>
+								<?php else : ?>
+									<input
+										type="text"
+										id="wow-cli"
+										class="wow-import__field"
+										name="<?php echo esc_attr( ClaudeCli::OPTION_BINARY ); ?>"
+										autocomplete="off"
+										spellcheck="false"
+										placeholder="<?php echo esc_attr( 'Windows' === PHP_OS_FAMILY ? 'C:/Users/you/.local/bin/claude.exe' : '/usr/local/bin/claude' ); ?>"
+										value="<?php echo esc_attr( (string) get_option( ClaudeCli::OPTION_BINARY, '' ) ); ?>"
+									>
+									<p class="description">
+										<?php esc_html_e( 'Only needed when the command is somewhere the web server cannot find on its own. Leave it empty and the theme looks along PATH. Remember that the web server runs as its own user: the binary has to be one that user may execute, and signed in as that user.', 'wow-signal' ); ?>
+									</p>
+								<?php endif; ?>
+							</td>
+						</tr>
 						<tr>
 							<th scope="row">
 								<label for="wow-key"><?php esc_html_e( 'Anthropic API key', 'wow-signal' ); ?></label>
@@ -512,7 +667,27 @@ final class Importer implements Module {
 						'required' => true,
 						'minimum'  => 0,
 					),
+					'refine'   => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
 				),
+			)
+		);
+
+		/*
+		 * Which route to a model this machine can take, checked afresh. The
+		 * settings screen asks on load and again whenever somebody changes the
+		 * path to the binary, because the honest answer to "will this work"
+		 * is only ever found by running it.
+		 */
+		register_rest_route(
+			self::NAMESPACE,
+			'/model',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'model_status' ),
+				'permission_callback' => $guard,
 			)
 		);
 
@@ -643,6 +818,22 @@ final class Importer implements Module {
 					'includes'     => array(
 						'type'    => 'object',
 						'default' => array(),
+					),
+
+					/*
+					 * Off by default, and deliberately so. A build that leaves
+					 * these alone converts entirely offline: no key needed, no
+					 * money spent, no network. Turning them on is a choice the
+					 * build screen makes the person state, with the cost of it
+					 * on screen before the press.
+					 */
+					'smart'        => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+					'refine'       => array(
+						'type'    => 'boolean',
+						'default' => false,
 					),
 				),
 			)
@@ -885,6 +1076,8 @@ final class Importer implements Module {
 
 		$includes = $request->get_param( 'includes' );
 
+		$smart = (bool) $request->get_param( 'smart' );
+
 		$job = SiteAssembler::start(
 			$root,
 			DesignArchive::index( $root ),
@@ -892,6 +1085,10 @@ final class Importer implements Module {
 				'language' => (string) $request->get_param( 'language' ),
 				'publish'  => (bool) $request->get_param( 'publish' ),
 				'includes' => is_array( $includes ) ? $includes : array(),
+				'smart'    => $smart,
+				'refine'   => $smart && (bool) $request->get_param( 'refine' ),
+				'model'    => (string) get_option( self::OPTION_MODEL, AnthropicClient::DEFAULT_MODEL ),
+				'effort'   => (string) get_option( self::OPTION_EFFORT, 'high' ),
 			)
 		);
 
@@ -925,12 +1122,30 @@ final class Importer implements Module {
 
 		return rest_ensure_response(
 			array(
-				'job'   => $id,
-				'steps' => $steps,
-				'done'  => $job['done'],
-				'total' => $job['total'],
+				'job'    => $id,
+				'steps'  => $steps,
+				'done'   => $job['done'],
+				'total'  => $job['total'],
+
+				/*
+				 * Whether the model is in the loop, which the browser needs to
+				 * know: a guided page takes a call per section rather than a
+				 * few milliseconds, and the progress it shows should say so
+				 * instead of looking stalled.
+				 */
+				'smart'  => ! empty( $job['smart'] ),
+				'refine' => ! empty( $job['refine'] ),
 			)
 		);
+	}
+
+	/**
+	 * Which route to a model this machine can take, and why.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function model_status(): WP_REST_Response {
+		return rest_ensure_response( ModelGateway::status( true ) );
 	}
 
 	/**
@@ -960,7 +1175,13 @@ final class Importer implements Module {
 		}
 
 		if ( function_exists( 'set_time_limit' ) ) {
-			set_time_limit( 60 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- One page, bounded.
+			/*
+			 * A structural page is milliseconds. A guided one is a model call
+			 * per section, each of which can take a minute at high effort, so
+			 * the ceiling has to be the length of the slowest page rather than
+			 * of the fastest.
+			 */
+			set_time_limit( empty( $job['smart'] ) ? 60 : 900 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- One page, bounded.
 		}
 
 		$key  = (string) $request->get_param( 'key' );
@@ -1290,11 +1511,26 @@ final class Importer implements Module {
 		$entries = glob( trailingslashit( $base ) . '*', GLOB_ONLYDIR );
 
 		foreach ( $entries ? $entries : array() as $dir ) {
+			// A folder no route could address (an old percent-encoded name) is not offered.
+			if ( ! self::validate_slug( basename( $dir ) ) ) {
+				continue;
+			}
+
 			$index = DesignArchive::index( $dir );
 
 			$designs[] = array(
 				'slug'      => basename( $dir ),
-				'pages'     => $index['pages'],
+
+				/*
+				 * Each page carries what a guided pass over it would cost
+				 * through the API, so the figure is on screen before the press
+				 * rather than on an invoice afterwards. Per page rather than
+				 * per design because a multilingual archive holds the same
+				 * site several times over, and a build converts one language
+				 * of it — a total for the whole archive would be three times
+				 * the truth.
+				 */
+				'pages'     => $this->priced( $index['pages'] ),
 				'languages' => $index['languages'],
 				'images'    => $index['images'],
 			);
@@ -1306,6 +1542,35 @@ final class Importer implements Module {
 				'archive' => DesignArchive::footprint(),
 			)
 		);
+	}
+
+	/**
+	 * The same page rows, each carrying what a guided pass over it would cost.
+	 *
+	 * @param array<int, array<string, mixed>> $pages Page rows from the index.
+	 * @return array<int, array<string, mixed>> The rows, with an `estimate` in dollars.
+	 */
+	private function priced( array $pages ): array {
+		$model = (string) get_option( self::OPTION_MODEL, AnthropicClient::DEFAULT_MODEL );
+
+		foreach ( $pages as $index => $page ) {
+			$sections = max( 1, (int) ( $page['sections'] ?? 1 ) );
+
+			/*
+			 * A guided prompt carries the section, the structural conversion
+			 * of it and the resolved-CSS brief, which together run to roughly
+			 * twice the page's own markup — hence the doubling. One call per
+			 * section, so the markup is divided between them for the input
+			 * and the reply is counted once per call: Spend::estimate() prices
+			 * exactly one reply.
+			 */
+			$pages[ $index ]['estimate'] = Spend::estimate(
+				(int) ( (int) ( $page['bytes'] ?? 0 ) * 2 / $sections ),
+				$model
+			) * $sections;
+		}
+
+		return $pages;
 	}
 
 	/**
@@ -1572,40 +1837,49 @@ final class Importer implements Module {
 			return new WP_Error( 'wow_signal_no_section', __( 'That section is no longer in the page.', 'wow-signal' ), array( 'status' => 404 ) );
 		}
 
-		// Only a request that will actually reach the API counts against the hour.
-		$limited = $this->hit_rate_limit();
+		/*
+		 * Only a request that will actually reach a model counts against the
+		 * hour. With no route configured the conversion still happens, offline
+		 * and free, and spending an allowance on it would mean a site with no
+		 * key could run out of free structural conversions.
+		 */
+		if ( ModelGateway::ready() ) {
+			$limited = $this->hit_rate_limit();
 
-		if ( is_wp_error( $limited ) ) {
-			return $limited;
+			if ( is_wp_error( $limited ) ) {
+				return $limited;
+			}
 		}
 
-		$css = CssIndex::from_directory( $root, $page['styles'] )->rules_for( $section['html'] );
-
 		$model = (string) get_option( self::OPTION_MODEL, AnthropicClient::DEFAULT_MODEL );
+		$css   = CssIndex::from_directory( $root, $page['styles'] );
 
-		$reply = AnthropicClient::generate(
-			ConversionPrompt::system(),
-			ConversionPrompt::message(
-				$section,
-				$css,
-				array(
-					'page'     => $page['title'],
-					'lang'     => $page['lang'],
-					'is_first' => 0 === $position,
-				)
-			),
-			ConversionPrompt::schema(),
+		$converter = new BlockConverter();
+		$converter->use_design( DesignTokens::section_backgrounds( $root ), DesignTokens::extract( $root )['colors'], $css );
+
+		$smart = new SmartConverter(
+			$root,
+			$converter,
+			$css,
 			array(
 				'model'  => $model,
 				'effort' => (string) get_option( self::OPTION_EFFORT, 'high' ),
+				'refine' => (bool) $request->get_param( 'refine' ),
 			)
 		);
 
-		if ( is_wp_error( $reply ) ) {
-			return $reply;
-		}
+		$smart->for_page( (string) $request->get_param( 'file' ) );
 
-		$markup    = isset( $reply['markup'] ) ? (string) $reply['markup'] : '';
+		$conversion = $smart->convert(
+			$section,
+			0 === $position,
+			array(
+				'page' => $page['title'],
+				'lang' => $page['lang'],
+			)
+		);
+
+		$markup    = (string) $conversion['markup'];
 		$validator = new BlockMarkupValidator();
 		$valid     = $validator->check( $markup );
 
@@ -1613,16 +1887,67 @@ final class Importer implements Module {
 			$markup = $this->with_media( $markup, $root, (string) $request->get_param( 'file' ) );
 		}
 
-		$usage = isset( $reply['_usage'] ) && is_array( $reply['_usage'] ) ? $reply['_usage'] : array();
+		$concerns = array_map( 'strval', (array) $conversion['concerns'] );
 
 		/*
-		 * Bill the model that answered, not the one that was asked for: a
-		 * server-side fallback can hand the request to a different model.
+		 * Nothing was sent anywhere, because there was nowhere to send it. The
+		 * conversion below is real and usable; it is just not the one the
+		 * button implied, and saying so here is the difference between "the
+		 * model saw no problems" and "no model was asked".
 		 */
-		$billed   = isset( $reply['_model'] ) && '' !== (string) $reply['_model'] ? (string) $reply['_model'] : $model;
-		$concerns = isset( $reply['concerns'] ) && is_array( $reply['concerns'] ) ? array_map( 'strval', $reply['concerns'] ) : array();
+		if ( ! empty( $conversion['unavailable'] ) ) {
+			$status = ModelGateway::status();
 
-		if ( ! Spend::knows( $billed ) ) {
+			$concerns[] = sprintf(
+				/* translators: %s: why no model could be reached. */
+				__( 'This is the structural conversion — no model was asked, because none can be reached from here. %s', 'wow-signal' ),
+				(string) $status['reason']
+			);
+		}
+
+		/*
+		 * Every call the conversion made, billed one by one. A guided
+		 * conversion is one call, a reviewed one is two, and a call that
+		 * failed is charged for nothing but is still worth saying out loud —
+		 * the section fell back to the structural conversion, and the person
+		 * looking at it should know that is what they are looking at.
+		 */
+		$usage     = array(
+			'input_tokens'  => 0,
+			'output_tokens' => 0,
+		);
+		$billed    = $model;
+		$cost      = 0.0;
+		$transport = ModelGateway::resolve();
+		$spend     = Spend::totals();
+
+		foreach ( $smart->calls() as $call ) {
+			if ( empty( $call['ok'] ) ) {
+				$concerns[] = sprintf(
+					/* translators: %s: the reason the model could not be reached. */
+					__( 'The model could not be reached, so this is the structural conversion: %s', 'wow-signal' ),
+					(string) ( $call['error'] ?? '' )
+				);
+
+				continue;
+			}
+
+			$call_usage = is_array( $call['usage'] ?? null ) ? $call['usage'] : array();
+			$billed     = (string) ( $call['model'] ?? $model );
+			$transport  = (string) ( $call['transport'] ?? $transport );
+			$billable   = ModelGateway::is_billable( $transport );
+
+			$usage['input_tokens']  += (int) ( $call_usage['input_tokens'] ?? 0 ) + (int) ( $call_usage['cache_read_input_tokens'] ?? 0 ) + (int) ( $call_usage['cache_creation_input_tokens'] ?? 0 );
+			$usage['output_tokens'] += (int) ( $call_usage['output_tokens'] ?? 0 );
+
+			if ( $billable ) {
+				$cost += Spend::cost( $call_usage, $billed );
+			}
+
+			$spend = Spend::record( $call_usage, $billed, $billable );
+		}
+
+		if ( 'api' === $transport && ! Spend::knows( $billed ) ) {
 			$concerns[] = sprintf(
 				/* translators: %s: model ID. */
 				__( 'This reply came from %s, which has no known price — its cost is recorded as zero.', 'wow-signal' ),
@@ -1631,16 +1956,19 @@ final class Importer implements Module {
 		}
 
 		$result = array(
-			'valid'    => $valid,
-			'errors'   => $validator->errors(),
-			'notes'    => $valid ? $validator->review( $markup ) : array(),
-			'markup'   => $valid ? $markup : '',
-			'summary'  => isset( $reply['summary'] ) ? (string) $reply['summary'] : '',
-			'editable' => isset( $reply['editable'] ) && is_array( $reply['editable'] ) ? array_map( 'strval', $reply['editable'] ) : array(),
-			'concerns' => $concerns,
-			'usage'    => $usage,
-			'model'    => $billed,
-			'cost'     => Spend::cost( $usage, $billed ),
+			'valid'     => $valid,
+			'errors'    => $validator->errors(),
+			'notes'     => $valid ? $validator->review( $markup ) : array(),
+			'markup'    => $valid ? $markup : '',
+			'summary'   => (string) $conversion['summary'],
+			'editable'  => array_map( 'strval', (array) $conversion['editable'] ),
+			'concerns'  => array_values( array_unique( $concerns ) ),
+			'changed'   => array_map( 'strval', (array) $conversion['changed'] ),
+			'source'    => (string) $conversion['source'],
+			'transport' => $transport,
+			'usage'     => $usage,
+			'model'     => $billed,
+			'cost'      => $cost,
 		);
 
 		/*
@@ -1655,7 +1983,7 @@ final class Importer implements Module {
 		);
 
 		$result['preview'] = $valid ? $this->preview( $markup ) : '';
-		$result['spend']   = Spend::record( $usage, $billed );
+		$result['spend']   = $spend;
 		$result['limit']   = $this->rate_limit_status();
 
 		return rest_ensure_response( $result );
