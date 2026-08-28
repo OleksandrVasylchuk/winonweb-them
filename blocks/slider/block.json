@@ -1,13 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "wow/slider",
+	"name": "qs/slider",
 	"title": "Case slider",
-	"category": "wow",
+	"category": "qs",
 	"icon": "images-alt2",
 	"description": "A horizontal row of cards a visitor can swipe or scroll through. Every card stays reachable without JavaScript.",
 	"keywords": [ "slider", "carousel", "cases", "portfolio", "scroller" ],
-	"textdomain": "wow-signal",
+	"textdomain": "qwerty-soft-signal",
 	"attributes": {
 		"label": {
 			"type": "string",

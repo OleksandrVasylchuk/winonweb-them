@@ -1,0 +1,65 @@
+{
+    "key": "group_qs_design_about_830b72",
+    "title": "Media enquiries strip",
+    "fields": [
+        {
+            "key": "field_qs_about_830b72_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "面向媒体、会议组织者和行业合作伙伴。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_about_830b72_description",
+            "label": "Description",
+            "name": "description",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert Khoubian 可就全球食品贸易、中国供应链、俄罗斯和独联体市场准入、冷冻食品物流、监管要求和跨境贸易风险提供观点。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_about_830b72_contact_link",
+            "label": "Contact link",
+            "name": "contact_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "mailto:robert@robertkhoubian.com",
+                "title": "联系",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_about_830b72_reports_link",
+            "label": "Link to the reports",
+            "name": "reports_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "reports.html",
+                "title": "查看报告",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-about-830b72"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,45 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-videos-e0196d",
+    "title": "最新视频简报",
+    "category": "qs",
+    "description": "最新视频简报 — 7 pieces of text, 3 repeating items. From videos.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "videos",
+        "最新视频简报"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "duration": "4:30",
+                "play_icon": "▶",
+                "eyebrow": "最新简报",
+                "heading": "如何阅读一份基于海关数据的市场报告",
+                "summary": "简明说明HS编码、数据覆盖、排名限制以及数字背后的商业含义。",
+                "takeaways_heading": "您将了解",
+                "ai_disclosure": "本视频采用 Robert Khoubian 经批准的数字分身和声音克隆进行AI辅助呈现。脚本、分析和最终发布均由 Robert Khoubian 审核批准。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/videos.html",
+    "qsDesignVersion": 7
+}

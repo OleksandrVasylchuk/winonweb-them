@@ -1,0 +1,53 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-research-c25398",
+    "title": "Research hero",
+    "category": "qs",
+    "description": "Research hero — 5 pieces of text, 2 links, 6 repeating items. From research.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "research",
+        "hero"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "eyebrow": "研究与市场情报",
+                "heading": "为实际贸易决策服务的食品贸易情报。",
+                "lead": "专注于中国食品出口、中国—欧亚贸易通道、冷冻食品供应链、市场准入、监管要求和贸易风险的专业研究中心。",
+                "primary_link": {
+                    "url": "#intelligence",
+                    "title": "查看情报",
+                    "target": ""
+                },
+                "secondary_link": {
+                    "url": "#methodology",
+                    "title": "研究方法",
+                    "target": ""
+                },
+                "panel_heading": "研究重点",
+                "panel_scope": "中国 • 欧亚 • 冷冻食品"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/research.html",
+    "qsDesignVersion": 7
+}

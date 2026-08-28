@@ -1,0 +1,195 @@
+{
+    "key": "group_qs_design_about_75b464",
+    "title": "Profile sections",
+    "fields": [
+        {
+            "key": "field_qs_about_75b464_on_this_page_heading",
+            "label": "On this page heading",
+            "name": "on_this_page_heading",
+            "type": "text",
+            "default_value": "На странице",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_about_75b464_profile_link",
+            "label": "Link to Profile",
+            "name": "profile_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#profile",
+                "title": "Профиль",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_75b464_timeline_link",
+            "label": "Link to Timeline",
+            "name": "timeline_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#timeline",
+                "title": "Timeline",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_75b464_market_access_link",
+            "label": "Link to Market access",
+            "name": "market_access_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#market-access",
+                "title": "Доступ на рынки",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_75b464_trade_missions_link",
+            "label": "Link to Trade missions",
+            "name": "trade_missions_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#missions",
+                "title": "Торговые миссии",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_75b464_projects_link",
+            "label": "Link to Projects",
+            "name": "projects_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#projects",
+                "title": "Проекты",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_75b464_aquaprole_link",
+            "label": "Link to Aquaprole",
+            "name": "aquaprole_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#aquaprole",
+                "title": "Aquaprole",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_75b464_technology_link",
+            "label": "Link to Technology",
+            "name": "technology_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#technology",
+                "title": "Технологии",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_about_75b464_beyond_trade_link",
+            "label": "Link to Beyond Trade",
+            "name": "beyond_trade_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#beyond",
+                "title": "Beyond Trade",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_about_75b464_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_about_75b464_row_heading",
+                    "label": "Block heading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "Практический профиль в международной торговле продуктами питания.",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_about_75b464_row_body",
+                    "label": "Body text",
+                    "name": "body",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Роберт Хубиян — профессионал в международной торговле продуктами питания, предприниматель и издатель market intelligence, специализирующийся на торговле Китай–Евразия, замороженных цепочках поставок и трансграничном доступе на рынки.",
+                    "instructions": "A short paragraph of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_about_75b464_row_body_2",
+                    "label": "Further body text",
+                    "name": "body_2",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "С начала карьеры в 2004 году в канадской торговой компании Роберт работал с рынками России, СНГ, Китая, Юго-Восточной Азии, Северной Америки и Европейского Союза. Его опыт включает торговлю продуктами питания, доступ на рынки, таможенные и ветеринарные требования, холодильную логистику, адаптацию продуктов для розницы и международное развитие бизнеса.",
+                    "instructions": "A short paragraph of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-about-75b464"
+            }
+        ]
+    ],
+    "active": true
+}

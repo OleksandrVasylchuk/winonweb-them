@@ -1,0 +1,52 @@
+{
+    "key": "group_qs_design_market_intelligence_index_04526b",
+    "title": "Index types",
+    "fields": [
+        {
+            "key": "field_qs_market_intelligence_index_04526b_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Для практического сравнения",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_04526b_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_market_intelligence_index_04526b_row_heading",
+                    "label": "Index type name",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "Индекс рынка",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_market_intelligence_index_04526b_row_description",
+                    "label": "What it evaluates",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Оценивает конкретный рынок назначения для продукта и периода.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-market-intelligence-index-04526b"
+            }
+        ]
+    ],
+    "active": true
+}

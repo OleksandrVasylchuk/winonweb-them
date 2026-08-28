@@ -18,7 +18,7 @@
  * Setup, once:  npm install && npx playwright install chromium
  * Usage:        npm run audit:a11y -- http://your-site.test [pages=10]
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { createRequire } from 'node:module';
@@ -49,7 +49,7 @@ const TAGS = [ 'wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa' ];
  */
 const fetchText = async ( url ) => {
 	try {
-		const response = await fetch( url, { redirect: 'follow', headers: { 'user-agent': 'wow-signal-axe/1.0' } } );
+		const response = await fetch( url, { redirect: 'follow', headers: { 'user-agent': 'qwerty-soft-signal-axe/1.0' } } );
 		return { status: response.status, body: await response.text() };
 	} catch {
 		return null;
@@ -131,7 +131,7 @@ const axeSource = readFileSync( require.resolve( 'axe-core/axe.min.js' ), 'utf8'
 const targets = [
 	{ label: 'front page', url: `${ base }/`, expect: 200 },
 	{ label: 'search', url: `${ base }/?s=signal`, expect: 200 },
-	{ label: '404', url: `${ base }/wow-signal-this-page-does-not-exist-${ Date.now() }/`, expect: 404 },
+	{ label: '404', url: `${ base }/qwerty-soft-signal-this-page-does-not-exist-${ Date.now() }/`, expect: 404 },
 	...( await discover() ).map( ( url ) => ( { label: url.slice( base.length ) || '/', url, expect: 200 } ) ),
 ];
 
@@ -148,7 +148,7 @@ try {
 const context = await browser.newContext( {
 	viewport: { width: 1280, height: 900 },
 	reducedMotion: 'reduce',
-	userAgent: 'wow-signal-axe/1.0 (Playwright)',
+	userAgent: 'qwerty-soft-signal-axe/1.0 (Playwright)',
 } );
 
 let violations = 0;

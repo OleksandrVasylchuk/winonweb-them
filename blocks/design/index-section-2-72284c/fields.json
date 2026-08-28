@@ -1,0 +1,24 @@
+{
+    "key": "group_qs_design_index_section_2_72284c",
+    "title": "Section 2",
+    "fields": [
+        {
+            "key": "field_qs_index_section_2_72284c_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Global Food Trade Expert",
+            "instructions": "A short line of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-section-2-72284c"
+            }
+        ]
+    ],
+    "active": true
+}

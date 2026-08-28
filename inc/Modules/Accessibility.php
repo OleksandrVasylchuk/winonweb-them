@@ -2,15 +2,15 @@
 /**
  * Accessibility behaviour that markup alone cannot provide.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,7 +24,7 @@ final class Accessibility implements Module {
 	 *
 	 * Kept in sync with the `anchor` on the main group in /templates/*.html.
 	 */
-	public const MAIN_ID = 'wow-main';
+	public const MAIN_ID = 'qs-main';
 
 	/**
 	 * Hook the module.
@@ -52,7 +52,7 @@ final class Accessibility implements Module {
 		printf(
 			'<a class="skip-link" href="#%1$s">%2$s</a>',
 			esc_attr( self::MAIN_ID ),
-			esc_html__( 'Skip to main content', 'wow-signal' )
+			esc_html__( 'Skip to main content', 'qwerty-soft-signal' )
 		);
 	}
 
@@ -85,9 +85,9 @@ final class Accessibility implements Module {
 	 */
 	public function excerpt_more(): string {
 		return sprintf(
-			'&hellip; <a class="wow-read-more" href="%1$s">%2$s<span class="screen-reader-text">: %3$s</span></a>',
+			'&hellip; <a class="qs-read-more" href="%1$s">%2$s<span class="screen-reader-text">: %3$s</span></a>',
 			esc_url( (string) get_permalink() ),
-			esc_html__( 'Read more', 'wow-signal' ),
+			esc_html__( 'Read more', 'qwerty-soft-signal' ),
 			esc_html( (string) get_the_title() )
 		);
 	}
@@ -103,7 +103,7 @@ final class Accessibility implements Module {
 		unset( $link );
 
 		return sprintf(
-			'<a class="wow-read-more" href="%1$s">%2$s<span class="screen-reader-text">: %3$s</span></a>',
+			'<a class="qs-read-more" href="%1$s">%2$s<span class="screen-reader-text">: %3$s</span></a>',
 			esc_url( (string) get_permalink() ),
 			esc_html( wp_strip_all_tags( $more ) ),
 			esc_html( (string) get_the_title() )

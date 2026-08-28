@@ -1,0 +1,103 @@
+{
+    "key": "group_qs_design_videos_how_to_read_a_customs_based_marke",
+    "title": "Video briefing",
+    "fields": [
+        {
+            "key": "field_qs_videos_how_to_read_a_customs_based_marke_video_duration",
+            "label": "Video duration",
+            "name": "video_duration",
+            "type": "text",
+            "default_value": "4:30",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_videos_how_to_read_a_customs_based_marke_play_symbol",
+            "label": "Play symbol",
+            "name": "play_symbol",
+            "type": "text",
+            "default_value": "▶",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_videos_how_to_read_a_customs_based_marke_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "text",
+            "default_value": "Latest briefing",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_videos_how_to_read_a_customs_based_marke_heading",
+            "label": "Video heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "How to Read a Customs-Based Market Report",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_how_to_read_a_customs_based_marke_summary",
+            "label": "Video summary",
+            "name": "summary",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "A concise explanation of HS-code scope, data coverage, ranking limitations and the commercial meaning behind the numbers.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_how_to_read_a_customs_based_marke_learning_points_heading",
+            "label": "Learning points heading",
+            "name": "learning_points_heading",
+            "type": "text",
+            "default_value": "What you will learn",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_how_to_read_a_customs_based_marke_disclosure",
+            "label": "AI disclosure",
+            "name": "disclosure",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "AI-assisted presentation using Robert Khoubian’s approved digital avatar and voice clone. Script, analysis and final publication are reviewed and approved by Robert Khoubian.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_how_to_read_a_customs_based_marke_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_videos_how_to_read_a_customs_based_marke_row_learning_point",
+                    "label": "Learning point",
+                    "name": "learning_point",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "How to interpret HS codes and data coverage",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-videos-how-to-read-a-customs-based-marke"
+            }
+        ]
+    ],
+    "active": true
+}

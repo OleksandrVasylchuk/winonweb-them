@@ -1,0 +1,65 @@
+{
+    "key": "group_qs_design_research_bda8fc",
+    "title": "Call to action",
+    "fields": [
+        {
+            "key": "field_qs_research_bda8fc_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "先建立研究受众，再销售报告。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_bda8fc_description",
+            "label": "Supporting text",
+            "name": "description",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "第一目标是可信度：持续发布有用情报，建立信任，然后将最强的研究转化为高级出版物。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_bda8fc_primary_action",
+            "label": "Primary link",
+            "name": "primary_action",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "index.html#newsletter",
+                "title": "订阅情报",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_research_bda8fc_secondary_action",
+            "label": "Secondary link",
+            "name": "secondary_action",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "media.html",
+                "title": "媒体中心",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-bda8fc"
+            }
+        ]
+    ],
+    "active": true
+}

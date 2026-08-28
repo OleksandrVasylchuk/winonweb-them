@@ -2,15 +2,15 @@
 /**
  * Self-hosted theme updates.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * What leaves the site: the installed version and a one-way hash of the site
  * URL, so the server can rate-limit and count installs. Nothing else, and the
- * whole check can be switched off with the `wow_signal/check_updates` filter.
+ * whole check can be switched off with the `qwerty_soft/check_updates` filter.
  *
  * What is trusted: nothing in the manifest until it has been checked. Every
  * URL must be HTTPS and on an allow-listed host, every version must parse,
@@ -37,12 +37,12 @@ defined( 'ABSPATH' ) || exit;
  *
  *     {
  *       "version":      "1.3.0",
- *       "download_url": "https://www.winonweb.dev/downloads/wow-signal-1.3.0.zip",
+ *       "download_url": "https://qwerty-soft.com/downloads/qwerty-soft-signal-1.3.0.zip",
  *       "requires":     "6.7",
  *       "requires_php": "8.1",
  *       "tested":       "7.0",
  *       "sha256":       "…64 hex characters…",
- *       "details_url":  "https://www.winonweb.dev/themes/signal/changelog/"
+ *       "details_url":  "https://qwerty-soft.com/themes/signal/changelog/"
  *     }
  *
  * `npm run build:zip` writes exactly this file next to the archive.
@@ -52,17 +52,17 @@ final class Updates implements Module {
 	/**
 	 * Where the manifest lives unless a filter moves it.
 	 */
-	private const MANIFEST_URL = 'https://www.winonweb.dev/themes/signal/update.json';
+	private const MANIFEST_URL = 'https://qwerty-soft.com/themes/signal/update.json';
 
 	/**
 	 * Transient holding the last manifest fetch.
 	 */
-	public const TRANSIENT = 'wow_signal_update_check';
+	public const TRANSIENT = 'qwerty_soft_update_check';
 
 	/**
 	 * Transient holding a one-off reason why an available update is not offered.
 	 */
-	private const NOTICE_TRANSIENT = 'wow_signal_update_blocked';
+	private const NOTICE_TRANSIENT = 'qwerty_soft_update_blocked';
 
 	/**
 	 * How long a fetched manifest is trusted, in seconds.
@@ -94,7 +94,7 @@ final class Updates implements Module {
 		 *
 		 * @param bool $check Whether to check. Default true.
 		 */
-		if ( ! (bool) apply_filters( 'wow_signal/check_updates', true ) ) {
+		if ( ! (bool) apply_filters( 'qwerty_soft/check_updates', true ) ) {
 			return;
 		}
 
@@ -115,13 +115,13 @@ final class Updates implements Module {
 		 *
 		 * A reseller or an agency hosting its own builds points this at
 		 * its own server. The download URL inside the manifest must then be
-		 * on the same host, or be allowed through `wow_signal/update_download_hosts`.
+		 * on the same host, or be allowed through `qwerty_soft/update_download_hosts`.
 		 *
 		 * @since 1.3.0
 		 *
 		 * @param string $url HTTPS URL of the JSON manifest.
 		 */
-		return (string) apply_filters( 'wow_signal/update_manifest_url', self::MANIFEST_URL );
+		return (string) apply_filters( 'qwerty_soft/update_manifest_url', self::MANIFEST_URL );
 	}
 
 	/**
@@ -145,7 +145,7 @@ final class Updates implements Module {
 		 *
 		 * @param array<int, string> $hosts Host names, without scheme or port.
 		 */
-		$hosts = (array) apply_filters( 'wow_signal/update_download_hosts', $hosts );
+		$hosts = (array) apply_filters( 'qwerty_soft/update_download_hosts', $hosts );
 
 		$clean = array();
 		foreach ( $hosts as $host ) {
@@ -190,7 +190,7 @@ final class Updates implements Module {
 			$transient->no_update = array();
 		}
 
-		$newer   = version_compare( $manifest['version'], WOW_SIGNAL_VERSION, '>' );
+		$newer   = version_compare( $manifest['version'], QSOFT_VERSION, '>' );
 		$blocked = $newer ? $this->unmet_requirement( $manifest ) : '';
 
 		if ( $newer && '' === $blocked ) {
@@ -219,7 +219,7 @@ final class Updates implements Module {
 		if ( '' !== $manifest['requires_php'] && version_compare( PHP_VERSION, $manifest['requires_php'], '<' ) ) {
 			return sprintf(
 				/* translators: 1: new theme version, 2: required PHP version, 3: current PHP version. */
-				__( 'WOW — Signal %1$s is available but needs PHP %2$s; this server runs PHP %3$s. Ask your host to upgrade PHP, then check for updates again.', 'wow-signal' ),
+				__( 'Qwerty Soft — Signal %1$s is available but needs PHP %2$s; this server runs PHP %3$s. Ask your host to upgrade PHP, then check for updates again.', 'qwerty-soft-signal' ),
 				$manifest['version'],
 				$manifest['requires_php'],
 				PHP_VERSION
@@ -230,7 +230,7 @@ final class Updates implements Module {
 		if ( '' !== $manifest['requires'] && version_compare( $wp, $manifest['requires'], '<' ) ) {
 			return sprintf(
 				/* translators: 1: new theme version, 2: required WordPress version, 3: current WordPress version. */
-				__( 'WOW — Signal %1$s is available but needs WordPress %2$s; this site runs WordPress %3$s. Update WordPress first.', 'wow-signal' ),
+				__( 'Qwerty Soft — Signal %1$s is available but needs WordPress %2$s; this site runs WordPress %3$s. Update WordPress first.', 'qwerty-soft-signal' ),
 				$manifest['version'],
 				$manifest['requires'],
 				$wp
@@ -324,7 +324,7 @@ final class Updates implements Module {
 		 */
 		$url = add_query_arg(
 			array(
-				'version' => rawurlencode( WOW_SIGNAL_VERSION ),
+				'version' => rawurlencode( QSOFT_VERSION ),
 				'site'    => substr( hash( 'sha256', (string) site_url() ), 0, 16 ),
 			),
 			$url
@@ -334,7 +334,7 @@ final class Updates implements Module {
 			$url,
 			array(
 				'timeout'    => self::TIMEOUT,
-				'user-agent' => 'WOW-Signal/' . WOW_SIGNAL_VERSION . '; ' . home_url( '/' ),
+				'user-agent' => 'Qwerty Soft-Signal/' . QSOFT_VERSION . '; ' . home_url( '/' ),
 				'headers'    => array( 'Accept' => 'application/json' ),
 			)
 		);
@@ -479,10 +479,10 @@ final class Updates implements Module {
 			wp_delete_file( $file );
 
 			return new WP_Error(
-				'wow_signal_update_checksum',
+				'qwerty_soft_update_checksum',
 				sprintf(
 					/* translators: %s: theme version. */
-					__( 'The downloaded WOW — Signal %s package does not match the checksum published with it, so it was not installed. Try again later; if it keeps happening, download the theme from your account and upload it by hand.', 'wow-signal' ),
+					__( 'The downloaded Qwerty Soft — Signal %s package does not match the checksum published with it, so it was not installed. Try again later; if it keeps happening, download the theme from your account and upload it by hand.', 'qwerty-soft-signal' ),
 					$manifest['version']
 				)
 			);

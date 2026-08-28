@@ -1,0 +1,83 @@
+{
+    "key": "group_qs_design_robert_ai_four_modes_of_robert_ai_5376b5",
+    "title": "Robert AI modes",
+    "fields": [
+        {
+            "key": "field_qs_robert_ai_four_modes_of_robert_ai_5376b5_kicker",
+            "label": "Kicker",
+            "name": "kicker",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Use Cases",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_four_modes_of_robert_ai_5376b5_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Four modes of Robert AI",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_four_modes_of_robert_ai_5376b5_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_robert_ai_four_modes_of_robert_ai_5376b5_row_number",
+                    "label": "Mode number",
+                    "name": "number",
+                    "type": "text",
+                    "default_value": "1",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_robert_ai_four_modes_of_robert_ai_5376b5_row_mode_name",
+                    "label": "Mode name",
+                    "name": "mode_name",
+                    "type": "text",
+                    "default_value": "Free Intelligence Assistant",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_robert_ai_four_modes_of_robert_ai_5376b5_row_description",
+                    "label": "Description",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Answers general questions using public articles, free reports and website content.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_robert_ai_four_modes_of_robert_ai_5376b5_row_purpose",
+                    "label": "Purpose",
+                    "name": "purpose",
+                    "type": "text",
+                    "default_value": "Lead generation, education and newsletter growth.",
+                    "instructions": "A short line of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-robert-ai-four-modes-of-robert-ai-5376b5"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,61 @@
+{
+    "key": "group_qs_design_robert_ai_how_the_team_controls_robert_a",
+    "title": "Admin control cards",
+    "fields": [
+        {
+            "key": "field_qs_robert_ai_how_the_team_controls_robert_a_kicker",
+            "label": "Section kicker",
+            "name": "kicker",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Admin System",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_how_the_team_controls_robert_a_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "How the team controls Robert AI",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_how_the_team_controls_robert_a_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_robert_ai_how_the_team_controls_robert_a_row_heading",
+                    "label": "Card heading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "Knowledge upload",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_robert_ai_how_the_team_controls_robert_a_row_description",
+                    "label": "Card description",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Admin uploads reports, PDFs, transcripts, glossary terms and evidence notes.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-robert-ai-how-the-team-controls-robert-a"
+            }
+        ]
+    ],
+    "active": true
+}

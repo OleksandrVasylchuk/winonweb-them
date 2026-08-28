@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_media_9e95b2",
+    "title": "Professional facts",
+    "fields": [
+        {
+            "key": "field_qs_media_9e95b2_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Профессиональные факты для СМИ",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_9e95b2_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Эти формулировки подходят как элементы профессионального профиля. Более сильные заявления, требующие документов, ведутся отдельно в evidence register и должны быть подтверждены перед формальным цитированием.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_9e95b2_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_media_9e95b2_row_check_mark",
+                    "label": "Check mark",
+                    "name": "check_mark",
+                    "type": "text",
+                    "default_value": "✓",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_media_9e95b2_row_fact",
+                    "label": "Fact",
+                    "name": "fact",
+                    "type": "text",
+                    "default_value": "Международная торговля продуктами питания с 2004 года",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-media-9e95b2"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-reports-43ec5c",
+    "title": "Report preview checklist",
+    "category": "qs",
+    "description": "Report preview checklist — 2 pieces of text, 7 repeating items. From reports.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "reports",
+        "report",
+        "preview",
+        "checklist"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "报告预览系统",
+                "intro": "每份报告都应有公开落地页，提供足够信息证明价值，同时不泄露完整产品。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/reports.html",
+    "qsDesignVersion": 7
+}

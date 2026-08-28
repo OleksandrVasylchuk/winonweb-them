@@ -5,7 +5,7 @@
  * than each tool re-inventing the search — and failing for a reason that has
  * nothing to do with the code under test — they all ask here.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { spawnSync } from 'node:child_process';

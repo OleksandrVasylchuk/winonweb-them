@@ -1,13 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "wow/faq",
+	"name": "qs/faq",
 	"title": "FAQ accordion",
-	"category": "wow",
+	"category": "qs",
 	"icon": "editor-help",
 	"description": "A list of questions that expand and collapse. Works without JavaScript and can publish itself to Google as an FAQ.",
 	"keywords": [ "faq", "accordion", "questions", "answers" ],
-	"textdomain": "wow-signal",
+	"textdomain": "qwerty-soft-signal",
 	"attributes": {
 		"emitSchema": {
 			"type": "boolean",
@@ -35,7 +35,7 @@
 			"fontSize": true
 		}
 	},
-	"allowedBlocks": [ "wow/faq-item" ],
+	"allowedBlocks": [ "qs/faq-item" ],
 	"editorScript": "file:./edit.js",
 	"editorStyle": "file:./editor.css",
 	"style": "file:./style.css",

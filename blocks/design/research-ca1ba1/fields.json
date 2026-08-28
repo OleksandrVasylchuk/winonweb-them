@@ -1,0 +1,85 @@
+{
+    "key": "group_qs_design_research_ca1ba1",
+    "title": "市场区域分布",
+    "fields": [
+        {
+            "key": "field_qs_research_ca1ba1_heading",
+            "label": "板块标题",
+            "name": "heading",
+            "type": "text",
+            "default_value": "按贸易通道组织研究",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_ca1ba1_intro",
+            "label": "板块简介",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "平台应便于国际访问者按地区、产品和商业问题查找信息。第一优先级是中国—欧亚食品贸易通道，并结合北美和东南亚经验。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_ca1ba1_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_research_ca1ba1_row_region",
+                    "label": "区域名称",
+                    "name": "region",
+                    "type": "text",
+                    "default_value": "中国平台",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_research_ca1ba1_row_country_1",
+                    "label": "国家/地区 1",
+                    "name": "country_1",
+                    "type": "text",
+                    "default_value": "中国",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_research_ca1ba1_row_country_2",
+                    "label": "国家/地区 2",
+                    "name": "country_2",
+                    "type": "text",
+                    "default_value": "香港",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_research_ca1ba1_row_country_3",
+                    "label": "国家/地区 3",
+                    "name": "country_3",
+                    "type": "text",
+                    "default_value": "新加坡",
+                    "instructions": "A short line of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-ca1ba1"
+            }
+        ]
+    ],
+    "active": true
+}

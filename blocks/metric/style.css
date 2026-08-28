@@ -1,14 +1,14 @@
 /**
- * wow/metric — front end and editor.
+ * qs/metric — front end and editor.
  */
 
-.wow-metric {
+.qs-metric {
 	display: flex;
 	flex-direction: column;
 	gap: var(--wp--preset--spacing--20);
 }
 
-.wow-metric__value {
+.qs-metric__value {
 	margin: 0;
 	font-size: var(--wp--preset--font-size--xxx-large);
 	font-weight: 800;
@@ -23,18 +23,18 @@
 	-webkit-text-fill-color: transparent;
 }
 
-.wow-metric__figure {
+.qs-metric__figure {
 	display: inline-flex;
 	align-items: baseline;
 	gap: 0.05em;
 }
 
-.wow-metric__affix {
+.qs-metric__affix {
 	font-size: 0.6em;
 	font-weight: 700;
 }
 
-.wow-metric__label {
+.qs-metric__label {
 	margin: 0;
 	color: var(--wp--preset--color--muted);
 	font-size: var(--wp--preset--font-size--small);
@@ -45,7 +45,7 @@
 /* Gradient text has no colour of its own to fall back on. */
 @media (forced-colors: active) {
 
-	.wow-metric__value {
+	.qs-metric__value {
 		background-image: none;
 		color: CanvasText;
 		-webkit-text-fill-color: CanvasText;

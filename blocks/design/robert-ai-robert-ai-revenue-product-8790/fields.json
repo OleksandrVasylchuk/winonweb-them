@@ -1,0 +1,52 @@
+{
+    "key": "group_qs_design_robert_ai_robert_ai_revenue_product_8790",
+    "title": "Коммерческая модель",
+    "fields": [
+        {
+            "key": "field_qs_robert_ai_robert_ai_revenue_product_8790_kicker",
+            "label": "Kicker",
+            "name": "kicker",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Коммерческая модель",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_revenue_product_8790_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Как Robert AI может стать revenue product",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_revenue_product_8790_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_robert_ai_robert_ai_revenue_product_8790_row_tier",
+                    "label": "Tier",
+                    "name": "tier",
+                    "type": "text",
+                    "default_value": "Free tier",
+                    "instructions": "A short line of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-robert-ai-robert-ai-revenue-product-8790"
+            }
+        ]
+    ],
+    "active": true
+}

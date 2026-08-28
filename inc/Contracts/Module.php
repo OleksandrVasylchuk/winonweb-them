@@ -2,13 +2,13 @@
 /**
  * Module contract.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Contracts;
+namespace Qwerty\Soft\Contracts;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-robert-ai-robert-ai-ab59be",
+    "title": "AI console hero",
+    "category": "qs",
+    "description": "AI console hero — 6 pieces of text, 2 links, 5 repeating items. From robert-ai.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "robert-ai",
+        "console",
+        "hero"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "eyebrow": "AI-powered trade intelligence",
+                "heading": "Robert AI",
+                "subheading": "International business and food trade intelligence — guided by Robert Khoubian’s methodology.",
+                "lede": "A controlled AI advisory interface designed to help professionals understand global food trade, China–Eurasia supply chains, market access, customs data, trade risk and report-based analysis.",
+                "primary_cta": {
+                    "url": "#waitlist",
+                    "title": "Join Waitlist",
+                    "target": ""
+                },
+                "secondary_cta": {
+                    "url": "#knowledge",
+                    "title": "View Knowledge Scope",
+                    "target": ""
+                },
+                "console_title": "Robert AI Advisory Console",
+                "console_status": "● Prototype mode"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/05_AI_Roadmap/z-08ed030b/robert_khoubian_site_v15_robert_ai/en/robert-ai.html",
+    "qsDesignVersion": 7
+}

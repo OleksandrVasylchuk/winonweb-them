@@ -1,0 +1,75 @@
+{
+    "key": "group_qs_design_about_about_robert_khoubian_8723f4",
+    "title": "About profile",
+    "fields": [
+        {
+            "key": "field_qs_about_about_robert_khoubian_8723f4_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "About Robert Khoubian",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_about_about_robert_khoubian_8723f4_lead",
+            "label": "Lead paragraph",
+            "name": "lead",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "International food trade professional, entrepreneur and market intelligence publisher specializing in China–Eurasia food trade, frozen food supply chains and cross-border market access.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_about_about_robert_khoubian_8723f4_image",
+            "label": "Portrait photo",
+            "name": "image",
+            "type": "image",
+            "return_format": "array",
+            "preview_size": "medium",
+            "instructions": "The picture shown in this position."
+        },
+        {
+            "key": "field_qs_about_about_robert_khoubian_8723f4_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_about_about_robert_khoubian_8723f4_row_fact_label",
+                    "label": "Fact label",
+                    "name": "fact_label",
+                    "type": "text",
+                    "default_value": "Since",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_about_about_robert_khoubian_8723f4_row_fact_value",
+                    "label": "Fact value",
+                    "name": "fact_value",
+                    "type": "text",
+                    "default_value": "2004 in food trade",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-about-about-robert-khoubian-8723f4"
+            }
+        ]
+    ],
+    "active": true
+}

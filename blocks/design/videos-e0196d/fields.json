@@ -1,0 +1,103 @@
+{
+    "key": "group_qs_design_videos_e0196d",
+    "title": "最新视频简报",
+    "fields": [
+        {
+            "key": "field_qs_videos_e0196d_duration",
+            "label": "Video length",
+            "name": "duration",
+            "type": "text",
+            "default_value": "4:30",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_videos_e0196d_play_icon",
+            "label": "Play icon",
+            "name": "play_icon",
+            "type": "text",
+            "default_value": "▶",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_videos_e0196d_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "text",
+            "default_value": "最新简报",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_videos_e0196d_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "如何阅读一份基于海关数据的市场报告",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_e0196d_summary",
+            "label": "Summary",
+            "name": "summary",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "简明说明HS编码、数据覆盖、排名限制以及数字背后的商业含义。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_e0196d_takeaways_heading",
+            "label": "Takeaways heading",
+            "name": "takeaways_heading",
+            "type": "text",
+            "default_value": "您将了解",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_e0196d_ai_disclosure",
+            "label": "AI disclosure",
+            "name": "ai_disclosure",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "本视频采用 Robert Khoubian 经批准的数字分身和声音克隆进行AI辅助呈现。脚本、分析和最终发布均由 Robert Khoubian 审核批准。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_e0196d_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_videos_e0196d_row_takeaway",
+                    "label": "Takeaway",
+                    "name": "takeaway",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "如何理解HS编码与数据覆盖范围",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-videos-e0196d"
+            }
+        ]
+    ],
+    "active": true
+}

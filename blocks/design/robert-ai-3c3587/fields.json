@@ -1,0 +1,42 @@
+{
+    "key": "group_qs_design_robert_ai_3c3587",
+    "title": "产品战略引言",
+    "fields": [
+        {
+            "key": "field_qs_robert_ai_3c3587_kicker",
+            "label": "版块小标题",
+            "name": "kicker",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "产品战略",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_3c3587_heading",
+            "label": "标题",
+            "name": "heading",
+            "type": "text",
+            "default_value": "不是普通聊天机器人，而是可扩展的智能层。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_3c3587_intro",
+            "label": "引言",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert AI 应成为用户与 Robert Khoubian、Aquaprole Market Intelligence、报告、方法论、视频、清单和已验证贸易经验之间的接口。",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-robert-ai-3c3587"
+            }
+        ]
+    ],
+    "active": true
+}

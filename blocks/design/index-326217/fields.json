@@ -1,0 +1,83 @@
+{
+    "key": "group_qs_design_index_326217",
+    "title": "Основные направления анализа.",
+    "fields": [
+        {
+            "key": "field_qs_index_326217_heading",
+            "label": "Subheading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Основные направления анализа.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_326217_lede",
+            "label": "Text",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Эти темы станут основой для будущих статей, отчетов, видео и платной market intelligence.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_326217_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_index_326217_row_category",
+                    "label": "Tag",
+                    "name": "category",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Китай–Евразия",
+                    "instructions": "A short paragraph of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_index_326217_row_heading",
+                    "label": "Subheading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "Торговля продуктами Китай–Евразия",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_index_326217_row_description",
+                    "label": "Text",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Торговые коридоры, доступ на рынки, регуляторная координация и потоки замороженных продуктов между Китаем, Россией, СНГ и региональными импортными рынками.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_index_326217_row_subscribe_link",
+                    "label": "Link",
+                    "name": "subscribe_link",
+                    "type": "link",
+                    "return_format": "array",
+                    "default_value": {
+                        "url": "#newsletter",
+                        "title": "Подписаться →",
+                        "target": ""
+                    },
+                    "instructions": "Choose a page, or paste a web address, and the text shown for it."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-326217"
+            }
+        ]
+    ],
+    "active": true
+}

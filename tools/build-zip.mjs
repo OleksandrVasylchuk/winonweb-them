@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Release packager for WOW — Signal.
+ * Release packager for Qwerty Soft — Signal.
  *
- * Writes artifacts/release/wow-signal-<version>.zip containing exactly the
+ * Writes artifacts/release/qwerty-soft-signal-<version>.zip containing exactly the
  * files that belong on a client's server — the theme, and nothing that only
  * exists to develop it.
  *
@@ -20,11 +20,11 @@
  * already filled in. The download URL in it is built from --download-base,
  * which must point at wherever the ZIP will actually be served from.
  *
- * Usage: npm run build:zip -- --download-base https://www.winonweb.dev/downloads/
+ * Usage: npm run build:zip -- --download-base https://qwerty-soft.com/downloads/
  *        DOWNLOAD_BASE=https://… npm run build:zip
  *        npm run build:zip -- --details-url https://…/changelog/
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { createHash } from 'node:crypto';
@@ -36,7 +36,7 @@ import { dirname, resolve, relative, sep } from 'node:path';
 const root = resolve( dirname( fileURLToPath( import.meta.url ) ), '..' );
 
 /** The folder name the archive unpacks into — must match the text domain. */
-const SLUG = 'wow-signal';
+const SLUG = 'qwerty-soft-signal';
 
 /**
  * Everything that must never reach a customer.
@@ -55,11 +55,23 @@ const EXCLUDE = [
 	'designs',
 	'design-reference',
 	'tools',
+
+	// Blocks the importer generated from somebody's design. They belong to the
+	// site they were built for, not to the theme: shipping them would put one
+	// client's markup and copy into the next client's install, and a theme
+	// update would overwrite the very files an editor had been editing.
+	'blocks/design',
 	// The fixture design and the integration tests: development only.
 	'tests',
 	// docs/ ships: GUIDE.md is the client manual and ACCESSIBILITY.md is the
-	// conformance report. BLOCK_SPEC.md is for whoever writes a new block.
+	// conformance report — both are handed over with the site. The rest stay
+	// inside the studio: BLOCK_SPEC.md for whoever writes a new block,
+	// TECHNICAL.md for whoever inherits the codebase, and MANAGEMENT.md, which
+	// carries our hours and our margins.
 	'docs/BLOCK_SPEC.md',
+	'docs/IMPORT_SPEC.md',
+	'docs/TECHNICAL.md',
+	'docs/MANAGEMENT.md',
 
 	// Version control and editor state.
 	'.git',
@@ -338,7 +350,7 @@ const option = ( flag, env ) => {
  */
 const PLACEHOLDER_BASE = 'https://downloads.example.invalid/';
 const downloadBase = option( 'download-base', 'DOWNLOAD_BASE' ) || PLACEHOLDER_BASE;
-const detailsUrl = option( 'details-url', 'DETAILS_URL' ) || `${ headerField( 'Theme URI' ) || 'https://www.winonweb.dev/themes/signal/' }changelog/`;
+const detailsUrl = option( 'details-url', 'DETAILS_URL' ) || `${ headerField( 'Theme URI' ) || 'https://qwerty-soft.com/themes/signal/' }changelog/`;
 
 if ( ! /^https:\/\/[^\s/]+\/.*$/.test( downloadBase ) ) {
 	console.error( `ERROR  --download-base must be an https:// URL with a trailing path, got "${ downloadBase }".` );
@@ -413,7 +425,7 @@ writeFileSync( `${ outFile }.sha256`, `${ sha256 }  ${ SLUG }-${ version }.zip\n
 const raw = entries.reduce( ( total, e ) => total + e.body.length, 0 );
 const kb = ( n ) => `${ ( n / 1024 ).toFixed( 0 ) } KB`;
 
-console.log( `\nwow-signal ${ version }` );
+console.log( `\nqwerty-soft-signal ${ version }` );
 console.log( `  ${ entries.length } files · ${ kb( raw ) } raw · ${ kb( archive.length ) } packed` );
 console.log( `  ${ relative( root, outFile ).split( sep ).join( '/' ) }` );
 console.log( `  sha256 ${ sha256 }` );

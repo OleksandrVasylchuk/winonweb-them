@@ -1,11 +1,11 @@
 {
-    "name": "wow-signal",
+    "name": "qwerty-soft-signal",
     "version": "1.4.0",
     "private": true,
-    "description": "WOW — Signal: a fast, accessible WordPress block theme by WOW — Win On Web.",
-    "author": "WOW — Win On Web (https://www.winonweb.dev/)",
+    "description": "Qwerty Soft — Signal: a fast, accessible WordPress block theme by Qwerty Soft.",
+    "author": "Qwerty Soft (https://qwerty-soft.com/)",
     "license": "GPL-2.0-or-later",
-    "homepage": "https://www.winonweb.dev/",
+    "homepage": "https://qwerty-soft.com/",
     "engines": {
         "node": ">=18"
     },

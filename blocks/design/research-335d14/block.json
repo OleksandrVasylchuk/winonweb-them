@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-research-335d14",
+    "title": "Planned tools",
+    "category": "qs",
+    "description": "Planned tools — 2 pieces of text, 6 repeating items. From research.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "research",
+        "planned",
+        "tools"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "下一步要建设的实用工具",
+                "intro": "这些工具将把专业经验转化为进口商、出口商、经纪人和贸易团队在报价、发货或进入市场前可以使用的资源。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/research.html",
+    "qsDesignVersion": 7
+}

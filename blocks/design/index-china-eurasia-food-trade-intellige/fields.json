@@ -1,0 +1,186 @@
+{
+    "key": "group_qs_design_index_china_eurasia_food_trade_intellige",
+    "title": "China–Eurasia Food Trade Intelligence",
+    "fields": [
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Evidence-led intelligence for global food trade",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "China–Eurasia Food Trade Intelligence",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_lede",
+            "label": "Hero lede",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Research, customs analysis and market-access insight built on more than 20 years of operating experience.",
+            "instructions": "A short paragraph of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_byline",
+            "label": "Hero byline",
+            "name": "byline",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Led by Robert Khoubian, CEO of Aquaprole Group.",
+            "instructions": "A short paragraph of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_primary_cta",
+            "label": "Btn — Explore Latest Intellige…",
+            "name": "primary_cta",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#latest-intelligence",
+                "title": "Explore Latest Intelligence",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_secondary_cta",
+            "label": "Btn — View Reports",
+            "name": "secondary_cta",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "reports.html",
+                "title": "View Reports",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_portrait",
+            "label": "Image",
+            "name": "portrait",
+            "type": "image",
+            "return_format": "array",
+            "preview_size": "medium",
+            "instructions": "The picture shown in this position."
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_portrait_name",
+            "label": "Label — Robert Khoubian",
+            "name": "portrait_name",
+            "type": "text",
+            "default_value": "Robert Khoubian",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_portrait_role",
+            "label": "Label — International Food Trade…",
+            "name": "portrait_role",
+            "type": "text",
+            "default_value": "International Food Trade Executive",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_portrait_role_secondary",
+            "label": "Label — Market Intelligence Publ…",
+            "name": "portrait_role_secondary",
+            "type": "text",
+            "default_value": "Market Intelligence Publisher",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_focus_label",
+            "label": "Label — Core Focus",
+            "name": "focus_label",
+            "type": "text",
+            "default_value": "Core Focus",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_focus_areas",
+            "label": "Label — China • Eurasia • Frozen…",
+            "name": "focus_areas",
+            "type": "text",
+            "default_value": "China • Eurasia • Frozen Food",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_index_china_eurasia_food_trade_intellige_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_index_china_eurasia_food_trade_intellige_row_stat_label",
+                    "label": "Label — Since",
+                    "name": "stat_label",
+                    "type": "text",
+                    "default_value": "Since",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_index_china_eurasia_food_trade_intellige_row_stat_value",
+                    "label": "Label — 2004",
+                    "name": "stat_value",
+                    "type": "text",
+                    "default_value": "2004",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-china-eurasia-food-trade-intellige"
+            }
+        ]
+    ],
+    "active": true
+}

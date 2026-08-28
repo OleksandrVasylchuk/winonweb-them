@@ -1,6 +1,6 @@
-# WOW — Signal
+# Qwerty Soft — Signal
 
-A Full Site Editing WordPress theme by [WOW — Win On Web](https://www.winonweb.dev/).
+A Full Site Editing WordPress theme by [Qwerty Soft](https://qwerty-soft.com/).
 
 Fast, accessible, editable in the block editor, and shipped with the checks that
 prove it. No page builder, no ACF, no build step.
@@ -32,12 +32,12 @@ PHP 8.1 — no extension, no cron, no outbound request. Only the design importer
 | writable `wp-content/uploads` | design files, images, fonts | same failure as any media upload |
 | outbound HTTPS to `api.anthropic.com` | model-assisted conversions | the one-press structural build still works |
 | outbound HTTPS to `fonts.googleapis.com` / `fonts.gstatic.com` | a design's Google Fonts | site falls back to the theme's Manrope; reported in the build |
-| outbound HTTPS to `www.winonweb.dev` | the twelve-hourly update check (see Updates) | no update is offered; upload the new ZIP by hand |
+| outbound HTTPS to `qwerty-soft.com` | the twelve-hourly update check (see Updates) | no update is offered; upload the new ZIP by hand |
 
 `inc/Modules/SiteHealth.php` reports each of these under **Tools → Site Health**
 (two direct tests and one asynchronous outbound check behind
-`GET /wow-signal/v1/health/outbound`, gated on `view_site_health_checks`), and
-adds a **WOW — Signal** section to the Info tab with the theme version, PHP
+`GET /qwerty-soft-signal/v1/health/outbound`, gated on `view_site_health_checks`), and
+adds a **Qwerty Soft — Signal** section to the Info tab with the theme version, PHP
 version, whether a key is configured (marked private) and how many design font
 families are installed. WordPress itself refuses to activate the theme on PHP
 below the `Requires PHP` header, so there is no runtime version guard.
@@ -58,20 +58,21 @@ templates/*.html      16 block templates, incl. WooCommerce
 parts/*.html          header, footer, post-meta
 patterns/*.php        17 patterns, incl. 3 whole-page layouts
 blocks/<slug>/        6 custom blocks — block.json, render.php, edit.js, style.css
-inc/                  PHP: Wow\Signal\* (PSR-4, autoloaded by functions.php)
+inc/                  PHP: Qwerty\Soft\* (PSR-4, autoloaded by functions.php)
   Contracts/          the Module interface
   Modules/            one concern per file, booted by inc/Theme.php
   Support/            small helpers with no hooks
 assets/fonts/         Manrope, three self-hosted woff2 subsets
-docs/                 GUIDE.md + ACCESSIBILITY.md ship · BLOCK_SPEC.md is internal
+docs/                 GUIDE.md + ACCESSIBILITY.md ship · TECHNICAL.md, MANAGEMENT.md,
+                      BLOCK_SPEC.md are internal
 tools/                the quality gates (see below)
-languages/            wow-signal.pot and the Ukrainian translation
+languages/            qwerty-soft-signal.pot and the Ukrainian translation
 artifacts/            gate output and packaged releases — git-ignored, safe to delete
 ```
 
 ### How PHP is wired
 
-`functions.php` registers a PSR-4 autoloader for `Wow\Signal\` → `inc/`, then
+`functions.php` registers a PSR-4 autoloader for `Qwerty\Soft\` → `inc/`, then
 calls `Theme::instance()->boot()`. `Theme` instantiates each module in
 `module_classes()` and calls `register()` on it; every module does all of its
 hooking there and nothing in its constructor.
@@ -79,8 +80,8 @@ hooking there and nothing in its constructor.
 To drop or add a module from a child theme:
 
 ```php
-add_filter( 'wow_signal/modules', function ( array $classes ): array {
-    return array_values( array_diff( $classes, [ Wow\Signal\Modules\Branding::class ] ) );
+add_filter( 'qwerty_soft/modules', function ( array $classes ): array {
+    return array_values( array_diff( $classes, [ Qwerty\Soft\Modules\Branding::class ] ) );
 } );
 ```
 
@@ -125,7 +126,7 @@ claim in `docs/ACCESSIBILITY.md`, so it belongs in the repository rather than
 in somebody's terminal history.
 
 `test:wp` runs `tests/wp/*.php` against a **real WordPress install** — the one
-found by `WOW_WP_PATH`, or the first `wp-load.php` above the theme folder. It
+found by `QSOFT_WP_PATH`, or the first `wp-load.php` above the theme folder. It
 borrows the site rather than owning it: every test runs inside a database
 transaction that is always rolled back (the harness refuses to start on
 anything but InnoDB, and checks after each rollback that no commit sneaked
@@ -135,7 +136,7 @@ others cover the contact form's POST flow (redirects, field errors, bot traps,
 the per-IP limit, a failing mailer), the design importer from
 `tests/fixtures/design.zip` to a built site and back through `reset()`, the
 section splitter, the Site Health tests and the SEO head. Without a WordPress
-install it prints `skipped: no WordPress found (set WOW_WP_PATH)` and exits 0,
+install it prints `skipped: no WordPress found (set QSOFT_WP_PATH)` and exits 0,
 which is why `npm test` does not include it and `npm run test:all` does.
 
 `tests/fixtures/design/` is a small Claude-Design-style export — `<x-dc>`
@@ -190,7 +191,7 @@ theme's own choices:
   module ids such as `@wordpress/interactivity-js-modulepreload`. HTML5 permits
   any non-empty id without whitespace, so these are valid; the rule's default is
   the stricter HTML4 rule.
-- **`no-redundant-role`** is off. `.wow-slider__track` is a `<ul>` with
+- **`no-redundant-role`** is off. `.qs-slider__track` is a `<ul>` with
   `list-style: none`, which makes Safari drop list semantics; `role="list"`
   restores them. The role is redundant per spec and necessary in practice.
 - **`long-title`** is off. It measures a `<title>` written by whoever wrote the
@@ -268,7 +269,7 @@ Three properties it is worth not breaking:
 
 ### The brand kit
 
-`Wow\Signal\Support\BrandKit::derive()` turns one to three brand colours into
+`Qwerty\Soft\Support\BrandKit::derive()` turns one to three brand colours into
 all thirteen tokens. It keeps the client's hue and walks the *lightness* — on a
 dark palette toward white, on a light one toward black — until the colour clears
 the same ratios `tools/contrast-audit.mjs` enforces, plus a small margin so a
@@ -317,14 +318,14 @@ uploaded HTML design into blocks, one section at a time, using the Anthropic
 API — which means every press spends the site owner's money. Three things exist
 because of that, and should not be quietly removed:
 
-- **`Wow\Signal\Support\Spend`** turns the token counts the API already returns
+- **`Qwerty\Soft\Support\Spend`** turns the token counts the API already returns
   into a running total and a before-you-press estimate. The estimate is built
   from the *actual* prompt size for each section — its markup plus the CSS rules
   that match it — not from an average, which is why it lands within a cent of
   the real figure. Prices are Anthropic's published list rates and every figure
   derived from them is labelled an estimate; a site with its own agreement
-  filters them with `wow_signal/anthropic_prices`.
-- **`Wow\Signal\Support\ImportSession`** banks each converted section in user
+  filters them with `qwerty_soft/anthropic_prices`.
+- **`Qwerty\Soft\Support\ImportSession`** banks each converted section in user
   meta as it arrives. Closing the tab on section eight of fourteen used to throw
   away both the work and what it cost; now reopening the page brings it back,
   and "convert every section" skips what is already done rather than paying for
@@ -337,13 +338,13 @@ because of that, and should not be quietly removed:
   does not expose that expiry at all.
 
 **The unpacked designs are not web-accessible.** Archives are extracted into
-`wp-content/uploads/wow-signal-designs/`, and that folder ships with an
+`wp-content/uploads/qwerty-soft-signal-designs/`, and that folder ships with an
 `.htaccess` (Apache) and a `web.config` (IIS) that deny every request, plus an
 empty `index.php`. nginx reads neither file, so a site on nginx needs the
 equivalent in its server block:
 
 ```nginx
-location ^~ /wp-content/uploads/wow-signal-designs/ { deny all; }
+location ^~ /wp-content/uploads/qwerty-soft-signal-designs/ { deny all; }
 ```
 
 ---
@@ -392,7 +393,7 @@ Everything the theme itself controls is off the critical path:
   are both on;
 - block view scripts are `defer`;
 - one 25 KB Latin woff2 subset is preloaded (the list is filterable with
-  `wow_signal/preload_fonts`); Latin-Extended and Cyrillic load only when a page
+  `qwerty_soft/preload_fonts`); Latin-Extended and Cyrillic load only when a page
   actually contains those glyphs.
 
 **Lazy-loading is left to core.** WordPress already skips `loading="lazy"` on
@@ -419,7 +420,7 @@ marked `.no-prerender`.
 | Output escaping | Every dynamic echo passes through `esc_html`/`esc_attr`/`esc_url`/`wp_kses`. The three unescaped echoes are `get_block_wrapper_attributes()` (escaped by core), rendered inner blocks, and `wp_json_encode()` output — each annotated in place. |
 | CSRF | Every form that writes carries a nonce: the contact form, the four setup-screen forms (look, brand, content, reset) and the design importer's admin form; the importer's REST routes check the REST nonce and a capability on every request. |
 | Mail header injection | The submitter's address is validated with `is_email()`; the display name has `<>",;:` and line breaks stripped before it reaches `Reply-To`. |
-| Open relay | The recipient comes from site options and the `wow_signal/contact_recipient` filter. It is never read from the request. |
+| Open relay | The recipient comes from site options and the `qwerty_soft/contact_recipient` filter. It is never read from the request. |
 | Spam | Off-screen honeypot, three-second time trap, five-per-ten-minutes per-IP rate limit. |
 | Headers | `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Cross-Origin-Opener-Policy`, `Permissions-Policy`. |
 
@@ -440,7 +441,7 @@ Content-Security-Policy: default-src 'self'; img-src 'self' data:; font-src 'sel
 ## Translation
 
 ```bash
-npm run make:pot     # regenerate languages/wow-signal.pot
+npm run make:pot     # regenerate languages/qwerty-soft-signal.pot
 npm run i18n         # pot, then compile every catalogue
 ```
 
@@ -459,7 +460,7 @@ the theme reads those files directly. `StyleVariations::all()` runs them through
 
 `tools/make-pot.mjs` extracts gettext calls from PHP plus the strings WordPress
 translates out of `block.json`, style variation JSON and pattern headers. The
-theme text domain is `wow-signal`.
+theme text domain is `qwerty-soft-signal`.
 
 ---
 
@@ -470,14 +471,14 @@ about new versions. `inc/Modules/Updates.php` asks a JSON manifest on the
 studio's server instead and feeds the answer into the same `update_themes`
 transient core reads for every other theme. From there everything is standard:
 the badge on Appearance → Themes, the one-click install, Dashboard → Updates,
-WP-CLI's `wp theme update wow-signal`.
+WP-CLI's `wp theme update qwerty-soft-signal`.
 
 **How a check works.** At most once every twelve hours (transient
-`wow_signal_update_check`), from wp-admin, cron or WP-CLI only, the module
+`qwerty_soft_update_check`), from wp-admin, cron or WP-CLI only, the module
 fetches
 
 ```
-https://www.winonweb.dev/themes/signal/update.json?version=<installed>&site=<hash>
+https://qwerty-soft.com/themes/signal/update.json?version=<installed>&site=<hash>
 ```
 
 with a ten-second timeout. `site` is the first sixteen hex characters of
@@ -494,12 +495,12 @@ the same moment, so that button really does reach the server.
 ```json
 {
   "version": "1.3.0",
-  "download_url": "https://www.winonweb.dev/downloads/wow-signal-1.3.0.zip",
+  "download_url": "https://qwerty-soft.com/downloads/qwerty-soft-signal-1.3.0.zip",
   "requires": "6.7",
   "requires_php": "8.1",
   "tested": "7.0",
   "sha256": "…64 hex characters…",
-  "details_url": "https://www.winonweb.dev/themes/signal/changelog/"
+  "details_url": "https://qwerty-soft.com/themes/signal/changelog/"
 }
 ```
 
@@ -525,17 +526,17 @@ through untouched.
 manifest URL, both over HTTPS, both as plain static files. The release
 workflow below produces both; copying them to the server is the one manual
 step. Downloads may live on a CDN — add its host with
-`wow_signal/update_download_hosts`.
+`qwerty_soft/update_download_hosts`.
 
 **Disabling it.** A site that deploys from version control should not be
 offered updates by the admin:
 
 ```php
-add_filter( 'wow_signal/check_updates', '__return_false' );
+add_filter( 'qwerty_soft/check_updates', '__return_false' );
 ```
 
 **Moving it.** A reseller or an agency hosting its own builds points the
-check at its own manifest with `wow_signal/update_manifest_url`; that host is
+check at its own manifest with `qwerty_soft/update_manifest_url`; that host is
 then automatically the one packages are allowed from.
 
 **Offline and errors.** Nothing here can fatal. No network, a 500, a body that
@@ -550,7 +551,7 @@ The version is declared in three places and all three must agree:
 
 | File | Field |
 |---|---|
-| `style.css` | `Version:` header — what WordPress and `WOW_SIGNAL_VERSION` read |
+| `style.css` | `Version:` header — what WordPress and `QSOFT_VERSION` read |
 | `readme.txt` | `Stable tag:` plus a new `= x.y.z =` changelog entry |
 | `package.json` | `"version"` |
 
@@ -558,11 +559,11 @@ The version is declared in three places and all three must agree:
 two files WordPress actually reads behind. Edit all three by hand, then:
 
 ```bash
-npm run build:zip -- --download-base https://www.winonweb.dev/downloads/
+npm run build:zip -- --download-base https://qwerty-soft.com/downloads/
 ```
 
 `build:zip` refuses to run when the three disagree, and writes three things to
-`artifacts/release/`: `wow-signal-x.y.z.zip`, `wow-signal-x.y.z.zip.sha256`
+`artifacts/release/`: `qwerty-soft-signal-x.y.z.zip`, `qwerty-soft-signal-x.y.z.zip.sha256`
 and `update.json` with that checksum already in it. Without `--download-base`
 (or a `DOWNLOAD_BASE` environment variable) the manifest carries a
 `downloads.example.invalid` placeholder that the theme's host allow-list
@@ -584,19 +585,19 @@ version within twelve hours.
 
 | Filter | Purpose |
 |---|---|
-| `wow_signal/modules` | Add or remove theme modules. |
-| `wow_signal/contact_recipient` | Route a contact form to a different address, by form id. |
-| `wow_signal/show_credit` | Force the footer designer credit on or off in code. |
-| `wow_signal/seo_delegated` | Tell the theme an SEO plugin owns page metadata. |
-| `wow_signal/schema_organization` | Extend the Organization JSON-LD node. |
-| `wow_signal/preconnect_origins` | Add origins to preconnect to. |
-| `wow_signal/preload_fonts` | Change which font files get a `<link rel="preload">`. |
-| `wow_signal/contact_client_ip` | Override the address the contact form rate-limits on, for a site behind a proxy or CDN that sets a forwarding header. |
-| `wow_signal/anthropic_prices` | Replace the published list prices the design importer's spend estimate is calculated from. |
-| `wow_signal/needs_woocommerce_assets` | Keep shop assets on a page outside the shop templates. |
-| `wow_signal/check_updates` | Return `false` to switch the update check off entirely — no request is made, no update is offered. |
-| `wow_signal/update_manifest_url` | Fetch the update manifest from a different HTTPS URL (a reseller or an agency hosting its own builds). |
-| `wow_signal/update_download_hosts` | Hosts a package may be downloaded from. Defaults to the manifest's own host; add a CDN host here. |
+| `qwerty_soft/modules` | Add or remove theme modules. |
+| `qwerty_soft/contact_recipient` | Route a contact form to a different address, by form id. |
+| `qwerty_soft/show_credit` | Force the footer designer credit on or off in code. |
+| `qwerty_soft/seo_delegated` | Tell the theme an SEO plugin owns page metadata. |
+| `qwerty_soft/schema_organization` | Extend the Organization JSON-LD node. |
+| `qwerty_soft/preconnect_origins` | Add origins to preconnect to. |
+| `qwerty_soft/preload_fonts` | Change which font files get a `<link rel="preload">`. |
+| `qwerty_soft/contact_client_ip` | Override the address the contact form rate-limits on, for a site behind a proxy or CDN that sets a forwarding header. |
+| `qwerty_soft/anthropic_prices` | Replace the published list prices the design importer's spend estimate is calculated from. |
+| `qwerty_soft/needs_woocommerce_assets` | Keep shop assets on a page outside the shop templates. |
+| `qwerty_soft/check_updates` | Return `false` to switch the update check off entirely — no request is made, no update is offered. |
+| `qwerty_soft/update_manifest_url` | Fetch the update manifest from a different HTTPS URL (a reseller or an agency hosting its own builds). |
+| `qwerty_soft/update_download_hosts` | Hosts a package may be downloaded from. Defaults to the manifest's own host; add a CDN host here. |
 
 ---
 
@@ -604,4 +605,4 @@ version within twelve hours.
 
 GPL-2.0-or-later. Manrope is bundled under the SIL Open Font License 1.1.
 
-© WOW — Win On Web — https://www.winonweb.dev/
+© Qwerty Soft — https://qwerty-soft.com/

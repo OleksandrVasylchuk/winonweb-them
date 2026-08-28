@@ -1,0 +1,52 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-about-830b72",
+    "title": "Media enquiries strip",
+    "category": "qs",
+    "description": "Media enquiries strip — 2 pieces of text, 2 links. From about.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "about",
+        "media",
+        "enquiries",
+        "strip"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "面向媒体、会议组织者和行业合作伙伴。",
+                "description": "Robert Khoubian 可就全球食品贸易、中国供应链、俄罗斯和独联体市场准入、冷冻食品物流、监管要求和跨境贸易风险提供观点。",
+                "contact_link": {
+                    "url": "mailto:robert@robertkhoubian.com",
+                    "title": "联系",
+                    "target": ""
+                },
+                "reports_link": {
+                    "url": "reports.html",
+                    "title": "查看报告",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/about.html",
+    "qsDesignVersion": 7
+}

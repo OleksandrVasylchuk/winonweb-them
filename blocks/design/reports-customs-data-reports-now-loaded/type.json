@@ -1,0 +1,22 @@
+{
+    "key": "qs_report",
+    "singular": "Report",
+    "plural": "Reports",
+    "fields": [
+        {
+            "name": "title",
+            "type": "text",
+            "label": "Report title"
+        },
+        {
+            "name": "summary",
+            "type": "textarea",
+            "label": "Report summary"
+        },
+        {
+            "name": "detail_link",
+            "type": "link",
+            "label": "Link to the report"
+        }
+    ]
+}

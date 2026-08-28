@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-robert-ai-robert-ai-55ce4e",
+    "title": "团队控制方式",
+    "category": "qs",
+    "description": "团队控制方式 — 2 pieces of text, 4 repeating items. From robert-ai.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "robert-ai",
+        "团队控制方式"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "kicker": "管理系统",
+                "heading": "团队如何控制 Robert AI"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/05_AI_Roadmap/z-08ed030b/robert_khoubian_site_v15_robert_ai/zh/robert-ai.html",
+    "qsDesignVersion": 7
+}

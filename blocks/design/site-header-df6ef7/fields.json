@@ -1,0 +1,77 @@
+{
+    "key": "group_qs_design_site_header_df6ef7",
+    "title": "Site header",
+    "fields": [
+        {
+            "key": "field_qs_site_header_df6ef7_brand",
+            "label": "Brand",
+            "name": "site_header_df6ef7_brand",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "index.html",
+                "title": "RKRobert Khoubian",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_site_header_df6ef7_lang_chip",
+            "label": "Lang chip — EN",
+            "name": "site_header_df6ef7_lang_chip",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "../en/",
+                "title": "EN",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_site_header_df6ef7_lang_chip_2",
+            "label": "Lang chip — RU",
+            "name": "site_header_df6ef7_lang_chip_2",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "../ru/",
+                "title": "RU",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_site_header_df6ef7_lang_chip_3",
+            "label": "Lang chip — 中文",
+            "name": "site_header_df6ef7_lang_chip_3",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "../zh/",
+                "title": "中文",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "qs-design-content"
+            }
+        ]
+    ],
+    "active": true
+}

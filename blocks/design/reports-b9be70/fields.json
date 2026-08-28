@@ -1,0 +1,61 @@
+{
+    "key": "group_qs_design_reports_b9be70",
+    "title": "许可结构",
+    "fields": [
+        {
+            "key": "field_qs_reports_b9be70_heading",
+            "label": "章节标题",
+            "name": "heading",
+            "type": "text",
+            "default_value": "许可结构",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_b9be70_intro",
+            "label": "章节说明文字",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "报告从第一天起就应以清晰的使用权出售。这有助于保护知识产权，并减少企业买家的理解风险。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_b9be70_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_reports_b9be70_row_license_name",
+                    "label": "许可类型名称",
+                    "name": "license_name",
+                    "type": "text",
+                    "default_value": "个人许可",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_reports_b9be70_row_license_description",
+                    "label": "许可说明",
+                    "name": "license_description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "供一名专业用户使用。仅限内部使用，不得转发或再分发。",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-b9be70"
+            }
+        ]
+    ],
+    "active": true
+}

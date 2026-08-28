@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-oat-products-selected-markets-2026-555eb",
+    "title": "Report hero",
+    "category": "qs",
+    "description": "Report hero — 6 pieces of text, 2 links, 4 repeating items. From oat-products-selected-markets-2026.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "oat-products-selected-markets-2026",
+        "report",
+        "hero"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "eyebrow": "Market Intelligence Brief",
+                "heading": "Овсяные продукты в выбранных рынках",
+                "lede": "Южная Корея • Япония • Филиппины • Мексика • Бразилия • Аргентина",
+                "summary": "Краткая версия отчета для сайта, подготовленная на основе загруженного исходного документа по oat milk, oat flour и новым oat-продуктам в выбранных рынках APAC и Латинской Америки.",
+                "back_link": {
+                    "url": "../reports.html",
+                    "title": "Вернуться к отчетам",
+                    "target": ""
+                },
+                "dashboard_link": {
+                    "url": "#market-dashboard",
+                    "title": "Смотреть dashboard",
+                    "target": ""
+                },
+                "status_label": "Статус публикации",
+                "status_value": "Черновик для сайта"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/reports/oat-products-selected-markets-2026.html",
+    "qsDesignVersion": 7
+}

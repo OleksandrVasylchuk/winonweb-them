@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-oat-products-selected-markets-2026-b1f9a",
+    "title": "Market Priorities",
+    "category": "qs",
+    "description": "Market Priorities — 2 pieces of text, 6 repeating items. From oat-products-selected-markets-2026.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "oat-products-selected-markets-2026",
+        "market",
+        "priorities"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "给出口商的商业解读。",
+                "intro": "本部分将来源报告转化为燕麦出口商、品牌方和市场情报用户可以使用的市场进入逻辑。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/reports/oat-products-selected-markets-2026.html",
+    "qsDesignVersion": 7
+}

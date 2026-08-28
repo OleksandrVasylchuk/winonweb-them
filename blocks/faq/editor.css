@@ -1,11 +1,11 @@
 /**
- * wow/faq — editor only.
+ * qs/faq — editor only.
  *
  * In the canvas each question is always expanded so an editor can see and
  * reach every answer without fighting the disclosure widget.
  */
 
-.editor-styles-wrapper .wow-faq__item.is-editor {
+.editor-styles-wrapper .qs-faq__item.is-editor {
 	display: block;
 	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50);
 	background: var(--wp--preset--color--surface);
@@ -13,23 +13,23 @@
 	border-radius: var(--wp--custom--radius--md);
 }
 
-.editor-styles-wrapper .wow-faq__item.is-editor .wow-faq__question {
+.editor-styles-wrapper .qs-faq__item.is-editor .qs-faq__question {
 	padding: 0 0 var(--wp--preset--spacing--30);
 	min-height: 0;
 	cursor: text;
 }
 
-.editor-styles-wrapper .wow-faq__item.is-editor .wow-faq__answer {
+.editor-styles-wrapper .qs-faq__item.is-editor .qs-faq__answer {
 	padding: 0;
 }
 
 /* Make an empty question obvious rather than collapsing to nothing. */
-.editor-styles-wrapper .wow-faq__question-text[data-rich-text-placeholder]::after {
+.editor-styles-wrapper .qs-faq__question-text[data-rich-text-placeholder]::after {
 	opacity: 0.6;
 }
 
 /* The appender always sits inside the wrapper, so :empty never matches; test for questions instead. */
-.editor-styles-wrapper .wow-faq:not(:has(.wow-faq__item))::before {
+.editor-styles-wrapper .qs-faq:not(:has(.qs-faq__item))::before {
 	content: attr(data-empty-hint);
 	display: block;
 	padding: var(--wp--preset--spacing--60);

@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-robert-ai-four-modes-of-robert-ai-5376b5",
+    "title": "Robert AI modes",
+    "category": "qs",
+    "description": "Robert AI modes — 2 pieces of text, 4 repeating items. From robert-ai.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "robert-ai",
+        "robert",
+        "modes"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "kicker": "Use Cases",
+                "heading": "Four modes of Robert AI"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/05_AI_Roadmap/z-08ed030b/robert_khoubian_site_v15_robert_ai/en/robert-ai.html",
+    "qsDesignVersion": 7
+}

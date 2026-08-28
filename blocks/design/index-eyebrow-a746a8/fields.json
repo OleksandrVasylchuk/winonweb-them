@@ -1,0 +1,25 @@
+{
+    "key": "group_qs_design_index_eyebrow_a746a8",
+    "title": "Eyebrow",
+    "fields": [
+        {
+            "key": "field_qs_index_eyebrow_a746a8_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert Khoubian",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-eyebrow-a746a8"
+            }
+        ]
+    ],
+    "active": true
+}

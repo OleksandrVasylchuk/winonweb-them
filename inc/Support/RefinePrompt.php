@@ -2,13 +2,13 @@
 /**
  * The second pass: compare what the blocks render as against the design.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 defined( 'ABSPATH' ) || exit;
 

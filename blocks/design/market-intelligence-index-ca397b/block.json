@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-market-intelligence-index-ca397b",
+    "title": "Демонстрационная карточка баллов",
+    "category": "qs",
+    "description": "Демонстрационная карточка баллов — 7 pieces of text, 8 repeating items. From market-intelligence-index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "market-intelligence-index",
+        "Демонстрационная",
+        "карточка",
+        "баллов"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Пример визуализации — не опубликованный рейтинг",
+                "lede": "Ниже показан только пример дизайна. Его нельзя цитировать как текущий рыночный вывод.",
+                "notice_heading": "Уведомление о названии и методологии",
+                "notice_text": "Robert Khoubian Market Intelligence Index™, RKMII™ и дизайн карточек представлены как заявленные обозначения бренда и авторской методологии. Символ ™ означает заявление о праве на обозначение и не подтверждает государственную регистрацию товарного знака.",
+                "total_score_label": "Демонстрационный итоговый балл",
+                "total_score": "82",
+                "status": "СТАТУС: ТОЛЬКО ДЕМОНСТРАЦИЯ"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/market-intelligence-index.html",
+    "qsDesignVersion": 7
+}

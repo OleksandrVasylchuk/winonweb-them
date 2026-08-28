@@ -2,13 +2,13 @@
 /**
  * Gatekeeper for generated block markup.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -149,7 +149,7 @@ final class BlockMarkupValidator {
 		$this->warnings = array();
 
 		if ( '' === trim( $markup ) ) {
-			$this->errors[] = __( 'The conversion produced nothing.', 'wow-signal' );
+			$this->errors[] = __( 'The conversion produced nothing.', 'qwerty-soft-signal' );
 
 			return false;
 		}
@@ -168,14 +168,14 @@ final class BlockMarkupValidator {
 	 */
 	private function check_dangerous_content( string $markup ): void {
 		if ( str_contains( $markup, '<?php' ) || str_contains( $markup, '<?=' ) ) {
-			$this->errors[] = __( 'The result contains PHP, which is never allowed in page content.', 'wow-signal' );
+			$this->errors[] = __( 'The result contains PHP, which is never allowed in page content.', 'qwerty-soft-signal' );
 		}
 
 		foreach ( self::FORBIDDEN_TAGS as $tag ) {
 			if ( 1 === preg_match( '#<' . $tag . '\b#i', $markup ) ) {
 				$this->errors[] = sprintf(
 					/* translators: %s: HTML tag name. */
-					__( 'The result contains a <%s> element, which generated content may not include.', 'wow-signal' ),
+					__( 'The result contains a <%s> element, which generated content may not include.', 'qwerty-soft-signal' ),
 					$tag
 				);
 			}
@@ -187,16 +187,16 @@ final class BlockMarkupValidator {
 		 * = is required so prose mentioning "onclick" does not trip it.
 		 */
 		if ( 1 === preg_match( '#\s+on[a-z]+\s*=#i', $markup ) ) {
-			$this->errors[] = __( 'The result contains an inline event handler attribute.', 'wow-signal' );
+			$this->errors[] = __( 'The result contains an inline event handler attribute.', 'qwerty-soft-signal' );
 		}
 
 		if ( 1 === preg_match( '#(href|src|action|formaction)\s*=\s*["\']?\s*(javascript|vbscript|data:text/html)#i', $markup ) ) {
-			$this->errors[] = __( 'The result contains a script-carrying link or source.', 'wow-signal' );
+			$this->errors[] = __( 'The result contains a script-carrying link or source.', 'qwerty-soft-signal' );
 		}
 
 		// core/html would let anything above through on a later edit.
 		if ( str_contains( $markup, '<!-- wp:html' ) ) {
-			$this->errors[] = __( 'The result uses the Custom HTML block. Sections must be built from real blocks so they stay editable.', 'wow-signal' );
+			$this->errors[] = __( 'The result uses the Custom HTML block. Sections must be built from real blocks so they stay editable.', 'qwerty-soft-signal' );
 		}
 	}
 
@@ -210,7 +210,7 @@ final class BlockMarkupValidator {
 		$pattern = '#<!--\s+(/?)wp:([a-z][a-z0-9-]*(?:/[a-z][a-z0-9-]*)?)\s*(\{.*?\})?\s*(/)?-->#s';
 
 		if ( ! preg_match_all( $pattern, $markup, $matches, PREG_SET_ORDER ) ) {
-			$this->errors[] = __( 'The result contains no blocks at all.', 'wow-signal' );
+			$this->errors[] = __( 'The result contains no blocks at all.', 'qwerty-soft-signal' );
 
 			return;
 		}
@@ -231,7 +231,7 @@ final class BlockMarkupValidator {
 				if ( '' !== $attributes && null === json_decode( $attributes, true ) ) {
 					$this->errors[] = sprintf(
 						/* translators: %s: block name. */
-						__( 'The settings on the "%s" block are not valid JSON.', 'wow-signal' ),
+						__( 'The settings on the "%s" block are not valid JSON.', 'qwerty-soft-signal' ),
 						$name
 					);
 				}
@@ -247,7 +247,7 @@ final class BlockMarkupValidator {
 				if ( null === $open ) {
 					$this->errors[] = sprintf(
 						/* translators: %s: block name. */
-						__( 'A "%s" block is closed but was never opened.', 'wow-signal' ),
+						__( 'A "%s" block is closed but was never opened.', 'qwerty-soft-signal' ),
 						$name
 					);
 					continue;
@@ -256,7 +256,7 @@ final class BlockMarkupValidator {
 				if ( $open !== $name ) {
 					$this->errors[] = sprintf(
 						/* translators: 1: closing block name, 2: block that was open. */
-						__( 'A "%1$s" block closes while "%2$s" is still open.', 'wow-signal' ),
+						__( 'A "%1$s" block closes while "%2$s" is still open.', 'qwerty-soft-signal' ),
 						$name,
 						$open
 					);
@@ -271,13 +271,13 @@ final class BlockMarkupValidator {
 		if ( array() !== $stack ) {
 			$this->errors[] = sprintf(
 				/* translators: %s: comma-separated block names. */
-				__( 'These blocks are never closed: %s.', 'wow-signal' ),
+				__( 'These blocks are never closed: %s.', 'qwerty-soft-signal' ),
 				implode( ', ', array_unique( $stack ) )
 			);
 		}
 
 		if ( 0 === $counted ) {
-			$this->errors[] = __( 'The result contains no blocks at all.', 'wow-signal' );
+			$this->errors[] = __( 'The result contains no blocks at all.', 'qwerty-soft-signal' );
 		}
 	}
 
@@ -295,7 +295,7 @@ final class BlockMarkupValidator {
 
 			$this->errors[] = sprintf(
 				/* translators: %s: block name. */
-				__( '"%s" is not a block the converter is allowed to use.', 'wow-signal' ),
+				__( '"%s" is not a block the converter is allowed to use.', 'qwerty-soft-signal' ),
 				'core/' . $name
 			);
 
@@ -317,7 +317,7 @@ final class BlockMarkupValidator {
 
 		$this->errors[] = sprintf(
 			/* translators: %s: block name. */
-			__( '"%s" is not installed on this site, so that part of the section would render as nothing.', 'wow-signal' ),
+			__( '"%s" is not installed on this site, so that part of the section would render as nothing.', 'qwerty-soft-signal' ),
 			$name
 		);
 	}
@@ -335,7 +335,7 @@ final class BlockMarkupValidator {
 		$notes = array();
 
 		if ( 1 === preg_match( '#<img\b(?![^>]*\balt\s*=)#i', $markup ) ) {
-			$notes[] = __( 'An image has no alt text. Add one, or mark it decorative, before publishing.', 'wow-signal' );
+			$notes[] = __( 'An image has no alt text. Add one, or mark it decorative, before publishing.', 'qwerty-soft-signal' );
 		}
 
 		/*
@@ -344,11 +344,11 @@ final class BlockMarkupValidator {
 		 * check in an earlier version.
 		 */
 		if ( 1 === preg_match( '~style\s*=\s*"[^"]*(\#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\()~', $markup ) ) {
-			$notes[] = __( 'A colour is written directly into the markup instead of using a theme colour, so it will not follow the site palette.', 'wow-signal' );
+			$notes[] = __( 'A colour is written directly into the markup instead of using a theme colour, so it will not follow the site palette.', 'qwerty-soft-signal' );
 		}
 
 		if ( 1 === preg_match( '#style\s*=\s*"[^"]*font-size\s*:\s*\d#i', $markup ) ) {
-			$notes[] = __( 'A font size is written directly into the markup instead of using a theme size.', 'wow-signal' );
+			$notes[] = __( 'A font size is written directly into the markup instead of using a theme size.', 'qwerty-soft-signal' );
 		}
 
 		preg_match_all( '#<h([1-6])\b#i', $markup, $headings );
@@ -357,14 +357,14 @@ final class BlockMarkupValidator {
 			$levels = array_map( 'intval', $headings[1] );
 
 			if ( count( array_filter( $levels, static fn( int $l ): bool => 1 === $l ) ) > 1 ) {
-				$notes[] = __( 'This section contains more than one level-1 heading. A page should have exactly one.', 'wow-signal' );
+				$notes[] = __( 'This section contains more than one level-1 heading. A page should have exactly one.', 'qwerty-soft-signal' );
 			}
 
 			$previous = null;
 
 			foreach ( $levels as $level ) {
 				if ( null !== $previous && $level > $previous + 1 ) {
-					$notes[] = __( 'The heading levels skip a step, which is confusing for screen reader users.', 'wow-signal' );
+					$notes[] = __( 'The heading levels skip a step, which is confusing for screen reader users.', 'qwerty-soft-signal' );
 					break;
 				}
 

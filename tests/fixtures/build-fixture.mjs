@@ -15,7 +15,7 @@
  *
  * Usage: npm run fixture:zip
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { deflateRawSync } from 'node:zlib';

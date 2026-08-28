@@ -1,0 +1,61 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-market-intelligence-index-robert-khoubia",
+    "title": "Market Index Hero",
+    "category": "qs",
+    "description": "Market Index Hero — 11 pieces of text, 2 links. From market-intelligence-index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "market-intelligence-index",
+        "market",
+        "index",
+        "hero"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "eyebrow": "Proprietary Market Framework",
+                "heading": "Robert Khoubian Market Intelligence Index™",
+                "lead": "A structured framework for comparing international food trade markets, products and corridors across commercial opportunity, operating feasibility and risk.",
+                "index_intro": "RKMII™ converts fragmented trade signals into a consistent 0–100 market intelligence score. It is designed to support screening and comparison—not to replace legal, financial, regulatory or transaction-specific due diligence.",
+                "primary_link": {
+                    "url": "#framework",
+                    "title": "View Framework",
+                    "target": ""
+                },
+                "secondary_link": {
+                    "url": "#interpretation",
+                    "title": "How to Read the Index",
+                    "target": ""
+                },
+                "score_card_label": "Illustrative Index Profile",
+                "corridor": "China → Georgia Poultry",
+                "score": "82",
+                "score_out_of": "/100",
+                "outlook_label": "Opportunity outlook",
+                "outlook": "Strong",
+                "status_note": "STATUS: DEMONSTRATION ONLY"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/en/market-intelligence-index.html",
+    "qsDesignVersion": 7
+}

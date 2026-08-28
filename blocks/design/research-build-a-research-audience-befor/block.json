@@ -1,0 +1,52 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-research-build-a-research-audience-befor",
+    "title": "Next Step Callout",
+    "category": "qs",
+    "description": "Next Step Callout — 2 pieces of text, 2 links. From research.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "research",
+        "next",
+        "step",
+        "callout"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Build a research audience before selling reports.",
+                "intro": "The first goal is credibility: publish useful intelligence consistently, earn trust, then convert the strongest research into premium publications.",
+                "primary_link": {
+                    "url": "index.html#newsletter",
+                    "title": "Join Intelligence",
+                    "target": ""
+                },
+                "secondary_link": {
+                    "url": "media.html",
+                    "title": "Media Center",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/en/research.html",
+    "qsDesignVersion": 7
+}

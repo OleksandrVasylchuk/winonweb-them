@@ -1,18 +1,18 @@
 <?php
 /**
- * Server render for wow/faq.
+ * Server render for qs/faq.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  *
  * @var array<string, mixed> $attributes Block attributes.
- * @var string               $content    Rendered wow/faq-item children.
+ * @var string               $content    Rendered qs/faq-item children.
  * @var WP_Block             $block      Block instance.
  */
 
 declare( strict_types = 1 );
 
-use Wow\Signal\Support\BlockText;
+use Qwerty\Soft\Support\BlockText;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,18 +20,18 @@ if ( '' === trim( $content ) ) {
 	return;
 }
 
-$wow_emit_schema = ! isset( $attributes['emitSchema'] ) || (bool) $attributes['emitSchema'];
-$wow_exclusive   = isset( $attributes['exclusive'] ) && (bool) $attributes['exclusive'];
+$qsoft_emit_schema = ! isset( $attributes['emitSchema'] ) || (bool) $attributes['emitSchema'];
+$qsoft_exclusive   = isset( $attributes['exclusive'] ) && (bool) $attributes['exclusive'];
 
-$wow_classes = array( 'wow-faq' );
+$qsoft_classes = array( 'qs-faq' );
 
-if ( $wow_exclusive ) {
-	$wow_classes[] = 'is-exclusive';
+if ( $qsoft_exclusive ) {
+	$qsoft_classes[] = 'is-exclusive';
 }
 
-$wow_wrapper = get_block_wrapper_attributes(
+$qsoft_wrapper = get_block_wrapper_attributes(
 	array(
-		'class' => implode( ' ', $wow_classes ),
+		'class' => implode( ' ', $qsoft_classes ),
 	)
 );
 
@@ -40,46 +40,46 @@ $wow_wrapper = get_block_wrapper_attributes(
  * rendered HTML: the parsed tree still has the question attribute and the
  * answer blocks separated, so no markup has to be scraped back apart.
  */
-$wow_schema = array();
+$qsoft_schema = array();
 
-if ( $wow_emit_schema ) {
-	$wow_children = isset( $block->parsed_block['innerBlocks'] ) && is_array( $block->parsed_block['innerBlocks'] )
+if ( $qsoft_emit_schema ) {
+	$qsoft_children = isset( $block->parsed_block['innerBlocks'] ) && is_array( $block->parsed_block['innerBlocks'] )
 		? $block->parsed_block['innerBlocks']
 		: array();
 
-	foreach ( $wow_children as $wow_child ) {
-		if ( ! is_array( $wow_child ) || 'wow/faq-item' !== ( $wow_child['blockName'] ?? '' ) ) {
+	foreach ( $qsoft_children as $qsoft_child ) {
+		if ( ! is_array( $qsoft_child ) || 'qs/faq-item' !== ( $qsoft_child['blockName'] ?? '' ) ) {
 			continue;
 		}
 
-		$wow_question = isset( $wow_child['attrs']['question'] )
-			? trim( html_entity_decode( wp_strip_all_tags( (string) $wow_child['attrs']['question'] ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) )
+		$qsoft_question = isset( $qsoft_child['attrs']['question'] )
+			? trim( html_entity_decode( wp_strip_all_tags( (string) $qsoft_child['attrs']['question'] ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) )
 			: '';
 
-		$wow_answer = isset( $wow_child['innerBlocks'] ) && is_array( $wow_child['innerBlocks'] )
-			? BlockText::from_blocks( $wow_child['innerBlocks'] )
+		$qsoft_answer = isset( $qsoft_child['innerBlocks'] ) && is_array( $qsoft_child['innerBlocks'] )
+			? BlockText::from_blocks( $qsoft_child['innerBlocks'] )
 			: '';
 
-		if ( '' === $wow_question || '' === $wow_answer ) {
+		if ( '' === $qsoft_question || '' === $qsoft_answer ) {
 			continue;
 		}
 
-		$wow_schema[] = array(
+		$qsoft_schema[] = array(
 			'@type'          => 'Question',
-			'name'           => $wow_question,
+			'name'           => $qsoft_question,
 			'acceptedAnswer' => array(
 				'@type' => 'Answer',
-				'text'  => $wow_answer,
+				'text'  => $qsoft_answer,
 			),
 		);
 	}
 }
 ?>
-<div <?php echo $wow_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by get_block_wrapper_attributes(). ?>>
+<div <?php echo $qsoft_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by get_block_wrapper_attributes(). ?>>
 	<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Inner blocks are already rendered and escaped by the block API. ?>
 </div>
 <?php
-if ( array() !== $wow_schema ) {
+if ( array() !== $qsoft_schema ) {
 	/*
 	 * wp_json_encode() escapes forward slashes by default, so an editor typing
 	 * "</script>" into a question cannot break out of this element.
@@ -90,7 +90,7 @@ if ( array() !== $wow_schema ) {
 			array(
 				'@context'   => 'https://schema.org',
 				'@type'      => 'FAQPage',
-				'mainEntity' => $wow_schema,
+				'mainEntity' => $qsoft_schema,
 			),
 			JSON_UNESCAPED_UNICODE
 		)

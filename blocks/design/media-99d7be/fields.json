@@ -1,0 +1,148 @@
+{
+    "key": "group_qs_design_media_99d7be",
+    "title": "Media hero",
+    "fields": [
+        {
+            "key": "field_qs_media_99d7be_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Медиа и пресс-центр",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_99d7be_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Экспертные комментарии по международной торговле продуктами питания.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_99d7be_lede",
+            "label": "Intro paragraph",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Материалы для журналистов, организаторов конференций, торговых ассоциаций и отраслевых партнеров, которым нужны комментарии по торговле продуктами питания между Китаем и Евразией, замороженным цепочкам поставок, рыночному доступу и практическому международному трейдингу.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_99d7be_topics_link",
+            "label": "Link to interview topics",
+            "name": "topics_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#topics",
+                "title": "Темы интервью",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_99d7be_media_contact_link",
+            "label": "Link to media contact",
+            "name": "media_contact_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#contact",
+                "title": "Контакт для СМИ",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_99d7be_portrait",
+            "label": "Spokesperson photo",
+            "name": "portrait",
+            "type": "image",
+            "return_format": "array",
+            "preview_size": "medium",
+            "instructions": "The picture shown in this position."
+        },
+        {
+            "key": "field_qs_media_99d7be_profile_eyebrow",
+            "label": "Profile card eyebrow",
+            "name": "profile_eyebrow",
+            "type": "text",
+            "default_value": "Media Profile",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_media_99d7be_spokesperson_name",
+            "label": "Spokesperson name",
+            "name": "spokesperson_name",
+            "type": "text",
+            "default_value": "Роберт Хубиян",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_media_99d7be_expertise_areas",
+            "label": "Areas of expertise",
+            "name": "expertise_areas",
+            "type": "text",
+            "default_value": "China • Eurasia • Frozen Food Supply Chains",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_media_99d7be_formats_label",
+            "label": "Media formats label",
+            "name": "formats_label",
+            "type": "text",
+            "default_value": "Media Formats",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_99d7be_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_media_99d7be_row_format_link",
+                    "label": "Link to the media format",
+                    "name": "format_link",
+                    "type": "link",
+                    "return_format": "array",
+                    "default_value": {
+                        "url": "",
+                        "title": "Media Formats",
+                        "target": ""
+                    },
+                    "instructions": "Choose a page, or paste a web address, and the text shown for it."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-media-99d7be"
+            }
+        ]
+    ],
+    "active": true
+}

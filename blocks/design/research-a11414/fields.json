@@ -1,0 +1,75 @@
+{
+    "key": "group_qs_design_research_a11414",
+    "title": "Focus areas",
+    "fields": [
+        {
+            "key": "field_qs_research_a11414_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Ключевые области покрытия",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_a11414_intro",
+            "label": "Section intro",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Цель страницы — организовать исследования вокруг практических вопросов: что можно экспортировать, кто может покупать, какие документы нужны, какие риски существуют и как правильно структурировать коммерческое решение.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_a11414_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_research_a11414_row_number",
+                    "label": "Focus area number",
+                    "name": "number",
+                    "type": "text",
+                    "default_value": "01",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_research_a11414_row_heading",
+                    "label": "Focus area heading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "Экспорт продуктов из Китая",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_research_a11414_row_description",
+                    "label": "Focus area description",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Готовность заводов, продуктовые категории, требования покупателей, документация и развитие международных каналов для китайской продукции.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-a11414"
+            }
+        ]
+    ],
+    "active": true
+}

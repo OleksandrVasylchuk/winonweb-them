@@ -1,0 +1,33 @@
+{
+    "key": "group_qs_design_reports_publishing_discipline_6fb23d",
+    "title": "Method note",
+    "fields": [
+        {
+            "key": "field_qs_reports_publishing_discipline_6fb23d_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Publishing discipline",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_publishing_discipline_6fb23d_body",
+            "label": "Body text",
+            "name": "body",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "High-value claims, rankings, retail reach, memberships and government-linked participation should remain tied to the internal evidence register before they appear in paid reports, media outreach or Wikipedia-related materials.",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-publishing-discipline-6fb23d"
+            }
+        ]
+    ],
+    "active": true
+}

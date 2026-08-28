@@ -1,0 +1,52 @@
+{
+    "key": "group_qs_design_robert_ai_robert_ai_c17e3a",
+    "title": "Business model tiers",
+    "fields": [
+        {
+            "key": "field_qs_robert_ai_robert_ai_c17e3a_kicker",
+            "label": "Kicker",
+            "name": "kicker",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "商业模式",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_c17e3a_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Robert AI 如何成为收入产品",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_c17e3a_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_robert_ai_robert_ai_c17e3a_row_tier_name",
+                    "label": "Tier name",
+                    "name": "tier_name",
+                    "type": "text",
+                    "default_value": "免费层",
+                    "instructions": "A short line of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-robert-ai-robert-ai-c17e3a"
+            }
+        ]
+    ],
+    "active": true
+}

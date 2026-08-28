@@ -1,5 +1,5 @@
 /**
- * wow/slider — arrow controls.
+ * qs/slider — arrow controls.
  *
  * The markup is already a usable scroller: swipe, trackpad, shift-scroll and
  * arrow keys all work with no script at all. This file reveals the arrow
@@ -13,13 +13,13 @@
 	'use strict';
 
 	function slideStep( viewport ) {
-		var slide = viewport.querySelector( '.wow-slider__slide' );
+		var slide = viewport.querySelector( '.qs-slider__slide' );
 
 		if ( ! slide ) {
 			return viewport.clientWidth;
 		}
 
-		var styles = window.getComputedStyle( viewport.querySelector( '.wow-slider__track' ) );
+		var styles = window.getComputedStyle( viewport.querySelector( '.qs-slider__track' ) );
 		var gap = parseFloat( styles.columnGap || styles.gap || '0' ) || 0;
 
 		return slide.getBoundingClientRect().width + gap;
@@ -49,15 +49,15 @@
 	}
 
 	function init( slider ) {
-		var viewport = slider.querySelector( '.wow-slider__viewport' );
-		var controls = slider.querySelector( '[data-wow-slider-controls]' );
+		var viewport = slider.querySelector( '.qs-slider__viewport' );
+		var controls = slider.querySelector( '[data-qs-slider-controls]' );
 
 		if ( ! viewport || ! controls ) {
 			return;
 		}
 
-		var prev = controls.querySelector( '[data-wow-slider-prev]' );
-		var next = controls.querySelector( '[data-wow-slider-next]' );
+		var prev = controls.querySelector( '[data-qs-slider-prev]' );
+		var next = controls.querySelector( '[data-qs-slider-next]' );
 
 		if ( ! prev || ! next ) {
 			return;
@@ -145,7 +145,7 @@
 
 	function boot() {
 		Array.prototype.forEach.call(
-			document.querySelectorAll( '.wow-slider' ),
+			document.querySelectorAll( '.qs-slider' ),
 			init
 		);
 	}

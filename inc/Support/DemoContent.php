@@ -2,13 +2,13 @@
 /**
  * The starter site, built from the theme's own page patterns.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Block_Patterns_Registry;
 use WP_Post;
@@ -39,9 +39,9 @@ final class DemoContent {
 	 * @var array<string, array{0:string,1:string}>
 	 */
 	private const PAGES = array(
-		'wow-signal/page-home'     => array( 'home', 'Home' ),
-		'wow-signal/page-services' => array( 'services', 'Services' ),
-		'wow-signal/page-contact'  => array( 'contact', 'Contact' ),
+		'qwerty-soft-signal/page-home'     => array( 'home', 'Home' ),
+		'qwerty-soft-signal/page-services' => array( 'services', 'Services' ),
+		'qwerty-soft-signal/page-contact'  => array( 'contact', 'Contact' ),
 	);
 
 	/**
@@ -151,11 +151,11 @@ final class DemoContent {
 	private static function title( string $slug, string $title ): string {
 		switch ( $slug ) {
 			case 'home':
-				return _x( 'Home', 'Starter page title', 'wow-signal' );
+				return _x( 'Home', 'Starter page title', 'qwerty-soft-signal' );
 			case 'services':
-				return _x( 'Services', 'Starter page title', 'wow-signal' );
+				return _x( 'Services', 'Starter page title', 'qwerty-soft-signal' );
 			case 'contact':
-				return _x( 'Contact', 'Starter page title', 'wow-signal' );
+				return _x( 'Contact', 'Starter page title', 'qwerty-soft-signal' );
 		}
 
 		return $title;
@@ -216,7 +216,7 @@ final class DemoContent {
 			array(
 				'post_type'    => 'wp_navigation',
 				'post_status'  => 'publish',
-				'post_title'   => _x( 'Primary', 'Starter menu name', 'wow-signal' ),
+				'post_title'   => _x( 'Primary', 'Starter menu name', 'qwerty-soft-signal' ),
 				'post_content' => self::links( $pages ),
 				'meta_input'   => array( SiteAssembler::OWNED_META => 1 ),
 			),

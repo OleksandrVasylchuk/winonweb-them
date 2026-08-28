@@ -1,0 +1,39 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-market-intelligence-index-fde64b",
+    "title": "指数类别卡片",
+    "category": "qs",
+    "description": "指数类别卡片 — 1 piece of text, 4 repeating items. From market-intelligence-index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "market-intelligence-index",
+        "指数类别卡片"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "面向实际比较"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/market-intelligence-index.html",
+    "qsDesignVersion": 7
+}

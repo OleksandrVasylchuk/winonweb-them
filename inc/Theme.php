@@ -2,15 +2,15 @@
 /**
  * Theme container.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal;
+namespace Qwerty\Soft;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -103,6 +103,9 @@ final class Theme {
 			Modules\Setup::class,
 			Modules\Assets::class,
 			Modules\Blocks::class,
+			Modules\DesignBlocks::class,
+			Modules\DesignOptions::class,
+			Modules\DesignTypes::class,
 			Modules\Patterns::class,
 			Modules\Markup::class,
 			Modules\Accessibility::class,
@@ -136,7 +139,7 @@ final class Theme {
 		 *
 		 * @param array<int, class-string<Module>> $classes Module class names.
 		 */
-		$classes = (array) apply_filters( 'wow_signal/modules', $classes );
+		$classes = (array) apply_filters( 'qwerty_soft/modules', $classes );
 
 		return array_values( array_filter( $classes, 'class_exists' ) );
 	}

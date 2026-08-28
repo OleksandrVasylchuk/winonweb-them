@@ -1,5 +1,5 @@
 /**
- * Editor UI for wow/metric.
+ * Editor UI for qs/metric.
  */
 ( function ( wp ) {
 	'use strict';
@@ -16,11 +16,11 @@
 	// Mirrors render.php and view.js: digits, optional thousands spaces, dot decimal.
 	var COUNTABLE = /^\d[\d\s]*(\.\d+)?$/;
 
-	wp.blocks.registerBlockType( 'wow/metric', {
+	wp.blocks.registerBlockType( 'qs/metric', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
-			var blockProps = useBlockProps( { className: 'wow-metric' } );
+			var blockProps = useBlockProps( { className: 'qs-metric' } );
 
 			var isNumeric = COUNTABLE.test( String( attributes.value || '' ).trim() );
 
@@ -32,36 +32,36 @@
 					null,
 					el(
 						PanelBody,
-						{ title: __( 'Metric', 'wow-signal' ) },
+						{ title: __( 'Metric', 'qwerty-soft-signal' ) },
 						el( TextControl, {
-							label: __( 'Number', 'wow-signal' ),
-							help: __( 'For example 98, 4.9 or 150. Text like "24/7" also works, it simply will not count up.', 'wow-signal' ),
+							label: __( 'Number', 'qwerty-soft-signal' ),
+							help: __( 'For example 98, 4.9 or 150. Text like "24/7" also works, it simply will not count up.', 'qwerty-soft-signal' ),
 							value: attributes.value,
 							onChange: function ( value ) {
 								setAttributes( { value: value } );
 							},
 						} ),
 						el( TextControl, {
-							label: __( 'Before the number', 'wow-signal' ),
-							help: __( 'Optional, for example a currency sign.', 'wow-signal' ),
+							label: __( 'Before the number', 'qwerty-soft-signal' ),
+							help: __( 'Optional, for example a currency sign.', 'qwerty-soft-signal' ),
 							value: attributes.prefix,
 							onChange: function ( value ) {
 								setAttributes( { prefix: value } );
 							},
 						} ),
 						el( TextControl, {
-							label: __( 'After the number', 'wow-signal' ),
-							help: __( 'Optional, for example % or +.', 'wow-signal' ),
+							label: __( 'After the number', 'qwerty-soft-signal' ),
+							help: __( 'Optional, for example % or +.', 'qwerty-soft-signal' ),
 							value: attributes.suffix,
 							onChange: function ( value ) {
 								setAttributes( { suffix: value } );
 							},
 						} ),
 						el( ToggleControl, {
-							label: __( 'Count up when it scrolls into view', 'wow-signal' ),
+							label: __( 'Count up when it scrolls into view', 'qwerty-soft-signal' ),
 							help: isNumeric
-								? __( 'Visitors who ask their device for reduced motion always see the final number straight away.', 'wow-signal' )
-								: __( 'This number is not a plain figure, so it will be shown without counting.', 'wow-signal' ),
+								? __( 'Visitors who ask their device for reduced motion always see the final number straight away.', 'qwerty-soft-signal' )
+								: __( 'This number is not a plain figure, so it will be shown without counting.', 'qwerty-soft-signal' ),
 							checked: !! attributes.animate,
 							disabled: ! isNumeric,
 							onChange: function ( value ) {
@@ -75,28 +75,28 @@
 					blockProps,
 					el(
 						'p',
-						{ className: 'wow-metric__value' },
+						{ className: 'qs-metric__value' },
 						el(
 							'span',
-							{ className: 'wow-metric__figure' },
+							{ className: 'qs-metric__figure' },
 							attributes.prefix
-								? el( 'span', { className: 'wow-metric__affix' }, attributes.prefix )
+								? el( 'span', { className: 'qs-metric__affix' }, attributes.prefix )
 								: null,
 							el(
 								'span',
-								{ className: 'wow-metric__number' },
+								{ className: 'qs-metric__number' },
 								attributes.value || '00'
 							),
 							attributes.suffix
-								? el( 'span', { className: 'wow-metric__affix' }, attributes.suffix )
+								? el( 'span', { className: 'qs-metric__affix' }, attributes.suffix )
 								: null
 						)
 					),
 					el( RichText, {
 						tagName: 'p',
-						className: 'wow-metric__label',
+						className: 'qs-metric__label',
 						value: attributes.label,
-						placeholder: __( 'What the number means…', 'wow-signal' ),
+						placeholder: __( 'What the number means…', 'qwerty-soft-signal' ),
 						allowedFormats: [ 'core/bold', 'core/italic' ],
 						onChange: function ( value ) {
 							setAttributes( { label: value } );

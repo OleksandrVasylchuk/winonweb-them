@@ -1,6 +1,6 @@
 <?php
 /**
- * Server render for wow/contact-form.
+ * Server render for qs/contact-form.
  *
  * Accessibility contract implemented here:
  *
@@ -15,7 +15,7 @@
  * - the success message is role="status", so it is announced without
  *   interrupting whatever the visitor is doing (WCAG 4.1.3).
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  *
  * @var array<string, mixed> $attributes Block attributes.
@@ -25,27 +25,27 @@
 
 declare( strict_types = 1 );
 
-use Wow\Signal\Modules\ContactForm;
+use Qwerty\Soft\Modules\ContactForm;
 
 defined( 'ABSPATH' ) || exit;
 
-$wow_form_id      = isset( $attributes['formId'] ) ? sanitize_key( (string) $attributes['formId'] ) : 'default';
-$wow_form_id      = '' !== $wow_form_id ? $wow_form_id : 'default';
-$wow_show_subject = isset( $attributes['showSubject'] ) && (bool) $attributes['showSubject'];
-$wow_submit       = isset( $attributes['submitLabel'] ) ? trim( (string) $attributes['submitLabel'] ) : '';
-$wow_success      = isset( $attributes['successMessage'] ) ? trim( (string) $attributes['successMessage'] ) : '';
-$wow_consent      = isset( $attributes['consentText'] ) ? trim( (string) $attributes['consentText'] ) : '';
+$qsoft_form_id      = isset( $attributes['formId'] ) ? sanitize_key( (string) $attributes['formId'] ) : 'default';
+$qsoft_form_id      = '' !== $qsoft_form_id ? $qsoft_form_id : 'default';
+$qsoft_show_subject = isset( $attributes['showSubject'] ) && (bool) $attributes['showSubject'];
+$qsoft_submit       = isset( $attributes['submitLabel'] ) ? trim( (string) $attributes['submitLabel'] ) : '';
+$qsoft_success      = isset( $attributes['successMessage'] ) ? trim( (string) $attributes['successMessage'] ) : '';
+$qsoft_consent      = isset( $attributes['consentText'] ) ? trim( (string) $attributes['consentText'] ) : '';
 
-$wow_submit  = '' !== $wow_submit ? $wow_submit : __( 'Send message', 'wow-signal' );
-$wow_success = '' !== $wow_success ? $wow_success : __( 'Thank you — your message is on its way. We reply within one working day.', 'wow-signal' );
+$qsoft_submit  = '' !== $qsoft_submit ? $qsoft_submit : __( 'Send message', 'qwerty-soft-signal' );
+$qsoft_success = '' !== $qsoft_success ? $qsoft_success : __( 'Thank you — your message is on its way. We reply within one working day.', 'qwerty-soft-signal' );
 
-$wow_feedback = ContactForm::consume_feedback();
-$wow_errors   = $wow_feedback['errors'];
-$wow_values   = $wow_feedback['values'];
-$wow_sent     = ContactForm::is_success();
+$qsoft_feedback = ContactForm::consume_feedback();
+$qsoft_errors   = $qsoft_feedback['errors'];
+$qsoft_values   = $qsoft_feedback['values'];
+$qsoft_sent     = ContactForm::is_success();
 
 // Unique per instance so two forms on one page never share an id.
-$wow_uid = wp_unique_id( 'wow-contact-' );
+$qsoft_uid = wp_unique_id( 'qs-contact-' );
 
 /**
  * Build the id for one field.
@@ -54,29 +54,29 @@ $wow_uid = wp_unique_id( 'wow-contact-' );
  * @param string $field Field name.
  * @return string
  */
-$wow_field_id = static function ( string $uid, string $field ): string {
+$qsoft_field_id = static function ( string $uid, string $field ): string {
 	return $uid . '-' . $field;
 };
 
-$wow_wrapper = get_block_wrapper_attributes( array( 'class' => 'wow-contact' ) );
+$qsoft_wrapper = get_block_wrapper_attributes( array( 'class' => 'qs-contact' ) );
 
-$wow_fields = array(
+$qsoft_fields = array(
 	'name'    => array(
-		'label'        => __( 'Your name', 'wow-signal' ),
+		'label'        => __( 'Your name', 'qwerty-soft-signal' ),
 		'type'         => 'text',
 		'autocomplete' => 'name',
 		'required'     => true,
 		'hint'         => '',
 	),
 	'email'   => array(
-		'label'        => __( 'Email address', 'wow-signal' ),
+		'label'        => __( 'Email address', 'qwerty-soft-signal' ),
 		'type'         => 'email',
 		'autocomplete' => 'email',
 		'required'     => true,
-		'hint'         => __( 'We reply to this address and never share it.', 'wow-signal' ),
+		'hint'         => __( 'We reply to this address and never share it.', 'qwerty-soft-signal' ),
 	),
 	'subject' => array(
-		'label'        => __( 'Subject', 'wow-signal' ),
+		'label'        => __( 'Subject', 'qwerty-soft-signal' ),
 		'type'         => 'text',
 		'autocomplete' => 'off',
 		'required'     => false,
@@ -84,13 +84,13 @@ $wow_fields = array(
 	),
 );
 
-if ( ! $wow_show_subject ) {
-	unset( $wow_fields['subject'] );
+if ( ! $qsoft_show_subject ) {
+	unset( $qsoft_fields['subject'] );
 }
 ?>
-<div <?php echo $wow_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by get_block_wrapper_attributes(). ?>>
+<div <?php echo $qsoft_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by get_block_wrapper_attributes(). ?>>
 
-	<?php if ( $wow_sent ) : ?>
+	<?php if ( $qsoft_sent ) : ?>
 		<?php
 		/*
 		 * The success redirect lands on this id, so the thank-you line is in
@@ -100,29 +100,29 @@ if ( ! $wow_show_subject ) {
 		 */
 		?>
 		<p
-			class="wow-contact__notice wow-contact__notice--success"
+			class="qs-contact__notice qs-contact__notice--success"
 			id="<?php echo esc_attr( ContactForm::ACTION ); ?>-status"
 			role="status"
 			tabindex="-1"
-			data-wow-contact-status
+			data-qs-contact-status
 		>
-			<?php echo esc_html( $wow_success ); ?>
+			<?php echo esc_html( $qsoft_success ); ?>
 		</p>
 	<?php endif; ?>
 
-	<?php if ( array() !== $wow_errors ) : ?>
-		<div class="wow-contact__notice wow-contact__notice--error" role="alert" tabindex="-1" data-wow-contact-summary>
-			<p class="wow-contact__notice-title">
-				<?php esc_html_e( 'Your message was not sent.', 'wow-signal' ); ?>
+	<?php if ( array() !== $qsoft_errors ) : ?>
+		<div class="qs-contact__notice qs-contact__notice--error" role="alert" tabindex="-1" data-qs-contact-summary>
+			<p class="qs-contact__notice-title">
+				<?php esc_html_e( 'Your message was not sent.', 'qwerty-soft-signal' ); ?>
 			</p>
-			<ul class="wow-contact__notice-list">
-				<?php foreach ( $wow_errors as $wow_key => $wow_message ) : ?>
+			<ul class="qs-contact__notice-list">
+				<?php foreach ( $qsoft_errors as $qsoft_key => $qsoft_message ) : ?>
 					<li>
-						<?php if ( '_form' === $wow_key ) : ?>
-							<?php echo esc_html( $wow_message ); ?>
+						<?php if ( '_form' === $qsoft_key ) : ?>
+							<?php echo esc_html( $qsoft_message ); ?>
 						<?php else : ?>
-							<a href="#<?php echo esc_attr( $wow_field_id( $wow_uid, (string) $wow_key ) ); ?>">
-								<?php echo esc_html( $wow_message ); ?>
+							<a href="#<?php echo esc_attr( $qsoft_field_id( $qsoft_uid, (string) $qsoft_key ) ); ?>">
+								<?php echo esc_html( $qsoft_message ); ?>
 							</a>
 						<?php endif; ?>
 					</li>
@@ -138,15 +138,15 @@ if ( ! $wow_show_subject ) {
 	 */
 	?>
 	<form
-		class="wow-contact__form"
+		class="qs-contact__form"
 		id="<?php echo esc_attr( ContactForm::ACTION ); ?>"
 		action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
 		method="post"
 	>
 		<?php wp_nonce_field( ContactForm::ACTION, ContactForm::NONCE_FIELD ); ?>
 		<input type="hidden" name="action" value="<?php echo esc_attr( ContactForm::ACTION ); ?>">
-		<input type="hidden" name="wow_signal_form" value="<?php echo esc_attr( $wow_form_id ); ?>">
-		<input type="hidden" name="wow_rendered_at" value="<?php echo esc_attr( (string) time() ); ?>">
+		<input type="hidden" name="qwerty_soft_form" value="<?php echo esc_attr( $qsoft_form_id ); ?>">
+		<input type="hidden" name="qsoft_rendered_at" value="<?php echo esc_attr( (string) time() ); ?>">
 
 		<?php
 		/*
@@ -155,123 +155,123 @@ if ( ! $wow_show_subject ) {
 		 * accessibility tree so no human ever encounters it.
 		 */
 		?>
-		<div class="wow-contact__trap" aria-hidden="true">
-			<label for="<?php echo esc_attr( $wow_uid ); ?>-website">
-				<?php esc_html_e( 'Leave this field empty', 'wow-signal' ); ?>
+		<div class="qs-contact__trap" aria-hidden="true">
+			<label for="<?php echo esc_attr( $qsoft_uid ); ?>-website">
+				<?php esc_html_e( 'Leave this field empty', 'qwerty-soft-signal' ); ?>
 			</label>
 			<input
 				type="text"
-				id="<?php echo esc_attr( $wow_uid ); ?>-website"
-				name="wow_website"
+				id="<?php echo esc_attr( $qsoft_uid ); ?>-website"
+				name="qsoft_website"
 				value=""
 				tabindex="-1"
 				autocomplete="off"
 			>
 		</div>
 
-		<?php foreach ( $wow_fields as $wow_name => $wow_field ) : ?>
+		<?php foreach ( $qsoft_fields as $qsoft_name => $qsoft_field ) : ?>
 			<?php
-			$wow_id       = $wow_field_id( $wow_uid, (string) $wow_name );
-			$wow_error    = $wow_errors[ $wow_name ] ?? '';
-			$wow_has_hint = '' !== $wow_field['hint'];
+			$qsoft_id       = $qsoft_field_id( $qsoft_uid, (string) $qsoft_name );
+			$qsoft_error    = $qsoft_errors[ $qsoft_name ] ?? '';
+			$qsoft_has_hint = '' !== $qsoft_field['hint'];
 
-			$wow_described = array();
+			$qsoft_described = array();
 
-			if ( '' !== $wow_error ) {
-				$wow_described[] = $wow_id . '-error';
+			if ( '' !== $qsoft_error ) {
+				$qsoft_described[] = $qsoft_id . '-error';
 			}
 
-			if ( $wow_has_hint ) {
-				$wow_described[] = $wow_id . '-hint';
+			if ( $qsoft_has_hint ) {
+				$qsoft_described[] = $qsoft_id . '-hint';
 			}
 
-			$wow_field_class = 'wow-contact__field' . ( '' !== $wow_error ? ' has-error' : '' );
+			$qsoft_field_class = 'qs-contact__field' . ( '' !== $qsoft_error ? ' has-error' : '' );
 			?>
-			<div class="<?php echo esc_attr( $wow_field_class ); ?>">
-				<label class="wow-contact__label" for="<?php echo esc_attr( $wow_id ); ?>">
-					<?php echo esc_html( (string) $wow_field['label'] ); ?>
-					<?php if ( $wow_field['required'] ) : ?>
-						<span class="wow-contact__required">
+			<div class="<?php echo esc_attr( $qsoft_field_class ); ?>">
+				<label class="qs-contact__label" for="<?php echo esc_attr( $qsoft_id ); ?>">
+					<?php echo esc_html( (string) $qsoft_field['label'] ); ?>
+					<?php if ( $qsoft_field['required'] ) : ?>
+						<span class="qs-contact__required">
 							<span aria-hidden="true">*</span>
-							<span class="screen-reader-text"><?php esc_html_e( '(required)', 'wow-signal' ); ?></span>
+							<span class="screen-reader-text"><?php esc_html_e( '(required)', 'qwerty-soft-signal' ); ?></span>
 						</span>
 					<?php endif; ?>
 				</label>
 
-				<?php if ( $wow_has_hint ) : ?>
-					<p class="wow-contact__hint" id="<?php echo esc_attr( $wow_id ); ?>-hint">
-						<?php echo esc_html( (string) $wow_field['hint'] ); ?>
+				<?php if ( $qsoft_has_hint ) : ?>
+					<p class="qs-contact__hint" id="<?php echo esc_attr( $qsoft_id ); ?>-hint">
+						<?php echo esc_html( (string) $qsoft_field['hint'] ); ?>
 					</p>
 				<?php endif; ?>
 
-				<?php if ( '' !== $wow_error ) : ?>
-					<p class="wow-contact__error" id="<?php echo esc_attr( $wow_id ); ?>-error">
-						<span class="screen-reader-text"><?php esc_html_e( 'Error:', 'wow-signal' ); ?></span>
-						<?php echo esc_html( $wow_error ); ?>
+				<?php if ( '' !== $qsoft_error ) : ?>
+					<p class="qs-contact__error" id="<?php echo esc_attr( $qsoft_id ); ?>-error">
+						<span class="screen-reader-text"><?php esc_html_e( 'Error:', 'qwerty-soft-signal' ); ?></span>
+						<?php echo esc_html( $qsoft_error ); ?>
 					</p>
 				<?php endif; ?>
 
 				<input
-					class="wow-contact__input"
-					type="<?php echo esc_attr( (string) $wow_field['type'] ); ?>"
-					id="<?php echo esc_attr( $wow_id ); ?>"
-					name="wow_<?php echo esc_attr( (string) $wow_name ); ?>"
-					value="<?php echo esc_attr( $wow_values[ $wow_name ] ?? '' ); ?>"
-					autocomplete="<?php echo esc_attr( (string) $wow_field['autocomplete'] ); ?>"
-					<?php if ( $wow_field['required'] ) : ?>
+					class="qs-contact__input"
+					type="<?php echo esc_attr( (string) $qsoft_field['type'] ); ?>"
+					id="<?php echo esc_attr( $qsoft_id ); ?>"
+					name="qsoft_<?php echo esc_attr( (string) $qsoft_name ); ?>"
+					value="<?php echo esc_attr( $qsoft_values[ $qsoft_name ] ?? '' ); ?>"
+					autocomplete="<?php echo esc_attr( (string) $qsoft_field['autocomplete'] ); ?>"
+					<?php if ( $qsoft_field['required'] ) : ?>
 						required aria-required="true"
 					<?php endif; ?>
-					<?php if ( '' !== $wow_error ) : ?>
+					<?php if ( '' !== $qsoft_error ) : ?>
 						aria-invalid="true"
 					<?php endif; ?>
-					<?php if ( array() !== $wow_described ) : ?>
-						aria-describedby="<?php echo esc_attr( implode( ' ', $wow_described ) ); ?>"
+					<?php if ( array() !== $qsoft_described ) : ?>
+						aria-describedby="<?php echo esc_attr( implode( ' ', $qsoft_described ) ); ?>"
 					<?php endif; ?>
 				>
 			</div>
 		<?php endforeach; ?>
 
 		<?php
-		$wow_message_id    = $wow_field_id( $wow_uid, 'message' );
-		$wow_message_error = $wow_errors['message'] ?? '';
-		$wow_message_class = 'wow-contact__field' . ( '' !== $wow_message_error ? ' has-error' : '' );
+		$qsoft_message_id    = $qsoft_field_id( $qsoft_uid, 'message' );
+		$qsoft_message_error = $qsoft_errors['message'] ?? '';
+		$qsoft_message_class = 'qs-contact__field' . ( '' !== $qsoft_message_error ? ' has-error' : '' );
 		?>
-		<div class="<?php echo esc_attr( $wow_message_class ); ?>">
-			<label class="wow-contact__label" for="<?php echo esc_attr( $wow_message_id ); ?>">
-				<?php esc_html_e( 'How can we help?', 'wow-signal' ); ?>
-				<span class="wow-contact__required">
+		<div class="<?php echo esc_attr( $qsoft_message_class ); ?>">
+			<label class="qs-contact__label" for="<?php echo esc_attr( $qsoft_message_id ); ?>">
+				<?php esc_html_e( 'How can we help?', 'qwerty-soft-signal' ); ?>
+				<span class="qs-contact__required">
 					<span aria-hidden="true">*</span>
-					<span class="screen-reader-text"><?php esc_html_e( '(required)', 'wow-signal' ); ?></span>
+					<span class="screen-reader-text"><?php esc_html_e( '(required)', 'qwerty-soft-signal' ); ?></span>
 				</span>
 			</label>
 
-			<?php if ( '' !== $wow_message_error ) : ?>
-				<p class="wow-contact__error" id="<?php echo esc_attr( $wow_message_id ); ?>-error">
-					<span class="screen-reader-text"><?php esc_html_e( 'Error:', 'wow-signal' ); ?></span>
-					<?php echo esc_html( $wow_message_error ); ?>
+			<?php if ( '' !== $qsoft_message_error ) : ?>
+				<p class="qs-contact__error" id="<?php echo esc_attr( $qsoft_message_id ); ?>-error">
+					<span class="screen-reader-text"><?php esc_html_e( 'Error:', 'qwerty-soft-signal' ); ?></span>
+					<?php echo esc_html( $qsoft_message_error ); ?>
 				</p>
 			<?php endif; ?>
 
 			<textarea
-				class="wow-contact__input wow-contact__textarea"
-				id="<?php echo esc_attr( $wow_message_id ); ?>"
-				name="wow_message"
+				class="qs-contact__input qs-contact__textarea"
+				id="<?php echo esc_attr( $qsoft_message_id ); ?>"
+				name="qsoft_message"
 				rows="6"
 				maxlength="5000"
 				required
 				aria-required="true"
-				<?php if ( '' !== $wow_message_error ) : ?>
-					aria-invalid="true" aria-describedby="<?php echo esc_attr( $wow_message_id ); ?>-error"
+				<?php if ( '' !== $qsoft_message_error ) : ?>
+					aria-invalid="true" aria-describedby="<?php echo esc_attr( $qsoft_message_id ); ?>-error"
 				<?php endif; ?>
-			><?php echo esc_textarea( $wow_values['message'] ?? '' ); ?></textarea>
+			><?php echo esc_textarea( $qsoft_values['message'] ?? '' ); ?></textarea>
 		</div>
 
-		<?php if ( '' !== $wow_consent ) : ?>
-			<p class="wow-contact__consent"><?php echo esc_html( $wow_consent ); ?></p>
+		<?php if ( '' !== $qsoft_consent ) : ?>
+			<p class="qs-contact__consent"><?php echo esc_html( $qsoft_consent ); ?></p>
 		<?php endif; ?>
 
-		<button type="submit" class="wow-contact__submit wp-block-button__link wp-element-button">
-			<?php echo esc_html( $wow_submit ); ?>
+		<button type="submit" class="qs-contact__submit wp-block-button__link wp-element-button">
+			<?php echo esc_html( $qsoft_submit ); ?>
 		</button>
 	</form>
 </div>

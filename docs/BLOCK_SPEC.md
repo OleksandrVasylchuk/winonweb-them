@@ -1,4 +1,4 @@
-# Block & pattern spec — WOW — Signal
+# Block & pattern spec — Qwerty Soft — Signal
 
 Authoritative conventions for this theme. Read it before adding a block, a
 pattern or a template. Anything that deviates needs a reason stated in a code
@@ -30,14 +30,14 @@ There is **no** global stylesheet and **no** build step.
 
 | Thing | Pattern | Example |
 |---|---|---|
-| Block name | `wow/{slug}` | `wow/case-highlight` |
-| CSS root class | `wow-{slug}` | `wow-case-highlight` |
-| BEM element | `wow-{slug}__{el}` | `wow-case-highlight__stat` |
+| Block name | `qs/{slug}` | `qs/case-highlight` |
+| CSS root class | `qs-{slug}` | `qs-case-highlight` |
+| BEM element | `qs-{slug}__{el}` | `qs-case-highlight__stat` |
 | BEM modifier | `is-{state}` / `has-{thing}` | `is-exclusive` |
-| PHP local in render.php | `$wow_` prefix | `$wow_heading` |
-| Pattern slug | `wow-signal/{slug}` | `wow-signal/cases-slider` |
-| Pattern category | `wow-{group}` | `wow-proof` |
-| Text domain | `wow-signal` | everywhere, no exceptions |
+| PHP local in render.php | `$qsoft_` prefix | `$qsoft_heading` |
+| Pattern slug | `qwerty-soft-signal/{slug}` | `qwerty-soft-signal/cases-slider` |
+| Pattern category | `qs-{group}` | `qs-proof` |
+| Text domain | `qwerty-soft-signal` | everywhere, no exceptions |
 
 Slugs are lowercase and hyphenated, and describe **content, not style**:
 `pricing`, `timeline`, `case-highlight`. Never `section-2`, never `blue-band`.
@@ -67,13 +67,13 @@ finds. No registration code is ever needed.
 {
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
-  "name": "wow/{slug}",
+  "name": "qs/{slug}",
   "title": "{Title}",
-  "category": "wow",
+  "category": "qs",
   "icon": "{dashicon}",
   "description": "One sentence a non-technical client understands.",
   "keywords": [ "{slug}", "{synonym}" ],
-  "textdomain": "wow-signal",
+  "textdomain": "qwerty-soft-signal",
   "attributes": {},
   "supports": {
     "html": false,
@@ -94,7 +94,7 @@ finds. No registration code is ever needed.
 <?php
 return array(
 	'dependencies' => array( 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-element', 'wp-i18n' ),
-	'version'      => WOW_SIGNAL_VERSION,
+	'version'      => QSOFT_VERSION,
 );
 ```
 
@@ -113,9 +113,9 @@ No JSX and no imports — the theme has no compiler. Write against the globals:
 	var __ = wp.i18n.__;
 	var useBlockProps = wp.blockEditor.useBlockProps;
 
-	wp.blocks.registerBlockType( 'wow/{slug}', {
+	wp.blocks.registerBlockType( 'qs/{slug}', {
 		edit: function ( props ) {
-			var blockProps = useBlockProps( { className: 'wow-{slug}' } );
+			var blockProps = useBlockProps( { className: 'qs-{slug}' } );
 			return el( 'div', blockProps, /* … */ );
 		},
 		save: function () {
@@ -135,9 +135,9 @@ Title, category, attributes and supports come from the server-registered
 ```php
 <?php
 /**
- * Server render for wow/{slug}.
+ * Server render for qs/{slug}.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  *
  * @var array<string, mixed> $attributes Block attributes.
@@ -150,9 +150,9 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 ```
 
-1. **Cast every attribute immediately.** `$wow_heading = (string) ( $attributes['heading'] ?? '' );`
-2. **Bail early on empty content.** `if ( '' === trim( $wow_heading ) ) { return; }` — an empty block should render nothing, not an empty shell.
-3. **Wrapper attributes** come from `get_block_wrapper_attributes( array( 'class' => 'wow-{slug}' ) )`. It is already escaped; print it with a `phpcs:ignore` and a reason. Never add a second `id` next to it — anchor support already puts one there.
+1. **Cast every attribute immediately.** `$qsoft_heading = (string) ( $attributes['heading'] ?? '' );`
+2. **Bail early on empty content.** `if ( '' === trim( $qsoft_heading ) ) { return; }` — an empty block should render nothing, not an empty shell.
+3. **Wrapper attributes** come from `get_block_wrapper_attributes( array( 'class' => 'qs-{slug}' ) )`. It is already escaped; print it with a `phpcs:ignore` and a reason. Never add a second `id` next to it — anchor support already puts one there.
 4. **Escaping table**
 
    | Data | Function |
@@ -211,26 +211,26 @@ Header block WordPress reads:
 <?php
 /**
  * Title: Services — three card grid
- * Slug: wow-signal/services-grid
- * Categories: wow-content
+ * Slug: qwerty-soft-signal/services-grid
+ * Categories: qs-content
  * Description: What an editor sees before inserting it.
  * Keywords: services, features, cards
  * Viewport Width: 1400
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 defined( 'ABSPATH' ) || exit;
 ?>
 ```
 
-Categories: `wow-hero`, `wow-content`, `wow-proof`, `wow-conversion`, `wow-page`.
+Categories: `qs-hero`, `qs-content`, `qs-proof`, `qs-conversion`, `qs-page`.
 Whole-page patterns add `Block Types: core/post-content` and `Post Types: page`
 so they appear when a page is created.
 
 Rules:
 
-- All visible copy goes through `esc_html_x( '…', 'Pattern placeholder text', 'wow-signal' )`, and text inside a block attribute through `esc_attr_x()`.
+- All visible copy goes through `esc_html_x( '…', 'Pattern placeholder text', 'qwerty-soft-signal' )`, and text inside a block attribute through `esc_attr_x()`.
 - Block markup must match what the editor would save, or the Site Editor flags
   the block as invalid. Keep style attributes to **one** group per block (spacing
   only, most of the time) and prefer `backgroundColor` / `textColor` / `fontSize`

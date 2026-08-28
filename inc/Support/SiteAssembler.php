@@ -2,13 +2,13 @@
 /**
  * Builds a whole site from an unpacked design.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use DOMDocument;
 use DOMElement;
@@ -30,22 +30,36 @@ final class SiteAssembler {
 	/**
 	 * Meta key marking content this importer created.
 	 */
-	public const OWNED_META = '_wow_signal_imported';
+	public const OWNED_META = '_qwerty_soft_imported';
+
+	/**
+	 * The language a page was imported in, as a two-letter code.
+	 *
+	 * @var string
+	 */
+	public const LANG_META = '_qwerty_soft_language';
+
+	/**
+	 * What joins a page to the same page in every other language.
+	 *
+	 * @var string
+	 */
+	public const GROUP_META = '_qwerty_soft_translation_of';
 
 	/**
 	 * Option holding the front-page settings as they were before an import.
 	 */
-	private const PREVIOUS_FRONT = 'wow_signal_import_previous_front';
+	private const PREVIOUS_FRONT = 'qwerty_soft_import_previous_front';
 
 	/**
 	 * Option holding the site title and logo as they were before an import.
 	 */
-	private const PREVIOUS_IDENTITY = 'wow_signal_import_previous_identity';
+	private const PREVIOUS_IDENTITY = 'qwerty_soft_import_previous_identity';
 
 	/**
 	 * Option holding the page that becomes the front page once it is published.
 	 */
-	private const PENDING_FRONT = 'wow_signal_import_pending_front';
+	private const PENDING_FRONT = 'qwerty_soft_import_pending_front';
 
 	/**
 	 * Make a published page the front page, remembering what was there before.
@@ -123,12 +137,23 @@ final class SiteAssembler {
 			? self::clean_includes( $options['includes'] )
 			: array();
 
-		$pages = self::pages_for( $index, $language );
+		$exclude = isset( $options['exclude'] ) && is_array( $options['exclude'] )
+			? array_flip( array_map( 'strval', $options['exclude'] ) )
+			: array();
+
+		$pages = self::pages_for( $index, $language, ! empty( $options['utility'] ), $exclude );
+
+		/*
+		 * With one language chosen it is that one; with all of them, the one
+		 * the design itself leads with — whichever holds the index page
+		 * nearest the root. That language keeps the root of the site.
+		 */
+		$primary = '' !== $language ? $language : self::leading_language( $pages );
 
 		if ( array() === $pages ) {
 			return new WP_Error(
-				'wow_signal_no_pages',
-				__( 'No pages were found in that language.', 'wow-signal' )
+				'qwerty_soft_no_pages',
+				__( 'No pages were found in that language.', 'qwerty-soft-signal' )
 			);
 		}
 
@@ -166,17 +191,34 @@ final class SiteAssembler {
 		);
 
 		if ( class_exists( DesignStylesheet::class ) ) {
-			$stylesheet = DesignStylesheet::import( $root, $media );
+			/*
+			 * Only what the pages being built actually link. A handoff holding
+			 * five projects has five complete stylesheets in it, each
+			 * redefining `:root`, `body` and `.card`; installing all of them
+			 * puts the site in whichever project sorted last.
+			 */
+			$linked = array();
+
+			foreach ( $pages as $page ) {
+				$path = realpath( trailingslashit( $root ) . ltrim( (string) $page['file'], '/' ) );
+
+				if ( false !== $path ) {
+					$linked[] = str_replace( '\\', '/', $path );
+				}
+			}
+
+			$stylesheet = DesignStylesheet::import( $root, $media, $linked );
 		}
 
 		return array(
-			'root'     => $root,
-			'publish'  => $publish,
-			'includes' => $includes,
-			'pages'    => array_values( $pages ),
-			'colors'   => $tokens['colors'],
-			'media'    => $media,
-			'routes'   => array(),
+			'root'             => $root,
+			'primary_language' => $primary,
+			'publish'          => $publish,
+			'includes'         => $includes,
+			'pages'            => array_values( $pages ),
+			'colors'           => $tokens['colors'],
+			'media'            => $media,
+			'routes'           => array(),
 
 			/*
 			 * Whether this build asks a model to correct each section, and
@@ -184,11 +226,11 @@ final class SiteAssembler {
 			 * Both are off unless the build screen turned them on; a build
 			 * that leaves them off never reaches the network at all.
 			 */
-			'smart'    => ! empty( $options['smart'] ) && SmartConverter::possible(),
-			'refine'   => ! empty( $options['refine'] ),
-			'model'    => isset( $options['model'] ) ? (string) $options['model'] : AnthropicClient::DEFAULT_MODEL,
-			'effort'   => isset( $options['effort'] ) ? (string) $options['effort'] : 'high',
-			'report'   => array(
+			'smart'            => ! empty( $options['smart'] ) && SmartConverter::possible(),
+			'refine'           => ! empty( $options['refine'] ),
+			'model'            => isset( $options['model'] ) ? (string) $options['model'] : AnthropicClient::DEFAULT_MODEL,
+			'effort'           => isset( $options['effort'] ) ? (string) $options['effort'] : 'high',
+			'report'           => array(
 				'pages'      => array(),
 				'media'      => count( $media ),
 				'menu'       => 0,
@@ -224,14 +266,30 @@ final class SiteAssembler {
 		}
 
 		if ( null === $page ) {
-			return new WP_Error( 'wow_signal_no_page', __( 'That page is not part of this build.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_no_page', __( 'That page is not part of this build.', 'qwerty-soft-signal' ) );
 		}
 
 		$includes = isset( $job['includes'][ $file ] ) && is_array( $job['includes'][ $file ] )
 			? $job['includes'][ $file ]
 			: null;
 
+		/*
+		 * The page this file already has, if it has one.
+		 *
+		 * Read from the job first, and from the site when the job does not know
+		 * — which is every second build, because a new job starts with no
+		 * routes at all. Taking only the job's word produced a second page for
+		 * a file that already had one: `/videos/` published, and `/videos-2/`
+		 * beside it as a draft, with the menu pointing at the older of the two.
+		 *
+		 * The claim this theme makes about rebuilding is that a page built
+		 * twice updates rather than duplicates. This is what makes it true.
+		 */
 		$existing = isset( $job['routes'][ $file ]['id'] ) ? (int) $job['routes'][ $file ]['id'] : 0;
+
+		if ( $existing <= 0 ) {
+			$existing = self::page_for_file( $file );
+		}
 
 		$smart = self::smart_converter( $job );
 
@@ -243,7 +301,8 @@ final class SiteAssembler {
 			! empty( $job['publish'] ),
 			$includes,
 			$existing,
-			$smart
+			$smart,
+			(string) ( $job['primary_language'] ?? '' )
 		);
 
 		if ( null !== $smart ) {
@@ -377,8 +436,17 @@ final class SiteAssembler {
 			'menu_link'    => '',
 		);
 
-		// Nothing built means nothing to link a menu to; finish() reports it.
-		if ( array() === $job['routes'] ) {
+		/*
+		 * No longer a reason to stop. The chrome is built before the pages
+		 * now, so there is never anything to link a menu to at this point —
+		 * the menu is made on the design's own hrefs and rewritten to real
+		 * pages by finish(), the same way the links inside pages and blocks
+		 * already are.
+		 *
+		 * What is still worth refusing is a job with no pages planned at all,
+		 * because then there will be nothing to rewrite them to either.
+		 */
+		if ( array() === (array) ( $job['pages'] ?? array() ) ) {
 			return $empty;
 		}
 
@@ -386,7 +454,8 @@ final class SiteAssembler {
 			(string) $job['root'],
 			(string) $job['pages'][0]['file'],
 			(array) $job['routes'],
-			self::converter( $job )
+			self::converter( $job ),
+			(array) $job['media']
 		);
 
 		$job['report']['menu']         = $chrome['menu'];
@@ -407,13 +476,41 @@ final class SiteAssembler {
 		$routes = (array) $job['routes'];
 
 		if ( array() === $routes ) {
-			return new WP_Error( 'wow_signal_nothing_built', __( 'None of the pages could be converted.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_nothing_built', __( 'None of the pages could be converted.', 'qwerty-soft-signal' ) );
 		}
 
 		$report = $job['report'];
 
+		/*
+		 * The menu, made here rather than with the chrome.
+		 *
+		 * The header is built first now, before any page exists, so a menu made
+		 * with it could only hold the design's own addresses — and `esc_url()`
+		 * reads a bare `research.html` as a host and renders
+		 * `http://research.html`. Every visitor during the build saw a menu of
+		 * links to nowhere.
+		 *
+		 * Waiting costs nothing, because the wrapped header looks the menu up
+		 * when it draws. Until this runs it renders without a navigation, and
+		 * then gains one that is right the first time.
+		 */
+		$menu = self::menu_from_design( $job, $routes );
+
+		if ( $menu > 0 ) {
+			$report['menu']      = $menu;
+			$report['menu_link'] = admin_url( 'site-editor.php?postType=wp_navigation&postId=' . $menu );
+		}
+
 		// Now that every page has a permalink, make the links between them work.
 		$unresolved = self::relink_pages( $routes );
+
+		/*
+		 * And upgrade the menu from addresses to page links. The entries were
+		 * made before the pages existed, so they are custom links pointing at
+		 * URLs; a page link is what keeps the menu correct when somebody later
+		 * renames a page or changes the permalink structure.
+		 */
+		self::refresh_menus();
 
 		foreach ( $unresolved as $target => $count ) {
 			$report['concerns'][] = sprintf(
@@ -422,7 +519,7 @@ final class SiteAssembler {
 					'%2$d link points at "%1$s", which is not a page on this site. Check the design or remove the link.',
 					'%2$d links point at "%1$s", which is not a page on this site. Check the design or remove the links.',
 					$count,
-					'wow-signal'
+					'qwerty-soft-signal'
 				),
 				$target,
 				$count
@@ -466,7 +563,8 @@ final class SiteAssembler {
 				(int) $routes[ $file ]['sections'],
 				(array) $routes[ $file ]['concerns'],
 				(int) ( $routes[ $file ]['improved'] ?? 0 ),
-				array_map( 'strval', (array) ( $routes[ $file ]['changed'] ?? array() ) )
+				array_map( 'strval', (array) ( $routes[ $file ]['changed'] ?? array() ) ),
+				(int) ( $routes[ $file ]['wrapped'] ?? 0 )
 			);
 		}
 
@@ -485,7 +583,7 @@ final class SiteAssembler {
 					'%1$d section could not be sent to the model and was converted structurally instead: %2$s',
 					'%1$d sections could not be sent to the model and were converted structurally instead: %2$s',
 					(int) $ai['failed'],
-					'wow-signal'
+					'qwerty-soft-signal'
 				),
 				(int) $ai['failed'],
 				(string) ( $ai['errors'][0] ?? '' )
@@ -493,6 +591,13 @@ final class SiteAssembler {
 		}
 
 		$job['report'] = $report;
+
+		/*
+		 * Kept past the end of the job, so a screen opened after the build —
+		 * or reloaded once it finished — can still say what the hour produced
+		 * instead of showing an empty upload form.
+		 */
+		ImportSession::remember_report( $report );
 
 		return $report;
 	}
@@ -615,9 +720,10 @@ final class SiteAssembler {
 	 * @param array<int, string> $concerns Concerns raised while converting.
 	 * @param int                $improved How many of those sections the model corrected.
 	 * @param array<int, string> $changed  What it changed, one phrase each.
+	 * @param int                $wrapped  How many sections became blocks of their own.
 	 * @return array<string, mixed>
 	 */
-	private static function page_row( int $id, string $file, int $sections, array $concerns, int $improved = 0, array $changed = array() ): array {
+	private static function page_row( int $id, string $file, int $sections, array $concerns, int $improved = 0, array $changed = array(), int $wrapped = 0 ): array {
 		$status = (string) get_post_status( $id );
 		$url    = (string) get_permalink( $id );
 
@@ -629,12 +735,79 @@ final class SiteAssembler {
 			'url'       => $url,
 			'sections'  => $sections,
 			'improved'  => $improved,
+			'wrapped'   => $wrapped,
 			'changed'   => $changed,
 			'concerns'  => $concerns,
 			'status'    => $status,
 			'link'      => 'publish' === $status ? $url : (string) get_preview_post_link( $id ),
 			'edit_link' => admin_url( 'post.php?post=' . $id . '&action=edit' ),
 		);
+	}
+
+	/**
+	 * The pages an import has put on this site, read back from the site.
+	 *
+	 * The last resort behind the stored report, and the answer to a screen
+	 * that has nothing to show because the build it is about finished before
+	 * anything thought to write a report down — or an hour ago, in another
+	 * tab, on a laptop that has since been closed. Every page an import made
+	 * carries the file it came from, so the list can always be rebuilt from
+	 * what is actually there rather than from what was once remembered.
+	 *
+	 * One row per source file, newest first: a design imported five times has
+	 * five pages per file on the site, and the current one is the last.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function imported_pages(): array {
+		$ids = get_posts(
+			array(
+				'post_type'        => 'page',
+				'post_status'      => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+
+				/*
+				 * Newest first, so the hundred read are the hundred that
+				 * matter: what a cap can drop here is the older duplicate of
+				 * a file whose current page has already been seen.
+				 */
+				'posts_per_page'   => 100,
+				'orderby'          => 'ID',
+				'order'            => 'DESC',
+				'fields'           => 'ids',
+				'meta_key'         => self::OWNED_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Import bookkeeping; the key is indexed and the set is small.
+				'suppress_filters' => false,
+			)
+		);
+
+		$newest = array();
+
+		foreach ( (array) $ids as $id ) {
+			$file = (string) get_post_meta( (int) $id, self::OWNED_META, true );
+
+			/*
+			 * Only the pages of the design. The same meta marks the language
+			 * stubs, the navigation and the template parts, none of which are
+			 * a page somebody wants a row for.
+			 */
+			if ( '' === $file || 'navigation' === $file
+				|| 0 === strpos( $file, 'language:' ) || 0 === strpos( $file, 'part:' ) ) {
+				continue;
+			}
+
+			if ( isset( $newest[ $file ] ) ) {
+				continue;
+			}
+
+			$newest[ $file ] = (int) $id;
+		}
+
+		$rows = array();
+
+		foreach ( $newest as $file => $id ) {
+			$rows[] = self::page_row( $id, (string) $file, 0, array() );
+		}
+
+		return $rows;
 	}
 
 	/**
@@ -650,10 +823,10 @@ final class SiteAssembler {
 	 */
 	private static function palette_warnings( array $colors ): array {
 		$pairs = array(
-			array( 'contrast', 'base', 4.5, __( 'body text on the page background', 'wow-signal' ) ),
-			array( 'muted', 'base', 4.5, __( 'secondary text on the page background', 'wow-signal' ) ),
-			array( 'contrast', 'surface', 4.5, __( 'text on cards', 'wow-signal' ) ),
-			array( 'border-strong', 'base', 3.0, __( 'form field borders', 'wow-signal' ) ),
+			array( 'contrast', 'base', 4.5, __( 'body text on the page background', 'qwerty-soft-signal' ) ),
+			array( 'muted', 'base', 4.5, __( 'secondary text on the page background', 'qwerty-soft-signal' ) ),
+			array( 'contrast', 'surface', 4.5, __( 'text on cards', 'qwerty-soft-signal' ) ),
+			array( 'border-strong', 'base', 3.0, __( 'form field borders', 'qwerty-soft-signal' ) ),
 		);
 
 		$warnings = array();
@@ -673,7 +846,7 @@ final class SiteAssembler {
 
 			$warnings[] = sprintf(
 				/* translators: 1: what the pair is used for, 2: measured ratio, 3: required ratio. */
-				__( 'The design\'s colours give %1$s a contrast of %2$s:1, below the %3$s:1 that WCAG 2.2 AA asks for. Adjust it in Appearance → Editor → Styles before launch.', 'wow-signal' ),
+				__( 'The design\'s colours give %1$s a contrast of %2$s:1, below the %3$s:1 that WCAG 2.2 AA asks for. Adjust it in Appearance → Editor → Styles before launch.', 'qwerty-soft-signal' ),
 				$label,
 				number_format_i18n( $ratio, 2 ),
 				number_format_i18n( $minimum, 1 )
@@ -684,18 +857,72 @@ final class SiteAssembler {
 	}
 
 	/**
+	 * Whether a page belongs to the site or to the tooling around it.
+	 *
+	 * A handoff ships the screens that run the site next to the ones people
+	 * visit: a translation queue, a report uploader, a settings panel, a
+	 * customer download area. They are real pages and they convert perfectly
+	 * well; they are also almost never what somebody importing a design is
+	 * asking for, so they are left out unless they are asked for.
+	 *
+	 * The same test runs on the screen, where the list folds them away. It
+	 * lives here as well because the two used to disagree: the screen hid a
+	 * page as tooling while the build made it anyway, purely because it
+	 * happened to sit under the chosen language.
+	 *
+	 * @param string $file Page file, relative to the design root.
+	 * @return bool
+	 */
+	public static function is_utility( string $file ): bool {
+		return 1 === preg_match(
+			'#(^|/)(admin|admin_private|customer|private|internal|prototype|prototypes|dashboard)(/|$)#i',
+			$file
+		);
+	}
+
+	/**
 	 * The pages worth building, in a sensible order.
 	 *
 	 * @param array<string, mixed> $index    Index.
 	 * @param string               $language Language directory, or empty for all.
+	 * @param bool                 $utility  Whether to include the tooling screens.
+	 * @param array<string, int>   $exclude  Files to leave out, as a lookup.
 	 * @return array<int, array<string, mixed>>
 	 */
-	private static function pages_for( array $index, string $language ): array {
+	private static function pages_for( array $index, string $language, bool $utility = false, array $exclude = array() ): array {
 		$pages = array();
 
 		foreach ( (array) $index['pages'] as $page ) {
-			if ( '' !== $language && ! self::in_language( (string) $page['file'], $language ) ) {
+			$file    = (string) $page['file'];
+			$tooling = self::is_utility( $file );
+
+			/*
+			 * A version of a page the screen decided against. Two files can
+			 * want the same address — a site and a blueprint that ships one of
+			 * its pages with a new section in it — and only one may have it.
+			 * Which one is a judgement, so it is made where a person can see
+			 * it and arrives here as a list.
+			 */
+			if ( isset( $exclude[ $file ] ) ) {
 				continue;
+			}
+
+			if ( ! $utility && $tooling ) {
+				continue;
+			}
+
+			if ( '' !== $language && ! self::in_language( $file, $language ) ) {
+				/*
+				 * A tooling screen is usually filed under no language at all —
+				 * `admin/translation-queue.html`, not `en/admin/…`. Judging it
+				 * by the language filter meant asking for the admin screens
+				 * and getting none of them, with nothing on the screen to say
+				 * why. One that does live under a language is still that
+				 * language's, and is left to it.
+				 */
+				if ( ! $tooling || '' !== self::language_of( $file ) ) {
+					continue;
+				}
 			}
 
 			/*
@@ -718,6 +945,24 @@ final class SiteAssembler {
 		);
 
 		return $pages;
+	}
+
+	/**
+	 * The language the design leads with.
+	 *
+	 * @param array<int, array<string, mixed>> $pages Pages being built, index first.
+	 * @return string
+	 */
+	private static function leading_language( array $pages ): string {
+		foreach ( $pages as $page ) {
+			$language = self::language_of( (string) $page['file'] );
+
+			if ( '' !== $language ) {
+				return $language;
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -752,9 +997,10 @@ final class SiteAssembler {
 	 * @param array<int, int>|null $includes  Section positions to keep, or null for all.
 	 * @param int                  $existing  Page already made for this file, to update.
 	 * @param SmartConverter|null  $smart     Guided converter, when the build asked for one.
+	 * @param string               $primary   The language that keeps the root of the site.
 	 * @return array<string, mixed>|WP_Error
 	 */
-	private static function build_page( string $root, array $page, BlockConverter $converter, array $media, bool $publish, ?array $includes = null, int $existing = 0, ?SmartConverter $smart = null ) {
+	private static function build_page( string $root, array $page, BlockConverter $converter, array $media, bool $publish, ?array $includes = null, int $existing = 0, ?SmartConverter $smart = null, string $primary = '' ) {
 		$file      = (string) $page['file'];
 		$converted = self::convert_sections( $root, $file, $converter, $media, $includes, $smart );
 		$split     = $converted['split'];
@@ -764,6 +1010,7 @@ final class SiteAssembler {
 		$changed  = array();
 		$kept     = 0;
 		$improved = 0;
+		$wrapped  = 0;
 
 		foreach ( $converted['sections'] as $section ) {
 			if ( ! empty( $section['excluded'] ) ) {
@@ -779,7 +1026,17 @@ final class SiteAssembler {
 			$markup[] = (string) $section['markup'];
 			++$kept;
 
-			if ( 'structural' !== (string) ( $section['source'] ?? 'structural' ) ) {
+			$source = (string) ( $section['source'] ?? 'structural' );
+
+			/*
+			 * Counted apart, because they are not the same claim. A wrapped
+			 * section had no model call at all, and reporting it as one Claude
+			 * corrected would tell an editor a review happened that did not —
+			 * on a bill, no less.
+			 */
+			if ( 'wrapped' === $source ) {
+				++$wrapped;
+			} elseif ( 'structural' !== $source ) {
 				++$improved;
 			}
 
@@ -787,7 +1044,7 @@ final class SiteAssembler {
 		}
 
 		if ( array() === $markup ) {
-			return new WP_Error( 'wow_signal_empty_page', __( 'Nothing on this page could be converted.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_empty_page', __( 'Nothing on this page could be converted.', 'qwerty-soft-signal' ) );
 		}
 
 		$concerns = array_merge( $concerns, self::splitter_notes( $split ) );
@@ -795,18 +1052,42 @@ final class SiteAssembler {
 		$content = self::ensure_h1( implode( "\n\n", $markup ) );
 		$title   = self::title_for( (string) $split['title'], $file, $content );
 
-		// A page with no heading at all still needs one; its own title is it.
-		if ( ! str_contains( $content, '<h1' ) ) {
+		/*
+		 * A page with no heading at all still needs one; its own title is it.
+		 *
+		 * Looked for in the design's markup rather than in the page's, because
+		 * a wrapped section keeps its heading inside the block's own template
+		 * and the page holds nothing but block comments. Reading only the page
+		 * found no `<h1>` anywhere, so every imported page opened with a band
+		 * repeating its title above the design's own hero — the first thing on
+		 * the screen, on every page, saying what the next section already said.
+		 */
+		if ( ! str_contains( $content, '<h1' ) && ! self::heads_itself( $converted['sections'] ) ) {
 			$content = self::title_band( $title ) . "\n\n" . $content;
 
-			$concerns[] = __( 'This page had no heading of its own, so its title was added as the top heading.', 'wow-signal' );
+			$concerns[] = __( 'This page had no heading of its own, so its title was added as the top heading.', 'qwerty-soft-signal' );
 		}
+
+		/*
+		 * Which language this page is, and what it hangs under.
+		 *
+		 * The primary language stays at the root, exactly where a
+		 * single-language import puts it. Every other language gets a page of
+		 * its own named after the code — `/ru/` — and its pages become
+		 * children of it, so the addresses come out `/ru/reports/` the way the
+		 * design wrote them and the way anyone reading the site expects. It is
+		 * plain WordPress page hierarchy; nothing here needs a plugin to
+		 * understand it.
+		 */
+		$language = self::language_of( $file );
+		$parent   = self::language_parent( $primary, $publish, $language );
 
 		$payload = array(
 			'post_type'     => 'page',
 			'post_status'   => $publish ? 'publish' : 'draft',
 			'post_title'    => $title,
 			'post_name'     => self::slug_for( $file ),
+			'post_parent'   => $parent,
 
 			/*
 			 * Slashed on purpose: wp_insert_post() unslashes what it is
@@ -815,9 +1096,32 @@ final class SiteAssembler {
 			 * early. Every generated insert on this path does the same.
 			 */
 			'post_content'  => wp_slash( $content ),
-			'page_template' => 'page-landing',
-			'meta_input'    => array( self::OWNED_META => $file ),
+
+			/*
+			 * An imported page brings its own container. The landing template
+			 * wraps content in a constrained main, which is right for a page
+			 * built out of the theme's patterns and wrong for one built out of
+			 * a design: WordPress then narrows every section to the theme's
+			 * wide size, and the design's own `.container` — the width its
+			 * author chose — never gets to decide anything.
+			 */
+			'page_template' => BlockConverter::faithful() ? 'page-design' : 'page-landing',
+			'meta_input'    => array(
+				self::OWNED_META => $file,
+				self::LANG_META  => $language,
+				self::GROUP_META => self::group_of( $file ),
+			),
 		);
+
+		/*
+		 * The language landing page is the branch itself, not a child of it:
+		 * `ru/index.html` is what `/ru/` should show.
+		 */
+		if ( $parent > 0 && self::is_index( $file ) ) {
+			$payload['ID']          = $parent;
+			$payload['post_name']   = $language;
+			$payload['post_parent'] = 0;
+		}
 
 		/*
 		 * A retried step updates the page it made the first time. The check
@@ -843,6 +1147,7 @@ final class SiteAssembler {
 			'url'      => (string) get_permalink( (int) $id ),
 			'sections' => $kept,
 			'improved' => $improved,
+			'wrapped'  => $wrapped,
 			'changed'  => array_values( array_unique( $changed ) ),
 			'concerns' => array_values( array_unique( $concerns ) ),
 		);
@@ -872,6 +1177,15 @@ final class SiteAssembler {
 			$smart->for_page( $file );
 		}
 
+		/*
+		 * Built once per page, not once per section. `from_directory()` reads
+		 * and indexes every stylesheet in the archive; doing that thirty-four
+		 * times for a thirty-four-section page would cost more than the
+		 * conversion it replaced.
+		 */
+		$wrapping = self::wrapping();
+		$styles   = $wrapping ? CssIndex::from_directory( $root ) : null;
+
 		foreach ( $split['sections'] as $offset => $section ) {
 			$position = (int) $section['position'];
 			$excluded = null !== $includes && ! in_array( $position, $includes, true );
@@ -890,6 +1204,76 @@ final class SiteAssembler {
 			if ( $excluded ) {
 				$sections[] = $row;
 				continue;
+			}
+
+			/*
+			 * The wrapping path, and the reason there is no model call under
+			 * it. A section is not being read and rewritten — it is being
+			 * copied into a block of its own with fields over the parts an
+			 * editor changes. That is a structural job, it is done in code, and
+			 * it takes milliseconds where the conversion took minutes.
+			 */
+			if ( $wrapping && null !== $styles ) {
+				$wrapped = self::wrap_section( $split, $file, $section, $styles, $media, $page_dir );
+
+				if ( null !== $wrapped ) {
+					$row['markup']   = $wrapped['markup'];
+					$row['source']   = 'wrapped';
+					$row['concerns'] = $wrapped['concerns'];
+
+					$sections[] = $row;
+					continue;
+				}
+
+				/*
+				 * Falling through rather than failing, but never in silence.
+				 *
+				 * The old path still produces a page, so a section the writer
+				 * cannot read is worth converting rather than dropping. What
+				 * is not acceptable is doing it quietly: a build that fell back
+				 * for every section looked exactly like a successful one, said
+				 * "Claude corrected 10 of them", and left somebody to work out
+				 * from the pages themselves that no block had been made.
+				 */
+				ImportLog::add(
+					'build',
+					sprintf(
+						/* translators: %s: section label. */
+						__( 'Section "%s" could not be made into a block of its own, so it was converted instead.', 'qwerty-soft-signal' ),
+						(string) $section['label']
+					)
+				);
+
+				$row['concerns'][] = sprintf(
+					/* translators: %s: section label. */
+					__( 'Section "%s" could not be kept as the design wrote it and was converted into theme blocks instead.', 'qwerty-soft-signal' ),
+					(string) $section['label']
+				);
+			}
+
+			/*
+			 * A line per section, before the slow part rather than after it.
+			 *
+			 * Each section is a model call, sometimes three, and a page of
+			 * thirty-four of them takes a quarter of an hour. Reporting only
+			 * on the finished page left the screen showing one unchanging
+			 * line for all of it, which is what "is it stuck?" looks like.
+			 * The same write is the heartbeat another tick reads to know the
+			 * step is alive.
+			 */
+			if ( null !== $smart ) {
+				ImportLog::add(
+					'build',
+					sprintf(
+						/* translators: 1: section number, 2: sections on the page, 3: section label. */
+						__( 'Section %1$d of %2$d — %3$s', 'qwerty-soft-signal' ),
+						$offset + 1,
+						count( $split['sections'] ),
+						(string) $section['label']
+					)
+				);
+
+				ImportSession::beat();
 			}
 
 			$result = null !== $smart
@@ -916,7 +1300,7 @@ final class SiteAssembler {
 			if ( ! $validator->check( $result['markup'] ) ) {
 				$row['concerns'][] = sprintf(
 					/* translators: 1: section label, 2: reason. */
-					__( 'Section "%1$s" was left out: %2$s', 'wow-signal' ),
+					__( 'Section "%1$s" was left out: %2$s', 'qwerty-soft-signal' ),
 					(string) $section['label'],
 					implode( ' ', $validator->errors() )
 				);
@@ -935,6 +1319,747 @@ final class SiteAssembler {
 			'split'    => $split,
 			'sections' => $sections,
 		);
+	}
+
+	/**
+	 * Wrap a piece of chrome as a block whose fields live with the site.
+	 *
+	 * The menu is deliberately not a field. A navigation is a list of
+	 * pages, WordPress already has a thing for that, and turning it into a
+	 * repeater field would mean an editor adding a page in one screen and
+	 * remembering to add it to the menu in another. So the header's links stay
+	 * a real menu; everything else in the header and footer — the strapline,
+	 * the small print, the address — becomes site content.
+	 *
+	 * @param string                                  $root  Design root.
+	 * @param string                                  $file  Page the chrome was read from.
+	 * @param string                                  $area  header or footer.
+	 * @param string                                  $html  The chrome's markup.
+	 * @param array<string, array{id:int,url:string}> $media Imported media map.
+	 * @param bool                                    $menu  Whether this chrome holds the site's navigation.
+	 * @return string Block markup for the template part, or empty.
+	 */
+	private static function wrap_chrome( string $root, string $file, string $area, string $html, array $media, bool $menu = false ): string {
+		if ( '' === trim( $html ) ) {
+			return '';
+		}
+
+		/*
+		 * The navigation comes out before the section is read, so its links
+		 * never become fields. Otherwise the header would hold the design's
+		 * five links as five text boxes, and adding a page would mean editing
+		 * a block as well as the menu — a site that drifts out of agreement
+		 * with itself the first time somebody publishes something.
+		 */
+		if ( $menu ) {
+			$html = self::hollow_nav( $html );
+		}
+
+		$plan = SectionPlan::of( $html );
+		$slug = BlockWriter::slug( 'site-' . $area . '-' . substr( md5( $html ), 0, 6 ) );
+
+		if ( '' === $slug ) {
+			return '';
+		}
+
+		$page_dir = (string) dirname( $file );
+		$dir      = BlockWriter::dir() . '/' . $slug;
+		$styles   = CssIndex::from_directory( $root );
+
+		$linked = SiteBuilder::relink_media( $html, $media, $page_dir );
+		$linked = SiteBuilder::relink_css_urls( $linked, $media, $page_dir );
+
+		if ( ! BlockWriter::current( $dir ) ) {
+			$written = BlockWriter::write(
+				$linked,
+				$plan,
+				$slug,
+				'header' === $area ? __( 'Site header', 'qwerty-soft-signal' ) : __( 'Site footer', 'qwerty-soft-signal' ),
+				SiteBuilder::relink_css_urls( $styles->rules_for( $html ), $media, $page_dir ),
+				$dir,
+				$file,
+				'option',
+				$menu
+			);
+
+			if ( null === $written ) {
+				return '';
+			}
+		}
+
+		$values = BlockWriter::values( $html, $plan );
+		$values = self::resolve_images( $values, $plan, $media, $page_dir );
+
+		SiteOptions::seed( BlockWriter::option_values( $slug, $plan, $values ) );
+
+		/*
+		 * Remembered so the last step can rewrite the footer's links. They are
+		 * link fields, so their addresses are option values rather than hrefs
+		 * in the markup — and the pass that fixes hrefs walked straight past
+		 * them, leaving every footer link pointing at the archive.
+		 */
+		update_option( SiteOptions::ORIGIN, $file, false );
+
+		/*
+		 * No `data` on the comment. The values are the site's, not this
+		 * placement's, so the block reads them from the options page every
+		 * time it renders — which is what makes one edit reach every page.
+		 */
+		return '<!-- wp:qs/design-' . $slug . ' /-->';
+	}
+
+	/**
+	 * Whether one node sits inside another.
+	 *
+	 * @param \DOMNode $node    The node to place.
+	 * @param \DOMNode $subject The node it might be inside.
+	 * @return bool
+	 */
+	private static function within( \DOMNode $node, \DOMNode $subject ): bool {
+		for ( $parent = $node->parentNode; null !== $parent; $parent = $parent->parentNode ) {
+			if ( $parent === $subject ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+	/**
+	 * Point every imported link at the page it means, on a site already built.
+	 *
+	 * The build does this at the end of a run, from the routes it is holding.
+	 * A repair has no run and no routes — but the pages carry the archive path
+	 * each came from, which is the same information written down, so the same
+	 * pass can be made over a finished site. Without it a restored block keeps
+	 * the design's own `about.html`, and `esc_url()` reads a bare file name as
+	 * a host: every link in the header, the footer and every section resolves
+	 * to `http://about.html`.
+	 *
+	 * @return array<string, int> Link targets that matched no page, and how often.
+	 */
+	public static function relink(): array {
+		$routes = array();
+
+		foreach ( self::owned_posts( array( 'page' ) ) as $page ) {
+			$file = (string) get_post_meta( $page->ID, self::OWNED_META, true );
+
+			if ( '' === $file ) {
+				continue;
+			}
+
+			$routes[ $file ] = array(
+				'id'  => (int) $page->ID,
+				'url' => (string) get_permalink( $page->ID ),
+			);
+		}
+
+		return array() === $routes ? array() : self::relink_pages( $routes );
+	}
+	/**
+	 * Point a generated template's fallback addresses at the pages that exist.
+	 *
+	 * A field's fallback is the design's own value, held as a PHP literal so a
+	 * block with nothing stored still draws the section as delivered. For a
+	 * link that value is an address, and an address out of the archive means
+	 * nothing here: the pass that rewrites `href=""` never sees it, because by
+	 * then it is a string in a function call rather than an attribute.
+	 *
+	 * @param string               $php        The template.
+	 * @param array<string, mixed> $index    Link index built from the routes.
+	 * @param string               $dir        Where the block's section stood in the archive.
+	 * @param array<string, int>   $unresolved Collected links that matched nothing.
+	 * @return string
+	 */
+	private static function relink_literals( string $php, array $index, string $dir, array &$unresolved ): string {
+		return (string) preg_replace_callback(
+			"#'url' => '([^']*)'#",
+			static function ( array $found ) use ( $index, $dir, &$unresolved ): string {
+				$href = $found[1];
+
+				if ( '' === $href || 1 === preg_match( '#^(https?:)?//|^(mailto|tel):|^\##i', $href ) ) {
+					return $found[0];
+				}
+
+				$parts = explode( '#', $href, 2 );
+				$url   = self::built_url( $index, $dir, $parts[0] );
+
+				if ( '' === $url ) {
+					if ( 1 === preg_match( '/\.html?$/i', $parts[0] ) ) {
+						$name                = strtolower( basename( $parts[0] ) );
+						$unresolved[ $name ] = ( $unresolved[ $name ] ?? 0 ) + 1;
+					}
+
+					return $found[0];
+				}
+
+				$url = $url . ( isset( $parts[1] ) ? '#' . $parts[1] : '' );
+
+				// Written back into a single-quoted PHP string, so it is escaped for one.
+				return "'url' => '" . addcslashes( esc_url_raw( $url ), "'\\\\" ) . "'";
+			},
+			$php
+		);
+	}
+
+	/**
+	 * The page a previous import already made for one file of a design.
+	 *
+	 * Every imported page carries the archive path it came from, which is what
+	 * makes a second build able to recognise its own work rather than repeat
+	 * it. A trashed one does not count: somebody deleted that page on purpose,
+	 * and rebuilding into it would bring it back without being asked.
+	 *
+	 * @param string $file Page file, relative to the design root.
+	 * @return int The page, or zero.
+	 */
+	private static function page_for_file( string $file ): int {
+		if ( '' === $file ) {
+			return 0;
+		}
+
+		$found = get_posts(
+			array(
+				'post_type'      => 'page',
+				'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+				'posts_per_page' => 1,
+				'meta_key'       => self::OWNED_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Import bookkeeping, not a front-end query.
+				'meta_value'     => $file, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- The archive path is the identity of an imported page.
+			)
+		);
+
+		return array() === $found ? 0 : (int) $found[0]->ID;
+	}
+
+	/**
+	 * Turn the cards a listing drew into records somebody can add to.
+	 *
+	 * This is what the whole listing idea is for. Six report cards held as
+	 * content mean adding a seventh report by editing a page; held as records
+	 * they mean pressing Add New, and the card the designer drew is the
+	 * template that draws it.
+	 *
+	 * Existing records are left alone. A rebuild of the same design must not
+	 * duplicate a list somebody has since been adding to, and matching on the
+	 * title is enough: two reports with the same name are the same report.
+	 *
+	 * @param string                           $type   The post type key.
+	 * @param array<int, array<string, mixed>> $rows  One entry per card, as values() read them.
+	 * @param array<int, array<string, mixed>> $shape The row's fields, from the plan.
+	 * @return int How many records were created.
+	 */
+	private static function seed_records( string $type, array $rows, array $shape ): int {
+		if ( '' === $type || array() === $rows ) {
+			return 0;
+		}
+
+		/*
+		 * The first text field is what a record is called. It is the only part
+		 * of a card that has to become something other than a field: WordPress
+		 * lists records by title, and a list of "Auto Draft" is not a list.
+		 */
+		$titles = '';
+
+		foreach ( $shape as $field ) {
+			if ( 'text' === (string) ( $field['type'] ?? '' ) ) {
+				$titles = (string) $field['name'];
+				break;
+			}
+		}
+
+		$made = 0;
+
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+
+			$title = '' !== $titles ? trim( (string) ( $row[ $titles ] ?? '' ) ) : '';
+
+			if ( '' === $title ) {
+				continue;
+			}
+
+			$existing = get_posts(
+				array(
+					'post_type'        => $type,
+					'post_status'      => 'any',
+					'posts_per_page'   => 1,
+					'title'            => $title,
+					'suppress_filters' => false,
+				)
+			);
+
+			if ( array() !== $existing ) {
+				continue;
+			}
+
+			$id = wp_insert_post(
+				array(
+					'post_type'   => $type,
+					'post_status' => 'publish',
+					'post_title'  => $title,
+					'meta_input'  => array( self::OWNED_META => 'record:' . $type ),
+				),
+				true
+			);
+
+			if ( is_wp_error( $id ) ) {
+				continue;
+			}
+
+			foreach ( $row as $name => $value ) {
+				if ( (string) $name === $titles ) {
+					continue;
+				}
+
+				update_post_meta( (int) $id, (string) $name, $value );
+			}
+
+			++$made;
+		}
+
+		return $made;
+	}
+
+	/**
+	 * Make the site's menu from the design's header, against the built pages.
+	 *
+	 * Run at the end because that is when the pages exist. Only one menu is
+	 * ever kept: a rebuild replaces the entries of the one already there rather
+	 * than leaving a second "Main navigation" behind for somebody to wonder
+	 * about.
+	 *
+	 * @param array<string, mixed>                $job    Job record.
+	 * @param array<string, array<string, mixed>> $routes Created pages.
+	 * @return int The menu, or zero when the design has no navigation.
+	 */
+	private static function menu_from_design( array $job, array $routes ): int {
+		$root = (string) ( $job['root'] ?? '' );
+		$file = (string) ( $job['pages'][0]['file'] ?? '' );
+
+		if ( '' === $root || '' === $file || array() === $routes ) {
+			return 0;
+		}
+
+		$split = SectionSplitter::split( trailingslashit( $root ) . $file, $root );
+		$html  = (string) ( $split['header']['html'] ?? '' );
+		$links = self::nav_links( $html, $routes );
+
+		if ( array() === $links ) {
+			$html  = self::chrome_file( $root, array( 'sitenav', 'siteheader', 'nav', 'header', 'menu' ) );
+			$links = self::nav_links( $html, $routes );
+		}
+
+		if ( array() === $links ) {
+			return 0;
+		}
+
+		/*
+		 * An existing menu is rewritten rather than joined by a second one.
+		 * The header looks the menu up by option, so replacing the post would
+		 * work too — but a site that accumulates a navigation per rebuild is
+		 * a site somebody has to tidy by hand.
+		 */
+		$existing = self::owned_posts( array( 'wp_navigation' ) );
+		$items    = array();
+
+		foreach ( $links as $link ) {
+			$items[] = self::menu_item( (int) $link['id'], (string) $link['label'], (string) $link['url'] );
+		}
+
+		if ( array() !== $existing ) {
+			$id = (int) $existing[0]->ID;
+
+			wp_update_post(
+				array(
+					'ID'           => $id,
+					'post_content' => wp_slash( implode( "\n\n", $items ) ),
+				)
+			);
+
+			update_option( SiteOptions::MENU, $id, false );
+
+			return $id;
+		}
+
+		return self::create_menu( $links );
+	}
+
+	/**
+	 * Empty the header's navigation, leaving a mark where a real menu goes.
+	 *
+	 * Which element is the navigation is decided by what it holds rather than
+	 * by what it is called: a `<nav>` when the design used one, otherwise
+	 * whichever element carries the most links to other pages of the design.
+	 * Handoffs are inconsistent about the tag and consistent about the shape.
+	 *
+	 * @param string $html The header's markup.
+	 * @return string The same markup with one element emptied.
+	 */
+	public static function hollow_nav( string $html ): string {
+		$dom = new DOMDocument();
+
+		libxml_use_internal_errors( true );
+		$ok = $dom->loadHTML( '<?xml encoding="UTF-8"><html><body>' . $html . '</body></html>', LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING );
+		libxml_clear_errors();
+
+		if ( ! $ok ) {
+			return $html;
+		}
+
+		$xpath      = new DOMXPath( $dom );
+		$best       = null;
+		$most       = 0;
+		$candidates = array();
+
+		foreach ( $xpath->query( '//nav | //ul | //div' ) as $node ) {
+			if ( ! $node instanceof DOMElement ) {
+				continue;
+			}
+
+			$links = 0;
+
+			foreach ( $xpath->query( './/a', $node ) as $anchor ) {
+				if ( $anchor instanceof DOMElement && 1 === preg_match( '/\.html?($|[#?])/i', $anchor->getAttribute( 'href' ) ) ) {
+					++$links;
+				}
+			}
+
+			// A `<nav>` wins on equal numbers.
+			if ( $links >= 2 ) {
+				$candidates[] = array(
+					'node'  => $node,
+					'score' => $links * 2 + ( 'nav' === strtolower( $node->tagName ) ? 1 : 0 ),
+				);
+			}
+		}
+
+		/*
+		 * An element that holds another candidate is not the navigation; it is
+		 * the thing the navigation sits in. Counting links alone made the
+		 * header's own wrapper the winner — it holds the brand link and the
+		 * call to action as well as the menu, so it always has the most — and
+		 * emptying it took the brand, the mobile toggle and the language chips
+		 * out of every page along with the design's list of links.
+		 */
+		foreach ( $candidates as $candidate ) {
+			foreach ( $candidates as $other ) {
+				if ( $other['node'] !== $candidate['node'] && self::within( $other['node'], $candidate['node'] ) ) {
+					continue 2;
+				}
+			}
+
+			if ( $candidate['score'] >= $most ) {
+				$most = $candidate['score'];
+				$best = $candidate['node'];
+			}
+		}
+
+		if ( ! $best instanceof DOMElement ) {
+			return $html;
+		}
+
+		/*
+		 * Only the links to other pages come out, and the mark goes where the
+		 * first of them stood. Emptying the element wholesale also took the
+		 * furniture standing beside the menu — this design keeps its language
+		 * chips inside the same `<nav>`, and every page lost the ability to
+		 * switch language so that WordPress could own a list of six links.
+		 */
+		$mark  = $dom->createComment( 'qs:menu' );
+		$links = array();
+
+		foreach ( $xpath->query( './/a', $best ) as $anchor ) {
+			if ( $anchor instanceof DOMElement && 1 === preg_match( '/\.html?($|[#?])/i', $anchor->getAttribute( 'href' ) ) ) {
+				$links[] = $anchor;
+			}
+		}
+
+		if ( array() === $links ) {
+			return $html;
+		}
+
+		foreach ( $links as $offset => $anchor ) {
+			/*
+			 * A link written as a list item takes the item with it. Leaving the
+			 * `<li>` behind would leave the design's bullets and gaps standing
+			 * around a menu that is no longer there.
+			 */
+			$doomed = $anchor;
+
+			while ( $doomed->parentNode instanceof DOMElement
+				&& $doomed->parentNode !== $best
+				&& 1 === $doomed->parentNode->childNodes->length ) {
+				$doomed = $doomed->parentNode;
+			}
+
+			if ( 0 === $offset ) {
+				$doomed->parentNode->replaceChild( $mark, $doomed );
+				continue;
+			}
+
+			$doomed->parentNode->removeChild( $doomed );
+		}
+
+		$body  = $xpath->query( '//body' )->item( 0 );
+		$saved = '';
+
+		foreach ( $body->childNodes as $child ) {
+			$saved .= (string) $dom->saveHTML( $child );
+		}
+
+		return $saved;
+	}
+
+	/**
+	 * Whether the model checks each reading before a block is made from it.
+	 *
+	 * On when a model can be reached, because the difference it makes is the
+	 * difference between a sidebar an editor can use and one full of
+	 * `label_2`. Off by filter for a build that must not touch the network,
+	 * and off automatically when there is no route to a model — in which case
+	 * the structural names stand and everything else is identical.
+	 *
+	 * @return bool
+	 */
+	public static function reviewing(): bool {
+		/**
+		 * Filter whether the model reviews each section's reading.
+		 *
+		 * @param bool $reviewing True to ask the model what the fields should be called.
+		 */
+		return (bool) apply_filters( 'qwerty_soft/review_plans', ModelGateway::ready() );
+	}
+
+	/**
+	 * Whether a section becomes a block of its own rather than a translation.
+	 *
+	 * On by default, because translating is what produced pages that matched
+	 * neither the design nor the theme. The filter is the way back for a site
+	 * that genuinely wants an import rebuilt in the theme's own blocks.
+	 *
+	 * @return bool
+	 */
+	public static function wrapping(): bool {
+		/**
+		 * Filter whether the importer wraps sections instead of converting them.
+		 *
+		 * @param bool $wrapping True to keep the design's markup in a block of its own.
+		 */
+		return (bool) apply_filters( 'qwerty_soft/wrap_sections', true );
+	}
+
+	/**
+	 * Turn one section into a block, and return the markup that places it.
+	 *
+	 * @param array<string, mixed>                    $split    The page the section came from.
+	 * @param string                                  $file     Page file, relative to the design root.
+	 * @param array<string, mixed>                    $section  The section.
+	 * @param CssIndex                                $styles   The design's stylesheets.
+	 * @param array<string, array{id:int,url:string}> $media    Imported media map.
+	 * @param string                                  $page_dir Where the page sits, for relative images.
+	 * @return array{markup:string,concerns:array<int,string>}|null
+	 */
+	private static function wrap_section( array $split, string $file, array $section, CssIndex $styles, array $media, string $page_dir ): ?array {
+		$html = (string) $section['html'];
+
+		if ( '' === trim( $html ) ) {
+			return null;
+		}
+
+		$plan     = SectionPlan::of( $html );
+		$title    = (string) $section['label'];
+		$singular = '';
+
+		/*
+		 * A name that says where it came from, and a digest so that two
+		 * sections with the same heading on the same page cannot claim one
+		 * directory. The digest is of the markup, so rebuilding an unchanged
+		 * design reuses the block rather than piling up near-duplicates.
+		 */
+		$slug = BlockWriter::slug(
+			basename( $file, '.html' ) . '-' . (string) $section['label'] . '-' . substr( md5( $html ), 0, 6 )
+		);
+
+		if ( '' === $slug ) {
+			return null;
+		}
+
+		$dir   = BlockWriter::dir() . '/' . $slug;
+		$fresh = ! BlockWriter::current( $dir );
+
+		/*
+		 * The model's one remaining job, and it runs only for a block that is
+		 * about to be written.
+		 *
+		 * Structure is decided in code — a heading is editable because it is a
+		 * heading — but code cannot judge. It names a field after whatever
+		 * class the designer used, which gives an editor a sidebar of
+		 * `subheading`, `btn` and `label_2`, and it counts six siblings without
+		 * knowing whether they are the site's reports or a fixed set of tiles.
+		 * Those are the questions a person would answer while explaining the
+		 * section, and they are what is asked here.
+		 *
+		 * Asking again for a block that already exists would be worse than
+		 * wasteful. The template is not rewritten, so it keeps the names it was
+		 * built with, and a model asked twice is under no obligation to answer
+		 * identically — the values would then be written under names the
+		 * template does not read, and every field on a rebuilt page would come
+		 * out empty.
+		 */
+		if ( $fresh && self::reviewing() ) {
+			$checked  = PlanReview::of( $html, $plan, $title );
+			$plan     = (array) $checked['plan'];
+			$title    = (string) $checked['title'];
+			$singular = (string) $checked['item'];
+		}
+
+		if ( ! $fresh ) {
+			$plan = BlockWriter::adopt( $plan, $dir );
+		}
+
+		/*
+		 * The pictures, before the markup is frozen into a template.
+		 *
+		 * A wrapped section keeps the archive's own addresses, and the archive
+		 * is not where the site serves from — `img/band.jpg` inside a block
+		 * directory resolves to nothing. Both spellings have to be caught: the
+		 * `src` on an `<img>`, and the `url()` inside an inline style, which is
+		 * where every full-bleed band in this design keeps its picture.
+		 */
+		$html = SiteBuilder::relink_media( $html, $media, $page_dir );
+		$html = SiteBuilder::relink_css_urls( $html, $media, $page_dir );
+
+		/*
+		 * An existing block is left exactly as it is. Editing a generated
+		 * render.php by hand is expected — it is ordinary theme code once it
+		 * is written — and a rebuild that overwrote it would throw that away
+		 * without asking.
+		 *
+		 * The exception is a block written by an older version of the writer,
+		 * which can be wrong in ways no editor caused. The first ones named
+		 * only ACF as their renderer and so drew nothing at all on a site
+		 * without the plugin; leaving those alone would mean the fix never
+		 * reached the pages that needed it.
+		 */
+		if ( $fresh ) {
+			$written = BlockWriter::write(
+				$html,
+				$plan,
+				$slug,
+				$title,
+				SiteBuilder::relink_css_urls( $styles->rules_for( (string) $section['html'] ), $media, $page_dir ),
+				$dir,
+				$file,
+				'block',
+				false,
+				$singular
+			);
+
+			if ( null === $written ) {
+				return null;
+			}
+		}
+
+		/*
+		 * Read from the original, not from the relinked copy: a field's value
+		 * is resolved to an attachment id, and resolving is done against the
+		 * archive's own path.
+		 */
+		$values = BlockWriter::values( (string) $section['html'], $plan );
+		$values = self::resolve_images( $values, $plan, $media, $page_dir );
+
+		/*
+		 * A listing's cards become records, and the block then draws whichever
+		 * of them the site currently has. So the cards' own values are taken
+		 * out of the block: leaving them would put the same six reports in the
+		 * page as well as in the list, and editing one would not change the
+		 * other.
+		 */
+		if ( 'listing' === ( $plan['kind'] ?? '' ) && '' !== $singular ) {
+			$cards = self::resolve_images(
+				array( 'items' => BlockWriter::rows_of( (string) $section['html'], $plan ) ),
+				$plan,
+				$media,
+				$page_dir
+			);
+
+			self::seed_records(
+				DesignType::key( $singular ),
+				(array) ( $cards['items'] ?? array() ),
+				(array) ( $plan['item']['fields'] ?? array() )
+			);
+		}
+
+		return array(
+			'markup'   => BlockWriter::instance( $slug, $plan, $values ),
+			'concerns' => array(),
+		);
+	}
+
+	/**
+	 * Swap the archive's own image paths for the attachments they were imported as.
+	 *
+	 * @param array<string, mixed>                    $values   What the section said.
+	 * @param array<string, mixed>                    $plan     What SectionPlan made of it.
+	 * @param array<string, array{id:int,url:string}> $media    Imported media map.
+	 * @param string                                  $page_dir Where the page sits.
+	 * @return array<string, mixed>
+	 */
+	public static function resolve_images( array $values, array $plan, array $media, string $page_dir ): array {
+		$images = array();
+
+		foreach ( (array) ( $plan['fields'] ?? array() ) as $field ) {
+			if ( 'image' === (string) ( $field['type'] ?? '' ) ) {
+				$images[] = (string) $field['name'];
+			}
+		}
+
+		foreach ( $images as $name ) {
+			if ( ! isset( $values[ $name ] ) || ! is_string( $values[ $name ] ) ) {
+				continue;
+			}
+
+			$found = SiteBuilder::attachment_for( (string) $values[ $name ], $media, $page_dir );
+
+			/*
+			 * An id, not a URL. An ACF image field holding a bare address
+			 * renders but cannot be changed from the library, which is the one
+			 * thing the field was added for.
+			 */
+			$values[ $name ] = null === $found ? '' : (int) $found['id'];
+		}
+
+		$rows = isset( $values['items'] ) && is_array( $values['items'] ) ? $values['items'] : null;
+		$item = $plan['item'] ?? null;
+
+		if ( null === $rows || ! is_array( $item ) ) {
+			return $values;
+		}
+
+		$row_images = array();
+
+		foreach ( (array) ( $item['fields'] ?? array() ) as $field ) {
+			if ( 'image' === (string) ( $field['type'] ?? '' ) ) {
+				$row_images[] = (string) $field['name'];
+			}
+		}
+
+		foreach ( $rows as $index => $row ) {
+			foreach ( $row_images as $name ) {
+				if ( ! isset( $row[ $name ] ) || ! is_string( $row[ $name ] ) ) {
+					continue;
+				}
+
+				$found = SiteBuilder::attachment_for( (string) $row[ $name ], $media, $page_dir );
+
+				$rows[ $index ][ $name ] = null === $found ? '' : (int) $found['id'];
+			}
+		}
+
+		$values['items'] = $rows;
+
+		return $values;
 	}
 
 	/**
@@ -969,7 +2094,7 @@ final class SiteAssembler {
 
 			$notes[] = sprintf(
 				/* translators: %s: comma-separated list of "visual → screenshot" pairs. */
-				__( 'JS-rendered visuals were stood in for by screenshots from the design: %s', 'wow-signal' ),
+				__( 'JS-rendered visuals were stood in for by screenshots from the design: %s', 'qwerty-soft-signal' ),
 				implode( ', ', $pairs )
 			);
 		}
@@ -986,7 +2111,7 @@ final class SiteAssembler {
 					'%1$d list was filled from the design’s own data (%2$d items).',
 					'%1$d lists were filled from the design’s own data (%2$d items).',
 					$loops,
-					'wow-signal'
+					'qwerty-soft-signal'
 				),
 				$loops,
 				$items
@@ -998,7 +2123,7 @@ final class SiteAssembler {
 		if ( array() !== $unresolved ) {
 			$notes[] = sprintf(
 				/* translators: %s: comma-separated list of template variable names. */
-				__( 'The design left placeholders to fill in: %s', 'wow-signal' ),
+				__( 'The design left placeholders to fill in: %s', 'qwerty-soft-signal' ),
 				implode( ', ', $unresolved )
 			);
 		}
@@ -1043,6 +2168,26 @@ final class SiteAssembler {
 		$readable = trim( (string) preg_replace( '/[-_]+/', ' ', $readable ) );
 
 		return '' === $readable ? $stem : ucfirst( $readable );
+	}
+
+	/**
+	 * Whether the design's own sections already open with a first-level heading.
+	 *
+	 * @param array<int, array<string, mixed>> $sections The sections as read.
+	 * @return bool
+	 */
+	private static function heads_itself( array $sections ): bool {
+		foreach ( $sections as $section ) {
+			if ( ! empty( $section['excluded'] ) || '' === (string) ( $section['markup'] ?? '' ) ) {
+				continue;
+			}
+
+			if ( str_contains( (string) ( $section['html'] ?? '' ), '<h1' ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1106,12 +2251,104 @@ final class SiteAssembler {
 	}
 
 	/**
+	 * The language a design file belongs to, or '' when it is not in one.
+	 *
+	 * @param string $file Archive-relative path.
+	 * @return string
+	 */
+	private static function language_of( string $file ): string {
+		return class_exists( DesignArchive::class ) ? DesignArchive::language_in( $file ) : '';
+	}
+
+	/**
+	 * What ties a page to the same page in the other languages.
+	 *
+	 * The path with the language folder taken out of it. `en/reports.html`,
+	 * `ru/reports.html` and `zh/reports.html` all come back as
+	 * `reports.html`, which is exactly the relationship a reader means by
+	 * "the same page in Russian" — and it is what the language switcher, the
+	 * hreflang tags and anything else joining translations up can be built on
+	 * without a taxonomy or a plugin.
+	 *
+	 * @param string $file Archive-relative path.
+	 * @return string
+	 */
+	private static function group_of( string $file ): string {
+		$language = self::language_of( $file );
+		$path     = self::archive_path( $file );
+
+		if ( '' === $language ) {
+			return $path;
+		}
+
+		$out = array();
+
+		foreach ( explode( '/', $path ) as $segment ) {
+			if ( $segment !== $language ) {
+				$out[] = $segment;
+			}
+		}
+
+		return implode( '/', $out );
+	}
+
+	/**
+	 * The page a language's pages hang under, made on first use.
+	 *
+	 * Zero for the primary language, which stays at the root of the site.
+	 *
+	 * @param string $primary  The language that keeps the root of the site.
+	 * @param bool   $publish  Publish rather than draft.
+	 * @param string $language Language code.
+	 * @return int
+	 */
+	private static function language_parent( string $primary, bool $publish, string $language ): int {
+		if ( '' === $language || $language === $primary ) {
+			return 0;
+		}
+
+		$existing = get_posts(
+			array(
+				'post_type'        => 'page',
+				'post_status'      => 'any',
+				'name'             => $language,
+				'post_parent'      => 0,
+				'posts_per_page'   => 1,
+				'no_found_rows'    => true,
+				'suppress_filters' => false,
+			)
+		);
+
+		if ( array() !== $existing ) {
+			return (int) $existing[0]->ID;
+		}
+
+		$id = wp_insert_post(
+			array(
+				'post_type'     => 'page',
+				'post_status'   => $publish ? 'publish' : 'draft',
+				'post_title'    => strtoupper( $language ),
+				'post_name'     => $language,
+				'post_parent'   => 0,
+				'page_template' => BlockConverter::faithful() ? 'page-design' : 'page-landing',
+				'meta_input'    => array(
+					self::OWNED_META => 'language:' . $language,
+					self::LANG_META  => $language,
+				),
+			),
+			true
+		);
+
+		return is_wp_error( $id ) ? 0 : (int) $id;
+	}
+
+	/**
 	 * A permalink slug for a design file.
 	 *
 	 * @param string $file Relative path.
 	 * @return string
 	 */
-	private static function slug_for( string $file ): string {
+	public static function slug_for( string $file ): string {
 		if ( self::is_index( $file ) ) {
 			return 'home';
 		}
@@ -1132,21 +2369,24 @@ final class SiteAssembler {
 	 * @return array<string, int> Targets that matched no page, and how often.
 	 */
 	private static function relink_pages( array $routes ): array {
-		$lookup     = array();
 		$unresolved = array();
+		$index      = self::link_index( $routes );
 
 		foreach ( $routes as $file => $made ) {
-			$lookup[ strtolower( basename( (string) $file ) ) ] = (string) $made['url'];
-		}
-
-		foreach ( $routes as $made ) {
 			$post = get_post( (int) $made['id'] );
 
 			if ( null === $post ) {
 				continue;
 			}
 
-			$content = self::relink_markup( (string) $post->post_content, $lookup, $unresolved );
+			/*
+			 * Where this page sat in the archive, because that is what its own
+			 * links were written against: `reports.html` inside `en/` means the
+			 * English one, and `../ru/reports.html` means the Russian one.
+			 */
+			$dir     = self::archive_dir( (string) $file );
+			$content = self::relink_markup( (string) $post->post_content, $index, $dir, $unresolved );
+			$content = self::relink_block_data( $content, $index, $dir, $unresolved );
 
 			if ( $content !== $post->post_content ) {
 				wp_update_post(
@@ -1158,7 +2398,238 @@ final class SiteAssembler {
 			}
 		}
 
+		self::relink_blocks( $index, $unresolved );
+		self::relink_options( $index, $unresolved );
+		self::relink_menus( $index, $unresolved );
+
 		return $unresolved;
+	}
+
+	/**
+	 * Point the menu at the pages that were built.
+	 *
+	 * The menu is made before them, on the design's own hrefs, which is what
+	 * lets the header and footer exist from the third step instead of the last
+	 * — so at this point every entry still says `reports.html`. Rewriting them
+	 * here is the other half of that trade.
+	 *
+	 * `refresh_menus()` finishes the job afterwards by turning a custom link
+	 * into a real page link once the page is published; this only has to get
+	 * the address right.
+	 *
+	 * @param array<string, mixed> $index      Link index built from the routes.
+	 * @param array<int, string>   $unresolved Collected links that matched nothing.
+	 * @return void
+	 */
+	private static function relink_menus( array $index, array &$unresolved ): void {
+		$origin = (string) get_option( SiteOptions::ORIGIN, '' );
+		$dir    = '' !== $origin ? self::archive_dir( $origin ) : '';
+
+		foreach ( self::owned_posts( array( 'wp_navigation' ) ) as $menu ) {
+			$blocks  = parse_blocks( (string) $menu->post_content );
+			$changed = false;
+
+			foreach ( $blocks as &$block ) {
+				if ( 'core/navigation-link' !== ( $block['blockName'] ?? '' ) ) {
+					continue;
+				}
+
+				$href = (string) ( $block['attrs']['url'] ?? '' );
+
+				if ( '' === $href || 1 === preg_match( '#^(https?:)?//|^(mailto|tel):|^\##i', $href ) ) {
+					continue;
+				}
+
+				$parts = explode( '#', $href, 2 );
+				$url   = self::built_url( $index, $dir, $parts[0] );
+
+				if ( '' === $url ) {
+					if ( 1 === preg_match( '/\.html?$/i', $parts[0] ) ) {
+						$leaf                = strtolower( basename( $parts[0] ) );
+						$unresolved[ $leaf ] = ( $unresolved[ $leaf ] ?? 0 ) + 1;
+					}
+
+					continue;
+				}
+
+				$block['attrs']['url'] = $url . ( isset( $parts[1] ) ? '#' . $parts[1] : '' );
+
+				$changed = true;
+			}
+
+			unset( $block );
+
+			if ( ! $changed ) {
+				continue;
+			}
+
+			wp_update_post(
+				array(
+					'ID'           => (int) $menu->ID,
+					'post_content' => wp_slash( serialize_blocks( $blocks ) ),
+				)
+			);
+		}
+	}
+
+	/**
+	 * Point the site's own stored links at the pages that were built.
+	 *
+	 * A button in the footer is a link field, so its address is an option row
+	 * rather than an `href` in any markup — invisible to the pass that rewrites
+	 * pages and invisible to the one that rewrites templates. Left out, every
+	 * link in a wrapped footer still pointed into the archive.
+	 *
+	 * @param array<string, mixed> $index      Link index built from the routes.
+	 * @param array<int, string>   $unresolved Collected links that matched nothing.
+	 * @return void
+	 */
+	private static function relink_options( array $index, array &$unresolved ): void {
+		$origin = (string) get_option( SiteOptions::ORIGIN, '' );
+
+		if ( '' === $origin ) {
+			return;
+		}
+
+		$dir = self::archive_dir( $origin );
+
+		foreach ( SiteOptions::all() as $name => $value ) {
+			if ( ! is_array( $value ) || ! isset( $value['url'] ) || ! is_string( $value['url'] ) ) {
+				continue;
+			}
+
+			$href = $value['url'];
+
+			if ( '' === $href || 1 === preg_match( '#^(https?:)?//|^(mailto|tel):|^\##i', $href ) ) {
+				continue;
+			}
+
+			$parts = explode( '#', $href, 2 );
+			$url   = self::built_url( $index, $dir, $parts[0] );
+
+			if ( '' === $url ) {
+				if ( 1 === preg_match( '/\.html?$/i', $parts[0] ) ) {
+					$leaf                = strtolower( basename( $parts[0] ) );
+					$unresolved[ $leaf ] = ( $unresolved[ $leaf ] ?? 0 ) + 1;
+				}
+
+				continue;
+			}
+
+			$value['url'] = $url . ( isset( $parts[1] ) ? '#' . $parts[1] : '' );
+
+			update_option( (string) $name, $value, false );
+		}
+	}
+
+	/**
+	 * Point the links inside generated blocks at the pages that were built.
+	 *
+	 * A wrapped section keeps the design's own anchors, and they live in the
+	 * block's `render.php` rather than in any post — so the pass that rewrites
+	 * a page's links never saw them, and every navigation link in a wrapped
+	 * build still pointed at `reports.html`.
+	 *
+	 * Which page a block came from is read back out of its manifest, because
+	 * the design's links are relative and `reports.html` means the English one
+	 * from inside `en/` and the Russian one from inside `ru/`.
+	 *
+	 * @param array<string, mixed> $index      Link index built from the routes.
+	 * @param array<int, string>   $unresolved Collected links that matched nothing.
+	 * @return void
+	 */
+	private static function relink_blocks( array $index, array &$unresolved ): void {
+		$found = glob( BlockWriter::dir() . '/*/block.json' );
+
+		if ( ! is_array( $found ) ) {
+			return;
+		}
+
+		foreach ( $found as $manifest ) {
+			$raw = file_get_contents( $manifest ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- A file inside the theme, written by this importer.
+
+			if ( false === $raw ) {
+				continue;
+			}
+
+			$json   = json_decode( $raw, true );
+			$origin = is_array( $json ) ? (string) ( $json['qsDesignOrigin'] ?? '' ) : '';
+
+			if ( '' === $origin ) {
+				continue;
+			}
+
+			$template = dirname( $manifest ) . '/render.php';
+
+			if ( ! is_file( $template ) ) {
+				continue;
+			}
+
+			$body = file_get_contents( $template ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- A file inside the theme, written by this importer.
+
+			if ( false === $body ) {
+				continue;
+			}
+
+			$linked = self::relink_markup( $body, $index, self::archive_dir( $origin ), $unresolved );
+			$linked = self::relink_literals( $linked, $index, self::archive_dir( $origin ), $unresolved );
+
+			if ( $linked !== $body ) {
+				file_put_contents( $template, $linked ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- A file inside the theme, written by this importer.
+			}
+		}
+	}
+
+	/**
+	 * Delete the blocks an import generated.
+	 *
+	 * These are files in the theme rather than rows in the database, which
+	 * breaks the promise that an import can be taken back out in one press —
+	 * so removing them is part of the undo rather than a separate housekeeping
+	 * job. Only `blocks/design/` is touched: the theme's own six blocks sit a
+	 * level above it and are never generated.
+	 *
+	 * @return int How many blocks were removed.
+	 */
+	private static function remove_blocks(): int {
+		$root = BlockWriter::dir();
+
+		if ( ! is_dir( $root ) ) {
+			return 0;
+		}
+
+		$removed = 0;
+
+		foreach ( (array) glob( $root . '/*', GLOB_ONLYDIR ) as $dir ) {
+			$dir = (string) $dir;
+
+			/*
+			 * Guarded rather than trusted. This deletes files, and a glob that
+			 * somehow escaped the directory it was rooted at would delete the
+			 * wrong ones — so the path is resolved and checked against the
+			 * root before anything is unlinked.
+			 */
+			$real = realpath( $dir );
+			$base = realpath( $root );
+
+			if ( false === $real || false === $base || ! str_starts_with( $real, $base ) ) {
+				continue;
+			}
+
+			foreach ( (array) glob( $real . '/*' ) as $file ) {
+				if ( is_file( (string) $file ) ) {
+					wp_delete_file( (string) $file );
+				}
+			}
+
+			if ( @rmdir( $real ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- A directory somebody added a file to is left alone rather than reported.
+				++$removed;
+			}
+		}
+
+		@rmdir( $root ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Removed only when it is already empty.
+
+		return $removed;
 	}
 
 	/**
@@ -1202,15 +2673,26 @@ final class SiteAssembler {
 	/**
 	 * Build the menu and the header and footer template parts.
 	 *
-	 * @param string                              $root      Design root.
-	 * @param string                              $file      A page to read the chrome from.
-	 * @param array<string, array<string, mixed>> $routes Created pages.
-	 * @param BlockConverter|null                 $converter Converter primed with the design; the footer is converted with it.
+	 * @param string                                  $root      Design root.
+	 * @param string                                  $file      A page to read the chrome from.
+	 * @param array<string, array<string, mixed>>     $routes Created pages.
+	 * @param BlockConverter|null                     $converter Converter primed with the design; the footer is converted with it.
+	 * @param array<string, array{id:int,url:string}> $media     Imported media map.
 	 */
-	private static function build_chrome( string $root, string $file, array $routes, ?BlockConverter $converter = null ): array {
+	private static function build_chrome( string $root, string $file, array $routes, ?BlockConverter $converter = null, array $media = array() ): array {
 		$split = SectionSplitter::split( trailingslashit( $root ) . $file, $root );
 		$menu  = 0;
 		$parts = array();
+
+		/*
+		 * Where the chrome stood in the archive, recorded before anything is
+		 * made from it. The design's links are relative — `about.html` written
+		 * inside `en/` means the English one — so the last step cannot rewrite
+		 * them to real pages without knowing this. Set here rather than only
+		 * where the footer is wrapped, because the menu needs it whether or not
+		 * there was a footer to wrap.
+		 */
+		update_option( SiteOptions::ORIGIN, $file, false );
 
 		$header_html = (string) ( $split['header']['html'] ?? '' );
 		$links       = self::nav_links( $header_html, $routes );
@@ -1225,14 +2707,60 @@ final class SiteAssembler {
 			$links       = self::nav_links( $header_html, $routes );
 		}
 
-		if ( array() !== $links ) {
-			$menu = self::create_menu( $links );
+		/*
+		 * The menu is made at the end, not here.
+		 *
+		 * The chrome is built before any page exists, so a menu made now could
+		 * only hold the design's own addresses — and a custom link of
+		 * `research.html` is not a URL: `esc_url()` reads the bare name as a
+		 * host and renders `http://research.html`. Every visitor during the
+		 * build would see a menu of links to nowhere.
+		 *
+		 * It costs nothing to wait, because the wrapped header looks the menu
+		 * up when it draws rather than holding an id it was born with. Until
+		 * finish() makes one, the header renders without a navigation and then
+		 * gains it, correct, in one step.
+		 */
+		if ( array() !== $routes && array() !== $links ) {
+			/*
+			 * One menu per site, not one per build.
+			 *
+			 * A menu this importer already made is taken as the menu, and
+			 * finish() rewrites its entries. Making a fresh one here instead
+			 * left a navigation behind on every rebuild — four of them after
+			 * two runs — with the header pointing at whichever the last step
+			 * happened to pick. The only reason to make one this early is the
+			 * plain header below, which bakes the id into its markup.
+			 */
+			$made = self::owned_posts( array( 'wp_navigation' ) );
+			$menu = array() === $made ? self::create_menu( $links ) : (int) $made[0]->ID;
 		}
 
 		$identity = self::identity( $header_html, $root, (string) dirname( $file ) );
 
-		if ( 0 !== $menu ) {
-			$parts[] = self::write_part( 'header', self::header_markup( $menu, $identity['logo'] > 0 ) );
+		if ( 0 !== $menu || ( self::wrapping() && '' !== trim( $header_html ) ) ) {
+			/*
+			 * The header, wrapped like everything else.
+			 *
+			 * It used to be the one part of a design that was thrown away and
+			 * rebuilt: `header_markup()` emits the theme's own site title
+			 * beside a navigation block, which loses the brand mark, the call
+			 * to action, the language chips and every class the design's
+			 * stylesheet aims at the top of the page. The first thing anybody
+			 * looks at was the one thing that never matched the mockup.
+			 *
+			 * The menu stays a real menu inside it — the design's list of
+			 * links is emptied and a navigation block rendered in its place —
+			 * so adding a page still means adding it once.
+			 */
+			$wrapped = self::wrapping()
+				? self::wrap_chrome( $root, $file, 'header', $header_html, $media, true )
+				: '';
+
+			$parts[] = self::write_part(
+				'header',
+				'' !== $wrapped ? $wrapped : self::header_markup( $menu, $identity['logo'] > 0 )
+			);
 		}
 
 		$footer_html = (string) ( $split['footer']['html'] ?? '' );
@@ -1248,7 +2776,21 @@ final class SiteAssembler {
 		 */
 		$footer = '';
 
-		if ( null !== $converter && is_array( $split['footer'] ?? null ) ) {
+		/*
+		 * Wrapped rather than converted, and its fields put on the options
+		 * page rather than on the block.
+		 *
+		 * The footer is on every page. Held as block content it would have to
+		 * be edited inside a template part, and a second copy of it — a footer
+		 * on a landing page, say — would drift away from the first. Held as
+		 * site content it is one telephone number, changed once, under
+		 * Appearance → Site content.
+		 */
+		if ( self::wrapping() && '' !== trim( $footer_html ) ) {
+			$footer = self::wrap_chrome( $root, $file, 'footer', $footer_html, $media );
+		}
+
+		if ( '' === $footer && null !== $converter && is_array( $split['footer'] ?? null ) ) {
 			$footer = self::footer_from_design( $split['footer'], $routes, $converter );
 		}
 
@@ -1266,7 +2808,7 @@ final class SiteAssembler {
 		foreach ( $parts as $area ) {
 			$detail[] = array(
 				'area'      => $area,
-				'title'     => 'header' === $area ? __( 'Header', 'wow-signal' ) : __( 'Footer', 'wow-signal' ),
+				'title'     => 'header' === $area ? __( 'Header', 'qwerty-soft-signal' ) : __( 'Footer', 'qwerty-soft-signal' ),
 				'edit_link' => admin_url( 'site-editor.php?postType=wp_template_part&postId=' . rawurlencode( get_stylesheet() . '//' . $area ) ),
 			);
 		}
@@ -1322,11 +2864,30 @@ final class SiteAssembler {
 			$target   = strtolower( basename( $pieces[0] ) );
 			$fragment = isset( $pieces[1] ) ? sanitize_title( $pieces[1] ) : '';
 
-			if ( ! isset( $lookup[ $target ] ) ) {
-				continue;
-			}
+			/*
+			 * Two ways of reading the same navigation, because the menu is now
+			 * built before the pages it points at.
+			 *
+			 * With pages built, a link is kept when it names one of them. With
+			 * none built yet — which is every build, since the chrome comes
+			 * first — anything that names an HTML file is kept as the archive
+			 * wrote it, and finish() rewrites those to real pages once they
+			 * exist. Keeping only what the design linked is what stops the
+			 * menu filling with in-page anchors.
+			 */
+			$made = $lookup[ $target ] ?? null;
 
-			$made = $lookup[ $target ];
+			if ( null === $made ) {
+				if ( array() !== $routes || 1 !== preg_match( '/\.html?$/i', $target ) ) {
+					continue;
+				}
+
+				$made = array(
+					'id'   => 0,
+					'file' => $target,
+					'url'  => $pieces[0],
+				);
+			}
 
 			/*
 			 * The logo links home and the header already renders the site
@@ -1337,8 +2898,12 @@ final class SiteAssembler {
 				continue;
 			}
 
-			// Two anchors into the same page, such as its proof and newsletter sections, are two menu entries.
-			$key = $made['id'] . '#' . $fragment;
+			/*
+			 * Two anchors into the same page, such as its proof and newsletter
+			 * sections, are two menu entries. Keyed by the file rather than by
+			 * an id, because before the pages exist every id is zero.
+			 */
+			$key = (string) $made['file'] . '#' . $fragment;
 
 			if ( isset( $seen[ $key ] ) ) {
 				continue;
@@ -1459,14 +3024,25 @@ final class SiteAssembler {
 			array(
 				'post_type'    => 'wp_navigation',
 				'post_status'  => 'publish',
-				'post_title'   => __( 'Main navigation', 'wow-signal' ),
+				'post_title'   => __( 'Main navigation', 'qwerty-soft-signal' ),
 				'post_content' => wp_slash( implode( "\n\n", $items ) ),
 				'meta_input'   => array( self::OWNED_META => 'navigation' ),
 			),
 			true
 		);
 
-		return is_wp_error( $id ) ? 0 : (int) $id;
+		if ( is_wp_error( $id ) ) {
+			return 0;
+		}
+
+		/*
+		 * Remembered, because a wrapped header looks the menu up when it draws
+		 * rather than holding an id it was born with. The header is generated
+		 * once and never rewritten, while every rebuild makes a fresh one.
+		 */
+		update_option( SiteOptions::MENU, (int) $id, false );
+
+		return (int) $id;
 	}
 
 	/**
@@ -1711,8 +3287,8 @@ final class SiteAssembler {
 			? "<!-- wp:site-logo {\"width\":160,\"shouldSyncIcon\":false} /-->\n\n"
 			: "<!-- wp:site-title {\"level\":0,\"fontSize\":\"medium\"} /-->\n\n";
 
-		return "<!-- wp:group {\"tagName\":\"div\",\"className\":\"wow-header\",\"align\":\"full\",\"style\":{\"spacing\":{\"padding\":{\"top\":\"var:preset|spacing|30\",\"bottom\":\"var:preset|spacing|30\"}}},\"layout\":{\"type\":\"constrained\"}} -->\n"
-			. '<div class="wp-block-group wow-header alignfull" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">'
+		return "<!-- wp:group {\"tagName\":\"div\",\"className\":\"qs-header\",\"align\":\"full\",\"style\":{\"spacing\":{\"padding\":{\"top\":\"var:preset|spacing|30\",\"bottom\":\"var:preset|spacing|30\"}}},\"layout\":{\"type\":\"constrained\"}} -->\n"
+			. '<div class="wp-block-group qs-header alignfull" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">'
 			. "<!-- wp:group {\"align\":\"wide\",\"layout\":{\"type\":\"flex\",\"justifyContent\":\"space-between\",\"flexWrap\":\"wrap\"}} -->\n"
 			. '<div class="wp-block-group alignwide">'
 			. $brand
@@ -1743,15 +3319,14 @@ final class SiteAssembler {
 			return '';
 		}
 
-		$lookup = array();
-
-		foreach ( $routes as $file => $made ) {
-			$lookup[ strtolower( basename( (string) $file ) ) ] = (string) $made['url'];
-		}
-
 		$unresolved = array();
 
-		return self::dated( self::relink_markup( $markup, $lookup, $unresolved ) );
+		/*
+		 * Chrome markup is lifted from one page but shown on all of them, so
+		 * there is no single directory to resolve against; the name index does
+		 * the work, and an unambiguous name is what a header links to anyway.
+		 */
+		return self::dated( self::relink_markup( $markup, self::link_index( $routes ), '', $unresolved ) );
 	}
 
 	/**
@@ -1773,7 +3348,7 @@ final class SiteAssembler {
 	 * @return string
 	 */
 	private static function dated( string $markup ): string {
-		if ( str_contains( $markup, 'wp:wow/colophon' ) ) {
+		if ( str_contains( $markup, 'wp:qs/colophon' ) ) {
 			return $markup;
 		}
 
@@ -1827,7 +3402,7 @@ final class SiteAssembler {
 					}
 
 					$blocks[ $index ] = array(
-						'blockName'    => 'wow/colophon',
+						'blockName'    => 'qs/colophon',
 						'attrs'        => $keep,
 						'innerBlocks'  => array(),
 						'innerHTML'    => '',
@@ -1866,7 +3441,7 @@ final class SiteAssembler {
 	 */
 	private static function append_colophon( array &$blocks ): void {
 		$colophon = array(
-			'blockName'    => 'wow/colophon',
+			'blockName'    => 'qs/colophon',
 			'attrs'        => array(),
 			'innerBlocks'  => array(),
 			'innerHTML'    => '',
@@ -1888,15 +3463,16 @@ final class SiteAssembler {
 	/**
 	 * Point a fragment's design links at the pages that were made from them.
 	 *
-	 * @param string                $content    Block markup.
-	 * @param array<string, string> $lookup     Design file name => page URL.
-	 * @param array<string, int>    $unresolved Counts of targets with no page, updated in place.
+	 * @param string                                                                $content    Block markup.
+	 * @param array{path:array<string,string>,name:array<string,array<int,string>>} $index      Index from link_index().
+	 * @param string                                                                $dir        Archive directory the markup came from, or '' when it came from several.
+	 * @param array<string, int>                                                    $unresolved Counts of targets with no page, updated in place.
 	 * @return string
 	 */
-	private static function relink_markup( string $content, array $lookup, array &$unresolved ): string {
+	private static function relink_markup( string $content, array $index, string $dir, array &$unresolved ): string {
 		return (string) preg_replace_callback(
 			'#href="([^"]+)"#i',
-			static function ( array $link ) use ( $lookup, &$unresolved ): string {
+			static function ( array $link ) use ( $index, $dir, &$unresolved ): string {
 				$href = $link[1];
 
 				if ( 1 === preg_match( '#^(https?:)?//|^(mailto|tel):|^\##i', $href ) ) {
@@ -1904,22 +3480,178 @@ final class SiteAssembler {
 				}
 
 				$parts  = explode( '#', $href, 2 );
-				$target = strtolower( basename( $parts[0] ) );
+				$target = $parts[0];
+				$url    = self::built_url( $index, $dir, $target );
 
-				if ( ! isset( $lookup[ $target ] ) ) {
+				if ( '' === $url ) {
 					if ( 1 === preg_match( '/\.html?$/i', $target ) ) {
-						$unresolved[ $target ] = ( $unresolved[ $target ] ?? 0 ) + 1;
+						$name                = strtolower( basename( $target ) );
+						$unresolved[ $name ] = ( $unresolved[ $name ] ?? 0 ) + 1;
 					}
 
 					return $link[0];
 				}
 
-				$url = $lookup[ $target ] . ( isset( $parts[1] ) ? '#' . $parts[1] : '' );
-
-				return 'href="' . esc_url( $url ) . '"';
+				return 'href="' . esc_url( $url . ( isset( $parts[1] ) ? '#' . $parts[1] : '' ) ) . '"';
 			},
 			$content
 		);
+	}
+
+	/**
+	 * Rewrite the addresses a wrapped block carries as field values.
+	 *
+	 * A button inside a wrapped section is a link field, so its address is not
+	 * an `href` in the markup — it is a value in the block comment's JSON, and
+	 * the pass that rewrites `href="…"` walked straight past it. The symptom
+	 * was a build whose pages linked correctly everywhere except on the
+	 * buttons, which is the one place a visitor actually clicks.
+	 *
+	 * @param string               $content    Post content.
+	 * @param array<string, mixed> $index      Link index built from the routes.
+	 * @param string               $dir        Where the page sat in the archive.
+	 * @param array<int, string>   $unresolved Collected links that matched nothing.
+	 * @return string
+	 */
+	private static function relink_block_data( string $content, array $index, string $dir, array &$unresolved ): string {
+		return (string) preg_replace_callback(
+			'#(<!-- wp:qs/design-[a-z0-9-]+ )(\{.*?\})( /-->)#s',
+			static function ( array $found ) use ( $index, $dir, &$unresolved ): string {
+				$attributes = json_decode( $found[2], true );
+
+				if ( ! is_array( $attributes ) || ! isset( $attributes['data'] ) || ! is_array( $attributes['data'] ) ) {
+					return $found[0];
+				}
+
+				$changed = false;
+
+				foreach ( $attributes['data'] as $name => $value ) {
+					if ( ! is_array( $value ) || ! isset( $value['url'] ) || ! is_string( $value['url'] ) ) {
+						continue;
+					}
+
+					$href = $value['url'];
+
+					if ( '' === $href || 1 === preg_match( '#^(https?:)?//|^(mailto|tel):|^\##i', $href ) ) {
+						continue;
+					}
+
+					$parts = explode( '#', $href, 2 );
+					$url   = self::built_url( $index, $dir, $parts[0] );
+
+					if ( '' === $url ) {
+						if ( 1 === preg_match( '/\.html?$/i', $parts[0] ) ) {
+							$leaf                = strtolower( basename( $parts[0] ) );
+							$unresolved[ $leaf ] = ( $unresolved[ $leaf ] ?? 0 ) + 1;
+						}
+
+						continue;
+					}
+
+					$attributes['data'][ $name ]['url'] = $url . ( isset( $parts[1] ) ? '#' . $parts[1] : '' );
+
+					$changed = true;
+				}
+
+				if ( ! $changed ) {
+					return $found[0];
+				}
+
+				return $found[1] . (string) wp_json_encode( $attributes ) . $found[3];
+			},
+			$content
+		);
+	}
+
+	/**
+	 * Two ways of finding a built page: by where it sat, and by what it is called.
+	 *
+	 * @param array<string, array<string, mixed>> $routes Created pages, keyed by archive path.
+	 * @return array{path:array<string,string>,name:array<string,array<int,string>>}
+	 */
+	private static function link_index( array $routes ): array {
+		$by_path = array();
+		$by_name = array();
+
+		foreach ( $routes as $file => $made ) {
+			$path             = self::archive_path( (string) $file );
+			$by_path[ $path ] = (string) $made['url'];
+
+			$by_name[ strtolower( basename( $path ) ) ][] = (string) $made['url'];
+		}
+
+		return array(
+			'path' => $by_path,
+			'name' => $by_name,
+		);
+	}
+
+	/**
+	 * The page a relative link points at, or an empty string.
+	 *
+	 * Exact match on the resolved path first. A design that ships the same
+	 * page in three languages has three files called `reports.html`, and
+	 * matching on the name alone sent every link in all three to whichever one
+	 * happened to be built last — the whole Russian site linking to English
+	 * pages. The name is still tried afterwards, because an archive that keeps
+	 * its pages in one folder and links them sloppily is common and harmless;
+	 * it is only used when exactly one page answers to that name.
+	 *
+	 * @param array{path:array<string,string>,name:array<string,array<int,string>>} $index  Index from link_index().
+	 * @param string                                                                $dir    Archive directory of the page holding the link.
+	 * @param string                                                                $target Href, without any fragment.
+	 * @return string
+	 */
+	private static function built_url( array $index, string $dir, string $target ): string {
+		$resolved = self::archive_path( '' === $dir || str_starts_with( $target, '/' ) ? $target : $dir . '/' . $target );
+
+		if ( isset( $index['path'][ $resolved ] ) ) {
+			return $index['path'][ $resolved ];
+		}
+
+		$name = strtolower( basename( $resolved ) );
+
+		return isset( $index['name'][ $name ] ) && 1 === count( $index['name'][ $name ] )
+			? $index['name'][ $name ][0]
+			: '';
+	}
+
+	/**
+	 * An archive path with its separators, dot segments and case settled.
+	 *
+	 * @param string $path Path as written.
+	 * @return string
+	 */
+	private static function archive_path( string $path ): string {
+		$out = array();
+
+		foreach ( explode( '/', str_replace( '\\', '/', $path ) ) as $segment ) {
+			if ( '' === $segment || '.' === $segment ) {
+				continue;
+			}
+
+			if ( '..' === $segment ) {
+				array_pop( $out );
+				continue;
+			}
+
+			$out[] = $segment;
+		}
+
+		return strtolower( implode( '/', $out ) );
+	}
+
+	/**
+	 * The archive directory a page sits in.
+	 *
+	 * @param string $file Archive-relative path of the page.
+	 * @return string
+	 */
+	private static function archive_dir( string $file ): string {
+		$path  = self::archive_path( $file );
+		$slash = strrpos( $path, '/' );
+
+		return false === $slash ? '' : substr( $path, 0, $slash );
 	}
 
 	/**
@@ -1946,12 +3678,12 @@ final class SiteAssembler {
 				. '<div class="wp-block-group">' . implode( "\n\n", $items ) . "</div>\n<!-- /wp:group -->\n\n";
 		}
 
-		return "<!-- wp:group {\"tagName\":\"div\",\"className\":\"wow-footer\",\"align\":\"full\",\"backgroundColor\":\"surface\",\"style\":{\"spacing\":{\"padding\":{\"top\":\"var:preset|spacing|70\",\"bottom\":\"var:preset|spacing|70\"}}},\"layout\":{\"type\":\"constrained\"}} -->\n"
-			. '<div class="wp-block-group wow-footer alignfull has-surface-background-color has-background" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">'
+		return "<!-- wp:group {\"tagName\":\"div\",\"className\":\"qs-footer\",\"align\":\"full\",\"backgroundColor\":\"surface\",\"style\":{\"spacing\":{\"padding\":{\"top\":\"var:preset|spacing|70\",\"bottom\":\"var:preset|spacing|70\"}}},\"layout\":{\"type\":\"constrained\"}} -->\n"
+			. '<div class="wp-block-group qs-footer alignfull has-surface-background-color has-background" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">'
 			. "<!-- wp:group {\"align\":\"wide\",\"layout\":{\"type\":\"constrained\"}} -->\n"
 			. '<div class="wp-block-group alignwide">'
 			. $columns
-			. '<!-- wp:wow/colophon /-->'
+			. '<!-- wp:qs/colophon /-->'
 			. "</div>\n<!-- /wp:group -->"
 			. "</div>\n<!-- /wp:group -->";
 	}
@@ -1986,7 +3718,7 @@ final class SiteAssembler {
 		$payload = array(
 			'post_type'    => 'wp_template_part',
 			'post_status'  => 'publish',
-			'post_title'   => 'header' === $area ? __( 'Header', 'wow-signal' ) : __( 'Footer', 'wow-signal' ),
+			'post_title'   => 'header' === $area ? __( 'Header', 'qwerty-soft-signal' ) : __( 'Footer', 'qwerty-soft-signal' ),
 			'post_name'    => $area,
 			'post_content' => wp_slash( $markup ),
 			'meta_input'   => array( self::OWNED_META => 'part:' . $area ),
@@ -2020,11 +3752,14 @@ final class SiteAssembler {
 	 */
 	public static function reset(): array {
 		$counts = array(
-			'pages' => 0,
-			'parts' => 0,
-			'menus' => 0,
-			'media' => 0,
-			'fonts' => 0,
+			'pages'   => 0,
+			'parts'   => 0,
+			'menus'   => 0,
+			'media'   => 0,
+			'fonts'   => 0,
+			'blocks'  => 0,
+			'options' => 0,
+			'records' => 0,
 		);
 
 		$owned = self::owned_posts();
@@ -2047,6 +3782,9 @@ final class SiteAssembler {
 				case 'wp_navigation':
 					++$counts['menus'];
 					break;
+				default:
+					++$counts['records'];
+					break;
 			}
 
 			wp_delete_post( $post->ID, true );
@@ -2056,6 +3794,9 @@ final class SiteAssembler {
 			wp_delete_attachment( $id, true );
 			++$counts['media'];
 		}
+
+		$counts['blocks']  = self::remove_blocks();
+		$counts['options'] = SiteOptions::reset();
 
 		// Give the theme its own palette and type back, and take the design's CSS out of Additional CSS.
 		DesignTokens::reset();
@@ -2118,15 +3859,33 @@ final class SiteAssembler {
 	/**
 	 * What a previous import left on the site, by kind.
 	 *
-	 * @return array{pages:int,parts:int,menus:int,media:int,fonts:int}
+	 * @return array{pages:int,parts:int,menus:int,media:int,fonts:int,blocks:int}
 	 */
 	public static function summary(): array {
+		$blocks = glob( BlockWriter::dir() . '/*/block.json' );
+
 		$counts = array(
-			'pages' => 0,
-			'parts' => 0,
-			'menus' => 0,
-			'media' => count( self::owned_media() ),
-			'fonts' => class_exists( DesignFonts::class ) ? (int) DesignFonts::count() : 0,
+			'pages'   => 0,
+			'parts'   => 0,
+			'menus'   => 0,
+			'media'   => count( self::owned_media() ),
+			'fonts'   => class_exists( DesignFonts::class ) ? (int) DesignFonts::count() : 0,
+
+			/*
+			 * Counted so that "delete everything this import added" can be
+			 * honest about what it will delete. These are files in the theme,
+			 * and a person deciding whether to press that button should know
+			 * that theme code goes with the pages.
+			 */
+			'blocks'  => is_array( $blocks ) ? count( $blocks ) : 0,
+
+			/*
+			 * Counted the same way reset() removes them: from the register the
+			 * import wrote, so the two numbers cannot drift apart and a person
+			 * pressing delete is told what will actually go.
+			 */
+			'options' => count( (array) get_option( SiteOptions::REGISTER, array() ) ),
+			'records' => 0,
 		);
 
 		foreach ( self::owned_posts() as $post ) {
@@ -2139,6 +3898,9 @@ final class SiteAssembler {
 					break;
 				case 'wp_navigation':
 					++$counts['menus'];
+					break;
+				default:
+					++$counts['records'];
 					break;
 			}
 		}
@@ -2153,9 +3915,19 @@ final class SiteAssembler {
 	 * @return array<int, \WP_Post>
 	 */
 	private static function owned_posts( ?array $types = null ): array {
+		/*
+		 * The record types an import invented count as its own. They are made
+		 * by the build, they carry its meta, and leaving them behind would mean
+		 * "delete everything this import added" quietly kept the reports.
+		 */
+		$default = array_merge(
+			array( 'page', 'wp_template_part', 'wp_navigation', 'wp_block' ),
+			array_keys( DesignType::all() )
+		);
+
 		return (array) get_posts(
 			array(
-				'post_type'      => $types ?? array( 'page', 'wp_template_part', 'wp_navigation', 'wp_block' ),
+				'post_type'      => $types ?? $default,
 				'post_status'    => 'any',
 				'posts_per_page' => -1,
 				'meta_key'       => self::OWNED_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Import bookkeeping, not a front-end query.
@@ -2177,7 +3949,7 @@ final class SiteAssembler {
 					'post_status'    => 'inherit',
 					'posts_per_page' => -1,
 					'fields'         => 'ids',
-					'meta_key'       => '_wow_signal_source', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Import bookkeeping.
+					'meta_key'       => '_qwerty_soft_source', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Import bookkeeping.
 				)
 			)
 		);

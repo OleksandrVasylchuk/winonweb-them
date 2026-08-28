@@ -1,0 +1,263 @@
+{
+    "key": "group_qs_design_reports_daf202",
+    "title": "Reports hero",
+    "fields": [
+        {
+            "key": "field_qs_reports_daf202_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "报告与商店",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_daf202_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "面向食品贸易决策的高级市场情报。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_daf202_hero_lede",
+            "label": "Intro text",
+            "name": "hero_lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "一个面向商业化运营的报告库，用于发布付费报告、实用指南、模板和未来企业订阅，覆盖中国—欧亚食品贸易、冷冻食品供应链、市场准入和贸易风险。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_daf202_primary_cta",
+            "label": "Primary button",
+            "name": "primary_cta",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#catalog",
+                "title": "浏览报告",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_secondary_cta",
+            "label": "Secondary button",
+            "name": "secondary_cta",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#checkout-flow",
+                "title": "购买流程",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_panel_eyebrow",
+            "label": "Panel eyebrow",
+            "name": "panel_eyebrow",
+            "type": "text",
+            "default_value": "报告与商店",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_panel_heading",
+            "label": "Panel heading",
+            "name": "panel_heading",
+            "type": "text",
+            "default_value": "Reports • Guides • Toolkits",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_reports_stat_label",
+            "label": "Reports stat label",
+            "name": "reports_stat_label",
+            "type": "text",
+            "default_value": "报告",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_reports_stat_value",
+            "label": "Reports stat value",
+            "name": "reports_stat_value",
+            "type": "text",
+            "default_value": "PDF + 样本预览",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_reports_stat_note",
+            "label": "Reports stat note",
+            "name": "reports_stat_note",
+            "type": "text",
+            "default_value": "结构化数字出版物",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_payments_stat_label",
+            "label": "Payments stat label",
+            "name": "payments_stat_label",
+            "type": "text",
+            "default_value": "支付",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_payments_stat_value",
+            "label": "Payments stat value",
+            "name": "payments_stat_value",
+            "type": "text",
+            "default_value": "Stripe / PayPal ready",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_payments_stat_note",
+            "label": "Payments stat note",
+            "name": "payments_stat_note",
+            "type": "text",
+            "default_value": "Visa、Mastercard、Amex 和银行转账",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_licensing_stat_label",
+            "label": "Licensing stat label",
+            "name": "licensing_stat_label",
+            "type": "text",
+            "default_value": "许可",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_licensing_stat_value",
+            "label": "Licensing stat value",
+            "name": "licensing_stat_value",
+            "type": "text",
+            "default_value": "个人 / 企业",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_licensing_stat_note",
+            "label": "Licensing stat note",
+            "name": "licensing_stat_note",
+            "type": "text",
+            "default_value": "按产品控制使用权",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_languages_stat_label",
+            "label": "Languages stat label",
+            "name": "languages_stat_label",
+            "type": "text",
+            "default_value": "语言",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_languages_stat_value",
+            "label": "Languages stat value",
+            "name": "languages_stat_value",
+            "type": "text",
+            "default_value": "EN / RU / 中文",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_languages_stat_note",
+            "label": "Languages stat note",
+            "name": "languages_stat_note",
+            "type": "text",
+            "default_value": "未来可继续增加语言",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_categories_strip_label",
+            "label": "Category strip label",
+            "name": "categories_strip_label",
+            "type": "text",
+            "default_value": "报告与商店",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_daf202_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_reports_daf202_row_link",
+                    "label": "Category link",
+                    "name": "link",
+                    "type": "link",
+                    "return_format": "array",
+                    "default_value": {
+                        "url": "",
+                        "title": "报告与商店",
+                        "target": ""
+                    },
+                    "instructions": "Choose a page, or paste a web address, and the text shown for it."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-daf202"
+            }
+        ]
+    ],
+    "active": true
+}

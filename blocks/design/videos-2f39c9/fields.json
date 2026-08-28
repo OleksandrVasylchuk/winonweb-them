@@ -1,0 +1,112 @@
+{
+    "key": "group_qs_design_videos_2f39c9",
+    "title": "Video library",
+    "fields": [
+        {
+            "key": "field_qs_videos_2f39c9_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "每段视频都将报告与其证据、局限和商业含义清晰连接。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_2f39c9_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_videos_2f39c9_row_play_icon",
+                    "label": "Play icon",
+                    "name": "play_icon",
+                    "type": "text",
+                    "default_value": "▶",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_videos_2f39c9_row_duration",
+                    "label": "Video length",
+                    "name": "duration",
+                    "type": "text",
+                    "default_value": "4:20",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_videos_2f39c9_row_topic",
+                    "label": "Topic",
+                    "name": "topic",
+                    "type": "text",
+                    "default_value": "报告解读",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_videos_2f39c9_row_watch_time",
+                    "label": "Watch time",
+                    "name": "watch_time",
+                    "type": "text",
+                    "default_value": "4–5 min",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_videos_2f39c9_row_title",
+                    "label": "Video title",
+                    "name": "title",
+                    "type": "text",
+                    "default_value": "如何阅读海关数据报告",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_videos_2f39c9_row_summary",
+                    "label": "Video summary",
+                    "name": "summary",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "了解HS编码、数据覆盖和已识别市场限制如何影响结论。",
+                    "instructions": "A short paragraph of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_videos_2f39c9_row_watch_link",
+                    "label": "Link to the video",
+                    "name": "watch_link",
+                    "type": "link",
+                    "return_format": "array",
+                    "default_value": {
+                        "url": "#",
+                        "title": "观看视频简报 →",
+                        "target": ""
+                    },
+                    "instructions": "Choose a page, or paste a web address, and the text shown for it."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-videos-2f39c9"
+            }
+        ]
+    ],
+    "active": true
+}

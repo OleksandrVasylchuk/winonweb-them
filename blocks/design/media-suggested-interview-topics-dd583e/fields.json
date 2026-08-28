@@ -1,0 +1,52 @@
+{
+    "key": "group_qs_design_media_suggested_interview_topics_dd583e",
+    "title": "Interview topics",
+    "fields": [
+        {
+            "key": "field_qs_media_suggested_interview_topics_dd583e_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Suggested interview topics",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_suggested_interview_topics_dd583e_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_media_suggested_interview_topics_dd583e_row_topic",
+                    "label": "Topic",
+                    "name": "topic",
+                    "type": "text",
+                    "default_value": "How China is developing as a frozen food export platform",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_media_suggested_interview_topics_dd583e_row_description",
+                    "label": "What the topic covers",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Market structure, production capacity, buyer expectations and regional opportunities.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-media-suggested-interview-topics-dd583e"
+            }
+        ]
+    ],
+    "active": true
+}

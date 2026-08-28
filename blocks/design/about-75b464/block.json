@@ -1,0 +1,80 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-about-75b464",
+    "title": "Profile sections",
+    "category": "qs",
+    "description": "Profile sections — 1 piece of text, 8 links, 11 repeating items. From about.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "about",
+        "profile",
+        "sections"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "on_this_page_heading": "На странице",
+                "profile_link": {
+                    "url": "#profile",
+                    "title": "Профиль",
+                    "target": ""
+                },
+                "timeline_link": {
+                    "url": "#timeline",
+                    "title": "Timeline",
+                    "target": ""
+                },
+                "market_access_link": {
+                    "url": "#market-access",
+                    "title": "Доступ на рынки",
+                    "target": ""
+                },
+                "trade_missions_link": {
+                    "url": "#missions",
+                    "title": "Торговые миссии",
+                    "target": ""
+                },
+                "projects_link": {
+                    "url": "#projects",
+                    "title": "Проекты",
+                    "target": ""
+                },
+                "aquaprole_link": {
+                    "url": "#aquaprole",
+                    "title": "Aquaprole",
+                    "target": ""
+                },
+                "technology_link": {
+                    "url": "#technology",
+                    "title": "Технологии",
+                    "target": ""
+                },
+                "beyond_trade_link": {
+                    "url": "#beyond",
+                    "title": "Beyond Trade",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/about.html",
+    "qsDesignVersion": 7
+}

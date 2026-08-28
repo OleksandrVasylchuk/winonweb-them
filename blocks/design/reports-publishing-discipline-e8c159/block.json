@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-reports-publishing-discipline-e8c159",
+    "title": "Method note",
+    "category": "qs",
+    "description": "Method note — 2 pieces of text. From reports.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "reports",
+        "method",
+        "note"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Publishing discipline",
+                "body_text": "High-value claims, rankings, retail reach, memberships и government-linked participation должны быть связаны с internal evidence register перед использованием в paid reports, media outreach или Wikipedia-related materials."
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/reports.html",
+    "qsDesignVersion": 7
+}

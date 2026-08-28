@@ -2,13 +2,13 @@
 /**
  * Reads a design's own colours and type, and makes the site wear them.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Theme_JSON_Resolver;
 
@@ -253,19 +253,19 @@ final class DesignTokens {
 	 */
 	private static function palette_name( string $slug ): string {
 		$names = array(
-			'base'          => _x( 'Base', 'Palette colour name', 'wow-signal' ),
-			'surface'       => _x( 'Surface', 'Palette colour name', 'wow-signal' ),
-			'surface-2'     => _x( 'Surface raised', 'Palette colour name', 'wow-signal' ),
-			'border'        => _x( 'Border', 'Palette colour name', 'wow-signal' ),
-			'border-strong' => _x( 'Border strong', 'Palette colour name', 'wow-signal' ),
-			'contrast'      => _x( 'Contrast', 'Palette colour name', 'wow-signal' ),
-			'muted'         => _x( 'Muted', 'Palette colour name', 'wow-signal' ),
-			'accent'        => _x( 'Accent', 'Palette colour name', 'wow-signal' ),
-			'accent-ink'    => _x( 'Accent ink', 'Palette colour name', 'wow-signal' ),
-			'accent-2'      => _x( 'Accent 2', 'Palette colour name', 'wow-signal' ),
-			'accent-3'      => _x( 'Accent 3', 'Palette colour name', 'wow-signal' ),
-			'success'       => _x( 'Success', 'Palette colour name', 'wow-signal' ),
-			'warning'       => _x( 'Warning', 'Palette colour name', 'wow-signal' ),
+			'base'          => _x( 'Base', 'Palette colour name', 'qwerty-soft-signal' ),
+			'surface'       => _x( 'Surface', 'Palette colour name', 'qwerty-soft-signal' ),
+			'surface-2'     => _x( 'Surface raised', 'Palette colour name', 'qwerty-soft-signal' ),
+			'border'        => _x( 'Border', 'Palette colour name', 'qwerty-soft-signal' ),
+			'border-strong' => _x( 'Border strong', 'Palette colour name', 'qwerty-soft-signal' ),
+			'contrast'      => _x( 'Contrast', 'Palette colour name', 'qwerty-soft-signal' ),
+			'muted'         => _x( 'Muted', 'Palette colour name', 'qwerty-soft-signal' ),
+			'accent'        => _x( 'Accent', 'Palette colour name', 'qwerty-soft-signal' ),
+			'accent-ink'    => _x( 'Accent ink', 'Palette colour name', 'qwerty-soft-signal' ),
+			'accent-2'      => _x( 'Accent 2', 'Palette colour name', 'qwerty-soft-signal' ),
+			'accent-3'      => _x( 'Accent 3', 'Palette colour name', 'qwerty-soft-signal' ),
+			'success'       => _x( 'Success', 'Palette colour name', 'qwerty-soft-signal' ),
+			'warning'       => _x( 'Warning', 'Palette colour name', 'qwerty-soft-signal' ),
 		);
 
 		return $names[ $slug ] ?? ucwords( str_replace( '-', ' ', $slug ) );
@@ -360,7 +360,7 @@ final class DesignTokens {
 	 *
 	 * @var string
 	 */
-	public const OPTION = 'wow_signal_design_takeover';
+	public const OPTION = 'qwerty_soft_design_takeover';
 
 	/**
 	 * The paths apply() always wrote before it started recording them.
@@ -714,7 +714,7 @@ final class DesignTokens {
 		static $cache = null;
 
 		if ( null === $cache ) {
-			$dir  = defined( 'WOW_SIGNAL_DIR' ) ? (string) WOW_SIGNAL_DIR : dirname( __DIR__, 2 );
+			$dir  = defined( 'QSOFT_DIR' ) ? (string) QSOFT_DIR : dirname( __DIR__, 2 );
 			$json = is_readable( $dir . '/theme.json' ) ? (string) file_get_contents( $dir . '/theme.json' ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- The theme's own file.
 			$data = json_decode( $json, true );
 
@@ -1000,17 +1000,17 @@ final class DesignTokens {
 
 		$index = new CssIndex( array( $css ) );
 		$html  = '<body>'
-			. '<p id="wow-p"></p>'
-			. '<small id="wow-small"></small>'
-			. '<p id="wow-lead" class="lead lede hero-lede intro subtitle standfirst"></p>'
-			. '<span id="wow-eyebrow" class="eyebrow kicker section-kicker overline"></span>'
-			. '<a id="wow-link" href="#"></a>'
-			. '<a id="wow-button" class="btn btn-primary button button-primary cta" href="#"></a>'
-			. '<button id="wow-native"></button>'
-			. '<hr id="wow-hr">'
-			. '<blockquote id="wow-quote"><cite id="wow-cite"></cite></blockquote>'
-			. '<figcaption id="wow-caption"></figcaption>'
-			. '<div id="wow-container" class="container wrap wrapper inner shell"></div>'
+			. '<p id="qs-p"></p>'
+			. '<small id="qs-small"></small>'
+			. '<p id="qs-lead" class="lead lede hero-lede intro subtitle standfirst"></p>'
+			. '<span id="qs-eyebrow" class="eyebrow kicker section-kicker overline"></span>'
+			. '<a id="qs-link" href="#"></a>'
+			. '<a id="qs-button" class="btn btn-primary button button-primary cta" href="#"></a>'
+			. '<button id="qs-native"></button>'
+			. '<hr id="qs-hr">'
+			. '<blockquote id="qs-quote"><cite id="qs-cite"></cite></blockquote>'
+			. '<figcaption id="qs-caption"></figcaption>'
+			. '<div id="qs-container" class="container wrap wrapper inner shell"></div>'
 			. '</body>';
 
 		$document = new \DOMDocument();
@@ -1027,7 +1027,7 @@ final class DesignTokens {
 		}
 
 		foreach ( array( 'p', 'small', 'lead', 'eyebrow', 'link', 'button', 'native', 'hr', 'quote', 'cite', 'caption', 'container' ) as $name ) {
-			$node = $document->getElementById( 'wow-' . $name );
+			$node = $document->getElementById( 'qs-' . $name );
 
 			$out[ $name ] = $node instanceof \DOMElement ? $index->declared_for( $node ) : array();
 		}
@@ -2409,7 +2409,7 @@ final class DesignTokens {
 	private static function css_overrides( array $rules, array $theme ): string {
 		$sheet = (string) ( $theme['styles']['css'] ?? '' );
 
-		if ( ! str_contains( $sheet, '.wow-header' ) ) {
+		if ( ! str_contains( $sheet, '.qs-header' ) ) {
 			return '';
 		}
 
@@ -2448,7 +2448,7 @@ final class DesignTokens {
 			$undo[] = 'border-bottom:0';
 		}
 
-		return array() === $undo ? '' : "\n/* design takeover: header */.wow-header{" . implode( ';', $undo ) . '}';
+		return array() === $undo ? '' : "\n/* design takeover: header */.qs-header{" . implode( ';', $undo ) . '}';
 	}
 
 	/**

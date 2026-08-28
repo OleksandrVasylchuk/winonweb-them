@@ -1,0 +1,91 @@
+{
+    "key": "group_qs_design_media_who_is_robert_khoubian_fb8c8d",
+    "title": "Media-ready profile",
+    "fields": [
+        {
+            "key": "field_qs_media_who_is_robert_khoubian_fb8c8d_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Who is Robert Khoubian?",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_who_is_robert_khoubian_fb8c8d_short_bio_heading",
+            "label": "Short biography heading",
+            "name": "short_bio_heading",
+            "type": "text",
+            "default_value": "Short biography",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_who_is_robert_khoubian_fb8c8d_short_bio",
+            "label": "Short biography",
+            "name": "short_bio",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert Khoubian is an international food trade professional, entrepreneur and market intelligence publisher specializing in China–Eurasia food trade, frozen food supply chains and cross-border market access. Since 2004, he has worked across China, Russia and CIS markets, North America, Southeast Asia and the European Union.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_who_is_robert_khoubian_fb8c8d_extended_bio_heading",
+            "label": "Extended biography heading",
+            "name": "extended_bio_heading",
+            "type": "text",
+            "default_value": "Extended biography",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_who_is_robert_khoubian_fb8c8d_extended_bio",
+            "label": "Extended biography",
+            "name": "extended_bio",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert’s work combines commercial execution, regulatory knowledge and practical market intelligence. His experience includes international food trading, customs and veterinary requirements, Canadian government trade missions, retail product adaptation, cold-chain logistics and the development of Aquaprole Group across Canada, the United States, Singapore, China and Hong Kong.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_who_is_robert_khoubian_fb8c8d_formats_heading",
+            "label": "Preferred formats heading",
+            "name": "formats_heading",
+            "type": "text",
+            "default_value": "Preferred formats",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_who_is_robert_khoubian_fb8c8d_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_media_who_is_robert_khoubian_fb8c8d_row_format",
+                    "label": "Format",
+                    "name": "format",
+                    "type": "text",
+                    "default_value": "Written Q&A",
+                    "instructions": "A short line of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-media-who-is-robert-khoubian-fb8c8d"
+            }
+        ]
+    ],
+    "active": true
+}

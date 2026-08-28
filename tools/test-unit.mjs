@@ -7,7 +7,7 @@
  *
  * Usage: npm run test:unit
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { spawnSync } from 'node:child_process';

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * WCAG 2.2 contrast auditor for WOW — Signal.
+ * WCAG 2.2 contrast auditor for Qwerty Soft — Signal.
  *
  * Reads the colour palettes straight out of theme.json and styles/light.json,
  * then checks every pair the theme actually renders against its required
@@ -8,7 +8,7 @@
  *
  * Usage: npm run audit:contrast
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { readdirSync, readFileSync } from 'node:fs';

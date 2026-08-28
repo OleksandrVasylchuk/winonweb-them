@@ -1,0 +1,52 @@
+{
+    "key": "group_qs_design_videos_326f73",
+    "title": "Editorial transparency",
+    "fields": [
+        {
+            "key": "field_qs_videos_326f73_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Редакционная прозрачность",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_326f73_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_videos_326f73_row_card_heading",
+                    "label": "Card heading",
+                    "name": "card_heading",
+                    "type": "text",
+                    "default_value": "Утвержденные сценарии",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_videos_326f73_row_card_text",
+                    "label": "Card text",
+                    "name": "card_text",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Каждый сценарий проходит проверку до публикации.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-videos-326f73"
+            }
+        ]
+    ],
+    "active": true
+}

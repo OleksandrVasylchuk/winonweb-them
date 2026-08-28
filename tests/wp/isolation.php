@@ -6,7 +6,7 @@
  * written under uploads/ must be gone, and a test that throws must still be
  * rolled back. If any of this fails there is no point reading further results.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 declare( strict_types = 1 );
@@ -17,14 +17,14 @@ declare( strict_types = 1 );
 
 require __DIR__ . '/bootstrap.php';
 
-$wow_post_id = 0;
-$wow_option  = 'wow_signal_test_option_' . bin2hex( random_bytes( 4 ) );
-$wow_file    = '';
+$qsoft_post_id = 0;
+$qsoft_option  = 'qwerty_soft_test_option_' . bin2hex( random_bytes( 4 ) );
+$qsoft_file    = '';
 
-wow_test(
+qsoft_test(
 	'Isolation: a post, an option and an upload inside a test',
-	static function () use ( &$wow_post_id, $wow_option, &$wow_file ): void {
-		$wow_post_id = (int) wp_insert_post(
+	static function () use ( &$qsoft_post_id, $qsoft_option, &$qsoft_file ): void {
+		$qsoft_post_id = (int) wp_insert_post(
 			array(
 				'post_type'    => 'post',
 				'post_status'  => 'publish',
@@ -34,38 +34,38 @@ wow_test(
 			true
 		);
 
-		wow_assert( $wow_post_id > 0, 'post was inserted inside the transaction' );
-		wow_assert( null !== get_post( $wow_post_id ), 'post is readable inside the transaction' );
+		qsoft_assert( $qsoft_post_id > 0, 'post was inserted inside the transaction' );
+		qsoft_assert( null !== get_post( $qsoft_post_id ), 'post is readable inside the transaction' );
 
-		update_option( $wow_option, 'probe', false );
-		wow_assert( 'probe' === get_option( $wow_option ), 'option is readable inside the transaction' );
+		update_option( $qsoft_option, 'probe', false );
+		qsoft_assert( 'probe' === get_option( $qsoft_option ), 'option is readable inside the transaction' );
 
-		$uploads  = wp_upload_dir();
-		$wow_file = trailingslashit( (string) $uploads['path'] ) . 'wow-signal-isolation-probe.txt';
-		file_put_contents( $wow_file, 'probe' );
-		wow_assert( is_file( $wow_file ), 'file was written under uploads/' );
+		$uploads    = wp_upload_dir();
+		$qsoft_file = trailingslashit( (string) $uploads['path'] ) . 'qwerty-soft-signal-isolation-probe.txt';
+		file_put_contents( $qsoft_file, 'probe' );
+		qsoft_assert( is_file( $qsoft_file ), 'file was written under uploads/' );
 	}
 );
 
 global $wpdb;
 
-wow_group( 'Isolation: after the test' );
+qsoft_group( 'Isolation: after the test' );
 
-$wow_row = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID = %d", $wow_post_id ) );
-wow_assert( null === $wow_row, 'post was rolled back', $wow_row );
+$qsoft_row = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID = %d", $qsoft_post_id ) );
+qsoft_assert( null === $qsoft_row, 'post was rolled back', $qsoft_row );
 
-$wow_row = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $wow_option ) );
-wow_assert( null === $wow_row, 'option was rolled back', $wow_row );
+$qsoft_row = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $qsoft_option ) );
+qsoft_assert( null === $qsoft_row, 'option was rolled back', $qsoft_row );
 
-wow_assert( false === get_option( $wow_option ), 'option cache does not remember the rolled-back value' );
-wow_assert( '' !== $wow_file && ! file_exists( $wow_file ), 'upload was removed', $wow_file );
+qsoft_assert( false === get_option( $qsoft_option ), 'option cache does not remember the rolled-back value' );
+qsoft_assert( '' !== $qsoft_file && ! file_exists( $qsoft_file ), 'upload was removed', $qsoft_file );
 
-$wow_second = 0;
+$qsoft_second = 0;
 
-wow_test(
+qsoft_test(
 	'Isolation: a test that throws is still rolled back',
-	static function () use ( &$wow_second ): void {
-		$wow_second = (int) wp_insert_post(
+	static function () use ( &$qsoft_second ): void {
+		$qsoft_second = (int) wp_insert_post(
 			array(
 				'post_type'   => 'post',
 				'post_status' => 'draft',
@@ -74,7 +74,7 @@ wow_test(
 			true
 		);
 
-		wow_assert( $wow_second > 0, 'post was inserted' );
+		qsoft_assert( $qsoft_second > 0, 'post was inserted' );
 
 		// Counted as a failure by the harness; corrected for below.
 		throw new RuntimeException( 'deliberate' );
@@ -82,18 +82,18 @@ wow_test(
 );
 
 // The throw above is reported as a failure by design; this file expects exactly that one.
-$wow_expected_failure = $GLOBALS['wow_failures'];
+$qsoft_expected_failure = $GLOBALS['qsoft_failures'];
 
-wow_group( 'Isolation: after the throwing test' );
+qsoft_group( 'Isolation: after the throwing test' );
 
-$wow_row = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID = %d", $wow_second ) );
-wow_assert( null === $wow_row, 'post from the throwing test was rolled back', $wow_row );
+$qsoft_row = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID = %d", $qsoft_second ) );
+qsoft_assert( null === $qsoft_row, 'post from the throwing test was rolled back', $qsoft_row );
 
-if ( 1 === $wow_expected_failure ) {
-	--$GLOBALS['wow_failures'];
-	wow_info( 'the deliberate exception above was expected and is not counted' );
+if ( 1 === $qsoft_expected_failure ) {
+	--$GLOBALS['qsoft_failures'];
+	qsoft_info( 'the deliberate exception above was expected and is not counted' );
 } else {
-	wow_assert( false, 'expected exactly one failure from the deliberate exception', $wow_expected_failure );
+	qsoft_assert( false, 'expected exactly one failure from the deliberate exception', $qsoft_expected_failure );
 }
 
-wow_finish();
+qsoft_finish();

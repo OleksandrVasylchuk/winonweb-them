@@ -7,7 +7,7 @@
  * way a template would, so what is asserted is the real output of the real
  * hooks rather than a private method's return value.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 declare( strict_types = 1 );
@@ -23,7 +23,7 @@ require __DIR__ . '/bootstrap.php';
  * @param int $post_id Post to query.
  * @return string
  */
-function wow_render_head( int $post_id ): string {
+function qsoft_render_head( int $post_id ): string {
 	global $wp_query, $wp_the_query;
 
 	// A logged-out visitor: an administrator is allowed to read protected content.
@@ -55,13 +55,13 @@ function wow_render_head( int $post_id ): string {
  * @param string $name Value of the name= or property= attribute.
  * @return string|null
  */
-function wow_meta( string $head, string $name ): ?string {
+function qsoft_meta( string $head, string $name ): ?string {
 	$pattern = '#<meta\s+(?:name|property)="' . preg_quote( $name, '#' ) . '"\s+content="([^"]*)"#i';
 
 	return 1 === preg_match( $pattern, $head, $found ) ? html_entity_decode( $found[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) : null;
 }
 
-wow_test(
+qsoft_test(
 	'SEO: a password-protected post leaks nothing into the head',
 	static function (): void {
 		$secret = 'Quarterly numbers: revenue up 41 percent, churn down, and the codename is Heron.';
@@ -78,25 +78,25 @@ wow_test(
 			true
 		);
 
-		if ( ! wow_assert( $post_id > 0, 'protected post was created' ) ) {
+		if ( ! qsoft_assert( $post_id > 0, 'protected post was created' ) ) {
 			return;
 		}
 
-		wow_assert( post_password_required( $post_id ), 'the post really is password protected for this visitor' );
+		qsoft_assert( post_password_required( $post_id ), 'the post really is password protected for this visitor' );
 
-		$head = wow_render_head( $post_id );
+		$head = qsoft_render_head( $post_id );
 
-		wow_assert( is_singular( 'post' ), 'the main query is the protected post' );
-		wow_assert( null === wow_meta( $head, 'description' ), 'no <meta name="description">', wow_meta( $head, 'description' ) );
-		wow_assert( null === wow_meta( $head, 'og:description' ), 'no og:description', wow_meta( $head, 'og:description' ) );
-		wow_assert( null === wow_meta( $head, 'twitter:description' ), 'no twitter:description', wow_meta( $head, 'twitter:description' ) );
-		wow_assert( ! str_contains( $head, 'Heron' ) && ! str_contains( $head, '41 percent' ), 'post content appears nowhere in the head' );
-		wow_assert( ! str_contains( $head, 'also confidential' ), 'post excerpt appears nowhere in the head' );
-		wow_assert( null !== wow_meta( $head, 'og:title' ), 'the harmless tags are still emitted (og:title)' );
+		qsoft_assert( is_singular( 'post' ), 'the main query is the protected post' );
+		qsoft_assert( null === qsoft_meta( $head, 'description' ), 'no <meta name="description">', qsoft_meta( $head, 'description' ) );
+		qsoft_assert( null === qsoft_meta( $head, 'og:description' ), 'no og:description', qsoft_meta( $head, 'og:description' ) );
+		qsoft_assert( null === qsoft_meta( $head, 'twitter:description' ), 'no twitter:description', qsoft_meta( $head, 'twitter:description' ) );
+		qsoft_assert( ! str_contains( $head, 'Heron' ) && ! str_contains( $head, '41 percent' ), 'post content appears nowhere in the head' );
+		qsoft_assert( ! str_contains( $head, 'also confidential' ), 'post excerpt appears nowhere in the head' );
+		qsoft_assert( null !== qsoft_meta( $head, 'og:title' ), 'the harmless tags are still emitted (og:title)' );
 	}
 );
 
-wow_test(
+qsoft_test(
 	'SEO: a normal post gets a description of at most 160 characters',
 	static function (): void {
 		$sentence = 'This paragraph exists to be long enough that the description has to be clipped somewhere sensible rather than copied whole. ';
@@ -113,24 +113,24 @@ wow_test(
 			true
 		);
 
-		if ( ! wow_assert( $post_id > 0, 'public post was created' ) ) {
+		if ( ! qsoft_assert( $post_id > 0, 'public post was created' ) ) {
 			return;
 		}
 
-		$head        = wow_render_head( $post_id );
-		$description = wow_meta( $head, 'description' );
+		$head        = qsoft_render_head( $post_id );
+		$description = qsoft_meta( $head, 'description' );
 
-		if ( ! wow_assert( is_string( $description ) && '' !== $description, 'a <meta name="description"> is emitted' ) ) {
+		if ( ! qsoft_assert( is_string( $description ) && '' !== $description, 'a <meta name="description"> is emitted' ) ) {
 			return;
 		}
 
-		wow_assert( mb_strlen( $description ) <= 160, sprintf( 'description is at most 160 characters (%d)', mb_strlen( $description ) ), $description );
-		wow_assert( str_starts_with( $description, 'This paragraph exists' ), 'description starts with the first paragraph, not the heading', $description );
-		wow_assert( ! str_contains( $description, '<' ), 'description has no markup', $description );
-		wow_assert( wow_meta( $head, 'og:description' ) === $description, 'og:description matches' );
-		wow_assert( 'article' === wow_meta( $head, 'og:type' ), 'a post is an article', wow_meta( $head, 'og:type' ) );
-		wow_assert( str_contains( $head, 'application/ld+json' ), 'structured data is emitted' );
-		wow_assert( ! str_contains( $head, '</script><' ) || 1 === preg_match( '#"@context":"https:\\\\/\\\\/schema.org"#', $head ), 'JSON-LD keeps slashes escaped so </script> cannot break out' );
+		qsoft_assert( mb_strlen( $description ) <= 160, sprintf( 'description is at most 160 characters (%d)', mb_strlen( $description ) ), $description );
+		qsoft_assert( str_starts_with( $description, 'This paragraph exists' ), 'description starts with the first paragraph, not the heading', $description );
+		qsoft_assert( ! str_contains( $description, '<' ), 'description has no markup', $description );
+		qsoft_assert( qsoft_meta( $head, 'og:description' ) === $description, 'og:description matches' );
+		qsoft_assert( 'article' === qsoft_meta( $head, 'og:type' ), 'a post is an article', qsoft_meta( $head, 'og:type' ) );
+		qsoft_assert( str_contains( $head, 'application/ld+json' ), 'structured data is emitted' );
+		qsoft_assert( ! str_contains( $head, '</script><' ) || 1 === preg_match( '#"@context":"https:\\\\/\\\\/schema.org"#', $head ), 'JSON-LD keeps slashes escaped so </script> cannot break out' );
 
 		// An excerpt, when present, wins over the content.
 		wp_update_post(
@@ -140,9 +140,9 @@ wow_test(
 			)
 		);
 
-		$head = wow_render_head( $post_id );
-		wow_assert( 'The short version, written by hand.' === wow_meta( $head, 'description' ), 'a hand-written excerpt is used verbatim', wow_meta( $head, 'description' ) );
+		$head = qsoft_render_head( $post_id );
+		qsoft_assert( 'The short version, written by hand.' === qsoft_meta( $head, 'description' ), 'a hand-written excerpt is used verbatim', qsoft_meta( $head, 'description' ) );
 	}
 );
 
-wow_finish();
+qsoft_finish();

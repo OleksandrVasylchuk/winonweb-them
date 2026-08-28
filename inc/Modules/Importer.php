@@ -2,34 +2,42 @@
 /**
  * The design import screen and the endpoints behind it.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
-use Wow\Signal\Contracts\Module;
-use Wow\Signal\Support\AnthropicClient;
-use Wow\Signal\Support\BlockConverter;
-use Wow\Signal\Support\BlockMarkupValidator;
-use Wow\Signal\Support\ClaudeCli;
-use Wow\Signal\Support\ConversionPrompt;
-use Wow\Signal\Support\CssIndex;
-use Wow\Signal\Support\DesignArchive;
-use Wow\Signal\Support\DesignTokens;
-use Wow\Signal\Support\ImportSession;
-use Wow\Signal\Support\ModelGateway;
-use Wow\Signal\Support\SectionSplitter;
-use Wow\Signal\Support\SiteAssembler;
-use Wow\Signal\Support\SiteBuilder;
-use Wow\Signal\Support\SmartConverter;
-use Wow\Signal\Support\Spend;
+use Qwerty\Soft\Contracts\Module;
+use Qwerty\Soft\Support\AnthropicClient;
+use Qwerty\Soft\Support\BlockConverter;
+use Qwerty\Soft\Support\BlockMarkupValidator;
+use Qwerty\Soft\Support\BlockRepair;
+use Qwerty\Soft\Support\ClaudeCli;
+use Qwerty\Soft\Support\ConversionPrompt;
+use Qwerty\Soft\Support\BuildRunner;
+use Qwerty\Soft\Support\CssIndex;
+use Qwerty\Soft\Support\DesignArchive;
+use Qwerty\Soft\Support\DesignDocs;
+use Qwerty\Soft\Support\DesignStylesheet;
+use Qwerty\Soft\Support\DesignTokens;
+use Qwerty\Soft\Support\ImportLog;
+use Qwerty\Soft\Support\ImportSession;
+use Qwerty\Soft\Support\ModelGateway;
+use Qwerty\Soft\Support\SectionSplitter;
+use Qwerty\Soft\Support\SiteAssembler;
+use Qwerty\Soft\Support\SiteBuilder;
+use Qwerty\Soft\Support\SiteOptions;
+use Qwerty\Soft\Support\SmartConverter;
+use Qwerty\Soft\Support\SourceProject;
+use Qwerty\Soft\Support\SourceRenderer;
+use Qwerty\Soft\Support\Spend;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -50,27 +58,27 @@ final class Importer implements Module {
 	/**
 	 * REST namespace for every endpoint on this screen.
 	 */
-	private const NAMESPACE = 'wow-signal/v1';
+	private const NAMESPACE = 'qwerty-soft-signal/v1';
 
 	/**
 	 * Admin page slug.
 	 */
-	private const PAGE = 'wow-signal-import';
+	private const PAGE = 'qwerty-soft-signal-import';
 
 	/**
 	 * Option holding the API key.
 	 */
-	private const OPTION_KEY = 'wow_signal_anthropic_key';
+	private const OPTION_KEY = 'qwerty_soft_anthropic_key';
 
 	/**
 	 * Option holding the chosen model.
 	 */
-	private const OPTION_MODEL = 'wow_signal_ai_model';
+	private const OPTION_MODEL = 'qwerty_soft_ai_model';
 
 	/**
 	 * Option holding the chosen effort level.
 	 */
-	private const OPTION_EFFORT = 'wow_signal_ai_effort';
+	private const OPTION_EFFORT = 'qwerty_soft_ai_effort';
 
 	/**
 	 * Conversions allowed per user per hour.
@@ -90,6 +98,9 @@ final class Importer implements Module {
 	public function register(): void {
 		add_action( 'admin_menu', array( $this, 'add_page' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+
+		// A build the server finishes on its own, one step per cron tick.
+		BuildRunner::boot();
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
@@ -110,8 +121,8 @@ final class Importer implements Module {
 	 */
 	public function add_page(): void {
 		add_theme_page(
-			__( 'Design import', 'wow-signal' ),
-			__( 'Design import', 'wow-signal' ),
+			__( 'Design import', 'qwerty-soft-signal' ),
+			__( 'Design import', 'qwerty-soft-signal' ),
 			'edit_theme_options',
 			self::PAGE,
 			array( $this, 'render_page' )
@@ -125,7 +136,7 @@ final class Importer implements Module {
 	 */
 	public function register_settings(): void {
 		register_setting(
-			'wow_signal_ai',
+			'qwerty_soft_ai',
 			self::OPTION_KEY,
 			array(
 				'type'              => 'string',
@@ -136,7 +147,7 @@ final class Importer implements Module {
 		);
 
 		register_setting(
-			'wow_signal_ai',
+			'qwerty_soft_ai',
 			self::OPTION_MODEL,
 			array(
 				'type'              => 'string',
@@ -151,7 +162,7 @@ final class Importer implements Module {
 		);
 
 		register_setting(
-			'wow_signal_ai',
+			'qwerty_soft_ai',
 			self::OPTION_EFFORT,
 			array(
 				'type'              => 'string',
@@ -166,7 +177,7 @@ final class Importer implements Module {
 		);
 
 		register_setting(
-			'wow_signal_ai',
+			'qwerty_soft_ai',
 			ModelGateway::OPTION_TRANSPORT,
 			array(
 				'type'              => 'string',
@@ -181,7 +192,7 @@ final class Importer implements Module {
 		);
 
 		register_setting(
-			'wow_signal_ai',
+			'qwerty_soft_ai',
 			ClaudeCli::OPTION_BINARY,
 			array(
 				'type'              => 'string',
@@ -218,8 +229,8 @@ final class Importer implements Module {
 		if ( ! is_file( $value ) ) {
 			add_settings_error(
 				ClaudeCli::OPTION_BINARY,
-				'wow_signal_cli_missing',
-				__( 'There is no file at that path, so it was not saved. Leave the field empty to let the theme look for the claude command itself.', 'wow-signal' )
+				'qwerty_soft_cli_missing',
+				__( 'There is no file at that path, so it was not saved. Leave the field empty to let the theme look for the claude command itself.', 'qwerty-soft-signal' )
 			);
 
 			return '';
@@ -266,27 +277,27 @@ final class Importer implements Module {
 		}
 
 		wp_enqueue_style(
-			'wow-signal-import',
-			WOW_SIGNAL_URI . '/assets/css/admin-import.css',
+			'qwerty-soft-signal-import',
+			QSOFT_URI . '/assets/css/admin-import.css',
 			array(),
-			WOW_SIGNAL_VERSION
+			QSOFT_VERSION
 		);
 
-		wp_add_inline_style( 'wow-signal-import', $this->preview_styles() );
+		wp_add_inline_style( 'qwerty-soft-signal-import', $this->preview_styles() );
 
 		wp_enqueue_script(
-			'wow-signal-import',
-			WOW_SIGNAL_URI . '/assets/js/admin-import.js',
+			'qwerty-soft-signal-import',
+			QSOFT_URI . '/assets/js/admin-import.js',
 			array( 'wp-api-fetch', 'wp-i18n' ),
-			WOW_SIGNAL_VERSION,
+			QSOFT_VERSION,
 			true
 		);
 
-		wp_set_script_translations( 'wow-signal-import', 'wow-signal', WOW_SIGNAL_DIR . '/languages' );
+		wp_set_script_translations( 'qwerty-soft-signal-import', 'qwerty-soft-signal', QSOFT_DIR . '/languages' );
 
 		wp_add_inline_script(
-			'wow-signal-import',
-			'window.wowSignalImport = ' . wp_json_encode(
+			'qwerty-soft-signal-import',
+			'window.qwertySoftImport = ' . wp_json_encode(
 				array(
 					'root'      => esc_url_raw( rest_url( self::NAMESPACE ) ),
 					'nonce'     => wp_create_nonce( 'wp_rest' ),
@@ -327,7 +338,7 @@ final class Importer implements Module {
 	 * @return string
 	 */
 	private function preview_styles(): string {
-		$scope     = '.wow-import__preview';
+		$scope     = '.qs-import__preview';
 		$variables = str_replace( ':root', $scope, wp_get_global_stylesheet( array( 'variables' ) ) );
 		$presets   = (string) preg_replace_callback(
 			'/(^|\})([^{}]+)\{/',
@@ -373,7 +384,7 @@ final class Importer implements Module {
 	 */
 	public function render_page(): void {
 		if ( ! $this->may_import() ) {
-			wp_die( esc_html__( 'You do not have permission to import designs.', 'wow-signal' ) );
+			wp_die( esc_html__( 'You do not have permission to import designs.', 'qwerty-soft-signal' ) );
 		}
 
 		$models  = AnthropicClient::models();
@@ -391,61 +402,105 @@ final class Importer implements Module {
 		$cli_path   = ClaudeCli::binary();
 		$can_spawn  = ClaudeCli::can_spawn();
 		?>
-		<div class="wrap wow-import">
-			<div class="wow-import__masthead">
-				<p class="wow-import__brand">
-					<span class="wow-import__mark" aria-hidden="true">W</span>
-					<?php echo esc_html( wp_get_theme()->get( 'Name' ) ); ?>
-				</p>
+		<div class="wrap qs-import">
+			<div class="qs-import__masthead">
+				<div class="qs-import__masthead-body">
+					<p class="qs-import__brand">
+						<span class="qs-import__mark" aria-hidden="true">Q</span>
+						<?php echo esc_html( wp_get_theme()->get( 'Name' ) ); ?>
+					</p>
 
-				<h1><?php esc_html_e( 'Design import', 'wow-signal' ); ?></h1>
+					<h1><?php esc_html_e( 'Design import', 'qwerty-soft-signal' ); ?></h1>
 
-				<p class="wow-import__lede">
-					<?php esc_html_e( 'Upload an HTML design as a ZIP. Build the whole site in one press as drafts, or convert sections one at a time and accept only the ones you like. Everything an import adds can be removed again in one step.', 'wow-signal' ); ?>
-				</p>
+					<p class="qs-import__lede">
+						<?php esc_html_e( 'A design as a ZIP becomes a WordPress site: pages, menu, header, footer. Nothing is one-way — everything an import adds can be taken back out in one press.', 'qwerty-soft-signal' ); ?>
+					</p>
+				</div>
+
+				<?php
+				/*
+				 * The three steps, stated once so the screen explains itself
+				 * before it asks for anything. They are a description of the
+				 * page below rather than a control: nothing here is clickable,
+				 * because a numbered list somebody can press is a promise the
+				 * screen would then have to keep in both directions.
+				 */
+				$qsoft_steps = array(
+					array(
+						__( 'Upload', 'qwerty-soft-signal' ),
+						__( 'The archive, however deeply it is boxed.', 'qwerty-soft-signal' ),
+					),
+					array(
+						__( 'Choose', 'qwerty-soft-signal' ),
+						__( 'Which pages, which language, how carefully.', 'qwerty-soft-signal' ),
+					),
+					array(
+						__( 'Build', 'qwerty-soft-signal' ),
+						__( 'On the server. Close the tab if you like.', 'qwerty-soft-signal' ),
+					),
+				);
+				?>
+
+				<ol class="qs-import__masthead-steps">
+					<?php foreach ( $qsoft_steps as $qsoft_index => $qsoft_step ) : ?>
+						<li>
+							<span class="qs-import__masthead-num" aria-hidden="true"><?php echo esc_html( (string) ( $qsoft_index + 1 ) ); ?></span>
+							<span class="qs-import__masthead-step">
+								<strong><?php echo esc_html( $qsoft_step[0] ); ?></strong>
+								<span><?php echo esc_html( $qsoft_step[1] ); ?></span>
+							</span>
+						</li>
+					<?php endforeach; ?>
+				</ol>
 			</div>
 
-			<details class="wow-import__settings" <?php echo '' === $key && '' === $cli_path ? 'open' : ''; ?>>
+			<details class="qs-import__settings" <?php echo '' === $key && '' === $cli_path ? 'open' : ''; ?>>
 				<summary>
-					<?php esc_html_e( 'Connection settings', 'wow-signal' ); ?>
+					<?php esc_html_e( 'Connection settings', 'qwerty-soft-signal' ); ?>
 
 					<?php if ( '' !== $cli_path && $can_spawn ) : ?>
-						<span class="wow-import__badge is-on">
-							<?php esc_html_e( 'Claude Code found on this machine', 'wow-signal' ); ?>
+						<span class="qs-import__badge is-on">
+							<?php esc_html_e( 'Claude Code found on this machine', 'qwerty-soft-signal' ); ?>
 						</span>
 					<?php endif; ?>
 
 					<?php if ( AnthropicClient::key_is_constant() ) : ?>
-						<span class="wow-import__badge is-on">
-							<?php esc_html_e( 'Key active — from wp-config.php', 'wow-signal' ); ?>
+						<span class="qs-import__badge is-on">
+							<?php esc_html_e( 'Key active — from wp-config.php', 'qwerty-soft-signal' ); ?>
 						</span>
 					<?php elseif ( '' !== $key ) : ?>
-						<span class="wow-import__badge is-on">
+						<span class="qs-import__badge is-on">
 							<?php
 							printf(
 								/* translators: %s: the last four characters of the key. */
-								esc_html__( 'Key active — ends in %s', 'wow-signal' ),
+								esc_html__( 'Key active — ends in %s', 'qwerty-soft-signal' ),
 								esc_html( substr( $key, -4 ) )
 							);
 							?>
 						</span>
 					<?php elseif ( '' === $cli_path ) : ?>
-						<span class="wow-import__badge is-off">
-							<?php esc_html_e( 'No key — the free routes still work', 'wow-signal' ); ?>
+						<span class="qs-import__badge is-off">
+							<?php esc_html_e( 'No key — the free routes still work', 'qwerty-soft-signal' ); ?>
 						</span>
 					<?php endif; ?>
 				</summary>
 
 				<form method="post" action="options.php">
-					<?php settings_fields( 'wow_signal_ai' ); ?>
+					<?php settings_fields( 'qwerty_soft_ai' ); ?>
+
+					<?php if ( '' !== $cli_path && $can_spawn && '' === $key && ! AnthropicClient::key_is_constant() ) : ?>
+						<p class="qs-import__hint">
+							<?php esc_html_e( 'Nothing here needs setting on this machine: Claude Code is installed and signed in, and the defaults below are the ones to want. These fields are for a client\'s hosting, where there is no such command and an API key is the only way to reach a model.', 'qwerty-soft-signal' ); ?>
+						</p>
+					<?php endif; ?>
 
 					<table class="form-table" role="presentation">
 						<tr>
 							<th scope="row">
-								<label for="wow-transport"><?php esc_html_e( 'How to reach the model', 'wow-signal' ); ?></label>
+								<label for="qs-transport"><?php esc_html_e( 'How to reach the model', 'qwerty-soft-signal' ); ?></label>
 							</th>
 							<td>
-								<select id="wow-transport" class="wow-import__field" name="<?php echo esc_attr( ModelGateway::OPTION_TRANSPORT ); ?>">
+								<select id="qs-transport" class="qs-import__field" name="<?php echo esc_attr( ModelGateway::OPTION_TRANSPORT ); ?>">
 									<?php foreach ( $transports as $id => $label ) : ?>
 										<option value="<?php echo esc_attr( $id ); ?>" <?php selected( ModelGateway::preference(), $id ); ?>>
 											<?php echo esc_html( $label ); ?>
@@ -454,19 +509,19 @@ final class Importer implements Module {
 								</select>
 
 								<p class="description">
-									<?php esc_html_e( 'Two routes lead to the same place. On your own machine, Claude Code is already signed in to your subscription, so rebuilding a design as many times as it takes adds nothing to a bill. On a client\'s hosting there is no such binary and PHP is usually barred from starting one, so the API is what works there. Neither is needed for the structural import, which never leaves the server.', 'wow-signal' ); ?>
+									<?php esc_html_e( 'Two routes lead to the same place. On your own machine, Claude Code is already signed in to your subscription, so rebuilding a design as many times as it takes adds nothing to a bill. On a client\'s hosting there is no such binary and PHP is usually barred from starting one, so the API is what works there. Neither is needed for the structural import, which never leaves the server.', 'qwerty-soft-signal' ); ?>
 								</p>
 
 								<?php if ( ! $can_spawn ) : ?>
 									<p class="description">
-										<strong><?php esc_html_e( 'This server does not allow PHP to start other programs, so only the API route can work here.', 'wow-signal' ); ?></strong>
+										<strong><?php esc_html_e( 'This server does not allow PHP to start other programs, so only the API route can work here.', 'qwerty-soft-signal' ); ?></strong>
 									</p>
 								<?php elseif ( '' !== $cli_path ) : ?>
 									<p class="description">
 										<?php
 										printf(
 											/* translators: %s: path to the claude binary. */
-											esc_html__( 'Found at %s.', 'wow-signal' ),
+											esc_html__( 'Found at %s.', 'qwerty-soft-signal' ),
 											'<code>' . esc_html( $cli_path ) . '</code>'
 										);
 										?>
@@ -474,21 +529,33 @@ final class Importer implements Module {
 								<?php endif; ?>
 							</td>
 						</tr>
+					<?php
+					/*
+					 * Where the claude command is, asked only when it matters:
+					 * when the theme could not find one, or when somebody has
+					 * already pointed at one by hand. A machine where the probe
+					 * found it needs no path, and a field that only ever
+					 * confirms what is already working is a field to remove.
+					 */
+					$qsoft_show_cli = '' === $cli_path || '' !== (string) get_option( ClaudeCli::OPTION_BINARY, '' ) || ClaudeCli::binary_is_constant();
+					?>
+
+					<?php if ( $qsoft_show_cli ) : ?>
 						<tr>
 							<th scope="row">
-								<label for="wow-cli"><?php esc_html_e( 'Path to the claude command', 'wow-signal' ); ?></label>
+								<label for="qs-cli"><?php esc_html_e( 'Path to the claude command', 'qwerty-soft-signal' ); ?></label>
 							</th>
 							<td>
 								<?php if ( ClaudeCli::binary_is_constant() ) : ?>
 									<p>
-										<strong><?php esc_html_e( 'Set in wp-config.php.', 'wow-signal' ); ?></strong>
-										<?php esc_html_e( 'The path is defined as a constant and cannot be changed here.', 'wow-signal' ); ?>
+										<strong><?php esc_html_e( 'Set in wp-config.php.', 'qwerty-soft-signal' ); ?></strong>
+										<?php esc_html_e( 'The path is defined as a constant and cannot be changed here.', 'qwerty-soft-signal' ); ?>
 									</p>
 								<?php else : ?>
 									<input
 										type="text"
-										id="wow-cli"
-										class="wow-import__field"
+										id="qs-cli"
+										class="qs-import__field"
 										name="<?php echo esc_attr( ClaudeCli::OPTION_BINARY ); ?>"
 										autocomplete="off"
 										spellcheck="false"
@@ -496,26 +563,27 @@ final class Importer implements Module {
 										value="<?php echo esc_attr( (string) get_option( ClaudeCli::OPTION_BINARY, '' ) ); ?>"
 									>
 									<p class="description">
-										<?php esc_html_e( 'Only needed when the command is somewhere the web server cannot find on its own. Leave it empty and the theme looks along PATH. Remember that the web server runs as its own user: the binary has to be one that user may execute, and signed in as that user.', 'wow-signal' ); ?>
+										<?php esc_html_e( 'Only needed when the command is somewhere the web server cannot find on its own. Leave it empty and the theme looks along PATH. Remember that the web server runs as its own user: the binary has to be one that user may execute, and signed in as that user.', 'qwerty-soft-signal' ); ?>
 									</p>
 								<?php endif; ?>
 							</td>
 						</tr>
+					<?php endif; ?>
 						<tr>
 							<th scope="row">
-								<label for="wow-key"><?php esc_html_e( 'Anthropic API key', 'wow-signal' ); ?></label>
+								<label for="qs-key"><?php esc_html_e( 'Anthropic API key', 'qwerty-soft-signal' ); ?></label>
 							</th>
 							<td>
 								<?php if ( AnthropicClient::key_is_constant() ) : ?>
 									<p>
-										<strong><?php esc_html_e( 'Set in wp-config.php.', 'wow-signal' ); ?></strong>
-										<?php esc_html_e( 'The key is defined as a constant, so it is not stored in the database and cannot be changed here.', 'wow-signal' ); ?>
+										<strong><?php esc_html_e( 'Set in wp-config.php.', 'qwerty-soft-signal' ); ?></strong>
+										<?php esc_html_e( 'The key is defined as a constant, so it is not stored in the database and cannot be changed here.', 'qwerty-soft-signal' ); ?>
 									</p>
 								<?php else : ?>
 									<input
 										type="password"
-										id="wow-key"
-										class="wow-import__field"
+										id="qs-key"
+										class="qs-import__field"
 										name="<?php echo esc_attr( self::OPTION_KEY ); ?>"
 										autocomplete="off"
 										spellcheck="false"
@@ -523,18 +591,18 @@ final class Importer implements Module {
 										value="<?php echo '' !== $key ? esc_attr( str_repeat( '•', 24 ) . substr( $key, -4 ) ) : ''; ?>"
 									>
 									<p class="description">
-										<?php esc_html_e( 'Used only on the server; it is never sent to the browser. Clear the field and save to remove the stored key. For the strongest setup, put it in wp-config.php instead:', 'wow-signal' ); ?>
-										<code>define( 'WOW_SIGNAL_ANTHROPIC_KEY', '…' );</code>
+										<?php esc_html_e( 'Used only on the server; it is never sent to the browser. Clear the field and save to remove the stored key. For the strongest setup, put it in wp-config.php instead:', 'qwerty-soft-signal' ); ?>
+										<code>define( 'QSOFT_ANTHROPIC_KEY', '…' );</code>
 									</p>
 								<?php endif; ?>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row">
-								<label for="wow-model"><?php esc_html_e( 'Model', 'wow-signal' ); ?></label>
+								<label for="qs-model"><?php esc_html_e( 'Model', 'qwerty-soft-signal' ); ?></label>
 							</th>
 							<td>
-								<select id="wow-model" class="wow-import__field" name="<?php echo esc_attr( self::OPTION_MODEL ); ?>">
+								<select id="qs-model" class="qs-import__field" name="<?php echo esc_attr( self::OPTION_MODEL ); ?>">
 									<?php foreach ( $models as $id => $label ) : ?>
 										<option value="<?php echo esc_attr( $id ); ?>" <?php selected( get_option( self::OPTION_MODEL, AnthropicClient::DEFAULT_MODEL ), $id ); ?>>
 											<?php echo esc_html( $label ); ?>
@@ -545,10 +613,10 @@ final class Importer implements Module {
 						</tr>
 						<tr>
 							<th scope="row">
-								<label for="wow-effort"><?php esc_html_e( 'Care taken per section', 'wow-signal' ); ?></label>
+								<label for="qs-effort"><?php esc_html_e( 'Care taken per section', 'qwerty-soft-signal' ); ?></label>
 							</th>
 							<td>
-								<select id="wow-effort" class="wow-import__field" name="<?php echo esc_attr( self::OPTION_EFFORT ); ?>">
+								<select id="qs-effort" class="qs-import__field" name="<?php echo esc_attr( self::OPTION_EFFORT ); ?>">
 									<?php foreach ( $efforts as $id => $label ) : ?>
 										<option value="<?php echo esc_attr( $id ); ?>" <?php selected( get_option( self::OPTION_EFFORT, 'high' ), $id ); ?>>
 											<?php echo esc_html( $label ); ?>
@@ -556,18 +624,18 @@ final class Importer implements Module {
 									<?php endforeach; ?>
 								</select>
 								<p class="description">
-									<?php esc_html_e( 'Higher settings take longer and cost more per section, and handle complicated layouts better.', 'wow-signal' ); ?>
+									<?php esc_html_e( 'Higher settings take longer and cost more per section, and handle complicated layouts better.', 'qwerty-soft-signal' ); ?>
 								</p>
 							</td>
 						</tr>
 					</table>
 
-					<?php submit_button( __( 'Save settings', 'wow-signal' ) ); ?>
+					<?php submit_button( __( 'Save settings', 'qwerty-soft-signal' ) ); ?>
 				</form>
 			</details>
 
-			<div id="wow-import-app" class="wow-import__app">
-				<noscript><?php esc_html_e( 'This screen needs JavaScript.', 'wow-signal' ); ?></noscript>
+			<div id="qs-import-app" class="qs-import__app">
+				<noscript><?php esc_html_e( 'This screen needs JavaScript.', 'qwerty-soft-signal' ); ?></noscript>
 			</div>
 		</div>
 		<?php
@@ -634,6 +702,127 @@ final class Importer implements Module {
 				'args'                => array(
 					'slug' => $slug_arg,
 					'file' => $file_arg,
+				),
+			)
+		);
+
+		/*
+		 * The design's own stylesheet, served to the preview panes.
+		 *
+		 * The unpacked design is not reachable over HTTP by design, so the
+		 * preview cannot link to its CSS files — this hands over the same
+		 * compiled, url()-rewritten stylesheet the build installs, which is
+		 * what makes the left-hand pane look like the archive instead of like
+		 * a column of unstyled text.
+		 */
+		register_rest_route(
+			self::NAMESPACE,
+			'/designs/(?P<slug>[a-z0-9-]+)/stylesheet',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'design_stylesheet' ),
+				'permission_callback' => $guard,
+				'args'                => array( 'slug' => $slug_arg ),
+			)
+		);
+
+		/*
+		 * What the importer is doing, and has done. Polled by the screen every
+		 * couple of seconds while anything is running, which is also what
+		 * makes a long import legible: an hour of work reads as an hour of
+		 * sentences rather than as a bar that has not moved.
+		 */
+		register_rest_route(
+			self::NAMESPACE,
+			'/log',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'read_log' ),
+				'permission_callback' => $guard,
+				'args'                => array(
+					'since' => array(
+						'type'    => 'integer',
+						'default' => 0,
+					),
+				),
+			)
+		);
+
+		/*
+		 * The site owner's own instructions for one design. Stored inside the
+		 * design and read back into every brief, above whatever the handoff
+		 * wrote about itself.
+		 */
+		register_rest_route(
+			self::NAMESPACE,
+			'/designs/(?P<slug>[a-z0-9-]+)/instructions',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'read_instructions' ),
+					'permission_callback' => $guard,
+					'args'                => array( 'slug' => $slug_arg ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'write_instructions' ),
+					'permission_callback' => $guard,
+					'args'                => array(
+						'slug'  => $slug_arg,
+						'notes' => array(
+							'type'     => 'string',
+							'required' => true,
+						),
+					),
+				),
+			)
+		);
+
+		/*
+		 * A design that is an application rather than a set of pages. The
+		 * first route says what it is and which URLs it serves; the second
+		 * reads one of them and writes the page it renders into the design,
+		 * after which it is an ordinary page and every route above works on
+		 * it unchanged.
+		 */
+		register_rest_route(
+			self::NAMESPACE,
+			'/designs/(?P<slug>[a-z0-9-]+)/source',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'read_source' ),
+				'permission_callback' => $guard,
+				'args'                => array(
+					'slug'    => $slug_arg,
+
+					// Which application in the archive, when it holds more than one.
+					'project' => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/designs/(?P<slug>[a-z0-9-]+)/render',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'render_route' ),
+				'permission_callback' => $guard,
+				'args'                => array(
+					'slug'    => $slug_arg,
+					'route'   => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+
+					// The application the route belongs to, when there is a choice.
+					'project' => array(
+						'type'    => 'string',
+						'default' => '',
+					),
 				),
 			)
 		);
@@ -821,6 +1010,27 @@ final class Importer implements Module {
 					),
 
 					/*
+					 * The screens the design ships for running the site — a
+					 * translation queue, a settings panel, a customer download
+					 * area. Left out unless asked for, because they are real
+					 * pages that almost nobody importing a design wants.
+					 */
+					'utility'      => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+
+					/*
+					 * Files this build must leave alone: the versions of a page
+					 * that lost the address to another version of itself.
+					 */
+					'exclude'      => array(
+						'type'    => 'array',
+						'items'   => array( 'type' => 'string' ),
+						'default' => array(),
+					),
+
+					/*
 					 * Off by default, and deliberately so. A build that leaves
 					 * these alone converts entirely offline: no key needed, no
 					 * money spent, no network. Turning them on is a choice the
@@ -832,6 +1042,16 @@ final class Importer implements Module {
 						'default' => false,
 					),
 					'refine'       => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+
+					/*
+					 * Whether the server finishes this build on its own. A
+					 * corrected, reviewed build of a real handoff runs for an
+					 * hour, and an hour is longer than a tab stays open.
+					 */
+					'unattended'   => array(
 						'type'    => 'boolean',
 						'default' => false,
 					),
@@ -861,6 +1081,47 @@ final class Importer implements Module {
 						'default' => '',
 					),
 				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/build/resume',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'build_resume' ),
+				'permission_callback' => $guard,
+			)
+		);
+
+		/*
+		 * Put back the blocks a site is missing.
+		 *
+		 * The blocks an import generates are files in the theme, and the theme
+		 * is the one part of a WordPress site that gets replaced wholesale: a
+		 * redeploy, a copied database, a directory cleaned out by hand. When
+		 * they go, every page says "your site doesn't include support for this
+		 * block" while the content sits safely in the database. Rebuilding them
+		 * needs no model and takes under a second, so it is a button rather
+		 * than a rebuild.
+		 */
+		register_rest_route(
+			self::NAMESPACE,
+			'/blocks/repair',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'blocks_repair' ),
+				'permission_callback' => $guard,
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/build/stop',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'build_stop' ),
+				'permission_callback' => $guard,
 			)
 		);
 
@@ -1001,7 +1262,7 @@ final class Importer implements Module {
 			return $path;
 		}
 
-		$key    = 'wow_signal_preview_' . md5( $slug . '|' . $file . '|' . (int) filemtime( $path ) . '|' . WOW_SIGNAL_VERSION );
+		$key    = 'qwerty_soft_preview_' . md5( $slug . '|' . $file . '|' . (int) filemtime( $path ) . '|' . QSOFT_VERSION );
 		$cached = get_transient( $key );
 
 		if ( is_array( $cached ) ) {
@@ -1057,12 +1318,99 @@ final class Importer implements Module {
 	}
 
 	/**
+	 * The steps a build runs, in the order it runs them.
+	 *
+	 * The chrome first, then the home page, then the rest, then the front page
+	 * and the links between everything. Named in one place because two
+	 * endpoints hand the list out: the one that starts a build, and the one a
+	 * tab that only watches asks for its log.
+	 *
+	 * The order here has to be the order BuildRunner actually takes. A list
+	 * that promised the header last while the build made it first would put
+	 * every row of the progress display against the wrong step, and the one
+	 * thing this screen is for is saying where a long build has got to.
+	 *
+	 * @param array<int, array<string, mixed>> $pages Pages the build will make, home first.
+	 * @return array<int, array<string, string>>
+	 */
+	private static function build_steps( array $pages ): array {
+		$steps = array( array( 'key' => 'chrome' ) );
+
+		foreach ( $pages as $page ) {
+			$steps[] = array(
+				'key'   => 'page',
+				'file'  => (string) ( $page['file'] ?? '' ),
+				'title' => (string) ( $page['title'] ?? ( $page['file'] ?? '' ) ),
+			);
+		}
+
+		$steps[] = array( 'key' => 'finish' );
+
+		return $steps;
+	}
+
+	/**
+	 * The work a build has already done by the time it reports for the first time.
+	 *
+	 * Reading the design's own colours, type and spacing, and importing its
+	 * fonts and pictures, both happen inside the request that starts a build.
+	 * They cost real seconds and they are counted in the total, so they are
+	 * described here rather than left as an unexplained head start.
+	 *
+	 * @return array<int, array<string, string>>
+	 */
+	private static function prep_steps(): array {
+		return array(
+			array(
+				'key'   => 'tokens',
+				'title' => __( 'Colours, type and spacing read from the design', 'qwerty-soft-signal' ),
+			),
+			array(
+				'key'   => 'media',
+				'title' => __( 'Fonts and pictures imported', 'qwerty-soft-signal' ),
+			),
+		);
+	}
+
+	/**
+	 * Refuse to build a site nobody would be able to edit.
+	 *
+	 * A wrapped import without ACF Pro still produces correct pages — the
+	 * design's markup, its stylesheet, its words — and not one of them can be
+	 * changed afterwards: every section reads "Unsupported" in the editor and
+	 * the footer has no screen to be edited from. That is a site to rebuild
+	 * rather than a site to work on.
+	 *
+	 * So it is refused before the work rather than discovered after it. An
+	 * hour of building is a poor way to learn that a plugin is missing.
+	 *
+	 * @return WP_Error|null The refusal, or null when the build may proceed.
+	 */
+	private function needs_acf(): ?WP_Error {
+		if ( ! SiteAssembler::wrapping() || SiteOptions::editable() ) {
+			return null;
+		}
+
+		return new WP_Error(
+			'qwerty_soft_needs_acf',
+			__( 'This build needs ACF Pro, which is not active. Every section becomes a block with editable fields, and ACF Pro is what provides those fields — without it the pages would be built correctly and could not be edited afterwards. Install and activate ACF Pro, then build.', 'qwerty-soft-signal' ),
+			array( 'status' => 409 )
+		);
+	}
+
+	/**
 	 * Begin a stepwise build: everything the pages depend on, in one request.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function build_start( WP_REST_Request $request ) {
+		$blocked = $this->needs_acf();
+
+		if ( null !== $blocked ) {
+			return $blocked;
+		}
+
 		$slug = (string) $request->get_param( 'slug' );
 		$root = $this->design_root( $slug );
 
@@ -1085,6 +1433,12 @@ final class Importer implements Module {
 				'language' => (string) $request->get_param( 'language' ),
 				'publish'  => (bool) $request->get_param( 'publish' ),
 				'includes' => is_array( $includes ) ? $includes : array(),
+
+				// The admin and utility screens, only when they were asked for.
+				'utility'  => (bool) $request->get_param( 'utility' ),
+
+				// The versions of a page the screen decided against.
+				'exclude'  => (array) $request->get_param( 'exclude' ),
 				'smart'    => $smart,
 				'refine'   => $smart && (bool) $request->get_param( 'refine' ),
 				'model'    => (string) get_option( self::OPTION_MODEL, AnthropicClient::DEFAULT_MODEL ),
@@ -1098,18 +1452,7 @@ final class Importer implements Module {
 			return $job;
 		}
 
-		$steps = array();
-
-		foreach ( $job['pages'] as $page ) {
-			$steps[] = array(
-				'key'   => 'page',
-				'file'  => (string) $page['file'],
-				'title' => (string) ( $page['title'] ?? $page['file'] ),
-			);
-		}
-
-		$steps[] = array( 'key' => 'chrome' );
-		$steps[] = array( 'key' => 'finish' );
+		$steps = self::build_steps( $job['pages'] );
 
 		// Tokens, fonts and media are two steps' worth of work already behind us.
 		$job['slug']         = $slug;
@@ -1118,14 +1461,50 @@ final class Importer implements Module {
 		$job['done']         = 2;
 		$job['total']        = 2 + count( $steps );
 
+		/*
+		 * Who finishes this build: the tab that started it, or the server. A
+		 * guided build of a real handoff is an hour of model calls, and an
+		 * hour is longer than a person will sit on one screen.
+		 */
+		$unattended        = (bool) $request->get_param( 'unattended' );
+		$job['unattended'] = $unattended;
+		$job['user']       = get_current_user_id();
+
 		$id = ImportSession::start_job( $job );
+
+		ImportLog::clear();
+		ImportLog::add(
+			'build',
+			sprintf(
+				/* translators: 1: number of pages, 2: number of images. */
+				__( 'Build started: %1$d pages to make, %2$d images already imported.', 'qwerty-soft-signal' ),
+				count( $job['pages'] ),
+				(int) ( $job['report']['media'] ?? 0 )
+			)
+		);
+
+		if ( $unattended ) {
+			ImportLog::add( 'build', __( 'This build runs on the server. You can close this tab; it will keep going.', 'qwerty-soft-signal' ) );
+			BuildRunner::schedule( (int) $job['user'] );
+		}
 
 		return rest_ensure_response(
 			array(
-				'job'    => $id,
-				'steps'  => $steps,
-				'done'   => $job['done'],
-				'total'  => $job['total'],
+				'job'        => $id,
+				'steps'      => $steps,
+
+				/*
+				 * The two steps that are already behind us by the time this
+				 * replies. They are counted in the total, so leaving them out
+				 * of the list is what made a build open on "2 of 9 done" with
+				 * seven rows to show for it.
+				 */
+				'prep'       => self::prep_steps(),
+				'done'       => $job['done'],
+				'total'      => $job['total'],
+
+				// Whether the browser should drive the steps or just watch.
+				'unattended' => $unattended,
 
 				/*
 				 * Whether the model is in the loop, which the browser needs to
@@ -1133,8 +1512,8 @@ final class Importer implements Module {
 				 * few milliseconds, and the progress it shows should say so
 				 * instead of looking stalled.
 				 */
-				'smart'  => ! empty( $job['smart'] ),
-				'refine' => ! empty( $job['refine'] ),
+				'smart'      => ! empty( $job['smart'] ),
+				'refine'     => ! empty( $job['refine'] ),
 			)
 		);
 	}
@@ -1145,7 +1524,237 @@ final class Importer implements Module {
 	 * @return WP_REST_Response
 	 */
 	public function model_status(): WP_REST_Response {
-		return rest_ensure_response( ModelGateway::status( true ) );
+		$status = ModelGateway::status( true );
+
+		/*
+		 * What the screen needs to know before somebody presses Build, sent
+		 * with the status it already asks for rather than in a request of its
+		 * own. A wrapped import turns every section into a block with editable
+		 * fields, and ACF Pro is what provides those fields — so a site without
+		 * it can be built and then not edited, which is the one outcome worth
+		 * preventing before the work rather than reporting after it.
+		 */
+		$status['acf'] = SiteOptions::editable();
+
+		/*
+		 * And how many blocks this site refers to but cannot draw. Counted
+		 * here because the screen already asks for this every few seconds, and
+		 * because a site in that state looks broken in a way that gives no clue
+		 * what to press: the pages are intact, every section says the block is
+		 * unsupported, and the fix is one button that needs no model at all.
+		 */
+		$status['missing_blocks'] = count( BlockRepair::missing() );
+
+		return rest_ensure_response( $status );
+	}
+
+	/**
+	 * The pages a running build has already made, keyed by step.
+	 *
+	 * Read back from the site rather than trusted from the job: a page can be
+	 * published, renamed or deleted while the build is still running, and a
+	 * link that 404s is worse than no link.
+	 *
+	 * @param array<string, mixed> $job Job record.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function made_so_far( array $job ): array {
+		$made = array();
+
+		foreach ( (array) ( $job['routes'] ?? array() ) as $file => $route ) {
+			$id = (int) ( $route['id'] ?? 0 );
+
+			if ( $id <= 0 ) {
+				continue;
+			}
+
+			$status = get_post_status( $id );
+
+			if ( false === $status || 'trash' === $status ) {
+				continue;
+			}
+
+			$made[ 'page:' . $file ] = array(
+				'id'        => $id,
+				'title'     => (string) ( $route['title'] ?? '' ),
+				'status'    => (string) $status,
+				'sections'  => (int) ( $route['sections'] ?? 0 ),
+				'link'      => 'publish' === $status
+					? (string) get_permalink( $id )
+					: (string) get_preview_post_link( $id ),
+				'edit_link' => admin_url( 'post.php?post=' . $id . '&action=edit' ),
+			);
+		}
+
+		return $made;
+	}
+
+	/**
+	 * The last finished build's report, checked against the site as it is now.
+	 *
+	 * The report was written when the build ended and the site has been
+	 * editable ever since: a page may have been published, or removed by the
+	 * clean-up button. So every row is read back before it is shown, and a
+	 * report whose pages have all gone is no report at all — which is also how
+	 * pressing "Delete everything this import added" makes this disappear
+	 * without anything having to tell it.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	private function last_built(): ?array {
+		$stored = ImportSession::last_report();
+
+		if ( null === $stored ) {
+			/*
+			 * No report kept, but the pages themselves are proof enough. This
+			 * is what a screen sees after a build that finished in another
+			 * tab, or before this theme learned to write the report down: the
+			 * list read back off the site, so "what happened to my import" is
+			 * never answered with an empty upload form.
+			 */
+			$pages = SiteAssembler::imported_pages();
+
+			if ( array() === $pages ) {
+				return null;
+			}
+
+			return array(
+				'at'     => 0,
+				'read'   => true,
+				'report' => array(
+					'pages'    => $pages,
+					'concerns' => array(),
+				),
+			);
+		}
+
+		$report = is_array( $stored['report'] ?? null ) ? $stored['report'] : array();
+		$pages  = array();
+
+		foreach ( (array) ( $report['pages'] ?? array() ) as $page ) {
+			$id     = (int) ( $page['id'] ?? 0 );
+			$status = $id > 0 ? get_post_status( $id ) : false;
+
+			if ( false === $status || 'trash' === $status ) {
+				continue;
+			}
+
+			$page['status'] = $status;
+			$pages[]        = $page;
+		}
+
+		if ( array() === $pages ) {
+			ImportSession::forget_report();
+
+			return null;
+		}
+
+		$report['pages'] = $pages;
+
+		return array(
+			'at'     => (int) ( $stored['at'] ?? 0 ),
+			'report' => $report,
+		);
+	}
+
+	/**
+	 * Carry a stalled server build on now, in this request.
+	 *
+	 * The screen offers this when a build has gone quiet for longer than a
+	 * step may be silent. Waiting is the wrong advice at that point: the
+	 * common cause is a site whose WP-Cron never runs, where the watchdog can
+	 * book ticks all day and none of them happen. One step is run here
+	 * instead, and it books its own next tick before starting — so this either
+	 * restarts a build that then continues on its own, or advances one that
+	 * cannot, one press at a time.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function build_resume() {
+		$job = ImportSession::running();
+
+		if ( null === $job || ! empty( $job['completed']['finish'] ) ) {
+			return new WP_Error(
+				'qwerty_soft_no_job',
+				__( 'There is no unfinished build on this site to continue.', 'qwerty-soft-signal' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( function_exists( 'set_time_limit' ) ) {
+			// One step, the same ceiling the browser-driven build runs a page under.
+			set_time_limit( empty( $job['smart'] ) ? 120 : 1800 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- One step, bounded by the transport's own timeouts.
+		}
+
+		ImportLog::add( 'build', __( 'Continued by hand from the import screen.', 'qwerty-soft-signal' ) );
+
+		$more = BuildRunner::resume( get_current_user_id() );
+		$job  = ImportSession::running();
+
+		return rest_ensure_response(
+			array(
+				'done'     => null === $job ? 0 : (int) ( $job['done'] ?? 0 ),
+				'total'    => null === $job ? 0 : (int) ( $job['total'] ?? 0 ),
+				'finished' => null === $job || ! empty( $job['completed']['finish'] ),
+				'more'     => $more,
+			)
+		);
+	}
+
+	/**
+	 * Rebuild the generated blocks this site refers to but no longer has.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function blocks_repair() {
+		$report = BlockRepair::run();
+
+		if ( '' === (string) $report['root'] && array() !== (array) $report['missing'] ) {
+			return new WP_Error(
+				'qwerty_soft_no_design',
+				__( 'The design these pages were built from is no longer unpacked, so the blocks cannot be rebuilt from it. Upload the archive again and build.', 'qwerty-soft-signal' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		return rest_ensure_response(
+			array(
+				'written' => (int) $report['written'],
+				'pages'   => (int) $report['pages'],
+				'missing' => array_values( (array) $report['missing'] ),
+			)
+		);
+	}
+
+	/**
+	 * Stop a build, keeping everything it has made and can continue from.
+	 *
+	 * The button used to be a lie. It set a flag in the tab's own state and
+	 * drew a stopped panel, while the build carried on running on cron —
+	 * so somebody who pressed Cancel and then Build again ended up with two
+	 * workers, and somebody who just closed the tab never knew it was still
+	 * going.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function build_stop() {
+		if ( ! BuildRunner::stop( get_current_user_id() ) ) {
+			return new WP_Error(
+				'qwerty_soft_no_job',
+				__( 'There is no build running to stop.', 'qwerty-soft-signal' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$job = ImportSession::running();
+
+		return rest_ensure_response(
+			array(
+				'stopped' => true,
+				'done'    => null === $job ? 0 : (int) ( $job['done'] ?? 0 ),
+				'total'   => null === $job ? 0 : (int) ( $job['total'] ?? 0 ),
+			)
+		);
 	}
 
 	/**
@@ -1159,8 +1768,8 @@ final class Importer implements Module {
 
 		if ( null === $job ) {
 			return new WP_Error(
-				'wow_signal_no_job',
-				__( 'That build is no longer running. Start it again.', 'wow-signal' ),
+				'qwerty_soft_no_job',
+				__( 'That build is no longer running. Start it again.', 'qwerty-soft-signal' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -1196,10 +1805,22 @@ final class Importer implements Module {
 
 		if ( 'page' === $key ) {
 			if ( ! $this->validate_file( $file ) ) {
-				return new WP_Error( 'wow_signal_no_page', __( 'That page is not in this design.', 'wow-signal' ), array( 'status' => 404 ) );
+				return new WP_Error( 'qwerty_soft_no_page', __( 'That page is not in this design.', 'qwerty-soft-signal' ), array( 'status' => 404 ) );
 			}
 
-			$result = SiteAssembler::page( $job, $file );
+			ImportLog::add(
+				'build',
+				sprintf(
+					/* translators: 1: page file, 2: step number, 3: steps in total. */
+					__( 'Building %1$s — step %2$d of %3$d…', 'qwerty-soft-signal' ),
+					$file,
+					(int) $job['done'] + 1,
+					(int) $job['total']
+				)
+			);
+
+			$started = microtime( true );
+			$result  = SiteAssembler::page( $job, $file );
 
 			$job['completed'][ 'page:' . $file ] = true;
 			$job['done']                         = 2 + count( $job['completed'] );
@@ -1207,15 +1828,39 @@ final class Importer implements Module {
 			ImportSession::update_job( $job );
 
 			if ( is_wp_error( $result ) ) {
+				ImportLog::add(
+					'build',
+					sprintf(
+						/* translators: 1: page file, 2: the reason. */
+						__( '%1$s was not built: %2$s', 'qwerty-soft-signal' ),
+						$file,
+						$result->get_error_message()
+					)
+				);
+
 				$result->add_data( array_merge( array( 'status' => 400 ), $progress( $job ) ) );
 
 				return $result;
 			}
 
+			ImportLog::add(
+				'build',
+				sprintf(
+					/* translators: 1: page title, 2: number of sections, 3: seconds taken. */
+					__( 'Built “%1$s” — %2$d sections, %3$ds.', 'qwerty-soft-signal' ),
+					(string) ( $result['title'] ?? $file ),
+					(int) ( $result['sections'] ?? 0 ),
+					(int) round( microtime( true ) - $started )
+				),
+				array( 'id' => (int) ( $result['id'] ?? 0 ) )
+			);
+
 			return rest_ensure_response( array_merge( $progress( $job ), array( 'result' => $result ) ) );
 		}
 
 		if ( 'chrome' === $key ) {
+			ImportLog::add( 'build', __( 'Building the menu, the header and the footer…', 'qwerty-soft-signal' ) );
+
 			$result = SiteAssembler::chrome( $job );
 
 			$job['completed']['chrome'] = true;
@@ -1250,6 +1895,15 @@ final class Importer implements Module {
 		}
 
 		ImportSession::end_job();
+
+		ImportLog::add(
+			'build',
+			sprintf(
+				/* translators: %d: number of pages. */
+				_n( 'The build is done: %d page is on the site.', 'The build is done: %d pages are on the site.', count( (array) ( $report['pages'] ?? array() ) ), 'qwerty-soft-signal' ),
+				count( (array) ( $report['pages'] ?? array() ) )
+			)
+		);
 
 		return rest_ensure_response(
 			array_merge(
@@ -1288,7 +1942,7 @@ final class Importer implements Module {
 	 * @return WP_REST_Response
 	 */
 	public function purge_designs(): WP_REST_Response {
-		$removed = DesignArchive::purge();
+		$result = DesignArchive::purge();
 
 		// Banked conversions refer to files that no longer exist.
 		ImportSession::forget();
@@ -1296,7 +1950,14 @@ final class Importer implements Module {
 
 		return rest_ensure_response(
 			array(
-				'removed' => $removed,
+				'removed' => (int) $result['removed'],
+
+				/*
+				 * What would not go, named. Reporting only the successes is
+				 * how a folder the web server may not delete came to sit in
+				 * uploads while the screen said everything was removed.
+				 */
+				'failed'  => array_values( $result['failed'] ),
 				'archive' => DesignArchive::footprint(),
 			)
 		);
@@ -1309,6 +1970,12 @@ final class Importer implements Module {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function build_site( WP_REST_Request $request ) {
+		$blocked = $this->needs_acf();
+
+		if ( null !== $blocked ) {
+			return $blocked;
+		}
+
 		$root = $this->design_root( (string) $request->get_param( 'slug' ) );
 
 		if ( is_wp_error( $root ) ) {
@@ -1437,7 +2104,7 @@ final class Importer implements Module {
 				'label'    => isset( $page['sections'][ $position ] )
 					? (string) $page['sections'][ $position ]['label']
 					/* translators: %d: section number. */
-					: sprintf( __( 'Section %d', 'wow-signal' ), $position + 1 ),
+					: sprintf( __( 'Section %d', 'qwerty-soft-signal' ), $position + 1 ),
 				'valid'    => $valid,
 				'errors'   => $validator->errors(),
 				'notes'    => $valid ? $validator->review( $markup ) : array(),
@@ -1518,8 +2185,20 @@ final class Importer implements Module {
 
 			$index = DesignArchive::index( $dir );
 
+			/*
+			 * An empty folder is not a design. One is left behind whenever a
+			 * removal deleted the files but could not delete the directory,
+			 * and while the list still offered it there was no way to be rid
+			 * of it: every button worked on something that was already gone.
+			 */
+			if ( array() === $index['pages'] && 0 === (int) $index['images'] && 0 === (int) $index['components'] ) {
+				DesignArchive::remove( $dir );
+
+				continue;
+			}
+
 			$designs[] = array(
-				'slug'      => basename( $dir ),
+				'slug'       => basename( $dir ),
 
 				/*
 				 * Each page carries what a guided pass over it would cost
@@ -1530,9 +2209,13 @@ final class Importer implements Module {
 				 * of it — a total for the whole archive would be three times
 				 * the truth.
 				 */
-				'pages'     => $this->priced( $index['pages'] ),
-				'languages' => $index['languages'],
-				'images'    => $index['images'],
+				'pages'      => $this->priced( $index['pages'] ),
+				'languages'  => $index['languages'],
+				'images'     => $index['images'],
+				'components' => $index['components'],
+				'readable'   => $index['readable'],
+				'kind'       => $index['kind'],
+				'diagnosis'  => $this->diagnosis( $index ),
 			);
 		}
 
@@ -1542,6 +2225,506 @@ final class Importer implements Module {
 				'archive' => DesignArchive::footprint(),
 			)
 		);
+	}
+
+	/**
+	 * The design's compiled stylesheet, as CSS.
+	 *
+	 * Sent as text/css so a preview iframe can link to it. Cached per design
+	 * for the length of a session: compiling a Tailwind build is a second of
+	 * work and the preview asks for it once per pane.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function design_stylesheet( WP_REST_Request $request ) {
+		$slug = (string) $request->get_param( 'slug' );
+		$root = $this->design_root( $slug );
+
+		if ( is_wp_error( $root ) ) {
+			return $root;
+		}
+
+		/*
+		 * A page is styled by the stylesheets it links. Asked for one, the
+		 * compile follows its `<link>` tags; asked for the design, it takes
+		 * everything. The difference matters on a developer handoff, where
+		 * five projects sit side by side and each has a full stylesheet that
+		 * redefines `:root`, `body` and `.card` — swept together they
+		 * overwrite one another and every preview came out wearing the wrong
+		 * project.
+		 */
+		$file  = (string) $request->get_param( 'page' );
+		$pages = array();
+
+		if ( '' !== $file ) {
+			$path = $this->page_path( $root, $file );
+
+			if ( is_string( $path ) ) {
+				$pages[] = $path;
+			}
+		}
+
+		$key = 'qwerty_soft_css_' . md5( $root . '|' . implode( '|', $pages ) );
+		$css = get_transient( $key );
+
+		if ( ! is_string( $css ) ) {
+			// For a frame, so the design's own html and body rules come too.
+			$css = DesignStylesheet::compile( $root, $this->media_map( $root ), true, $pages );
+
+			set_transient( $key, $css, HOUR_IN_SECONDS );
+		}
+
+		/*
+		 * Handed over as data rather than as a text/css body: the preview
+		 * writes it into an iframe as a <style>, which needs no second
+		 * request, no nonce in a URL and no argument with the REST layer
+		 * about content types.
+		 */
+		return rest_ensure_response(
+			array(
+				'css'   => $css,
+				'bytes' => strlen( $css ),
+			)
+		);
+	}
+
+	/**
+	 * The running account of what the importer is doing.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function read_log( WP_REST_Request $request ): WP_REST_Response {
+		$since = (int) $request->get_param( 'since' );
+		$job   = ImportSession::running();
+
+		/*
+		 * The poll is also the watchdog.
+		 *
+		 * WP-Cron deletes an event when it fires, so a step that takes the
+		 * process down with it leaves an unattended build with nothing
+		 * scheduled to carry it — frozen at "2 of 7", no error, no end. This
+		 * screen asks for its log every few seconds, which makes it the one
+		 * thing reliably looking; if it finds a running build and an empty
+		 * queue, it books the tick that went missing.
+		 *
+		 * The diagnosis is taken first, because booking a tick does not undo
+		 * the silence that earned it: read afterwards, every build the
+		 * watchdog had just fixed would be reported as stopped.
+		 */
+		$stall   = BuildRunner::diagnose( get_current_user_id() );
+		$revived = BuildRunner::revive( get_current_user_id() );
+
+		if ( $revived ) {
+			ImportLog::add( 'build', __( 'The build had stopped without finishing a step; it was picked up again from where it stood.', 'qwerty-soft-signal' ) );
+		}
+
+		return rest_ensure_response(
+			array(
+				'lines'   => ImportLog::since( $since ),
+
+				/*
+				 * The state of the job the log is about, so the screen can
+				 * show progress and know when to stop asking — including for
+				 * a build that is being run by the server rather than by this
+				 * tab.
+				 */
+				'job'     => null === $job ? null : array(
+					'id'         => (string) ( $job['id'] ?? '' ),
+					'done'       => (int) ( $job['done'] ?? 0 ),
+					'total'      => (int) ( $job['total'] ?? 0 ),
+					'unattended' => ! empty( $job['unattended'] ),
+					'finished'   => ! empty( $job['completed']['finish'] ),
+
+					/*
+					 * Which step is being worked on, when it was claimed and
+					 * when it last said anything.
+					 *
+					 * A tab that did not start the build knows none of this,
+					 * and without it the panel is a bar and a number that both
+					 * sit still for a quarter of an hour at a time — which is
+					 * indistinguishable from a build that has died. With it,
+					 * the right row is marked as working and carries a clock
+					 * that moves.
+					 */
+					'current'    => (string) ( $job['working'] ?? '' ),
+					'started'    => (int) ( $job['started'] ?? 0 ),
+					'beat'       => BuildRunner::last_sign_of_life( $job ),
+
+					/*
+					 * The same list the browser gets when it starts a build
+					 * itself. A reloaded tab, and a tab watching a build the
+					 * server is running, have never seen that reply — without
+					 * this they can draw a bar and a number but not the one
+					 * thing worth looking at, which is which page is being
+					 * made and which are already done.
+					 */
+					'prep'       => self::prep_steps(),
+					'steps'      => self::build_steps( is_array( $job['pages'] ?? null ) ? $job['pages'] : array() ),
+					'completed'  => array_keys( is_array( $job['completed'] ?? null ) ? $job['completed'] : array() ),
+
+					/*
+					 * Every page that already exists, with somewhere to go.
+					 *
+					 * A page is on the site the moment its own step ends — a
+					 * build of fourteen pages has thirteen real, readable
+					 * drafts while it is still working on the last. Holding
+					 * the links back until the end made an hour-long build
+					 * feel like an hour of nothing, when in fact the home page
+					 * was ready in the first four minutes.
+					 */
+					'made'       => self::made_so_far( $job ),
+
+					/*
+					 * A build that has gone quiet, described well enough for
+					 * the screen to say what happened and offer to carry it
+					 * on. Null on the poll that revived it: that one is fixed
+					 * already, and the log line says so.
+					 */
+					'stall'      => $revived ? null : $stall,
+
+					/*
+					 * Stopped by hand, which is not the same as stalled and
+					 * needs saying differently: nothing went wrong, somebody
+					 * pressed a button, and the work is waiting rather than
+					 * stuck. The screen offers to continue it either way.
+					 */
+					'stopped'    => ! empty( $job['stopped'] ),
+				),
+
+				/*
+				 * What the last build made, once there is no build running.
+				 *
+				 * A build ends by deleting its own job, which used to take the
+				 * report with it: reload the screen a minute after an hour's
+				 * work and it offered an empty upload form, as though nothing
+				 * had happened. Served only when nothing is running, because a
+				 * build in progress has a panel of its own.
+				 */
+				'built'   => null === $job ? $this->last_built() : null,
+
+				'running' => null !== $job,
+			)
+		);
+	}
+
+	/**
+	 * Read the site owner's instructions for a design.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function read_instructions( WP_REST_Request $request ) {
+		$root = $this->design_root( (string) $request->get_param( 'slug' ) );
+
+		if ( is_wp_error( $root ) ) {
+			return $root;
+		}
+
+		return rest_ensure_response( array( 'notes' => DesignDocs::notes( $root ) ) );
+	}
+
+	/**
+	 * Save, or clear, the site owner's instructions for a design.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function write_instructions( WP_REST_Request $request ) {
+		$root = $this->design_root( (string) $request->get_param( 'slug' ) );
+
+		if ( is_wp_error( $root ) ) {
+			return $root;
+		}
+
+		$notes = (string) $request->get_param( 'notes' );
+
+		if ( ! DesignDocs::save_notes( $root, $notes ) ) {
+			return new WP_Error(
+				'qwerty_soft_notes',
+				__( 'The instructions could not be written into the design folder.', 'qwerty-soft-signal' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		ImportLog::add(
+			'read',
+			'' === trim( $notes )
+				? __( 'Your instructions for this design were cleared.', 'qwerty-soft-signal' )
+				: __( 'Your instructions for this design were saved and will lead every brief.', 'qwerty-soft-signal' )
+		);
+
+		return rest_ensure_response( array( 'notes' => DesignDocs::notes( $root ) ) );
+	}
+
+	/**
+	 * What application this design is, and which pages it serves.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function read_source( WP_REST_Request $request ) {
+		$root = $this->design_root( (string) $request->get_param( 'slug' ) );
+
+		if ( is_wp_error( $root ) ) {
+			return $root;
+		}
+
+		$projects = SourceProject::all( $root );
+
+		if ( array() === $projects ) {
+			return rest_ensure_response(
+				array(
+					'found'    => false,
+					'projects' => array(),
+					'routes'   => array(),
+				)
+			);
+		}
+
+		/*
+		 * Which of them the screen is asking about. A handoff can hold three
+		 * applications — the site, an admin panel, a widget meant to ship as a
+		 * plugin — and only a person knows which one belongs on this site, so
+		 * the choice is theirs and the default is simply the largest.
+		 */
+		$wanted  = (string) $request->get_param( 'project' );
+		$project = $projects[0];
+
+		foreach ( $projects as $candidate ) {
+			if ( $candidate->relative() === $wanted ) {
+				$project = $candidate;
+				break;
+			}
+		}
+
+		$routes   = $project->routes();
+		$rendered = $this->rendered_pages( $root );
+
+		foreach ( $routes as $index => $route ) {
+			$file = SourceRenderer::RENDER_DIR . '/' . SourceProject::slug( (string) $route['path'] ) . '.html';
+
+			$routes[ $index ]['rendered'] = isset( $rendered[ $file ] ) ? $rendered[ $file ] : null;
+		}
+
+		/*
+		 * Every project, described well enough to choose between them without
+		 * opening the archive: what it is called, where it sits, what it is
+		 * written in, how big it is and how many pages it would produce.
+		 */
+		$listed = array();
+
+		foreach ( $projects as $candidate ) {
+			$listed[] = array(
+				'dir'        => $candidate->relative(),
+				'name'       => $candidate->name(),
+				'framework'  => $candidate->framework(),
+				'components' => $candidate->components(),
+				'routes'     => count( $candidate->routes() ),
+				'chosen'     => $candidate->relative() === $project->relative(),
+			);
+		}
+
+		return rest_ensure_response(
+			array(
+				'found'     => true,
+				'framework' => $project->framework(),
+				'project'   => $project->relative(),
+				'projects'  => $listed,
+				'routes'    => $routes,
+				'notes'     => $project->notes(),
+				'model'     => ModelGateway::status(),
+			)
+		);
+	}
+
+	/**
+	 * Which routes already have a page written for them.
+	 *
+	 * @param string $root Design root.
+	 * @return array<string, array<string, mixed>> Relative file => page row.
+	 */
+	private function rendered_pages( string $root ): array {
+		$pages = array();
+
+		foreach ( DesignArchive::index( $root )['pages'] as $page ) {
+			if ( str_starts_with( (string) $page['file'], SourceRenderer::RENDER_DIR . '/' ) ) {
+				$pages[ (string) $page['file'] ] = $page;
+			}
+		}
+
+		return $pages;
+	}
+
+	/**
+	 * Read one route's components and write the page they render.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function render_route( WP_REST_Request $request ) {
+		$root = $this->design_root( (string) $request->get_param( 'slug' ) );
+
+		if ( is_wp_error( $root ) ) {
+			return $root;
+		}
+
+		$projects = SourceProject::all( $root );
+
+		if ( array() === $projects ) {
+			return new WP_Error(
+				'qwerty_soft_no_source',
+				__( 'There is no application source in this design to read.', 'qwerty-soft-signal' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// The same project the screen is listing routes for, not whichever is biggest.
+		$chosen  = (string) $request->get_param( 'project' );
+		$project = $projects[0];
+
+		foreach ( $projects as $candidate ) {
+			if ( $candidate->relative() === $chosen ) {
+				$project = $candidate;
+				break;
+			}
+		}
+
+		$wanted = (string) $request->get_param( 'route' );
+		$route  = null;
+
+		foreach ( $project->routes() as $candidate ) {
+			if ( (string) $candidate['path'] === $wanted ) {
+				$route = $candidate;
+				break;
+			}
+		}
+
+		if ( null === $route ) {
+			return new WP_Error(
+				'qwerty_soft_no_route_row',
+				__( 'That route is not one this application serves.', 'qwerty-soft-signal' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// Reading components always reaches a model, so it always counts against the hour.
+		$limited = $this->hit_rate_limit();
+
+		if ( is_wp_error( $limited ) ) {
+			return $limited;
+		}
+
+		$renderer = new SourceRenderer(
+			$root,
+			$project,
+			array(
+				'model'  => (string) get_option( self::OPTION_MODEL, AnthropicClient::DEFAULT_MODEL ),
+				'effort' => (string) get_option( self::OPTION_EFFORT, 'high' ),
+			)
+		);
+
+		ImportLog::add(
+			'render',
+			sprintf(
+				/* translators: 1: route path, 2: component name. */
+				__( 'Reading %1$s out of its components (%2$s)…', 'qwerty-soft-signal' ),
+				(string) $route['path'],
+				(string) $route['component']
+			)
+		);
+
+		$started = microtime( true );
+		$result  = $renderer->render( $route );
+		$call    = $renderer->call();
+		$spend   = Spend::totals();
+
+		if ( is_wp_error( $result ) ) {
+			ImportLog::add(
+				'render',
+				sprintf(
+					/* translators: 1: route path, 2: the reason. */
+					__( 'Could not read %1$s: %2$s', 'qwerty-soft-signal' ),
+					(string) $route['path'],
+					$result->get_error_message()
+				)
+			);
+		} else {
+			ImportLog::add(
+				'render',
+				sprintf(
+					/* translators: 1: route, 2: sections, 3: words, 4: seconds taken. */
+					__( 'Read %1$s — %2$d sections, %3$d words, %4$ds.', 'qwerty-soft-signal' ),
+					(string) $route['path'],
+					(int) $result['sections'],
+					(int) $result['words'],
+					(int) round( microtime( true ) - $started )
+				),
+				array( 'file' => (string) $result['file'] )
+			);
+		}
+
+		/*
+		 * A call that was made is billed whether or not its answer was any
+		 * use. A failed render that quietly cost a dollar and reported only
+		 * the failure would make the running total on this screen a lie.
+		 */
+		if ( ! empty( $call['ok'] ) ) {
+			$usage     = is_array( $call['usage'] ?? null ) ? $call['usage'] : array();
+			$billed    = (string) ( $call['model'] ?? '' );
+			$transport = (string) ( $call['transport'] ?? 'api' );
+			$spend     = Spend::record( $usage, $billed, ModelGateway::is_billable( $transport ) );
+		}
+
+		if ( is_wp_error( $result ) ) {
+			$data = (array) $result->get_error_data();
+
+			// Keep whatever status the failure chose; the total rides along with it.
+			$result->add_data( array_merge( array( 'status' => 500 ), $data, array( 'spend' => $spend ) ) );
+
+			return $result;
+		}
+
+		$result['spend'] = $spend;
+		$result['limit'] = $this->rate_limit_status();
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Say in one sentence what this design is, when it is not what was expected.
+	 *
+	 * Returns an empty string for an ordinary static design — there is nothing
+	 * to explain and a banner over a working import is noise. It speaks up for
+	 * the case that used to produce "Nothing on this page could be converted"
+	 * for every page in turn: an archive whose HTML is a React or Vue shell,
+	 * where the markup only exists after a browser has run the app.
+	 *
+	 * @param array<string, mixed> $index Result of DesignArchive::index().
+	 * @return string
+	 */
+	private function diagnosis( array $index ): string {
+		if ( 'static' === ( $index['kind'] ?? '' ) ) {
+			return '';
+		}
+
+		$components = (int) ( $index['components'] ?? 0 );
+
+		if ( 'app' === ( $index['kind'] ?? '' ) ) {
+			return sprintf(
+				/* translators: %d: number of component source files found. */
+				_n(
+					'This archive is a JavaScript application, not a static design: its HTML holds an empty root element and the pages are assembled in the browser. The markup to convert does not exist on disk — %d component file does, but reading components is not something the structural converter can do. Open the site in a browser, save each finished page as HTML, and upload those.',
+					'This archive is a JavaScript application, not a static design: its HTML holds an empty root element and the pages are assembled in the browser. The markup to convert does not exist on disk — %d component files do, but reading components is not something the structural converter can do. Open the site in a browser, save each finished page as HTML, and upload those.',
+					$components,
+					'qwerty-soft-signal'
+				),
+				$components
+			);
+		}
+
+		return __( 'No HTML page was found in that archive. A design the importer can read is a folder of .html files with their stylesheets and images beside them.', 'qwerty-soft-signal' );
 	}
 
 	/**
@@ -1583,13 +2766,29 @@ final class Importer implements Module {
 		$files = $request->get_file_params();
 
 		if ( empty( $files['archive'] ) || ! is_array( $files['archive'] ) ) {
-			return new WP_Error( 'wow_signal_no_file', __( 'No file was received.', 'wow-signal' ), array( 'status' => 400 ) );
+			return new WP_Error( 'qwerty_soft_no_file', __( 'No file was received.', 'qwerty-soft-signal' ), array( 'status' => 400 ) );
 		}
 
 		$file = $files['archive'];
 
 		if ( ! empty( $file['error'] ) ) {
-			return new WP_Error( 'wow_signal_upload', __( 'The upload did not complete. The file may be larger than this server allows.', 'wow-signal' ), array( 'status' => 400 ) );
+			return new WP_Error(
+				'qwerty_soft_upload',
+				sprintf(
+					/* translators: %s: the server's upload size limit, e.g. "128 MB". */
+					__( 'The upload did not complete. This server accepts files up to %s; a larger archive needs upload_max_filesize and post_max_size raised in php.ini.', 'qwerty-soft-signal' ),
+					size_format( wp_max_upload_size() )
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		/*
+		 * Reading a thousand-file archive is minutes of work. The default
+		 * limit killed it part-way and left a half-written folder behind.
+		 */
+		if ( function_exists( 'set_time_limit' ) ) {
+			@set_time_limit( 900 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Refused in safe mode; the unpack still runs.
 		}
 
 		/*
@@ -1598,13 +2797,13 @@ final class Importer implements Module {
 		 * unpacked.
 		 */
 		if ( ! is_uploaded_file( (string) $file['tmp_name'] ) ) {
-			return new WP_Error( 'wow_signal_upload', __( 'That file did not arrive as an upload.', 'wow-signal' ), array( 'status' => 400 ) );
+			return new WP_Error( 'qwerty_soft_upload', __( 'That file did not arrive as an upload.', 'qwerty-soft-signal' ), array( 'status' => 400 ) );
 		}
 
 		$type = wp_check_filetype_and_ext( (string) $file['tmp_name'], (string) $file['name'], array( 'zip' => 'application/zip' ) );
 
 		if ( 'zip' !== ( $type['ext'] ?? '' ) ) {
-			return new WP_Error( 'wow_signal_not_zip', __( 'Please upload a .zip archive.', 'wow-signal' ), array( 'status' => 400 ) );
+			return new WP_Error( 'qwerty_soft_not_zip', __( 'Please upload a .zip archive.', 'qwerty-soft-signal' ), array( 'status' => 400 ) );
 		}
 
 		$label  = pathinfo( (string) $file['name'], PATHINFO_FILENAME );
@@ -1615,17 +2814,104 @@ final class Importer implements Module {
 		}
 
 		$index = DesignArchive::index( $result['path'] );
+		$docs  = DesignDocs::digest( $result['path'], 40000 );
+
+		/*
+		 * The account starts here, with the upload, and runs to the end of the
+		 * build. Everything a person would want to know afterwards about what
+		 * the importer did with their archive is written as it happens.
+		 */
+		ImportLog::clear();
+		ImportLog::add(
+			'unpack',
+			sprintf(
+				/* translators: 1: file count, 2: size on disk. */
+				__( 'Unpacked %1$d files, %2$s.', 'qwerty-soft-signal' ),
+				(int) $result['files'],
+				size_format( (int) $result['bytes'] )
+			),
+			array(
+				'files' => (int) $result['files'],
+				'bytes' => (int) $result['bytes'],
+			)
+		);
+
+		if ( ! empty( $result['nested'] ) ) {
+			ImportLog::add(
+				'unpack',
+				sprintf(
+					/* translators: %d: number of archives. */
+					_n( 'Opened %d archive found inside the design.', 'Opened %d archives found inside the design.', (int) $result['nested'], 'qwerty-soft-signal' ),
+					(int) $result['nested']
+				)
+			);
+		}
+
+		/*
+		 * Everything the unpacker refused, said out loud.
+		 *
+		 * These reasons were collected on every upload and thrown away on
+		 * every upload, which is how an archive holding an entire website came
+		 * to be skipped in silence: the page list looked plausible, the log
+		 * looked clean, and the only trace was a .zip left on disk that
+		 * nothing would ever open. A line nobody reads is still a line
+		 * somebody can be pointed at.
+		 */
+		foreach ( array_slice( (array) $result['skipped'], 0, 12 ) as $qsoft_reason ) {
+			ImportLog::add( 'unpack', (string) $qsoft_reason );
+		}
+
+		$qsoft_more = count( (array) $result['skipped'] ) - 12;
+
+		if ( $qsoft_more > 0 ) {
+			ImportLog::add(
+				'unpack',
+				sprintf(
+					/* translators: %d: how many more entries were skipped. */
+					_n( 'And %d more entry was skipped.', 'And %d more entries were skipped.', $qsoft_more, 'qwerty-soft-signal' ),
+					$qsoft_more
+				)
+			);
+		}
+
+		if ( array() !== $docs['files'] ) {
+			ImportLog::add(
+				'read',
+				sprintf(
+					/* translators: 1: number of documents, 2: the first one's name. */
+					_n( 'Read %1$d document that came with the design, starting with %2$s.', 'Read %1$d documents that came with the design, starting with %2$s.', count( $docs['files'] ), 'qwerty-soft-signal' ),
+					count( $docs['files'] ),
+					basename( (string) $docs['files'][0] )
+				),
+				array( 'files' => $docs['files'] )
+			);
+		}
+
+		ImportLog::add(
+			'read',
+			sprintf(
+				/* translators: 1: pages found, 2: images found. */
+				__( 'Indexed the design: %1$d pages, %2$d images.', 'qwerty-soft-signal' ),
+				count( $index['pages'] ),
+				(int) $index['images']
+			)
+		);
 
 		return rest_ensure_response(
 			array(
-				'slug'      => $result['slug'],
-				'files'     => $result['files'],
-				'bytes'     => $result['bytes'],
-				'skipped'   => $result['skipped'],
-				'pages'     => $index['pages'],
-				'languages' => $index['languages'],
-				'images'    => $index['images'],
-				'palette'   => CssIndex::from_directory( $result['path'] )->palette_proposal(),
+				'slug'       => $result['slug'],
+				'files'      => $result['files'],
+				'bytes'      => $result['bytes'],
+				'skipped'    => $result['skipped'],
+				'dropped'    => $result['dropped'],
+				'pages'      => $index['pages'],
+				'languages'  => $index['languages'],
+				'images'     => $index['images'],
+				'components' => $index['components'],
+				'readable'   => $index['readable'],
+				'kind'       => $index['kind'],
+				'diagnosis'  => $this->diagnosis( $index ),
+				'palette'    => CssIndex::from_directory( $result['path'] )->palette_proposal(),
 			)
 		);
 	}
@@ -1639,7 +2925,7 @@ final class Importer implements Module {
 	private function design_root( string $slug ) {
 		// An empty slug would resolve to the base itself and "build" every design.
 		if ( ! $this->validate_slug( $slug ) ) {
-			return new WP_Error( 'wow_signal_unknown_design', __( 'That design is not on this site.', 'wow-signal' ), array( 'status' => 404 ) );
+			return new WP_Error( 'qwerty_soft_unknown_design', __( 'That design is not on this site.', 'qwerty-soft-signal' ), array( 'status' => 404 ) );
 		}
 
 		$base = DesignArchive::base_dir();
@@ -1652,11 +2938,11 @@ final class Importer implements Module {
 		$real_dir  = realpath( trailingslashit( $base ) . $slug );
 
 		if ( false === $real_base || false === $real_dir || ! is_dir( $real_dir ) ) {
-			return new WP_Error( 'wow_signal_unknown_design', __( 'That design is not on this site.', 'wow-signal' ), array( 'status' => 404 ) );
+			return new WP_Error( 'qwerty_soft_unknown_design', __( 'That design is not on this site.', 'qwerty-soft-signal' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! $this->is_inside( $real_dir, $real_base ) ) {
-			return new WP_Error( 'wow_signal_unknown_design', __( 'That design is not on this site.', 'wow-signal' ), array( 'status' => 404 ) );
+			return new WP_Error( 'qwerty_soft_unknown_design', __( 'That design is not on this site.', 'qwerty-soft-signal' ), array( 'status' => 404 ) );
 		}
 
 		return $real_dir;
@@ -1780,23 +3066,23 @@ final class Importer implements Module {
 	 */
 	private function page_path( string $root, string $file ) {
 		if ( ! $this->validate_file( $file ) ) {
-			return new WP_Error( 'wow_signal_no_page', __( 'That page is not in this design.', 'wow-signal' ), array( 'status' => 404 ) );
+			return new WP_Error( 'qwerty_soft_no_page', __( 'That page is not in this design.', 'qwerty-soft-signal' ), array( 'status' => 404 ) );
 		}
 
 		$candidate = realpath( trailingslashit( $root ) . ltrim( str_replace( '\\', '/', $file ), '/' ) );
 
 		if ( false === $candidate || ! is_file( $candidate ) ) {
-			return new WP_Error( 'wow_signal_no_page', __( 'That page is not in this design.', 'wow-signal' ), array( 'status' => 404 ) );
+			return new WP_Error( 'qwerty_soft_no_page', __( 'That page is not in this design.', 'qwerty-soft-signal' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! $this->is_inside( $candidate, $root ) ) {
-			return new WP_Error( 'wow_signal_no_page', __( 'That page is not in this design.', 'wow-signal' ), array( 'status' => 404 ) );
+			return new WP_Error( 'qwerty_soft_no_page', __( 'That page is not in this design.', 'qwerty-soft-signal' ), array( 'status' => 404 ) );
 		}
 
 		$normalised_file = str_replace( '\\', '/', $candidate );
 
 		if ( ! preg_match( '#\.html?$#i', $normalised_file ) ) {
-			return new WP_Error( 'wow_signal_no_page', __( 'That is not an HTML page.', 'wow-signal' ), array( 'status' => 400 ) );
+			return new WP_Error( 'qwerty_soft_no_page', __( 'That is not an HTML page.', 'qwerty-soft-signal' ), array( 'status' => 400 ) );
 		}
 
 		return $candidate;
@@ -1834,7 +3120,7 @@ final class Importer implements Module {
 		}
 
 		if ( null === $section ) {
-			return new WP_Error( 'wow_signal_no_section', __( 'That section is no longer in the page.', 'wow-signal' ), array( 'status' => 404 ) );
+			return new WP_Error( 'qwerty_soft_no_section', __( 'That section is no longer in the page.', 'qwerty-soft-signal' ), array( 'status' => 404 ) );
 		}
 
 		/*
@@ -1900,7 +3186,7 @@ final class Importer implements Module {
 
 			$concerns[] = sprintf(
 				/* translators: %s: why no model could be reached. */
-				__( 'This is the structural conversion — no model was asked, because none can be reached from here. %s', 'wow-signal' ),
+				__( 'This is the structural conversion — no model was asked, because none can be reached from here. %s', 'qwerty-soft-signal' ),
 				(string) $status['reason']
 			);
 		}
@@ -1925,7 +3211,7 @@ final class Importer implements Module {
 			if ( empty( $call['ok'] ) ) {
 				$concerns[] = sprintf(
 					/* translators: %s: the reason the model could not be reached. */
-					__( 'The model could not be reached, so this is the structural conversion: %s', 'wow-signal' ),
+					__( 'The model could not be reached, so this is the structural conversion: %s', 'qwerty-soft-signal' ),
 					(string) ( $call['error'] ?? '' )
 				);
 
@@ -1950,7 +3236,7 @@ final class Importer implements Module {
 		if ( 'api' === $transport && ! Spend::knows( $billed ) ) {
 			$concerns[] = sprintf(
 				/* translators: %s: model ID. */
-				__( 'This reply came from %s, which has no known price — its cost is recorded as zero.', 'wow-signal' ),
+				__( 'This reply came from %s, which has no known price — its cost is recorded as zero.', 'qwerty-soft-signal' ),
 				$billed
 			);
 		}
@@ -2060,10 +3346,10 @@ final class Importer implements Module {
 
 		if ( $status['remaining'] < 1 ) {
 			return new WP_Error(
-				'wow_signal_rate_limit',
+				'qwerty_soft_rate_limit',
 				sprintf(
 					/* translators: %d: number of conversions allowed per hour. */
-					__( 'That is %d conversions in an hour, which is the limit. Wait a little before continuing.', 'wow-signal' ),
+					__( 'That is %d conversions in an hour, which is the limit. Wait a little before continuing.', 'qwerty-soft-signal' ),
 					self::RATE_LIMIT
 				),
 				array( 'status' => 429 )
@@ -2090,7 +3376,7 @@ final class Importer implements Module {
 	 * @return string
 	 */
 	private function rate_limit_key(): string {
-		return 'wow_signal_convert_' . get_current_user_id();
+		return 'qwerty_soft_convert_' . get_current_user_id();
 	}
 
 	/**
@@ -2168,13 +3454,13 @@ final class Importer implements Module {
 		// Re-validated on the way in: the browser is not a trusted courier.
 		if ( ! $validator->check( $markup ) ) {
 			return new WP_Error(
-				'wow_signal_invalid_markup',
+				'qwerty_soft_invalid_markup',
 				implode( ' ', $validator->errors() ),
 				array( 'status' => 400 )
 			);
 		}
 
-		$title = '' !== $title ? $title : __( 'Imported section', 'wow-signal' );
+		$title = '' !== $title ? $title : __( 'Imported section', 'qwerty-soft-signal' );
 
 		if ( 'page' === $as ) {
 			/*
@@ -2190,7 +3476,19 @@ final class Importer implements Module {
 					'post_status'   => 'draft',
 					'post_title'    => $title,
 					'post_content'  => wp_slash( $markup ),
-					'page_template' => 'page-landing',
+					'page_template' => BlockConverter::faithful() ? 'page-design' : 'page-landing',
+
+					/*
+					 * The same ownership mark SiteAssembler puts on the pages
+					 * it builds. Undo deletes what carries this mark and
+					 * nothing else, so a page saved from a pasted or
+					 * CLI-produced reply was unreachable by it forever: the
+					 * import could be run again and again, and "Delete what
+					 * was built so far" removed nothing while reporting
+					 * success. Measured on a real install: nine imported
+					 * pages, zero marks.
+					 */
+					'meta_input'    => array( SiteAssembler::OWNED_META => 'markup:page' ),
 				),
 				true
 			);
@@ -2201,6 +3499,9 @@ final class Importer implements Module {
 					'post_status'  => 'publish',
 					'post_title'   => $title,
 					'post_content' => wp_slash( $markup ),
+
+					// Marked for the same reason the page above is.
+					'meta_input'   => array( SiteAssembler::OWNED_META => 'markup:pattern' ),
 				),
 				true
 			);

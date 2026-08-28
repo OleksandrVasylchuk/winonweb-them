@@ -1,12 +1,12 @@
 <?php
 /**
- * Server render for wow/metric.
+ * Server render for qs/metric.
  *
  * The finished number is always present in the HTML. The count-up animation
  * is layered on top by view.js and is skipped entirely for visitors who ask
  * for reduced motion, so nobody ever sees a stuck zero.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  *
  * @var array<string, mixed> $attributes Block attributes.
@@ -18,13 +18,13 @@ declare( strict_types = 1 );
 
 defined( 'ABSPATH' ) || exit;
 
-$wow_value  = isset( $attributes['value'] ) ? trim( (string) $attributes['value'] ) : '';
-$wow_prefix = isset( $attributes['prefix'] ) ? (string) $attributes['prefix'] : '';
-$wow_suffix = isset( $attributes['suffix'] ) ? (string) $attributes['suffix'] : '';
-$wow_label  = isset( $attributes['label'] ) ? (string) $attributes['label'] : '';
-$wow_anim   = ! isset( $attributes['animate'] ) || (bool) $attributes['animate'];
+$qsoft_value  = isset( $attributes['value'] ) ? trim( (string) $attributes['value'] ) : '';
+$qsoft_prefix = isset( $attributes['prefix'] ) ? (string) $attributes['prefix'] : '';
+$qsoft_suffix = isset( $attributes['suffix'] ) ? (string) $attributes['suffix'] : '';
+$qsoft_label  = isset( $attributes['label'] ) ? (string) $attributes['label'] : '';
+$qsoft_anim   = ! isset( $attributes['animate'] ) || (bool) $attributes['animate'];
 
-if ( '' === $wow_value && '' === trim( wp_strip_all_tags( $wow_label ) ) ) {
+if ( '' === $qsoft_value && '' === trim( wp_strip_all_tags( $qsoft_label ) ) ) {
 	return;
 }
 
@@ -35,40 +35,40 @@ if ( '' === $wow_value && '' === trim( wp_strip_all_tags( $wow_label ) ) ) {
  * edit.js so PHP, the animation and the editor never disagree about what is
  * countable.
  */
-$wow_numeric   = 1 === preg_match( '/^\d[\d\s]*(\.\d+)?$/D', $wow_value );
-$wow_countable = $wow_anim && $wow_numeric && '' !== $wow_value;
+$qsoft_numeric   = 1 === preg_match( '/^\d[\d\s]*(\.\d+)?$/D', $qsoft_value );
+$qsoft_countable = $qsoft_anim && $qsoft_numeric && '' !== $qsoft_value;
 
 // The full string a screen reader should hear, in reading order.
-$wow_spoken = trim( $wow_prefix . $wow_value . $wow_suffix );
+$qsoft_spoken = trim( $qsoft_prefix . $qsoft_value . $qsoft_suffix );
 
-$wow_wrapper = get_block_wrapper_attributes( array( 'class' => 'wow-metric' ) );
+$qsoft_wrapper = get_block_wrapper_attributes( array( 'class' => 'qs-metric' ) );
 ?>
-<div <?php echo $wow_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by get_block_wrapper_attributes(). ?>>
-	<p class="wow-metric__value">
-		<?php if ( '' !== $wow_spoken ) : ?>
-			<span class="screen-reader-text"><?php echo esc_html( $wow_spoken ); ?></span>
+<div <?php echo $qsoft_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by get_block_wrapper_attributes(). ?>>
+	<p class="qs-metric__value">
+		<?php if ( '' !== $qsoft_spoken ) : ?>
+			<span class="screen-reader-text"><?php echo esc_html( $qsoft_spoken ); ?></span>
 			<span
-				class="wow-metric__figure"
+				class="qs-metric__figure"
 				aria-hidden="true"
-				<?php if ( $wow_countable ) : ?>
-					data-wow-count-to="<?php echo esc_attr( $wow_value ); ?>"
+				<?php if ( $qsoft_countable ) : ?>
+					data-qs-count-to="<?php echo esc_attr( $qsoft_value ); ?>"
 				<?php endif; ?>
 			>
-				<?php if ( '' !== $wow_prefix ) : ?>
-					<span class="wow-metric__affix"><?php echo esc_html( $wow_prefix ); ?></span>
+				<?php if ( '' !== $qsoft_prefix ) : ?>
+					<span class="qs-metric__affix"><?php echo esc_html( $qsoft_prefix ); ?></span>
 				<?php endif; ?>
-				<span class="wow-metric__number"><?php echo esc_html( $wow_value ); ?></span>
-				<?php if ( '' !== $wow_suffix ) : ?>
-					<span class="wow-metric__affix"><?php echo esc_html( $wow_suffix ); ?></span>
+				<span class="qs-metric__number"><?php echo esc_html( $qsoft_value ); ?></span>
+				<?php if ( '' !== $qsoft_suffix ) : ?>
+					<span class="qs-metric__affix"><?php echo esc_html( $qsoft_suffix ); ?></span>
 				<?php endif; ?>
 			</span>
 		<?php endif; ?>
 	</p>
-	<?php if ( '' !== trim( wp_strip_all_tags( $wow_label ) ) ) : ?>
-		<p class="wow-metric__label">
+	<?php if ( '' !== trim( wp_strip_all_tags( $qsoft_label ) ) ) : ?>
+		<p class="qs-metric__label">
 			<?php
 			echo wp_kses(
-				$wow_label,
+				$qsoft_label,
 				array(
 					'strong' => array(),
 					'em'     => array(),

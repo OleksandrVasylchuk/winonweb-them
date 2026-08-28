@@ -1,0 +1,129 @@
+{
+    "key": "group_qs_design_robert_ai_robert_ai_ab59be",
+    "title": "AI console hero",
+    "fields": [
+        {
+            "key": "field_qs_robert_ai_robert_ai_ab59be_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "AI-powered trade intelligence",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_ab59be_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Robert AI",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_ab59be_subheading",
+            "label": "Subheading",
+            "name": "subheading",
+            "type": "text",
+            "default_value": "International business and food trade intelligence — guided by Robert Khoubian’s methodology.",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_ab59be_lede",
+            "label": "Lede",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "A controlled AI advisory interface designed to help professionals understand global food trade, China–Eurasia supply chains, market access, customs data, trade risk and report-based analysis.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_ab59be_primary_cta",
+            "label": "Primary button",
+            "name": "primary_cta",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#waitlist",
+                "title": "Join Waitlist",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_ab59be_secondary_cta",
+            "label": "Secondary button",
+            "name": "secondary_cta",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#knowledge",
+                "title": "View Knowledge Scope",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_ab59be_console_title",
+            "label": "Console title",
+            "name": "console_title",
+            "type": "text",
+            "default_value": "Robert AI Advisory Console",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_ab59be_console_status",
+            "label": "Console status",
+            "name": "console_status",
+            "type": "text",
+            "default_value": "● Prototype mode",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_ab59be_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_robert_ai_robert_ai_ab59be_row_topic",
+                    "label": "Topic",
+                    "name": "topic",
+                    "type": "text",
+                    "default_value": "Market access",
+                    "instructions": "A short line of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-robert-ai-robert-ai-ab59be"
+            }
+        ]
+    ],
+    "active": true
+}

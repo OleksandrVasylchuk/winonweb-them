@@ -2,13 +2,13 @@
 /**
  * Reads the data a design page's templates were meant to be filled with.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use DOMDocument;
 use DOMElement;

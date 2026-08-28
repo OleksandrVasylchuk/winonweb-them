@@ -2,18 +2,18 @@
 /**
  * Site Health checks for the hosting environment.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
-use Wow\Signal\Support\AnthropicClient;
-use Wow\Signal\Support\ClaudeCli;
-use Wow\Signal\Support\DesignFonts;
+use Qwerty\Soft\Contracts\Module;
+use Qwerty\Soft\Support\AnthropicClient;
+use Qwerty\Soft\Support\ClaudeCli;
+use Qwerty\Soft\Support\DesignFonts;
 use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
@@ -38,8 +38,8 @@ final class SiteHealth implements Module {
 	 */
 	private function outbound(): array {
 		return array(
-			'https://api.anthropic.com/'    => __( 'design conversions through the Anthropic API', 'wow-signal' ),
-			'https://fonts.googleapis.com/' => __( 'downloading a design’s Google Fonts', 'wow-signal' ),
+			'https://api.anthropic.com/'    => __( 'design conversions through the Anthropic API', 'qwerty-soft-signal' ),
+			'https://fonts.googleapis.com/' => __( 'downloading a design’s Google Fonts', 'qwerty-soft-signal' ),
 		);
 	}
 
@@ -61,19 +61,19 @@ final class SiteHealth implements Module {
 	 * @return array<string, array<string, array<string, mixed>>>
 	 */
 	public function tests( array $tests ): array {
-		$tests['direct']['wow_signal_extensions'] = array(
-			'label' => __( 'WOW — Signal: PHP extensions for the design importer', 'wow-signal' ),
+		$tests['direct']['qwerty_soft_extensions'] = array(
+			'label' => __( 'Qwerty Soft — Signal: PHP extensions for the design importer', 'qwerty-soft-signal' ),
 			'test'  => array( $this, 'test_extensions' ),
 		);
 
-		$tests['direct']['wow_signal_uploads'] = array(
-			'label' => __( 'WOW — Signal: uploads folder is writable', 'wow-signal' ),
+		$tests['direct']['qwerty_soft_uploads'] = array(
+			'label' => __( 'Qwerty Soft — Signal: uploads folder is writable', 'qwerty-soft-signal' ),
 			'test'  => array( $this, 'test_uploads' ),
 		);
 
-		$tests['async']['wow_signal_outbound'] = array(
-			'label'             => __( 'WOW — Signal: outbound HTTPS for the design importer', 'wow-signal' ),
-			'test'              => rest_url( 'wow-signal/v1/health/outbound' ),
+		$tests['async']['qwerty_soft_outbound'] = array(
+			'label'             => __( 'Qwerty Soft — Signal: outbound HTTPS for the design importer', 'qwerty-soft-signal' ),
+			'test'              => rest_url( 'qwerty-soft-signal/v1/health/outbound' ),
 			'has_rest'          => true,
 			'async_direct_test' => array( $this, 'test_outbound' ),
 		);
@@ -99,20 +99,20 @@ final class SiteHealth implements Module {
 
 		if ( array() === $missing ) {
 			return $this->result(
-				'wow_signal_extensions',
+				'qwerty_soft_extensions',
 				'good',
-				__( 'The PHP extensions the design importer needs are installed', 'wow-signal' ),
-				__( 'ZipArchive and DOM are available, so design archives can be unpacked and read.', 'wow-signal' )
+				__( 'The PHP extensions the design importer needs are installed', 'qwerty-soft-signal' ),
+				__( 'ZipArchive and DOM are available, so design archives can be unpacked and read.', 'qwerty-soft-signal' )
 			);
 		}
 
 		return $this->result(
-			'wow_signal_extensions',
+			'qwerty_soft_extensions',
 			'recommended',
-			__( 'A PHP extension the design importer needs is missing', 'wow-signal' ),
+			__( 'A PHP extension the design importer needs is missing', 'qwerty-soft-signal' ),
 			sprintf(
 				/* translators: %s: comma-separated list of PHP extension names. */
-				__( 'The theme itself runs fine, but Appearance → Design import cannot work without: %s. Ask your host to enable the extension.', 'wow-signal' ),
+				__( 'The theme itself runs fine, but Appearance → Design import cannot work without: %s. Ask your host to enable the extension.', 'qwerty-soft-signal' ),
 				implode( ', ', $missing )
 			)
 		);
@@ -128,18 +128,18 @@ final class SiteHealth implements Module {
 
 		if ( empty( $uploads['error'] ) && wp_is_writable( (string) $uploads['basedir'] ) ) {
 			return $this->result(
-				'wow_signal_uploads',
+				'qwerty_soft_uploads',
 				'good',
-				__( 'The uploads folder is writable', 'wow-signal' ),
-				__( 'Design archives, their images and their fonts can be stored.', 'wow-signal' )
+				__( 'The uploads folder is writable', 'qwerty-soft-signal' ),
+				__( 'Design archives, their images and their fonts can be stored.', 'qwerty-soft-signal' )
 			);
 		}
 
 		return $this->result(
-			'wow_signal_uploads',
+			'qwerty_soft_uploads',
 			'critical',
-			__( 'The uploads folder is not writable', 'wow-signal' ),
-			__( 'Media uploads, the logo step of the theme setup and the design importer all need to write to wp-content/uploads. Check the folder’s permissions with your host.', 'wow-signal' )
+			__( 'The uploads folder is not writable', 'qwerty-soft-signal' ),
+			__( 'Media uploads, the logo step of the theme setup and the design importer all need to write to wp-content/uploads. Check the folder’s permissions with your host.', 'qwerty-soft-signal' )
 		);
 	}
 
@@ -168,20 +168,20 @@ final class SiteHealth implements Module {
 
 		if ( array() === $blocked ) {
 			return $this->result(
-				'wow_signal_outbound',
+				'qwerty_soft_outbound',
 				'good',
-				__( 'The server can reach the services the design importer uses', 'wow-signal' ),
-				__( 'api.anthropic.com and fonts.googleapis.com both answered.', 'wow-signal' )
+				__( 'The server can reach the services the design importer uses', 'qwerty-soft-signal' ),
+				__( 'api.anthropic.com and fonts.googleapis.com both answered.', 'qwerty-soft-signal' )
 			);
 		}
 
 		return $this->result(
-			'wow_signal_outbound',
+			'qwerty_soft_outbound',
 			'recommended',
-			__( 'The server cannot reach a service the design importer uses', 'wow-signal' ),
+			__( 'The server cannot reach a service the design importer uses', 'qwerty-soft-signal' ),
 			sprintf(
 				/* translators: %s: list of blocked hosts with what each is used for. */
-				__( 'Everything else in the theme is unaffected. Blocked: %s. Usually a firewall rule on the host; the support desk can open outbound HTTPS to these hosts.', 'wow-signal' ),
+				__( 'Everything else in the theme is unaffected. Blocked: %s. Usually a firewall rule on the host; the support desk can open outbound HTTPS to these hosts.', 'qwerty-soft-signal' ),
 				implode( '; ', $blocked )
 			)
 		);
@@ -194,7 +194,7 @@ final class SiteHealth implements Module {
 	 */
 	public function routes(): void {
 		register_rest_route(
-			'wow-signal/v1',
+			'qwerty-soft-signal/v1',
 			'/health/outbound',
 			array(
 				'methods'             => 'GET',
@@ -217,24 +217,24 @@ final class SiteHealth implements Module {
 	public function debug_information( array $info ): array {
 		$fonts = class_exists( DesignFonts::class ) ? DesignFonts::count() : 0;
 
-		$info['wow-signal'] = array(
-			'label'  => __( 'WOW — Signal', 'wow-signal' ),
+		$info['qwerty-soft-signal'] = array(
+			'label'  => __( 'Qwerty Soft — Signal', 'qwerty-soft-signal' ),
 			'fields' => array(
 				'version' => array(
-					'label' => __( 'Theme version', 'wow-signal' ),
-					'value' => WOW_SIGNAL_VERSION,
+					'label' => __( 'Theme version', 'qwerty-soft-signal' ),
+					'value' => QSOFT_VERSION,
 				),
 				'php'     => array(
-					'label' => __( 'PHP version', 'wow-signal' ),
+					'label' => __( 'PHP version', 'qwerty-soft-signal' ),
 					'value' => PHP_VERSION,
 				),
 				'zip'     => array(
-					'label' => __( 'ZipArchive', 'wow-signal' ),
-					'value' => class_exists( 'ZipArchive' ) ? __( 'Available', 'wow-signal' ) : __( 'Missing', 'wow-signal' ),
+					'label' => __( 'ZipArchive', 'qwerty-soft-signal' ),
+					'value' => class_exists( 'ZipArchive' ) ? __( 'Available', 'qwerty-soft-signal' ) : __( 'Missing', 'qwerty-soft-signal' ),
 				),
 				'api_key' => array(
-					'label'   => __( 'Anthropic API key', 'wow-signal' ),
-					'value'   => '' !== AnthropicClient::api_key() ? __( 'Configured', 'wow-signal' ) : __( 'Not set', 'wow-signal' ),
+					'label'   => __( 'Anthropic API key', 'qwerty-soft-signal' ),
+					'value'   => '' !== AnthropicClient::api_key() ? __( 'Configured', 'qwerty-soft-signal' ) : __( 'Not set', 'qwerty-soft-signal' ),
 					'private' => true,
 				),
 
@@ -246,15 +246,15 @@ final class SiteHealth implements Module {
 				 * start a process at all, and whether the command is findable.
 				 */
 				'cli'     => array(
-					'label' => __( 'Claude Code command', 'wow-signal' ),
+					'label' => __( 'Claude Code command', 'qwerty-soft-signal' ),
 					'value' => self::cli_summary(),
 				),
 				'fonts'   => array(
-					'label' => __( 'Font families imported from designs', 'wow-signal' ),
+					'label' => __( 'Font families imported from designs', 'qwerty-soft-signal' ),
 					'value' => (string) $fonts,
 				),
 				'locale'  => array(
-					'label' => __( 'Site language', 'wow-signal' ),
+					'label' => __( 'Site language', 'qwerty-soft-signal' ),
 					'value' => get_locale(),
 				),
 			),
@@ -270,15 +270,15 @@ final class SiteHealth implements Module {
 	 */
 	private static function cli_summary(): string {
 		if ( ! ClaudeCli::can_spawn() ) {
-			return __( 'Unavailable — this server does not let PHP start other programs', 'wow-signal' );
+			return __( 'Unavailable — this server does not let PHP start other programs', 'qwerty-soft-signal' );
 		}
 
 		$binary = ClaudeCli::binary();
 
 		return '' !== $binary
 			/* translators: %s: path to the claude binary. */
-			? sprintf( __( 'Found at %s', 'wow-signal' ), $binary )
-			: __( 'Not installed on this server', 'wow-signal' );
+			? sprintf( __( 'Found at %s', 'qwerty-soft-signal' ), $binary )
+			: __( 'Not installed on this server', 'qwerty-soft-signal' );
 	}
 
 	/**
@@ -295,7 +295,7 @@ final class SiteHealth implements Module {
 			'label'       => $label,
 			'status'      => $status,
 			'badge'       => array(
-				'label' => __( 'Theme', 'wow-signal' ),
+				'label' => __( 'Theme', 'qwerty-soft-signal' ),
 				'color' => 'good' === $status ? 'blue' : 'orange',
 			),
 			'description' => '<p>' . esc_html( $description ) . '</p>',

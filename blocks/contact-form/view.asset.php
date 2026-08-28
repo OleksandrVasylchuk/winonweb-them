@@ -1,11 +1,11 @@
 <?php
 /**
- * Script dependencies for the wow/contact-form front-end script.
+ * Script dependencies for the qs/contact-form front-end script.
  *
  * The script is dependency-free on purpose: it is a few lines of vanilla
  * JavaScript that only refines behaviour the markup already provides.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 

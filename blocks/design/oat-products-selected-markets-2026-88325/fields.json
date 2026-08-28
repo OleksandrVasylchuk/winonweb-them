@@ -1,0 +1,33 @@
+{
+    "key": "group_qs_design_oat_products_selected_markets_2026_88325",
+    "title": "Методология и права",
+    "fields": [
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_88325_heading",
+            "label": "Заголовок",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Методология и публикационные права",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_88325_note",
+            "label": "Текст примечания",
+            "name": "note",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Исходный отчет использует исторические и прогнозные данные и ссылается на Euromonitor International, Mintel GNPD и Global Trade Tracker. Перед публичной публикацией полной версии или платного отчета нужно подтвердить права на использование детальных third-party tables. Текущая страница — краткая website-ready версия, а не полное воспроизведение исходного документа.",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-oat-products-selected-markets-2026-88325"
+            }
+        ]
+    ],
+    "active": true
+}

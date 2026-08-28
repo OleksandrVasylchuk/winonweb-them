@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-oat-products-selected-markets-2026-where",
+    "title": "Executive Summary",
+    "category": "qs",
+    "description": "Executive Summary — 2 pieces of text, 5 repeating items. From oat-products-selected-markets-2026.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "oat-products-selected-markets-2026",
+        "executive",
+        "summary"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Where oat opportunities look strongest.",
+                "summary": "The source report indicates that oat product activity is not evenly distributed. Mexico and Brazil are the largest selected markets by combined proxy volume and product-launch activity, while Japan is the largest selected APAC market. The Philippines and South Korea appear more targeted, with useful innovation signals and Canadian product presence."
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/en/reports/oat-products-selected-markets-2026.html",
+    "qsDesignVersion": 7
+}

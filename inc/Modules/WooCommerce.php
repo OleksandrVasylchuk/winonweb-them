@@ -2,15 +2,15 @@
 /**
  * WooCommerce integration.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -160,7 +160,7 @@ final class WooCommerce implements Module {
 		 *
 		 * @param bool $needs_shop Whether to keep WooCommerce assets.
 		 */
-		if ( (bool) apply_filters( 'wow_signal/needs_woocommerce_assets', $needs_shop ) ) {
+		if ( (bool) apply_filters( 'qwerty_soft/needs_woocommerce_assets', $needs_shop ) ) {
 			return;
 		}
 
@@ -188,7 +188,7 @@ final class WooCommerce implements Module {
 
 		$label = sprintf(
 			/* translators: 1: average rating, 2: number of reviews. */
-			_n( 'Rated %1$s out of 5 based on %2$s review', 'Rated %1$s out of 5 based on %2$s reviews', (int) $count, 'wow-signal' ),
+			_n( 'Rated %1$s out of 5 based on %2$s review', 'Rated %1$s out of 5 based on %2$s reviews', (int) $count, 'qwerty-soft-signal' ),
 			esc_html( (string) round( (float) $rating, 1 ) ),
 			esc_html( number_format_i18n( (int) $count ) )
 		);

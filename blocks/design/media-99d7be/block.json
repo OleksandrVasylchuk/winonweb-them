@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-media-99d7be",
+    "title": "Media hero",
+    "category": "qs",
+    "description": "Media hero — 7 pieces of text, 1 picture, 2 links, 5 repeating items. From media.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "media",
+        "hero"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "eyebrow": "Медиа и пресс-центр",
+                "heading": "Экспертные комментарии по международной торговле продуктами питания.",
+                "lede": "Материалы для журналистов, организаторов конференций, торговых ассоциаций и отраслевых партнеров, которым нужны комментарии по торговле продуктами питания между Китаем и Евразией, замороженным цепочкам поставок, рыночному доступу и практическому международному трейдингу.",
+                "topics_link": {
+                    "url": "#topics",
+                    "title": "Темы интервью",
+                    "target": ""
+                },
+                "media_contact_link": {
+                    "url": "#contact",
+                    "title": "Контакт для СМИ",
+                    "target": ""
+                },
+                "profile_eyebrow": "Media Profile",
+                "spokesperson_name": "Роберт Хубиян",
+                "expertise_areas": "China • Eurasia • Frozen Food Supply Chains",
+                "formats_label": "Media Formats"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/media.html",
+    "qsDesignVersion": 7
+}

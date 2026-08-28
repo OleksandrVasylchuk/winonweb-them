@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_reports_f3c63d",
+    "title": "Supported payments",
+    "fields": [
+        {
+            "key": "field_qs_reports_f3c63d_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "应支持的支付方式",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_f3c63d_lede",
+            "label": "Intro text",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "上线版本应支持银行卡、PayPal 和银行转账，并通过安全下载链接保护付费文件。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_f3c63d_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_reports_f3c63d_row_check_mark",
+                    "label": "Check mark",
+                    "name": "check_mark",
+                    "type": "text",
+                    "default_value": "✓",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_reports_f3c63d_row_payment_method",
+                    "label": "Payment method",
+                    "name": "payment_method",
+                    "type": "text",
+                    "default_value": "通过 Stripe 支持 Visa、Mastercard 和 American Express",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-f3c63d"
+            }
+        ]
+    ],
+    "active": true
+}

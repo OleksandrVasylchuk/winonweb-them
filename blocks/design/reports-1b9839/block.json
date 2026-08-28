@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-reports-1b9839",
+    "title": "Таможенные отчеты",
+    "category": "qs",
+    "description": "Таможенные отчеты — 2 pieces of text, 3 repeating items. From reports.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "reports",
+        "Таможенные",
+        "отчеты"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Таможенные отчеты загружены как первичные данные.",
+                "lede": "Эти отчеты добавлены в прототип как источники для внутренней проверки. Публичные samples и платные версии должны быть отредактированы и утверждены перед запуском."
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/reports.html",
+    "qsDesignVersion": 7
+}

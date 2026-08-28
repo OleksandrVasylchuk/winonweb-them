@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_market_intelligence_index_how_to_read_th",
+    "title": "Index Score Bands",
+    "fields": [
+        {
+            "key": "field_qs_market_intelligence_index_how_to_read_th_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "How to Read the Index",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_how_to_read_th_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_market_intelligence_index_how_to_read_th_row_score_range",
+                    "label": "Score range",
+                    "name": "score_range",
+                    "type": "text",
+                    "default_value": "80–100",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_market_intelligence_index_how_to_read_th_row_heading",
+                    "label": "Band heading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "High-priority opportunity",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_market_intelligence_index_how_to_read_th_row_description",
+                    "label": "What this band means",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Strong fundamentals; proceed to transaction-level validation.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-market-intelligence-index-how-to-read-th"
+            }
+        ]
+    ],
+    "active": true
+}

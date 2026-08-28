@@ -11,7 +11,7 @@
 # the host named in the DOWNLOAD_BASE repository variable and every site
 # running the theme sees the new version under Appearance → Themes.
 #
-# Repository variable: DOWNLOAD_BASE, e.g. https://www.winonweb.dev/downloads/
+# Repository variable: DOWNLOAD_BASE, e.g. https://qwerty-soft.com/downloads/
 # Without it the manifest carries a placeholder host the theme refuses, so a
 # forgotten variable cannot publish a working-looking but broken manifest.
 
@@ -72,18 +72,18 @@ jobs:
       - name: Read the checksum
         id: sum
         run: |
-          echo "sha256=$(cut -d' ' -f1 artifacts/release/wow-signal-${THEME_VERSION}.zip.sha256)" >> "$GITHUB_OUTPUT"
+          echo "sha256=$(cut -d' ' -f1 artifacts/release/qwerty-soft-signal-${THEME_VERSION}.zip.sha256)" >> "$GITHUB_OUTPUT"
 
       - name: Create the GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          name: WOW — Signal ${{ env.THEME_VERSION }}
+          name: Qwerty Soft — Signal ${{ env.THEME_VERSION }}
           files: |
-            artifacts/release/wow-signal-${{ env.THEME_VERSION }}.zip
-            artifacts/release/wow-signal-${{ env.THEME_VERSION }}.zip.sha256
+            artifacts/release/qwerty-soft-signal-${{ env.THEME_VERSION }}.zip
+            artifacts/release/qwerty-soft-signal-${{ env.THEME_VERSION }}.zip.sha256
             artifacts/release/update.json
           body: |
-            **wow-signal-${{ env.THEME_VERSION }}.zip**
+            **qwerty-soft-signal-${{ env.THEME_VERSION }}.zip**
 
             SHA-256: `${{ steps.sum.outputs.sha256 }}`
 

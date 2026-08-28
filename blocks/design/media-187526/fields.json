@@ -1,0 +1,52 @@
+{
+    "key": "group_qs_design_media_187526",
+    "title": "Interview topics",
+    "fields": [
+        {
+            "key": "field_qs_media_187526_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Рекомендуемые темы интервью",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_187526_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_media_187526_row_topic",
+                    "label": "Topic",
+                    "name": "topic",
+                    "type": "text",
+                    "default_value": "Как Китай развивается как экспортная платформа замороженных продуктов",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_media_187526_row_description",
+                    "label": "What the topic covers",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Структура рынка, производственные мощности, ожидания покупателей и региональные возможности.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-media-187526"
+            }
+        ]
+    ],
+    "active": true
+}

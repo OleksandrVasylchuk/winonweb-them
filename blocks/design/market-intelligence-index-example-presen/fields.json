@@ -1,0 +1,116 @@
+{
+    "key": "group_qs_design_market_intelligence_index_example_presen",
+    "title": "Illustrative scorecard",
+    "fields": [
+        {
+            "key": "field_qs_market_intelligence_index_example_presen_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Example presentation — not a published market ranking",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_example_presen_lede",
+            "label": "Intro text",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "The following score is a design demonstration only. It must not be cited as a current market conclusion.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_example_presen_notice_heading",
+            "label": "Notice heading",
+            "name": "notice_heading",
+            "type": "text",
+            "default_value": "Name and methodology notice",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_example_presen_notice_text",
+            "label": "Notice text",
+            "name": "notice_text",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert Khoubian Market Intelligence Index™, RKMII™ and associated scorecard designs are presented as proprietary brand and methodology identifiers. The ™ symbol indicates a claimed mark; it does not state that a trademark registration has been granted.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_example_presen_overall_score_label",
+            "label": "Overall score label",
+            "name": "overall_score_label",
+            "type": "text",
+            "default_value": "Illustrative overall score",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_example_presen_overall_score",
+            "label": "Overall score",
+            "name": "overall_score",
+            "type": "text",
+            "default_value": "82",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_example_presen_status_note",
+            "label": "Status note",
+            "name": "status_note",
+            "type": "text",
+            "default_value": "STATUS: DEMONSTRATION ONLY",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_example_presen_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_market_intelligence_index_example_presen_row_criterion",
+                    "label": "Criterion",
+                    "name": "criterion",
+                    "type": "text",
+                    "default_value": "Illustrative overall score",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_market_intelligence_index_example_presen_row_score",
+                    "label": "Score",
+                    "name": "score",
+                    "type": "text",
+                    "default_value": "82",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-market-intelligence-index-example-presen"
+            }
+        ]
+    ],
+    "active": true
+}

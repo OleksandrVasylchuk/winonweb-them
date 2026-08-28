@@ -1,0 +1,60 @@
+{
+    "key": "group_qs_design_index_stats_band_bd35b3",
+    "title": "Stats band",
+    "fields": [
+        {
+            "key": "field_qs_index_stats_band_bd35b3_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_index_stats_band_bd35b3_row_label",
+                    "label": "Label — Operating Experience",
+                    "name": "label",
+                    "type": "text",
+                    "default_value": "Operating Experience",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_index_stats_band_bd35b3_row_value",
+                    "label": "Label — Since 2004",
+                    "name": "value",
+                    "type": "text",
+                    "default_value": "Since 2004",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_index_stats_band_bd35b3_row_detail",
+                    "label": "Label — International food trade",
+                    "name": "detail",
+                    "type": "text",
+                    "default_value": "International food trade",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-stats-band-bd35b3"
+            }
+        ]
+    ],
+    "active": true
+}

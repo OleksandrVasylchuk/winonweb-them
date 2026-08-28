@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-market-intelligence-index-06b625",
+    "title": "指数维度框架",
+    "category": "qs",
+    "description": "指数维度框架 — 2 pieces of text, 8 repeating items. From market-intelligence-index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "market-intelligence-index",
+        "指数维度框架"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "指数衡量什么",
+                "intro": "每一项公开评分均应基于有记录的输入数据、标准化子评分及注明日期的方法说明。不同指数类别可采用不同权重，但公开结果必须披露适用版本与数据期间。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/market-intelligence-index.html",
+    "qsDesignVersion": 7
+}

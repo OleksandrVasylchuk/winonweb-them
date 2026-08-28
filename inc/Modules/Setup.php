@@ -2,15 +2,15 @@
 /**
  * Theme supports, image sizes and translations.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -46,6 +46,14 @@ final class Setup implements Module {
 		add_theme_support( 'wide-blocks' );
 		add_theme_support( 'responsive-embeds' );
 		add_theme_support( 'editor-styles' );
+
+		/*
+		 * One stylesheet, and it exists for one reason: the editor draws the
+		 * post content as a constrained column, and a section lifted from a
+		 * design is never a column. Everything else the editor needs is in
+		 * theme.json, where it belongs.
+		 */
+		add_editor_style( 'assets/css/editor.css' );
 		add_theme_support( 'wp-block-styles' );
 		add_theme_support( 'custom-logo' );
 		add_theme_support( 'automatic-feed-links' );
@@ -72,13 +80,13 @@ final class Setup implements Module {
 	 */
 	public function image_sizes(): void {
 		// 3:2 card used by the services, cases and blog grids.
-		add_image_size( 'wow-signal-card', 720, 480, true );
+		add_image_size( 'qwerty-soft-signal-card', 720, 480, true );
 
 		// 16:9 banner used by hero media and single post featured images.
-		add_image_size( 'wow-signal-wide', 1600, 900, true );
+		add_image_size( 'qwerty-soft-signal-wide', 1600, 900, true );
 
 		// 1:1 avatar used by testimonials and team patterns.
-		add_image_size( 'wow-signal-square', 640, 640, true );
+		add_image_size( 'qwerty-soft-signal-square', 640, 640, true );
 	}
 
 	/**
@@ -91,9 +99,9 @@ final class Setup implements Module {
 		return array_merge(
 			$sizes,
 			array(
-				'wow-signal-card'   => __( 'Signal card (3:2)', 'wow-signal' ),
-				'wow-signal-wide'   => __( 'Signal wide (16:9)', 'wow-signal' ),
-				'wow-signal-square' => __( 'Signal square (1:1)', 'wow-signal' ),
+				'qwerty-soft-signal-card'   => __( 'Signal card (3:2)', 'qwerty-soft-signal' ),
+				'qwerty-soft-signal-wide'   => __( 'Signal wide (16:9)', 'qwerty-soft-signal' ),
+				'qwerty-soft-signal-square' => __( 'Signal square (1:1)', 'qwerty-soft-signal' ),
 			)
 		);
 	}
@@ -108,6 +116,6 @@ final class Setup implements Module {
 	 * @return void
 	 */
 	public function load_translations(): void {
-		load_theme_textdomain( 'wow-signal', WOW_SIGNAL_DIR . '/languages' );
+		load_theme_textdomain( 'qwerty-soft-signal', QSOFT_DIR . '/languages' );
 	}
 }

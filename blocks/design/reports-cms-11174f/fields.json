@@ -1,0 +1,54 @@
+{
+    "key": "group_qs_design_reports_cms_11174f",
+    "title": "Report catalogue",
+    "fields": [
+        {
+            "key": "field_qs_reports_cms_11174f_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "为 CMS 上传准备的报告产品。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_cms_11174f_lede",
+            "label": "Section intro",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "以下是商店的第一批产品类别。每个项目都设计为以后可以在后台上传封面、执行摘要、样本 PDF、受保护的付费 PDF、价格、许可和多语言版本。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_cms_11174f_source",
+            "label": "Show",
+            "name": "source",
+            "type": "post_object",
+            "post_type": [
+                "qs_report"
+            ],
+            "multiple": 1,
+            "return_format": "id",
+            "instructions": "Leave empty to show the most recent automatically."
+        },
+        {
+            "key": "field_qs_reports_cms_11174f_limit",
+            "label": "How many",
+            "name": "limit",
+            "type": "number",
+            "default_value": 6,
+            "min": 1,
+            "instructions": "The most this position will display at once."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-cms-11174f"
+            }
+        ]
+    ],
+    "active": true
+}

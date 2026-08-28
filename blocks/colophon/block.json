@@ -1,13 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "wow/colophon",
+	"name": "qs/colophon",
 	"title": "Colophon",
-	"category": "wow",
+	"category": "qs",
 	"icon": "info-outline",
 	"description": "The copyright line for the footer. Keeps the year current on its own and can show the designer credit.",
 	"keywords": [ "footer", "copyright", "credit", "year" ],
-	"textdomain": "wow-signal",
+	"textdomain": "qwerty-soft-signal",
 	"attributes": {
 		"prefix": {
 			"type": "string",

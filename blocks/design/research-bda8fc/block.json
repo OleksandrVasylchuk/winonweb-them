@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-research-bda8fc",
+    "title": "Call to action",
+    "category": "qs",
+    "description": "Call to action — 2 pieces of text, 2 links. From research.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "research",
+        "call",
+        "action"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "先建立研究受众，再销售报告。",
+                "description": "第一目标是可信度：持续发布有用情报，建立信任，然后将最强的研究转化为高级出版物。",
+                "primary_action": {
+                    "url": "index.html#newsletter",
+                    "title": "订阅情报",
+                    "target": ""
+                },
+                "secondary_action": {
+                    "url": "media.html",
+                    "title": "媒体中心",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/research.html",
+    "qsDesignVersion": 7
+}

@@ -1,0 +1,195 @@
+{
+    "key": "group_qs_design_about_cd2b89",
+    "title": "About Content Blocks",
+    "fields": [
+        {
+            "key": "field_qs_about_cd2b89_contents_heading",
+            "label": "Contents heading",
+            "name": "contents_heading",
+            "type": "text",
+            "default_value": "页面内容",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_about_cd2b89_profile_link",
+            "label": "Link to Profile",
+            "name": "profile_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#profile",
+                "title": "简介",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_cd2b89_timeline_link",
+            "label": "Link to Timeline",
+            "name": "timeline_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#timeline",
+                "title": "时间线",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_cd2b89_market_access_link",
+            "label": "Link to Market access",
+            "name": "market_access_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#market-access",
+                "title": "市场准入",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_cd2b89_missions_link",
+            "label": "Link to Trade missions",
+            "name": "missions_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#missions",
+                "title": "贸易代表团",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_cd2b89_projects_link",
+            "label": "Link to Projects",
+            "name": "projects_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#projects",
+                "title": "项目",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_cd2b89_aquaprole_link",
+            "label": "Link to Aquaprole",
+            "name": "aquaprole_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#aquaprole",
+                "title": "Aquaprole",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_cd2b89_technology_link",
+            "label": "Link to Technology",
+            "name": "technology_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#technology",
+                "title": "技术",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_about_cd2b89_beyond_link",
+            "label": "Link to Beyond work",
+            "name": "beyond_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#beyond",
+                "title": "工作之外",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_about_cd2b89_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_about_cd2b89_row_heading",
+                    "label": "Block heading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "实战型国际食品贸易背景。",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_about_cd2b89_row_body",
+                    "label": "Body text",
+                    "name": "body",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Robert Khoubian 是国际食品贸易专业人士、企业家和市场情报发布者，专注中国—欧亚食品贸易、冷冻食品供应链和跨境市场准入。",
+                    "instructions": "A short paragraph of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_about_cd2b89_row_additional_detail",
+                    "label": "Additional detail",
+                    "name": "additional_detail",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "自 2004 年在加拿大贸易公司开始职业生涯以来，Robert 的工作覆盖俄罗斯、独联体市场、中国、东南亚、北美和欧盟。他的经验包括食品贸易、市场准入、海关和兽医要求、冷链物流、零售产品适配和国际业务发展。",
+                    "instructions": "A short paragraph of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-about-cd2b89"
+            }
+        ]
+    ],
+    "active": true
+}

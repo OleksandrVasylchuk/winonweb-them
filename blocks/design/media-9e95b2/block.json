@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-media-9e95b2",
+    "title": "Professional facts",
+    "category": "qs",
+    "description": "Professional facts — 2 pieces of text, 7 repeating items. From media.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "media",
+        "professional",
+        "facts"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Профессиональные факты для СМИ",
+                "intro": "Эти формулировки подходят как элементы профессионального профиля. Более сильные заявления, требующие документов, ведутся отдельно в evidence register и должны быть подтверждены перед формальным цитированием."
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/media.html",
+    "qsDesignVersion": 7
+}

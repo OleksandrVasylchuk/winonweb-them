@@ -1,24 +1,24 @@
 /**
- * wow/faq — front end and editor.
+ * qs/faq — front end and editor.
  */
 
-.wow-faq {
+.qs-faq {
 	display: grid;
 	gap: var(--wp--preset--spacing--30);
 }
 
-.wow-faq__item {
+.qs-faq__item {
 	background: var(--wp--preset--color--surface);
 	border: 1px solid var(--wp--preset--color--border);
 	border-radius: var(--wp--custom--radius--md);
 	overflow: hidden;
 }
 
-.wow-faq__item[open] {
+.qs-faq__item[open] {
 	border-color: var(--wp--preset--color--border-strong);
 }
 
-.wow-faq__question {
+.qs-faq__question {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -35,37 +35,37 @@
 }
 
 /* Hide the default disclosure triangle; the custom marker replaces it. */
-.wow-faq__question::-webkit-details-marker {
+.qs-faq__question::-webkit-details-marker {
 	display: none;
 }
 
-.wow-faq__question::marker {
+.qs-faq__question::marker {
 	content: "";
 }
 
-.wow-faq__question:hover {
+.qs-faq__question:hover {
 	background: var(--wp--preset--color--surface-2);
 }
 
-.wow-faq__question:focus-visible {
+.qs-faq__question:focus-visible {
 	outline: var(--wp--custom--focus-ring--width) solid var(--wp--custom--focus-ring--color);
 	outline-offset: calc(var(--wp--custom--focus-ring--offset) * -1);
 }
 
-.wow-faq__question-text {
+.qs-faq__question-text {
 	flex: 1 1 auto;
 }
 
 /* Plus sign drawn from two rules so it needs no icon font or SVG request. */
-.wow-faq__marker {
+.qs-faq__marker {
 	position: relative;
 	flex: 0 0 auto;
 	width: var(--wp--custom--icon--md);
 	height: var(--wp--custom--icon--md);
 }
 
-.wow-faq__marker::before,
-.wow-faq__marker::after {
+.qs-faq__marker::before,
+.qs-faq__marker::after {
 	content: "";
 	position: absolute;
 	inset-block-start: 50%;
@@ -77,32 +77,32 @@
 	transition: rotate var(--wp--custom--transition--base), opacity var(--wp--custom--transition--fast);
 }
 
-.wow-faq__marker::after {
+.qs-faq__marker::after {
 	rotate: 90deg;
 }
 
-.wow-faq__item[open] .wow-faq__marker::after {
+.qs-faq__item[open] .qs-faq__marker::after {
 	rotate: 180deg;
 	opacity: 0;
 }
 
-.wow-faq__answer {
+.qs-faq__answer {
 	padding: 0 var(--wp--preset--spacing--50) var(--wp--preset--spacing--50);
 	color: var(--wp--preset--color--muted);
 }
 
-.wow-faq__answer > :first-child {
+.qs-faq__answer > :first-child {
 	margin-block-start: 0;
 }
 
-.wow-faq__answer > :last-child {
+.qs-faq__answer > :last-child {
 	margin-block-end: 0;
 }
 
 @media (forced-colors: active) {
 
-	.wow-faq__marker::before,
-	.wow-faq__marker::after {
+	.qs-faq__marker::before,
+	.qs-faq__marker::after {
 		background: CanvasText;
 	}
 }

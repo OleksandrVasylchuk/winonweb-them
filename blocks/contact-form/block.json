@@ -1,13 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "wow/contact-form",
+	"name": "qs/contact-form",
 	"title": "Contact form",
-	"category": "wow",
+	"category": "qs",
 	"icon": "email-alt",
 	"description": "An accessible contact form that emails the site owner. Protected by a nonce, a honeypot and a rate limit — no plugin needed.",
 	"keywords": [ "contact", "form", "email", "enquiry", "lead" ],
-	"textdomain": "wow-signal",
+	"textdomain": "qwerty-soft-signal",
 	"attributes": {
 		"formId": {
 			"type": "string",

@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-robert-ai-robert-ai-af8f80",
+    "title": "AI console hero",
+    "category": "qs",
+    "description": "AI console hero — 6 pieces of text, 2 links, 5 repeating items. From robert-ai.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "robert-ai",
+        "console",
+        "hero"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "eyebrow": "ИИ-интеллект для международной торговли",
+                "heading": "Robert AI",
+                "subheading": "Интеллектуальный консультант по международному бизнесу и food trade, построенный на методологии Роберта Хубияна.",
+                "lede": "Контролируемый AI-интерфейс, который помогает профессионалам разбираться в международной торговле продуктами питания, цепочках Китай—Евразия, доступе на рынки, таможенных данных, платежных рисках и аналитических отчетах.",
+                "primary_cta": {
+                    "url": "#waitlist",
+                    "title": "Присоединиться к waitlist",
+                    "target": ""
+                },
+                "secondary_cta": {
+                    "url": "#knowledge",
+                    "title": "Что будет знать Robert AI",
+                    "target": ""
+                },
+                "console_title": "Консоль Robert AI",
+                "console_status": "● Режим прототипа"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/05_AI_Roadmap/z-08ed030b/robert_khoubian_site_v15_robert_ai/ru/robert-ai.html",
+    "qsDesignVersion": 7
+}

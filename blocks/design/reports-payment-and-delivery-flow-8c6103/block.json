@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-reports-payment-and-delivery-flow-8c6103",
+    "title": "Checkout flow steps",
+    "category": "qs",
+    "description": "Checkout flow steps — 2 pieces of text, 4 repeating items. From reports.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "reports",
+        "checkout",
+        "flow",
+        "steps"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Payment and delivery flow",
+                "intro": "The production CMS should connect reports to checkout and protected digital delivery. The static prototype shows the structure; the live version should process payments and deliver files automatically."
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/en/reports.html",
+    "qsDesignVersion": 7
+}

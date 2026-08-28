@@ -1,0 +1,49 @@
+/*
+ * Gateway links
+ *
+ * Lifted from the design's own stylesheet, unchanged. The selectors
+ * match the class names on render.php because both came out of the
+ * same archive; do not rename either without renaming the other.
+ */
+
+:root{--navy:#06111f; --navy-2:#0b1b2e; --ink:#132033; --muted:#5d6878; --line:#dfe6ef; --soft:#f4f7fb; --soft-2:#eef3f8; --gold:#c7a85d; --gold-2:#e7d39a; --white:#ffffff; --charcoal:#182231; --shadow:0 24px 60px rgba(6,17,31,.16); --radius:22px; --radius-sm:14px; --max:1180px;}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}
+.primary-nav a{transition:.2s;color:#334155}
+.primary-nav a:hover{color:var(--navy)}
+.photo-caption small{color:#dfe9f5}
+.mini-grid div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px}
+.intelligence-strip span,.intelligence-strip a{padding:18px 26px;border-right:1px solid rgba(255,255,255,.14);font-size:13px;color:#e4edf7}
+.stat small{display:block;color:var(--muted);font-size:13px;margin-top:6px}
+.topic-card .tag,.topic-card h3,.topic-card p,.topic-card a{margin-left:22px;margin-right:22px}
+.topic-card a{display:inline-block;margin-top:18px;margin-bottom:24px;color:var(--navy);font-weight:800}
+.site-footer a{display:block;color:#dce6f2;margin:0 0 9px}
+.aside-nav a{display:block;color:#526174;border-top:1px solid var(--line);padding:11px 0;font-size:14px}
+.gateway-links{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.gateway-links a{background:#fff;color:var(--navy);border-radius:18px;padding:22px;border:1px solid rgba(255,255,255,.25);font-weight:800}
+.gateway-links small{display:block;color:#68758a;margin-top:6px;font-weight:500}
+.store-stat small{display:block;color:#dbe7f5;margin-top:5px}
+.report-cover span,.report-cover small{position:relative;z-index:2;text-transform:uppercase;letter-spacing:.13em;font-size:11px;font-weight:850;color:#e7d39a}
+.index-score-ring strong,.index-score-ring small{position:relative;z-index:1}
+.index-score-ring small{font-size:.9rem;color:#607086;margin-top:23px}
+.scorecard-top div{display:flex;flex-direction:column}
+.subscore-row>div:first-child{display:flex;justify-content:space-between;font-size:.87rem}
+.metric-main small{color:#dbe7f5}
+.metric-secondary div{padding:14px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);border-radius:16px}
+.rkmii-home-grid>div>p{font-size:18px;color:var(--muted)}
+.score-bars div{display:grid;grid-template-columns:130px 1fr;gap:14px;align-items:center}
+.rkmii-mini-score small{color:#aebed0}
+:root{--bg:#07111f; --bg2:#0b1728; --panel:#101d31; --ink:#f7f3ea; --muted:#aeb8c5; --line:rgba(255,255,255,.12); --gold:#d4b46a; --blue:#87b7ff; --white:#fff; --body:#172033; --bodytext:#2c3444;}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}
+.lang a{font-size:12px;border:1px solid var(--line);padding:7px 9px;border-radius:999px;color:#cdd7e5}
+.lang a.active{background:var(--gold);color:#07111f;border-color:var(--gold)}
+.flow div{background:#fff;border:1px solid #e5dfd2;border-radius:18px;padding:18px}
+:root{--navy:#06111f; --navy2:#0b1b30; --ink:#111827; --muted:#667085; --line:#d9e1ea; --paper:#f6f8fb; --gold:#b8954b; --blue:#2d6cdf; --green:#15803d; --red:#b42318; --amber:#b7791f; --white:#fff; --shadow:0 18px 45px rgba(6,17,31,.12); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}
+.nav a{display:block;padding:11px 12px;border-radius:10px;color:#e8eef5;margin:4px 0}
+.nav a.active,.nav a:hover{background:rgba(255,255,255,.08)}
+@media (max-width:860px){.gateway-links{grid-template-columns:1fr}}
+@media (max-width:540px){.intelligence-strip span,.intelligence-strip a{padding:15px 18px}}
+@media(max-width:720px){.score-bars div{grid-template-columns:110px 1fr}}

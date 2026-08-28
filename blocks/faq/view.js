@@ -1,5 +1,5 @@
 /**
- * wow/faq — optional "one answer open at a time" behaviour.
+ * qs/faq — optional "one answer open at a time" behaviour.
  *
  * Everything the accordion needs already works without this file: <details>
  * handles opening, closing, keyboard operation and screen-reader state on its
@@ -30,7 +30,7 @@
 	}
 
 	function boot() {
-		var accordions = document.querySelectorAll( '.wow-faq.is-exclusive' );
+		var accordions = document.querySelectorAll( '.qs-faq.is-exclusive' );
 
 		Array.prototype.forEach.call( accordions, init );
 	}

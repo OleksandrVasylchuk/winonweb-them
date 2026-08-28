@@ -1,0 +1,77 @@
+{
+    "key": "group_qs_design_index_bc3bb9",
+    "title": "来自实战经验的市场覆盖。",
+    "fields": [
+        {
+            "key": "field_qs_index_bc3bb9_heading",
+            "label": "Subheading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "来自实战经验的市场覆盖。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_bc3bb9_lede",
+            "label": "Text",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert 的工作覆盖供应市场、目的地市场、政府相关贸易代表团以及受监管零售渠道的产品导入项目。重点不是理论，而是食品贸易走廊中的实际执行。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_bc3bb9_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_index_bc3bb9_row_region",
+                    "label": "Label — 北美",
+                    "name": "region",
+                    "type": "text",
+                    "default_value": "北美",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_index_bc3bb9_row_country",
+                    "label": "Label — 加拿大",
+                    "name": "country",
+                    "type": "text",
+                    "default_value": "加拿大",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_index_bc3bb9_row_country_2",
+                    "label": "Label — 美国",
+                    "name": "country_2",
+                    "type": "text",
+                    "default_value": "美国",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-bc3bb9"
+            }
+        ]
+    ],
+    "active": true
+}

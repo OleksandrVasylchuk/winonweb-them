@@ -1,0 +1,152 @@
+{
+    "key": "group_qs_design_index_understand_the_report_in_five_minu",
+    "title": "Understand the report in five minutes.",
+    "fields": [
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_heading",
+            "label": "Subheading — Understand the report in…",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Understand the report in five minutes.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_intro",
+            "label": "Text — Each approved report can…",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Each approved report can include a 4–5 minute briefing presented by Robert Khoubian’s approved digital avatar and voice clone. The briefing explains the key findings, methodology, limitations and commercial implications without replacing the report itself.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_video_duration",
+            "label": "Video duration",
+            "name": "video_duration",
+            "type": "text",
+            "default_value": "4:30",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_play_icon",
+            "label": "Video play",
+            "name": "play_icon",
+            "type": "text",
+            "default_value": "▶",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_featured_briefing_label",
+            "label": "Label",
+            "name": "featured_briefing_label",
+            "type": "text",
+            "default_value": "Featured report briefing",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_briefing_title",
+            "label": "Subheading — How to Read a Customs-Ba…",
+            "name": "briefing_title",
+            "type": "text",
+            "default_value": "How to Read a Customs-Based Market Report",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_briefing_description",
+            "label": "Text — A concise explanation of…",
+            "name": "briefing_description",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "A concise explanation of HS-code scope, data coverage, ranking limitations and the commercial meaning behind the numbers.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_learn_heading",
+            "label": "Subheading — What you will learn",
+            "name": "learn_heading",
+            "type": "text",
+            "default_value": "What you will learn",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_watch_briefing_link",
+            "label": "Btn — Watch the briefing",
+            "name": "watch_briefing_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "videos.html",
+                "title": "Watch the briefing",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_youtube_channel_link",
+            "label": "Btn — More videos on YouTube",
+            "name": "youtube_channel_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#",
+                "title": "More videos on YouTube",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_ai_disclosure",
+            "label": "Video disclosure",
+            "name": "ai_disclosure",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "AI-assisted presentation using Robert Khoubian’s approved digital avatar and voice clone. Script, analysis and final publication are reviewed and approved by Robert Khoubian.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_understand_the_report_in_five_minu_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_index_understand_the_report_in_five_minu_row_learning_point",
+                    "label": "Text",
+                    "name": "learning_point",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "How to interpret HS codes and data coverage",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-understand-the-report-in-five-minu"
+            }
+        ]
+    ],
+    "active": true
+}

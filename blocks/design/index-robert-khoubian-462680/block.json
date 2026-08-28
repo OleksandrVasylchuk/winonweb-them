@@ -1,0 +1,68 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-index-robert-khoubian-462680",
+    "title": "Robert Khoubian",
+    "category": "qs",
+    "description": "Robert Khoubian — 19 pieces of text, 1 picture, 2 links, 5 repeating items. From index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "index",
+        "robert",
+        "khoubian"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "eyebrow": "面向全球食品市场的可信情报",
+                "heading": "Robert Khoubian",
+                "subheading": "全球食品贸易专家",
+                "focus_line": "中国 • 欧亚 • 冷冻食品供应链",
+                "lede": "基于二十多年在中国、俄罗斯、独联体市场、北美和国际冷冻食品供应链的实战经验，提供独立食品贸易情报。",
+                "primary_link": {
+                    "url": "#expertise",
+                    "title": "查看专业领域",
+                    "target": ""
+                },
+                "secondary_link": {
+                    "url": "about.html",
+                    "title": "阅读简介",
+                    "target": ""
+                },
+                "caption_kicker": "全球食品贸易",
+                "caption_name": "Robert Khoubian",
+                "caption_note": "研究 • 情报 • 贸易",
+                "panel_label": "情报重点",
+                "panel_value": "中国 • 欧亚 • 全球食品贸易",
+                "stat_one_label": "始于",
+                "stat_one_value": "2004",
+                "stat_two_label": "重点",
+                "stat_two_value": "市场准入",
+                "stat_three_label": "品类",
+                "stat_three_value": "冷冻食品",
+                "stat_four_label": "读者",
+                "stat_four_value": "企业决策者",
+                "strip_label": "最新情报"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/index.html",
+    "qsDesignVersion": 7
+}

@@ -1,16 +1,16 @@
 /**
- * wow/slider — front end and editor.
+ * qs/slider — front end and editor.
  */
 
-.wow-slider {
-	--wow-slide-width: var(--wp--custom--slider--slide-width);
+.qs-slider {
+	--qs-slide-width: var(--wp--custom--slider--slide-width);
 
 	position: relative;
 	display: grid;
 	gap: var(--wp--preset--spacing--50);
 }
 
-.wow-slider__viewport {
+.qs-slider__viewport {
 	overflow-x: auto;
 	overflow-y: hidden;
 	scroll-snap-type: x mandatory;
@@ -22,7 +22,7 @@
 	scrollbar-color: var(--wp--preset--color--border-strong) transparent;
 }
 
-.wow-slider__track {
+.qs-slider__track {
 	display: flex;
 	gap: var(--wp--preset--spacing--50);
 	list-style: none;
@@ -30,28 +30,28 @@
 	margin: 0;
 }
 
-.wow-slider__slide {
-	flex: 0 0 min(var(--wow-slide-width), var(--wp--custom--slider--slide-width-mobile));
+.qs-slider__slide {
+	flex: 0 0 min(var(--qs-slide-width), var(--wp--custom--slider--slide-width-mobile));
 	scroll-snap-align: start;
 	margin: 0;
 }
 
-.wow-slider__slide > * {
+.qs-slider__slide > * {
 	height: 100%;
 	margin: 0;
 }
 
-.wow-slider__controls {
+.qs-slider__controls {
 	display: flex;
 	justify-content: flex-end;
 	gap: var(--wp--preset--spacing--30);
 }
 
-.wow-slider__controls[hidden] {
+.qs-slider__controls[hidden] {
 	display: none;
 }
 
-.wow-slider__button {
+.qs-slider__button {
 	width: var(--wp--custom--tap-target);
 	height: var(--wp--custom--tap-target);
 	padding: 0;
@@ -66,30 +66,30 @@
 	transition: background-color var(--wp--custom--transition--fast), border-color var(--wp--custom--transition--fast);
 }
 
-.wow-slider__button:hover:not([aria-disabled="true"]) {
+.qs-slider__button:hover:not([aria-disabled="true"]) {
 	background: var(--wp--preset--color--surface-2);
 	border-color: var(--wp--preset--color--accent);
 }
 
-.wow-slider__button[aria-disabled="true"] {
+.qs-slider__button[aria-disabled="true"] {
 	opacity: 0.4;
 	cursor: default;
 }
 
 /* Chevron drawn with two borders — no icon font, no SVG request. */
-.wow-slider__arrow {
+.qs-slider__arrow {
 	width: var(--wp--custom--icon--sm);
 	height: var(--wp--custom--icon--sm);
 	border-top: var(--wp--custom--hairline) solid currentColor;
 	border-right: var(--wp--custom--hairline) solid currentColor;
 }
 
-.wow-slider__arrow--next {
+.qs-slider__arrow--next {
 	rotate: 45deg;
 	translate: calc(var(--wp--custom--hairline) * -1) 0;
 }
 
-.wow-slider__arrow--prev {
+.qs-slider__arrow--prev {
 	rotate: -135deg;
 	translate: var(--wp--custom--hairline) 0;
 }
@@ -98,7 +98,7 @@
  * The viewport is focusable so it can be scrolled from the keyboard; the ring
  * has to sit inside it because the container clips its own overflow.
  */
-.wow-slider__viewport:focus-visible {
+.qs-slider__viewport:focus-visible {
 	outline: var(--wp--custom--focus-ring--width) solid var(--wp--custom--focus-ring--color);
 	outline-offset: calc(var(--wp--custom--focus-ring--offset) * -1);
 	border-radius: var(--wp--custom--radius--md);
@@ -106,25 +106,25 @@
 
 @media (prefers-reduced-motion: reduce) {
 
-	.wow-slider__viewport {
+	.qs-slider__viewport {
 		scroll-behavior: auto;
 	}
 }
 
 @media (forced-colors: active) {
 
-	.wow-slider__button {
+	.qs-slider__button {
 		border-color: ButtonBorder;
 	}
 }
 
 /* The chevrons point the other way in a right-to-left document. */
-[dir="rtl"] .wow-slider__arrow--next {
+[dir="rtl"] .qs-slider__arrow--next {
 	rotate: -135deg;
 	translate: var(--wp--custom--hairline) 0;
 }
 
-[dir="rtl"] .wow-slider__arrow--prev {
+[dir="rtl"] .qs-slider__arrow--prev {
 	rotate: 45deg;
 	translate: calc(var(--wp--custom--hairline) * -1) 0;
 }

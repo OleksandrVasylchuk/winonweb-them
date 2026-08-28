@@ -1,5 +1,5 @@
 /**
- * Editor UI for wow/faq.
+ * Editor UI for qs/faq.
  */
 ( function ( wp ) {
 	'use strict';
@@ -12,19 +12,19 @@
 	var PanelBody = wp.components.PanelBody;
 	var ToggleControl = wp.components.ToggleControl;
 
-	var TEMPLATE = [ [ 'wow/faq-item' ], [ 'wow/faq-item' ], [ 'wow/faq-item' ] ];
+	var TEMPLATE = [ [ 'qs/faq-item' ], [ 'qs/faq-item' ], [ 'qs/faq-item' ] ];
 
-	wp.blocks.registerBlockType( 'wow/faq', {
+	wp.blocks.registerBlockType( 'qs/faq', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
 
 			var blockProps = useBlockProps( {
-				className: 'wow-faq',
-				'data-empty-hint': __( 'Add a question to start the FAQ.', 'wow-signal' ),
+				className: 'qs-faq',
+				'data-empty-hint': __( 'Add a question to start the FAQ.', 'qwerty-soft-signal' ),
 			} );
 			var innerProps = useInnerBlocksProps( blockProps, {
-				allowedBlocks: [ 'wow/faq-item' ],
+				allowedBlocks: [ 'qs/faq-item' ],
 				template: TEMPLATE,
 				templateLock: false,
 				renderAppender: wp.blockEditor.InnerBlocks.ButtonBlockAppender,
@@ -38,18 +38,18 @@
 					null,
 					el(
 						PanelBody,
-						{ title: __( 'FAQ settings', 'wow-signal' ) },
+						{ title: __( 'FAQ settings', 'qwerty-soft-signal' ) },
 						el( ToggleControl, {
-							label: __( 'Publish as an FAQ to search engines', 'wow-signal' ),
-							help: __( 'Adds hidden FAQ data so Google can show these questions in results. Turn this off if another plugin already does it, or if the answers are not genuine questions.', 'wow-signal' ),
+							label: __( 'Publish as an FAQ to search engines', 'qwerty-soft-signal' ),
+							help: __( 'Adds hidden FAQ data so Google can show these questions in results. Turn this off if another plugin already does it, or if the answers are not genuine questions.', 'qwerty-soft-signal' ),
 							checked: !! attributes.emitSchema,
 							onChange: function ( value ) {
 								setAttributes( { emitSchema: value } );
 							},
 						} ),
 						el( ToggleControl, {
-							label: __( 'Close other answers when one opens', 'wow-signal' ),
-							help: __( 'Keeps only one answer open at a time. Visitors can still open every answer if JavaScript is unavailable.', 'wow-signal' ),
+							label: __( 'Close other answers when one opens', 'qwerty-soft-signal' ),
+							help: __( 'Keeps only one answer open at a time. Visitors can still open every answer if JavaScript is unavailable.', 'qwerty-soft-signal' ),
 							checked: !! attributes.exclusive,
 							onChange: function ( value ) {
 								setAttributes( { exclusive: value } );

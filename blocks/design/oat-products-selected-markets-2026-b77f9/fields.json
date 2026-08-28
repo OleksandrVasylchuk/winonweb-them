@@ -1,0 +1,61 @@
+{
+    "key": "group_qs_design_oat_products_selected_markets_2026_b77f9",
+    "title": "Market priorities",
+    "fields": [
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_b77f9_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Коммерческая интерпретация для экспортеров.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_b77f9_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Этот блок переводит исходный отчет в практическую логику market entry для oat exporters, брендов и пользователей рыночной аналитики.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_b77f9_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_oat_products_selected_markets_2026_b77f9_row_market",
+                    "label": "Market",
+                    "name": "market",
+                    "type": "text",
+                    "default_value": "Приоритет 1: Мексика",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_oat_products_selected_markets_2026_b77f9_row_assessment",
+                    "label": "What it means",
+                    "name": "assessment",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Мексика сочетает крупнейший прокси-объем, высокую активность запусков и наиболее заметное канадское присутствие.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-oat-products-selected-markets-2026-b77f9"
+            }
+        ]
+    ],
+    "active": true
+}

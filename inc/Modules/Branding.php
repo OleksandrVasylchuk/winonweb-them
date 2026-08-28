@@ -2,15 +2,15 @@
 /**
  * Admin and login branding.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * Applies the theme palette to the login screen and admin chrome.
  *
  * Everything here is cosmetic and admin-only: no front-end weight, and the
- * whole module can be dropped by a child theme through the wow_signal/modules
+ * whole module can be dropped by a child theme through the qwerty_soft/modules
  * filter without affecting the site.
  */
 final class Branding implements Module {
@@ -83,9 +83,9 @@ final class Branding implements Module {
 			$c['accent']
 		);
 
-		wp_register_style( 'wow-signal-login', false, array(), WOW_SIGNAL_VERSION );
-		wp_enqueue_style( 'wow-signal-login' );
-		wp_add_inline_style( 'wow-signal-login', $css );
+		wp_register_style( 'qwerty-soft-signal-login', false, array(), QSOFT_VERSION );
+		wp_enqueue_style( 'qwerty-soft-signal-login' );
+		wp_add_inline_style( 'qwerty-soft-signal-login', $css );
 	}
 
 	/**
@@ -162,8 +162,8 @@ final class Branding implements Module {
 
 		return sprintf(
 			/* translators: %s: linked studio name. */
-			esc_html__( 'Built with WOW — Signal by %s', 'wow-signal' ),
-			'<a href="https://www.winonweb.dev/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Win On Web', 'wow-signal' ) . '</a>'
+			esc_html__( 'Built with Qwerty Soft — Signal by %s', 'qwerty-soft-signal' ),
+			'<a href="https://qwerty-soft.com/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Qwerty Soft', 'qwerty-soft-signal' ) . '</a>'
 		);
 	}
 }

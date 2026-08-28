@@ -1,4 +1,4 @@
-# WOW — Signal — using the theme
+# Qwerty Soft — Signal — using the theme
 
 This is the guide for the person running the site. It assumes you know your way
 around WordPress and does not assume you write code — nothing here requires
@@ -31,10 +31,10 @@ Developer documentation is in `README.md`; the accessibility report is in
 required, and there is nothing to build or compile.
 
 1. **Appearance → Themes → Add New → Upload Theme**
-2. Choose `wow-signal-*.zip` and press **Install Now**
+2. Choose `qwerty-soft-signal-*.zip` and press **Install Now**
 3. Press **Activate**
 
-If your host rejects the upload for size, unzip it and copy the `wow-signal`
+If your host rejects the upload for size, unzip it and copy the `qwerty-soft-signal`
 folder into `wp-content/themes/` over SFTP instead.
 
 **Will it run on my hosting?** Any host that runs WordPress on PHP 8.1 or newer
@@ -42,7 +42,7 @@ runs the theme — there is nothing to compile and nothing to configure. The
 design importer additionally needs the PHP `zip` extension and permission to
 make outgoing connections, both of which almost every shared host provides.
 After activating, open **Tools → Site Health**: the entries beginning
-"WOW — Signal" tell you in plain words whether anything is missing and what it
+"Qwerty Soft — Signal" tell you in plain words whether anything is missing and what it
 would affect.
 
 **Language.** The theme is in English by default. It switches to Ukrainian only
@@ -157,11 +157,11 @@ The theme's patterns are filed under five headings:
 
 | Category | What is in it |
 |---|---|
-| **WOW — Hero** | Opening sections for the top of a page |
-| **WOW — Content** | Services, process, features, text |
-| **WOW — Proof** | Case studies, metrics, testimonials, client logos |
-| **WOW — Conversion** | Pricing, FAQ, contact, calls to action |
-| **WOW — Full pages** | Complete page layouts to drop in and edit |
+| **Qwerty Soft — Hero** | Opening sections for the top of a page |
+| **Qwerty Soft — Content** | Services, process, features, text |
+| **Qwerty Soft — Proof** | Case studies, metrics, testimonials, client logos |
+| **Qwerty Soft — Conversion** | Pricing, FAQ, contact, calls to action |
+| **Qwerty Soft — Full pages** | Complete page layouts to drop in and edit |
 
 Once inserted, a pattern is just blocks. Edit the text, swap the images, delete
 what you do not need.
@@ -253,6 +253,128 @@ checked before you can preview it and again before it can be saved.
 **To undo an import,** use **Remove everything this added**. It removes only
 what the import created.
 
+### How close to the design an import gets
+
+**As close as the archive is.** The pages an import makes keep the design's own
+class names, and the design's own stylesheet is installed alongside them, so
+what renders is the design — its colours, its spacing, its type, its rounded
+corners. The conversion does not translate any of that into the theme's palette
+or spacing scale; a hero the archive painted `#06111f` with 4.375rem of padding
+keeps exactly that.
+
+**The boxes stay boxes.** Every wrapper the design wrote — the grid a row of
+cards sits in, the card, the padded body inside it — comes back as a Group with
+the same tag and the same class names. That is what its stylesheet is written
+against, and flattening those wrappers into a run of paragraphs was the one
+thing that made an imported page share the design's words and none of its
+shape.
+
+**What the conversion does improve is underneath the styling:** headings become
+real headings in a sensible order with one `h1` per page, lists become lists,
+images carry alt text, forms become the theme's own contact block, in-page
+links keep the section ids they point at, and every section is a block a person
+can edit without touching code.
+
+**The preview shows this honestly.** Press Preview on any page and each section
+appears full width, rendered with the design's own stylesheet — the page as the
+built site will show it, not a narrow column. *Show the design beside it* puts
+the archive's own markup next to it when you want to compare the two.
+
+### A long import: watching it, and leaving it to run
+
+**What is happening now.** Every step that takes real time writes a line as it
+happens — the archive unpacked, the documents read, a page read out of its
+components, a page built, the menu and header made. The panel at the top of the
+screen shows them as they arrive. The lines live on the server, so reloading
+the page does not lose them and a build that finishes while you were away still
+has its account waiting.
+
+**Leaving it to run.** A corrected, reviewed build of a large design is an hour
+of model calls, which is longer than anyone will watch a tab. Tick **Run it on
+the server** before you press build and the server carries it on by itself, one
+page at a time; you can close the tab and come back, and the screen rejoins the
+build where it is. This uses WordPress's own scheduler, which advances on
+requests — a site with real cron (or with `DISABLE_WP_CRON` pointed at one)
+runs it properly unattended, and a quiet local install advances whenever
+anything touches it, including this screen watching its own log.
+
+**Your own instructions.** Under the design you will find **Your instructions
+for this design** — a box for the things the archive does not say: which page is
+really the home page, that the prices are placeholders, which language to keep.
+What you write goes to the top of every brief Claude works from, above the
+design's own documentation, and is stored inside the design so it disappears
+with it.
+
+### What the importer reads besides the markup
+
+**Archives inside the archive.** A handoff often arrives as a box of boxes —
+the source zipped, the build zipped, the photographs zipped, all inside one
+more. Each inner ZIP is opened where it stands, into a folder named after it,
+so a page that refers to `assets/photos/hero.png` still finds it once
+`assets/photos.zip` has been opened. Four levels deep is the limit, and the
+packaging is deleted once emptied; what stays on disk is the design.
+
+**The companion plugin.** Some handoffs ship the WordPress plugin the design
+expects to sit beside — post types, a REST route, a PDF generator. Those files
+say what the design means by a "report" or a "translation job", so the importer
+unpacks them and reads them. It never unpacks them as PHP: the extension is
+folded into the name, so `class-rk-rest-api.php` arrives as
+`class-rk-rest-api-php.txt`, which no web server will run whatever it is
+configured to do. Genuinely executable payloads — `.exe`, `.phar`, `.htaccess`
+— are still refused outright.
+
+**One stylesheet, not five.** A developer handoff is rarely one design. The
+last one held a marketing site, an admin console and two prototypes side by
+side, each with a complete stylesheet that defined `:root`, `body`, `.card`
+and `.btn`. The importer follows the `<link>` tags of the page you are looking
+at rather than sweeping up every CSS file it can find, so a page gets the
+stylesheet it was written against. When a page links a file the export left
+behind — `../assets/styles.css` from a folder that was zipped separately — the
+nearest copy of that file elsewhere in the archive is used.
+
+**The written part.** A handoff also carries a START-HERE, a README, a product
+brief, a route inventory, a UI design system, notes on which copy is final.
+Those pages answer what markup cannot: which colours are the brand's, what a
+page is for, what was deliberately left unfinished. The importer reads them,
+ranks them by what they are called — design system and content decisions
+first, change registers and QA sign-offs never — drops the ones filed twice,
+and quotes as much as fits into the brief Claude works from. One handoff here
+carries 61 markdown files; four of them are worth the room, and those four are
+the ones that get it.
+
+### Designs that are React or Vue applications
+
+Some handoffs are not pages at all. Open the `index.html` of a site built with
+React, Vue, Next or Vite and you find one empty element: the page is assembled
+in the browser, so there is no markup on disk to convert. The import screen
+says so plainly rather than failing a page at a time, and offers the way
+through it: **Read the pages out of the application**.
+
+That panel lists the URLs the application serves — read out of its router, not
+guessed — and reads one at a time. For each, Claude is given the page
+component, everything it renders, the layout around it, the stylesheet and the
+list of pictures that exist in the archive, and writes down the page those
+components produce. The result is saved into the design as an ordinary HTML
+page, and from that moment the design behaves like any other: preview it,
+convert it section by section, or build the whole site.
+
+Worth knowing:
+
+- **This is the one step that cannot be done offline.** Everything else on the
+  screen works with no account; reading components needs a model, either
+  through Claude Code on this machine (which uses the subscription it is signed
+  in to and bills nothing) or through an API key.
+- **One call per page,** and a page of components is a long read — expect it to
+  cost more than converting a single section.
+- **Nothing is invented.** The instructions are explicit that every heading,
+  paragraph and label must come from the source; where a page could not be
+  rendered faithfully, the reason is reported next to it.
+- **Routes with a parameter in them** — `/products/:slug` — are listed but not
+  read. They are one page per record, not one page, and rendering one would
+  give you an arbitrary product.
+- **Nothing touches your site.** A read writes one file inside the design's own
+  folder in uploads. Removing the design removes it.
+
 ### Designs exported from Claude Design
 
 If your design came out of Claude Design as an HTML archive, drop that archive
@@ -296,7 +418,7 @@ Useful to know before a handover, an audit, or a privacy review.
 | What | Where | Why |
 |---|---|---|
 | Your palette, logo and type choices | Site global styles (the same record the Site Editor writes) | So a theme update cannot overwrite them |
-| Whether setup is finished | Site option `wow_signal_setup` | So the notice stops appearing |
+| Whether setup is finished | Site option `qwerty_soft_setup` | So the notice stops appearing |
 | Anthropic API key, model and effort | Site options | Only if you use the design import with a key |
 | Design import spend and work in progress | Your own user profile | So the figures and the unfinished work are yours, not the site's |
 | Contact form rate limiting | Temporary records that expire on their own | Spam protection |
@@ -306,14 +428,14 @@ makes come from the design import screen: to Anthropic when you convert a
 section with a key entered, and to Google Fonts when a design you import uses
 typefaces from there (the files are downloaded once and then served from your
 own site, so visitors never contact Google). **Tools → Site Health** shows
-whether your host allows both, under the entries beginning "WOW — Signal".
+whether your host allows both, under the entries beginning "Qwerty Soft — Signal".
 
 **A note on the API key.** Stored in the database, it is readable by anyone with
 administrator access to the site. If that matters to you, put it in
 `wp-config.php` instead and the theme will use it from there and never store it:
 
 ```php
-define( 'WOW_SIGNAL_ANTHROPIC_KEY', 'sk-ant-…' );
+define( 'QSOFT_ANTHROPIC_KEY', 'sk-ant-…' );
 ```
 
 ---
@@ -349,7 +471,7 @@ uploaded** when asked. The result is identical to the automatic route.
 **What the check sends.** The version you have installed and a scrambled
 (one-way) form of the site address, so the server can tell one site from
 another. Nothing else. A developer can switch the check off entirely with the
-`wow_signal/check_updates` filter.
+`qwerty_soft/check_updates` filter.
 
 **If you have edited theme files directly, your edits will be lost.** Use a
 child theme if you need to change the code.
@@ -358,7 +480,7 @@ child theme if you need to change the code.
 
 ## Getting help
 
-There is a **WOW — Signal** panel on your dashboard with links to everything
+There is a **Qwerty Soft — Signal** panel on your dashboard with links to everything
 above, and a **Help** tab at the top right of the setup screen.
 
 If something is wrong, the most useful message tells us: the WordPress and PHP
@@ -368,9 +490,9 @@ you expected instead.
 **If you find something inaccessible in this theme, please report it.** We treat
 that as a defect, not a feature request.
 
-<https://www.winonweb.dev/>
+<https://qwerty-soft.com/>
 
 ---
 
-© WOW — Win On Web. The theme is GPL-2.0-or-later; Manrope is bundled under the
+© Qwerty Soft. The theme is GPL-2.0-or-later; Manrope is bundled under the
 SIL Open Font License 1.1.

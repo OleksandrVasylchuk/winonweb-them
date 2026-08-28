@@ -1,0 +1,45 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-market-intelligence-index-d031aa",
+    "title": "示例评分卡",
+    "category": "qs",
+    "description": "示例评分卡 — 7 pieces of text, 8 repeating items. From market-intelligence-index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "market-intelligence-index",
+        "示例评分卡"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "展示样式示例——并非已发布市场排名",
+                "intro": "以下评分仅用于页面设计演示，不得作为当前市场结论引用。",
+                "notice_heading": "名称与方法说明",
+                "notice_text": "Robert Khoubian Market Intelligence Index™、RKMII™ 及相关评分卡设计作为专有品牌和方法标识使用。™ 表示对商标权益的主张，并不代表已获得商标注册。",
+                "overall_score_label": "示例综合评分",
+                "overall_score": "82",
+                "status": "状态：仅供演示"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/market-intelligence-index.html",
+    "qsDesignVersion": 7
+}

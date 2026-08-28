@@ -1,0 +1,52 @@
+{
+    "key": "group_qs_design_robert_ai_how_robert_ai_can_become_a_rev",
+    "title": "Commercial model tiers",
+    "fields": [
+        {
+            "key": "field_qs_robert_ai_how_robert_ai_can_become_a_rev_kicker",
+            "label": "Section kicker",
+            "name": "kicker",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Commercial Model",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_how_robert_ai_can_become_a_rev_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "How Robert AI can become a revenue product",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_how_robert_ai_can_become_a_rev_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_robert_ai_how_robert_ai_can_become_a_rev_row_tier",
+                    "label": "Tier",
+                    "name": "tier",
+                    "type": "text",
+                    "default_value": "Free tier",
+                    "instructions": "A short line of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-robert-ai-how-robert-ai-can-become-a-rev"
+            }
+        ]
+    ],
+    "active": true
+}

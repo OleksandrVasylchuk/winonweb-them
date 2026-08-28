@@ -1,0 +1,98 @@
+/*
+ * Подписаться на Global Food Trade Intelligence
+ *
+ * Lifted from the design's own stylesheet, unchanged. The selectors
+ * match the class names on render.php because both came out of the
+ * same archive; do not rename either without renaming the other.
+ */
+
+:root{--navy:#06111f; --navy-2:#0b1b2e; --ink:#132033; --muted:#5d6878; --line:#dfe6ef; --soft:#f4f7fb; --soft-2:#eef3f8; --gold:#c7a85d; --gold-2:#e7d39a; --white:#ffffff; --charcoal:#182231; --shadow:0 24px 60px rgba(6,17,31,.16); --radius:22px; --radius-sm:14px; --max:1180px;}
+*{box-sizing:border-box}
+.container{width:min(var(--max),calc(100% - 40px));margin:0 auto}
+.hero h2{font-size:clamp(28px,3.6vw,48px);line-height:1.05;margin:16px 0 10px;font-weight:650;letter-spacing:-.035em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:13px 20px;border-radius:999px;font-weight:700;font-size:14px;border:1px solid transparent;transition:.2s;cursor:pointer}
+.btn-primary{background:var(--gold);color:#111;border-color:var(--gold)}
+.btn-primary:hover{transform:translateY(-1px);background:#d6b869}
+.mini-grid div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px}
+.section{padding:92px 0}
+.section-head h2,.content-block h2,.about-intro h2,.footprint h2,.proof h2,.newsletter h2,.page-hero h1{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.045em;color:var(--navy);line-height:1.05}
+.section-head h2,.footprint h2,.proof h2,.newsletter h2{font-size:clamp(36px,4.8vw,62px);margin:10px 0 0}
+.section-head p{max-width:640px;color:var(--muted);font-size:18px;margin:12px 0 0}
+.expertise-card p,.topic-card p,.focus-card p,.project-card p,.principle p{color:var(--muted);margin:0;font-size:15px}
+.footprint-copy p,.proof-copy p{color:var(--muted);font-size:18px}
+.topic-card .tag,.topic-card h3,.topic-card p,.topic-card a{margin-left:22px;margin-right:22px}
+.about-preview h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(36px,4.8vw,62px);line-height:1.05;letter-spacing:-.045em;margin:10px 0;color:#fff}
+.about-preview p{color:#d9e5f3;font-size:18px}
+.newsletter{background:#fff}
+.newsletter-card{border:1px solid var(--line);border-radius:34px;background:linear-gradient(135deg,#fff,#f6f8fb);padding:42px;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;box-shadow:var(--shadow)}
+.newsletter p{color:var(--muted);font-size:17px}
+.signup{display:flex;gap:10px;flex-wrap:wrap}
+.signup input{flex:1;min-width:240px;border:1px solid var(--line);border-radius:999px;padding:14px 16px;font-size:15px}
+.site-footer p{color:#aeb9c8;margin-top:10px}
+.content-block h2{font-size:clamp(30px,3.4vw,48px);margin:10px 0 16px}
+.content-block p{color:#4e5d70;font-size:17px}
+.timeline-item p{margin:0;color:#596779}
+.media-strip h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,4vw,56px);line-height:1.06;letter-spacing:-.04em;margin:10px 0;color:#fff}
+.media-strip p{color:#d8e4f2;font-size:18px}
+.gateway p{color:#dbe7f5;font-size:18px}
+.report-card p{margin:0;color:var(--muted)}
+.license-card p,.flow-step p{margin:0;color:var(--muted)}
+.method-note h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,4.5vw,58px);line-height:1.05;letter-spacing:-.045em;color:var(--navy);margin:10px 0}
+.method-note p{color:var(--muted);font-size:18px;max-width:900px}
+.insight-card p{margin:0;color:var(--muted)}
+.report-callout p{color:#465568}
+.index-score-card h2{font-size:1.25rem;margin:10px 0 22px}
+.index-score-card>p{font-size:.68rem;letter-spacing:.08em;font-weight:800;color:#9b5c00;margin:16px 0 0}
+.index-dimension p{margin:9px 0 0;color:#607086;line-height:1.6}
+.index-band h3,.index-band p{margin:0}
+.index-band p{color:#607086;margin-top:5px}
+.legal-note p{margin:8px 0 0;font-size:.9rem;color:#607086}
+.scorecard-top div{display:flex;flex-direction:column}
+.subscore-row>div:first-child{display:flex;justify-content:space-between;font-size:.87rem}
+.data-feature h2,.rkmii-home h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,4.7vw,62px);line-height:1.03;letter-spacing:-.045em;color:var(--navy);margin:10px 0 18px}
+.metric-secondary div{padding:14px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);border-radius:16px}
+.rkmii-home-grid>div>p{font-size:18px;color:var(--muted)}
+.score-bars div{display:grid;grid-template-columns:130px 1fr;gap:14px;align-items:center}
+.video-intelligence h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,4.7vw,62px);line-height:1.03;letter-spacing:-.045em;color:#fff;margin:10px 0 18px}
+.video-intelligence p{color:#c7d4e4;font-size:17px}
+.video-player-copy p{font-size:14px;margin:0;color:#d5dfeb}
+.video-library-hero p{max-width:760px;color:#cad8e7;font-size:18px}
+.video-card-body p{color:var(--muted);margin:0 0 16px}
+.youtube-band h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(32px,4vw,50px);margin:0 0 10px;color:var(--navy)}
+.youtube-band p{color:var(--muted);margin:0}
+.transparency-card p{margin:0;color:var(--muted)}
+.report-video-grid h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,4vw,52px);line-height:1.05;letter-spacing:-.04em;color:var(--navy);margin:8px 0 14px}
+.report-video-grid p{color:var(--muted)}
+:root{--bg:#07111f; --bg2:#0b1728; --panel:#101d31; --ink:#f7f3ea; --muted:#aeb8c5; --line:rgba(255,255,255,.12); --gold:#d4b46a; --blue:#87b7ff; --white:#fff; --body:#172033; --bodytext:#2c3444;}
+*{box-sizing:border-box}
+.container{width:min(1180px,92vw);margin:0 auto}
+.hero h2{font-size:30px;margin:0 0 18px;color:#fff}
+.hero p.lede{font-size:19px;color:#cbd5e1;max-width:640px}
+.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:14px 19px;font-weight:800}
+.btn.primary{background:var(--gold);color:#07111f}
+.btn.secondary{border:1px solid rgba(255,255,255,.28);color:#fff}
+.section{padding:76px 0}
+.section.dark{background:#07111f;color:#f7f3ea}
+.section.dark .section-kicker{color:var(--gold)}
+h2{font-family:Georgia,serif;font-size:42px;line-height:1.08;margin:12px 0 18px;color:#101828}
+.dark h2{color:#fff}
+.card p,.card li{color:#596272}
+.dark .card p,.dark .card li{color:#c6cfda}
+.flow div{background:#fff;border:1px solid #e5dfd2;border-radius:18px;padding:18px}
+.mock-input input{flex:1;border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;border-radius:999px;padding:13px 16px}
+.mock-input button{border:0;background:var(--gold);color:#07111f;border-radius:999px;padding:12px 16px;font-weight:900}
+:root{--navy:#06111f; --navy2:#0b1b30; --ink:#111827; --muted:#667085; --line:#d9e1ea; --paper:#f6f8fb; --gold:#b8954b; --blue:#2d6cdf; --green:#15803d; --red:#b42318; --amber:#b7791f; --white:#fff; --shadow:0 18px 45px rgba(6,17,31,.12); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;}
+*{box-sizing:border-box}
+.topbar p{margin:0;color:var(--muted);max-width:790px}
+.btn{border:1px solid var(--line);background:white;border-radius:10px;padding:10px 14px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+.btn.primary{background:var(--navy);color:white;border-color:var(--navy)}
+.btn.blue{background:var(--blue);color:white;border-color:var(--blue)}
+.btn.danger{background:#fff5f5;color:var(--red);border-color:#ffc9c9}
+.card h2,.card h3{margin:0 0 10px}
+.card h2{font-size:22px}
+.card p{color:var(--muted);margin:0 0 12px}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:#fff;font:inherit}
+@media (max-width:860px){.hero-grid,.page-hero-grid,.footprint-grid,.proof-grid,.about-preview-grid,.newsletter-card,.about-layout,.media-strip-grid{grid-template-columns:1fr}.section,.about-main{padding:62px 0}}
+@media (max-width:540px){.container{width:min(100% - 28px,var(--max))}.hero h2{font-size:30px}.newsletter-card,.content-block,.gateway-card{padding:24px}.section-head h2,.footprint h2,.proof h2,.newsletter h2,.about-preview h2{font-size:36px}}
+@media(max-width:720px){.data-feature h2,.rkmii-home h2{font-size:38px}.score-bars div{grid-template-columns:110px 1fr}.video-actions .btn{width:100%;text-align:center}.video-intelligence h2{font-size:38px}}
+@media(max-width:900px){.section{padding:54px 0}}

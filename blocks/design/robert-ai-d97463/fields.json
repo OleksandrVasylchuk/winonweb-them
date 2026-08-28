@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_robert_ai_d97463",
+    "title": "Implementation roadmap",
+    "fields": [
+        {
+            "key": "field_qs_robert_ai_d97463_kicker",
+            "label": "Section kicker",
+            "name": "kicker",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "实施路线图",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_d97463_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "按受控阶段建设",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_d97463_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_robert_ai_d97463_row_phase",
+                    "label": "Phase name",
+                    "name": "phase",
+                    "type": "text",
+                    "default_value": "第一阶段",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_robert_ai_d97463_row_phase_description",
+                    "label": "What happens in this phase",
+                    "name": "phase_description",
+                    "type": "text",
+                    "default_value": "Robert AI landing page + waitlist + controlled demo.",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-robert-ai-d97463"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-index-aquaprole-1a6889",
+    "title": "Aquaprole как подтверждение операционного опыта.",
+    "category": "qs",
+    "description": "Aquaprole как подтверждение операционного опыта. — 2 pieces of text, 1 link, 5 repeating items. From index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "index",
+        "aquaprole",
+        "подтверждение",
+        "операционного",
+        "опыта"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Aquaprole как подтверждение операционного опыта.",
+                "body_text": "Аналитика Роберта основана на реальном опыте международной торговли. Как CEO Aquaprole Group, он консолидировал торговые направления в Канаде, США, Сингапуре, Китае и Гонконге, включая sourcing, логистику, доступ на рынки, cold-chain operations и развитие продуктов под собственным брендом.",
+                "biography_link": {
+                    "url": "about.html",
+                    "title": "Читать биографию",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/index.html",
+    "qsDesignVersion": 7
+}

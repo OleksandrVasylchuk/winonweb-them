@@ -1,0 +1,263 @@
+{
+    "key": "group_qs_design_reports_food_trade_88b51c",
+    "title": "Герой раздела отчетов",
+    "fields": [
+        {
+            "key": "field_qs_reports_food_trade_88b51c_eyebrow",
+            "label": "Надзаголовок",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Отчеты и магазин",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_heading",
+            "label": "Заголовок",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Премиальная рыночная аналитика для решений в food trade.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_hero_lede",
+            "label": "Вводный текст",
+            "name": "hero_lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Commerce-ready библиотека для платных отчетов, practical guides, templates и будущих корпоративных подписок по China–Eurasia food trade, замороженным продуктам, доступу на рынки и trade risk.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_cta_primary",
+            "label": "Основная кнопка",
+            "name": "cta_primary",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#catalog",
+                "title": "Смотреть отчеты",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_cta_secondary",
+            "label": "Вторая кнопка",
+            "name": "cta_secondary",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#checkout-flow",
+                "title": "Как работает покупка",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_panel_eyebrow",
+            "label": "Надзаголовок панели",
+            "name": "panel_eyebrow",
+            "type": "text",
+            "default_value": "Отчеты и магазин",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_panel_heading",
+            "label": "Заголовок панели",
+            "name": "panel_heading",
+            "type": "text",
+            "default_value": "Reports • Guides • Toolkits",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_reports_stat_label",
+            "label": "Показатель «Отчеты»: название",
+            "name": "reports_stat_label",
+            "type": "text",
+            "default_value": "Отчеты",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_reports_stat_value",
+            "label": "Показатель «Отчеты»: значение",
+            "name": "reports_stat_value",
+            "type": "text",
+            "default_value": "PDF + preview",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_reports_stat_note",
+            "label": "Показатель «Отчеты»: пояснение",
+            "name": "reports_stat_note",
+            "type": "text",
+            "default_value": "Структурированные digital publications",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_payment_stat_label",
+            "label": "Показатель «Оплата»: название",
+            "name": "payment_stat_label",
+            "type": "text",
+            "default_value": "Оплата",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_payment_stat_value",
+            "label": "Показатель «Оплата»: значение",
+            "name": "payment_stat_value",
+            "type": "text",
+            "default_value": "Stripe / PayPal ready",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_payment_stat_note",
+            "label": "Показатель «Оплата»: пояснение",
+            "name": "payment_stat_note",
+            "type": "text",
+            "default_value": "Visa, Mastercard, Amex и bank transfer",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_license_stat_label",
+            "label": "Показатель «Лицензии»: название",
+            "name": "license_stat_label",
+            "type": "text",
+            "default_value": "Лицензии",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_license_stat_value",
+            "label": "Показатель «Лицензии»: значение",
+            "name": "license_stat_value",
+            "type": "text",
+            "default_value": "Individual / Corporate",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_license_stat_note",
+            "label": "Показатель «Лицензии»: пояснение",
+            "name": "license_stat_note",
+            "type": "text",
+            "default_value": "Права использования по каждому продукту",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_language_stat_label",
+            "label": "Показатель «Языки»: название",
+            "name": "language_stat_label",
+            "type": "text",
+            "default_value": "Языки",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_language_stat_value",
+            "label": "Показатель «Языки»: значение",
+            "name": "language_stat_value",
+            "type": "text",
+            "default_value": "EN / RU / 中文",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_language_stat_note",
+            "label": "Показатель «Языки»: пояснение",
+            "name": "language_stat_note",
+            "type": "text",
+            "default_value": "Можно добавлять новые языки",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_categories_label",
+            "label": "Подпись к списку категорий",
+            "name": "categories_label",
+            "type": "text",
+            "default_value": "Отчеты и магазин",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_food_trade_88b51c_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_reports_food_trade_88b51c_row_category_link",
+                    "label": "Ссылка на категорию",
+                    "name": "category_link",
+                    "type": "link",
+                    "return_format": "array",
+                    "default_value": {
+                        "url": "",
+                        "title": "Отчеты и магазин",
+                        "target": ""
+                    },
+                    "instructions": "Choose a page, or paste a web address, and the text shown for it."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-food-trade-88b51c"
+            }
+        ]
+    ],
+    "active": true
+}

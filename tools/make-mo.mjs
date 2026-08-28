@@ -12,7 +12,7 @@
  *
  * Usage: npm run make:mo
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync } from 'node:fs';
@@ -21,7 +21,7 @@ import { dirname, resolve, join, basename } from 'node:path';
 import { createHash } from 'node:crypto';
 
 const root = resolve( dirname( fileURLToPath( import.meta.url ) ), '..' );
-const DOMAIN = 'wow-signal';
+const DOMAIN = 'qwerty-soft-signal';
 
 /** The theme version, read from the one place that owns it: style.css. */
 const VERSION = ( () => {
@@ -172,12 +172,12 @@ for ( const file of locales ) {
 	};
 
 	const poLines = [
-		'# ' + ( LANGUAGE_NAMES[ locale ] ?? locale ) + ' translation for WOW — Signal.',
-		'# Copyright (C) 2026 WOW — Win On Web',
+		'# ' + ( LANGUAGE_NAMES[ locale ] ?? locale ) + ' translation for Qwerty Soft — Signal.',
+		'# Copyright (C) 2026 Qwerty Soft',
 		'# This file is distributed under the GNU General Public License v2 or later.',
 		'msgid ""',
 		'msgstr ""',
-		`"Project-Id-Version: WOW — Signal ${ VERSION }\\n"`,
+		`"Project-Id-Version: Qwerty Soft — Signal ${ VERSION }\\n"`,
 		'"MIME-Version: 1.0\\n"',
 		'"Content-Type: text/plain; charset=UTF-8\\n"',
 		'"Content-Transfer-Encoding: 8bit\\n"',
@@ -189,7 +189,7 @@ for ( const file of locales ) {
 	];
 
 	const moHeader = [
-		`Project-Id-Version: WOW — Signal ${ VERSION }`,
+		`Project-Id-Version: Qwerty Soft — Signal ${ VERSION }`,
 		'MIME-Version: 1.0',
 		'Content-Type: text/plain; charset=UTF-8',
 		'Content-Transfer-Encoding: 8bit',
@@ -300,7 +300,7 @@ for ( const file of locales ) {
 				{
 					domain: 'messages',
 					'translation-revision-date': revision,
-					generator: 'wow-signal/make-mo.mjs',
+					generator: 'qwerty-soft-signal/make-mo.mjs',
 					locale_data: {
 						messages: {
 							'': {

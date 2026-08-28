@@ -1,0 +1,61 @@
+{
+    "key": "group_qs_design_research_how_research_will_be_published",
+    "title": "Publishing Roadmap",
+    "fields": [
+        {
+            "key": "field_qs_research_how_research_will_be_published_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "How research will be published",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_how_research_will_be_published_intro",
+            "label": "Introduction",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "The platform should publish both free and premium intelligence. Free content builds authority and search visibility. Premium reports become commercial products once the research library is deep enough.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_how_research_will_be_published_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_research_how_research_will_be_published_row_format_name",
+                    "label": "Publication format",
+                    "name": "format_name",
+                    "type": "text",
+                    "default_value": "Weekly Intelligence Notes",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_research_how_research_will_be_published_row_description",
+                    "label": "Description",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Short market updates designed for LinkedIn, email and the website.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-how-research-will-be-published"
+            }
+        ]
+    ],
+    "active": true
+}

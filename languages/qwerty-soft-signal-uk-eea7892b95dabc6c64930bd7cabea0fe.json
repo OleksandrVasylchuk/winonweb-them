@@ -1,7 +1,7 @@
 {
 	"domain": "messages",
-	"translation-revision-date": "2026-08-21T17:04:47+0000",
-	"generator": "wow-signal/make-mo.mjs",
+	"translation-revision-date": "2026-08-28T12:01:02+0000",
+	"generator": "qwerty-soft-signal/make-mo.mjs",
 	"locale_data": {
 		"messages": {
 			"": {
@@ -9,38 +9,332 @@
 				"lang": "uk",
 				"plural-forms": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 			},
-			"Build the whole site, corrected and reviewed": [
-				"Зібрати весь сайт, із виправленням і перевіркою"
+			"A build is running on the server. This is where it has got to.": [
+				"На сервері виконується збірка. Ось де вона зараз."
 			],
-			"Build the whole site, corrected by Claude": [
-				"Зібрати весь сайт, із виправленням від Claude"
+			"A build was left unfinished. Its progress is below.": [
+				"Збірка лишилася незавершеною. Її поступ — нижче."
 			],
-			"Build everything at once": [
-				"Зібрати все одразу"
+			"What is happening now": [
+				"Що відбувається зараз"
 			],
-			"Creates every page as a draft, imports the images, builds the menu and the header and footer, and sets the front page. No API key and no conversation needed. You can undo it and run it again. Press Preview on any page below to see what it will become and leave sections out.": [
-				"Створює кожну сторінку як чернетку, імпортує зображення, будує меню, шапку й підвал і призначає головну сторінку. Без API-ключа й без діалогу. Це можна скасувати й повторити. Натисніть «Перегляд» на будь-якій сторінці нижче, щоб побачити, чим вона стане, і прибрати зайві секції."
+			"What happened": [
+				"Що відбувалося"
 			],
-			"Publish pages immediately": [
-				"Опублікувати сторінки одразу"
+			"under $0.01": [
+				"менше $0,01"
+			],
+			"Reading %1$s — %2$d of %3$d…": [
+				"Читаємо %1$s — %2$d з %3$d…"
+			],
+			"Read %1$d pages; %2$d could not be read. The pages that were read are in the list below.": [
+				"Прочитано сторінок: %1$d; не вдалося прочитати: %2$d. Прочитані сторінки — у списку нижче."
+			],
+			"Read %d page out of the application. It is an ordinary design now — pick a page below.": [
+				"Прочитано %d сторінку із застосунку. Тепер це звичайний дизайн — виберіть сторінку нижче.",
+				"Прочитано %d сторінки із застосунку. Тепер це звичайний дизайн — виберіть сторінку нижче.",
+				"Прочитано %d сторінок із застосунку. Тепер це звичайний дизайн — виберіть сторінку нижче."
+			],
+			"%d section": [
+				"%d розділ",
+				"%d розділи",
+				"%d розділів"
+			],
+			"Which version of %s to build": [
+				"Яку версію %s збирати"
+			],
+			"%s MB": [
+				"%s МБ"
+			],
+			"%1$s — %2$d sections": [
+				"%1$s — секцій: %2$d"
+			],
+			"%d versions of this page": [
+				"Версій цієї сторінки: %d"
+			],
+			"%s KB": [
+				"%s КБ"
+			],
+			"The page this build will make": [
+				"Сторінка, яку зробить ця збірка",
+				"%d сторінки, які зробить ця збірка",
+				"%d сторінок, які зробить ця збірка"
+			],
+			"%1$s · %2$d pages · %3$d components": [
+				"%1$s · сторінок: %2$d · компонентів: %3$d"
+			],
+			"This archive holds %d applications. Only one of them becomes this site — pick it, then preview a page before importing anything.": [
+				"У цьому архіві %d застосунки. Сайтом стане лише один — оберіть його, а тоді подивіться прев'ю сторінки, перш ніж щось імпортувати."
+			],
+			"Read the pages out of the application": [
+				"Прочитати сторінки із застосунку"
+			],
+			"This one has no pages of its own — no router and no page components. Pick another above.": [
+				"У цього немає власних сторінок — ні роутера, ні компонентів сторінок. Оберіть інший вище."
+			],
+			"This design is a %1$s application: its %2$d pages exist as components, not as markup. Claude reads each route — the page component, everything it renders, the layout around it and the stylesheet — and writes down the page it produces. From then on it is an ordinary page here: preview it, convert it, build it.": [
+				"Цей дизайн — застосунок на %1$s: його %2$d сторінок існують як компоненти, а не як розмітка. Клод читає кожен маршрут — компонент сторінки, усе, що він рендерить, макет навколо нього та стилі — і записує сторінку, яку той дає. Далі це звичайна сторінка: переглядайте, конвертуйте, збирайте."
+			],
+			"This is the one thing on this screen that cannot be done offline, and no model can be reached from here. %s": [
+				"Це єдине на цьому екрані, чого не зробити офлайн, а моделі звідси не дістатися. %s"
+			],
+			"%d call through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed.": [
+				"%d виклик через Claude Code на цьому комп’ютері, який використовує підписку, під якою він увійшов. Нічого не тарифікується.",
+				"По одному виклику на сторінку — %d разом — через Claude Code на цьому комп’ютері, який використовує підписку, під якою він увійшов. Нічого не тарифікується.",
+				"По одному виклику на сторінку — %d разом — через Claude Code на цьому комп’ютері, який використовує підписку, під якою він увійшов. Нічого не тарифікується."
+			],
+			"%d call through the Anthropic API. A page of components is a long read, so expect this one to cost more than a section conversion.": [
+				"%d виклик через Anthropic API. Сторінка з компонентів — це довге читання, тож очікуйте, що вона коштуватиме більше, ніж конвертація секції.",
+				"По одному виклику на сторінку — %d разом — через Anthropic API. Сторінка з компонентів — це довге читання, тож очікуйте, що вони коштуватимуть більше, ніж конвертація секції.",
+				"По одному виклику на сторінку — %d разом — через Anthropic API. Сторінка з компонентів — це довге читання, тож очікуйте, що вони коштуватимуть більше, ніж конвертація секції."
+			],
+			"read — %1$d sections, %2$d words": [
+				"прочитано — секцій: %1$d, слів: %2$d"
+			],
+			"Read": [
+				"Прочитати"
+			],
+			"Read again": [
+				"Прочитати ще раз"
+			],
+			"Stop after this page": [
+				"Зупинити після цієї сторінки"
+			],
+			"Stopping — the page being read now will finish.": [
+				"Зупиняємося — сторінка, яку читаємо зараз, дочитається до кінця."
+			],
+			"Read every page": [
+				"Прочитати всі сторінки"
+			],
+			"Read the %d not read yet": [
+				"Прочитати ще не прочитані (%d)"
+			],
+			"%d route takes a parameter and is not read": [
+				"%d маршрут приймає параметр і не читається",
+				"%d маршрути приймають параметр і не читаються",
+				"%d маршрутів приймають параметр і не читаються"
+			],
+			"These are one page per record — a product, a project, an order. Build the site from the pages above first, then add the records as posts or products; a single rendered example of each would be a page of one arbitrary record.": [
+				"Це по сторінці на запис — товар, проєкт, замовлення. Спершу зберіть сайт зі сторінок вище, а записи додайте як пости чи товари; один відрендерений приклад був би сторінкою одного випадкового запису."
+			],
+			"an empty app shell, nothing to convert": [
+				"порожня оболонка застосунку, конвертувати нічого"
+			],
+			"%1$d sections · %2$d words": [
+				"секцій: %1$d · слів: %2$d"
+			],
+			"%d section kept": [
+				"залишено %d секцію",
+				"залишено %d секції",
+				"залишено %d секцій"
+			],
+			"Language": [
+				"Мова"
+			],
+			"Previewing": [
+				"Перегляд"
+			],
+			"2. Pick a page": [
+				"2. Виберіть сторінку"
+			],
+			"This design has %s. Import one language first; the others can be added later with a translation plugin.": [
+				"Цей дизайн має %s. Спершу імпортуйте одну мову; решту можна додати пізніше плагіном перекладу."
+			],
+			"%1$d files were not unpacked (first %2$d listed)": [
+				"Не розпаковано файлів: %1$d (показано перші %2$d)"
+			],
+			"%d files were not unpacked": [
+				"Не розпаковано файлів: %d"
+			],
+			"Filter %d pages…": [
+				"Фільтр серед %d сторінок…"
+			],
+			"%d admin or utility page": [
+				"%d службова сторінка",
+				"%d службові сторінки",
+				"%d службових сторінок"
+			],
+			"Screens the design ships for running the site rather than for visiting it. Import them if you want them; most sites do not.": [
+				"Екрани, які дизайн дає для керування сайтом, а не для його відвідування. Імпортуйте, якщо потрібні; більшості сайтів вони не потрібні."
+			],
+			"Converting “%s” for the preview…": [
+				"Конвертуємо «%s» для перегляду…"
+			],
+			"“%1$s” previewed: %2$d sections. Untick any you do not want built.": [
+				"«%1$s» переглянуто: секцій — %2$d. Зніміть позначку з тих, які не треба будувати."
+			],
+			"Converting the page…": [
+				"Конвертуємо сторінку…"
+			],
+			"Preview: %s": [
+				"Перегляд: %s"
+			],
+			"%1$d of %2$d sections included": [
+				"Включено %1$d з %2$d секцій"
+			],
+			"Show the design beside it": [
+				"Показати дизайн поруч"
+			],
+			"Include all": [
+				"Включити всі"
+			],
+			"Close preview": [
+				"Закрити перегляд"
+			],
+			"Left: the design as uploaded. Right: the same section as blocks. Untick a section to leave it out of this page.": [
+				"Ліворуч — дизайн, як його завантажили. Праворуч — та сама секція в блоках. Зніміть позначку, щоб не включати секцію до цієї сторінки."
+			],
+			"Each section as the built page will show it, full width. Untick one to leave it out.": [
+				"Кожна секція так, як її покаже зібрана сторінка, на всю ширину. Зніміть позначку, щоб не включати секцію."
+			],
+			"Nothing here could become blocks.": [
+				"Тут нічого не можна перетворити на блоки."
+			],
+			"Include": [
+				"Включити"
+			],
+			"Design": [
+				"Дизайн"
+			],
+			"Blocks": [
+				"Блоки"
+			],
+			"Reading the page…": [
+				"Читаю сторінку…"
+			],
+			"Found %1$d sections. %2$d were already converted earlier and have been brought back.": [
+				"Знайдено %1$d секцій. %2$d уже були конвертовані раніше — їх повернуто."
+			],
+			"Found %d sections on this page.": [
+				"На цій сторінці знайдено секцій: %d"
+			],
+			"Checking whether Claude can be reached from here…": [
+				"Перевіряємо, чи можна звідси дістатися до Claude…"
+			],
+			"Claude Code is not installed here and no API key has been saved.": [
+				"Claude Code тут не встановлено, і жодного ключа API не збережено."
+			],
+			"Correcting each section with Claude is not available yet. ": [
+				"Виправлення секцій за допомогою Claude поки недоступне. "
+			],
+			"Open Connection settings above to set it up. The build below works without it.": [
+				"Відкрийте «Налаштування з’єднання» вище, щоб його налаштувати. Білд нижче працює й без цього."
+			],
+			"About %1$d call to the Anthropic API — roughly %2$s at list prices, billed to your key.": [
+				"Приблизно %1$d виклик до Anthropic API — близько %2$s за прайсом, списується з вашого ключа.",
+				"Приблизно %1$d виклики до Anthropic API — близько %2$s за прайсом, списується з вашого ключа.",
+				"Приблизно %1$d викликів до Anthropic API — близько %2$s за прайсом, списується з вашого ключа."
+			],
+			"About %d call through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed.": [
+				"Приблизно %d виклик через Claude Code на цьому комп'ютері, який використовує підписку, під якою він увійшов. Нічого не тарифікується.",
+				"Приблизно %d виклики через Claude Code на цьому комп'ютері, який використовує підписку, під якою він увійшов. Нічого не тарифікується.",
+				"Приблизно %d викликів через Claude Code на цьому комп'ютері, який використовує підписку, під якою він увійшов. Нічого не тарифікується."
+			],
+			"This runs on the server, page by page. Close the tab if you like — the account below is waiting when you come back.": [
+				"Це виконується на сервері, сторінка за сторінкою. Можете закрити вкладку — журнал нижче чекатиме, коли ви повернетеся."
+			],
+			"Expect minutes rather than seconds — a page is built section by section. Closing the tab stops it where it got to, and what it has already made stays.": [
+				"Очікуйте хвилини, а не секунди — сторінка збирається секція за секцією. Закрита вкладка зупинить процес там, де він дійшов, а зроблене лишиться."
+			],
+			"Straight through": [
+				"Навпростець"
+			],
+			"The structural conversion only. Free, offline, and finished in seconds.": [
+				"Лише структурна конвертація. Безкоштовно, офлайн, за секунди."
+			],
+			"%d page · seconds · no cost": [
+				"%d сторінка · секунди · безкоштовно",
+				"%d сторінки · секунди · безкоштовно",
+				"%d сторінок · секунди · безкоштовно"
+			],
+			"Corrected and checked": [
+				"З виправленнями і звіркою"
+			],
+			"Every section is converted, then read by Claude and fixed where the conversion misread the design, then rendered and compared with the original until the two agree.": [
+				"Кожну секцію конвертуємо, потім Клод її читає й виправляє там, де конвертація не зрозуміла дизайн, а тоді рендеримо й порівнюємо з оригіналом, доки вони не збігнуться."
+			],
+			"%1$d sections · %2$s · %3$s": [
+				"секцій: %1$d · %2$s · %3$s"
+			],
+			"no cost": [
+				"безкоштовно"
+			],
+			"All %d languages": [
+				"Усі %d мови"
+			],
+			"Build the whole site, corrected and reviewed — %d page": [
+				"Зібрати весь сайт із виправленнями та перевіркою — %d сторінка",
+				"Зібрати весь сайт із виправленнями та перевіркою — %d сторінки",
+				"Зібрати весь сайт із виправленнями та перевіркою — %d сторінок"
+			],
+			"Build the whole site, corrected by Claude — %d page": [
+				"Зібрати весь сайт із виправленнями Claude — %d сторінка",
+				"Зібрати весь сайт із виправленнями Claude — %d сторінки",
+				"Зібрати весь сайт із виправленнями Claude — %d сторінок"
+			],
+			"Build the whole site — %d page": [
+				"Зібрати весь сайт — %d сторінка",
+				"Зібрати весь сайт — %d сторінки",
+				"Зібрати весь сайт — %d сторінок"
+			],
+			"There is no markup in this design to build from.": [
+				"У цьому дизайні немає розмітки, з якої можна щось збудувати."
+			],
+			"Build the site": [
+				"Зібрати сайт"
+			],
+			"Every page as a draft, with its images, menu, header and footer. Undo it and run it again as often as you like — nothing here is one-way.": [
+				"Кожна сторінка як чернетка, разом із зображеннями, меню, шапкою та підвалом. Скасовуйте й запускайте знову скільки завгодно — тут нічого не є незворотним."
+			],
+			"Install ACF Pro before building.": [
+				"Встановіть ACF Pro перед збіркою."
+			],
+			"Each section of the design becomes a block with editable fields, and ACF Pro is what provides those fields. Built without it, the pages would be correct and could never be edited — every section would read \"Unsupported\" in the editor. Activate the plugin and this button turns on by itself.": [
+				"Кожна секція дизайну стає блоком з редагованими полями, і саме ACF Pro ці поля дає. Без нього сторінки зберуться правильно, але їх ніколи не можна буде відредагувати — редактор писатиме «Unsupported» на кожній секції. Активуйте плагін, і ця кнопка увімкнеться сама."
+			],
+			"Go to Plugins": [
+				"Перейти до плагінів"
+			],
+			"%d block this site uses is missing from the theme.": [
+				"%d блок, який використовує цей сайт, відсутній у темі.",
+				"%d блоки, які використовує цей сайт, відсутні в темі.",
+				"%d блоків, які використовує цей сайт, відсутні в темі."
+			],
+			"Your pages are untouched — the sections read \"Unsupported\" only because the theme files behind them are gone. They can be written again from the design and from the pages themselves, without asking the model anything.": [
+				"Ваші сторінки цілі — секції показують «Не підтримується» лише тому, що зникли файли теми за ними. Їх можна написати знову з дизайну та з самих сторінок, без жодного звернення до моделі."
+			],
+			"Restore the missing blocks": [
+				"Відновити відсутні блоки"
 			],
 			"Leave this off to review each page as a draft first.": [
 				"Залиште вимкненим, щоб спершу переглянути кожну сторінку як чернетку."
 			],
-			"Keep the uploaded design for another run": [
-				"Залишити завантажений дизайн для наступного запуску"
+			"Publish straight away": [
+				"Публікувати одразу"
 			],
-			"Otherwise the unpacked files are removed from uploads once the build is done.": [
-				"Інакше розпаковані файли буде видалено з uploads після завершення білду."
+			"Dashboards, queues, upload forms and download areas the design ships for running the site.": [
+				"Панелі, черги, форми завантаження та розділи завантажень, які дизайн постачає для роботи сайту."
 			],
-			"Language to build:": [
-				"Мова для збірки:"
+			"Build the %d admin screen too": [
+				"Зібрати також %d адмінський екран",
+				"Зібрати також %d адмінські екрани",
+				"Зібрати також %d адмінських екранів"
 			],
-			"Changed your mind, or got a new version of the design? Delete everything and drop the new archive in — nothing here is one-way.": [
-				"Передумали або маєте нову версію дизайну? Видаліть усе й закиньте новий архів — тут ніщо не робиться в один бік."
+			"%d is the same page in another language — set Language to “All” above to build it too.": [
+				"%d — та сама сторінка іншою мовою; поставте «Мова» на «Усі» вище, щоб зібрати і її.",
+				"%d — ті самі сторінки іншими мовами; поставте «Мова» на «Усі» вище, щоб зібрати і їх.",
+				"%d — ті самі сторінки іншими мовами; поставте «Мова» на «Усі» вище, щоб зібрати і їх."
 			],
-			"%s MB": [
-				"%s МБ"
+			"about %s hours": [
+				"приблизно %s год."
+			],
+			"%d is an admin screen, listed below — tick the box to build it too.": [
+				"%d — адмінський екран зі списку нижче; позначте галочку, щоб зібрати і його.",
+				"%d — адмінські екрани зі списку нижче; позначте галочку, щоб зібрати і їх.",
+				"%d — адмінських екранів зі списку нижче; позначте галочку, щоб зібрати і їх."
+			],
+			"Building %1$d of the %2$d pages in this design.": [
+				"Буде зібрано %1$d з %2$d сторінок цього дизайну."
 			],
 			"Delete everything and start over": [
 				"Видалити все й почати заново"
@@ -48,20 +342,20 @@
 			"Removes only what an import created. Your own pages are left alone.": [
 				"Видаляє лише те, що створив імпорт. Ваші власні сторінки не чіпає."
 			],
-			"Reading the design, importing fonts and images…": [
-				"Читаємо дизайн, імпортуємо шрифти й зображення…"
+			"about an hour": [
+				"приблизно година"
 			],
-			"%s KB": [
-				"%s КБ"
+			"about %d minutes": [
+				"приблизно %d хв."
 			],
-			"Steps that did not complete:": [
-				"Кроки, що не завершились:"
+			"Stop": [
+				"Зупинити"
 			],
-			"Cancel": [
-				"Скасувати"
+			"Continue the build": [
+				"Продовжити білд"
 			],
-			"Build cancelled. The pages made so far are still on the site as drafts.": [
-				"Білд скасовано. Уже створені сторінки залишаються на сайті як чернетки."
+			"Build progress": [
+				"Перебіг білду"
 			],
 			"Delete what was built so far": [
 				"Видалити створене досі"
@@ -69,29 +363,106 @@
 			"Dismiss": [
 				"Закрити"
 			],
-			"Build progress": [
-				"Перебіг білду"
+			"All %d steps done": [
+				"Усі %d кроків виконано"
+			],
+			"Page %1$d of %2$d": [
+				"Сторінка %1$d з %2$d"
+			],
+			"Step %1$d of %2$d": [
+				"Крок %1$d з %2$d"
+			],
+			"Starting…": [
+				"Запускаємо…"
+			],
+			"%d%%": [
+				"%d%%"
+			],
+			"Stopped": [
+				"Зупинено"
+			],
+			"Running on the server": [
+				"Виконується на сервері"
+			],
+			"Working…": [
+				"Працюємо…"
+			],
+			"Continuing the build. This step runs in this tab, so leave the page open until it finishes.": [
+				"Продовжуємо білд. Цей крок виконується в цій вкладці, тож не закривайте сторінку, доки він не завершиться."
+			],
+			"The build has stopped.": [
+				"Білд зупинився."
+			],
+			"The last step finished %1$s ago and the next one, %2$s, has not started.": [
+				"Попередній крок завершився %1$s тому, а наступний — %2$s — так і не почався."
+			],
+			"Nothing has happened on %1$s for %2$s.": [
+				"На «%1$s» нічого не відбувається вже %2$s."
+			],
+			"It has been started %1$d of %2$d times. After that the build sets it aside, carries on with the rest and comes back to it at the end.": [
+				"Його вже запускали %1$d з %2$d разів. Після цього білд відкладає його, продовжує з рештою і повертається до нього наприкінці."
+			],
+			"It has used every attempt. Continuing now sets this step aside and moves the build on to the rest; it gets one more go once everything else is built.": [
+				"Спроби вичерпано. Якщо продовжити зараз, цей крок буде відкладено, а білд піде далі; він отримає ще один шанс, коли все інше буде зібрано."
+			],
+			"The next step is booked, but nothing on this site has run it. That is usually WP-Cron: it only fires when somebody makes a request, so a build left alone on a quiet site waits instead of working.": [
+				"Наступний крок заплановано, але ніщо на цьому сайті його не запустило. Зазвичай причина — WP-Cron: він спрацьовує лише на запит до сайту, тож білд, залишений без нагляду на тихому сайті, чекає замість того, щоб працювати."
+			],
+			"Nothing is booked to start it, so the build is waiting where it stands.": [
+				"Ніщо не заплановано, щоб його запустити, тож білд стоїть там, де зупинився."
+			],
+			"The step ended without finishing and left nothing behind to carry the build on.": [
+				"Крок обірвався, не завершившись, і не залишив нічого, що продовжило б білд."
+			],
+			"Continuing the build…": [
+				"Продовжуємо білд…"
 			],
 			"The build is complete.": [
 				"Білд завершено."
 			],
+			"That step is done and the build has moved on.": [
+				"Крок виконано, білд рушив далі."
+			],
+			"Writing the missing blocks…": [
+				"Записую відсутні блоки…"
+			],
+			"%1$d block written. Your pages draw the design again — reload one to see it.": [
+				"Записано %1$d блок. Ваші сторінки знову малюють дизайн — перезавантажте одну, щоб побачити.",
+				"Записано %1$d блоки на %2$d сторінках. Ваші сторінки знову малюють дизайн — перезавантажте одну, щоб побачити.",
+				"Записано %1$d блоків на %2$d сторінках. Ваші сторінки знову малюють дизайн — перезавантажте одну, щоб побачити."
+			],
+			"Stopping the build…": [
+				"Зупиняю збірку…"
+			],
+			"Build stopped. Everything it made is on the site, and Continue picks up where it left off.": [
+				"Збірку зупинено. Усе зроблене лишається на сайті, а «Продовжити» підхопить з того місця, де вона спинилась."
+			],
+			"View": [
+				"Переглянути"
+			],
+			"Edit": [
+				"Редагувати"
+			],
+			"%ds": [
+				"%d с"
+			],
+			"%1$d:%2$s": [
+				"%1$d:%2$s"
+			],
 			"Cancelled after %1$d of %2$d steps.": [
 				"Скасовано після %1$d з %2$d кроків."
+			],
+			"Reading the design, importing fonts and pictures…": [
+				"Читаємо дизайн, імпортуємо шрифти й зображення…"
 			],
 			"%1$d of %2$d steps done.": [
 				"Виконано %1$d з %2$d кроків."
 			],
-			"Building %1$s with Claude, section by section (%2$d of %3$d) — this one takes a while": [
-				"Будуємо %1$s разом із Claude, секція за секцією (%2$d з %3$d) — це надовго"
+			"Building %s with Claude, section by section — this one takes a while.": [
+				"Будуємо %s разом із Claude, секція за секцією — це надовго."
 			],
-			"Building %1$s (%2$d of %3$d)": [
-				"Будуємо %1$s (%2$d з %3$d)"
-			],
-			"the menu, header and footer": [
-				"меню, шапка й підвал"
-			],
-			"the front page and links": [
-				"головна сторінка й посилання"
+			"Building %s.": [
+				"Будуємо %s."
 			],
 			"Structure only — the button above": [
 				"Тільки структура — кнопка вище"
@@ -129,17 +500,19 @@
 			"Actions": [
 				"Дії"
 			],
-			"View": [
-				"Переглянути"
-			],
-			"Edit": [
-				"Редагувати"
-			],
 			"Publish": [
 				"Опублікувати"
 			],
 			"(%d sections)": [
 				"(секцій: %d)"
+			],
+			"Preview": [
+				"Перегляд"
+			],
+			"%d became a block of its own, markup and styles as the design wrote them.": [
+				"%d стала окремим блоком — розмітка й стилі як у дизайні.",
+				"%d стали окремими блоками — розмітка й стилі як у дизайні.",
+				"%d стали окремими блоками — розмітка й стилі як у дизайні."
 			],
 			"Claude corrected %d of them.": [
 				"Claude виправив %d із них.",
@@ -200,6 +573,9 @@
 			"Starting the build — reading the design, importing fonts and images…": [
 				"Починаємо білд — читаємо дизайн, імпортуємо шрифти й зображення…"
 			],
+			"The build is running on the server. You can close this tab — it will carry on, and this screen picks it up again when you come back.": [
+				"Збірка виконується на сервері. Вкладку можна закрити — вона триватиме далі, а цей екран підхопить її, коли ви повернетеся."
+			],
 			"Built and published %1$d pages and imported %2$d images. Look through them, then edit anything you like.": [
 				"Створено й опубліковано %1$d сторінок, імпортовано %2$d зображень. Перегляньте їх і редагуйте що завгодно."
 			],
@@ -211,6 +587,9 @@
 			],
 			"Undoing…": [
 				"Скасовую…"
+			],
+			"Nothing was removed: no page, menu or image on this site carries the import mark. Anything you see was made another way and has to go from Pages, in the trash sense.": [
+				"Нічого не видалено: жодна сторінка, меню чи зображення на цьому сайті не має позначки імпорту. Усе, що ви бачите, створено інакше — і прибирати це треба вручну через «Сторінки»."
 			],
 			"Removed %1$d pages and %2$d images. The site is back to how it was.": [
 				"Видалено %1$d сторінок і %2$d зображень. Сайт повернуто у попередній стан."
@@ -224,11 +603,17 @@
 			"Delete now": [
 				"Видалити зараз"
 			],
+			"Cancel": [
+				"Скасувати"
+			],
 			"Type %s to confirm": [
 				"Введіть %s для підтвердження"
 			],
 			"Removing the uploaded designs…": [
 				"Видаляємо завантажені дизайни…"
+			],
+			"Could not remove: %s. The folder is still in uploads — the web server may not have permission to delete it, or a file inside is open. Delete it by hand over FTP or in the file manager.": [
+				"Не вдалося видалити: %s. Тека досі в uploads — можливо, вебсервер не має прав на видалення або якийсь файл усередині відкритий. Видаліть її вручну через FTP чи файловий менеджер."
 			],
 			"Removed %d uploaded design.": [
 				"Видалено %d завантажений дизайн.",
@@ -238,8 +623,8 @@
 			"Clean up": [
 				"Очистити"
 			],
-			"This import created %1$d pages, %2$d template parts, %3$d menus, %4$d images, %5$d fonts.": [
-				"Імпорт створив сторінок: %1$d, частин шаблонів: %2$d, меню: %3$d, зображень: %4$d, шрифтів: %5$d."
+			"This import created %1$d pages, %2$d template parts, %3$d menus, %4$d images, %5$d fonts, %6$d section blocks.": [
+				"Цей імпорт створив: сторінок — %1$d, частин шаблону — %2$d, меню — %3$d, зображень — %4$d, шрифтів — %5$d, блоків секцій — %6$d."
 			],
 			"Your own content is untouched — only what the import added is removed.": [
 				"Ваш власний вміст не чіпається — видаляється лише те, що додав імпорт."
@@ -258,19 +643,28 @@
 			"Clean up a previous import": [
 				"Очистити попередній імпорт"
 			],
+			"No cost": [
+				"Безкоштовно"
+			],
 			"to convert %d remaining section": [
 				"щоб конвертувати %d секцію, що лишилась",
 				"щоб конвертувати %d секції, що лишились",
 				"щоб конвертувати %d секцій, що лишились"
 			],
-			"spent so far · %1$d conversions · %2$s in, %3$s out": [
-				"витрачено · %1$d конвертацій · %2$s на вхід, %3$s на вихід"
+			"Nothing billed": [
+				"Нічого не списано"
+			],
+			"so far · %1$d conversions · %2$s in, %3$s out": [
+				"наразі · конверсій: %1$d · %2$s вхідних, %3$s вихідних"
 			],
 			"conversions left this hour · resets in %d min": [
 				"конвертацій лишилось цієї години · оновиться через %d хв"
 			],
 			"Estimated from published list prices — not a bill.": [
 				"Оцінка за опублікованими цінами — це не рахунок."
+			],
+			"Run through Claude Code on this machine, on its signed-in subscription. The token counts are what it used, not what it charged.": [
+				"Виконується через Claude Code на цій машині, на підписці, під якою він авторизований. Лічильники токенів показують витрачене, а не виставлене до сплати."
 			],
 			"3. Convert each section": [
 				"3. Конвертуйте кожну секцію"
@@ -382,6 +776,12 @@
 			"Keep as a draft page": [
 				"Залишити як чернетку сторінки"
 			],
+			"× %d sections": [
+				"× %d секцій"
+			],
+			"Something went wrong.": [
+				"Щось пішло не так."
+			],
 			"Add your Anthropic API key in the connection settings first.": [
 				"Спершу додайте ключ API Anthropic у налаштуваннях підключення."
 			],
@@ -409,9 +809,6 @@
 			"Draft page created from all %d sections.": [
 				"Чернетку створено з усіх %d секцій."
 			],
-			"Something went wrong.": [
-				"Щось пішло не так."
-			],
 			"Saved.": [
 				"Збережено."
 			],
@@ -436,119 +833,40 @@
 			"%1$d pages · %2$d images": [
 				"Сторінок: %1$d · зображень: %2$d"
 			],
+			"JavaScript app — no markup to convert": [
+				"Застосунок на JavaScript — немає розмітки для конвертації"
+			],
 			"Already uploaded": [
 				"Уже завантажено"
 			],
-			"%1$s — %2$d sections": [
-				"%1$s — секцій: %2$d"
+			"Saved. These instructions lead every brief for this design.": [
+				"Збережено. Ці інструкції очолюють кожен бриф для цього дизайну."
 			],
-			"%d section chosen for the build": [
-				"Для білду вибрано %d секцію",
-				"Для білду вибрано %d секції",
-				"Для білду вибрано %d секцій"
+			"For example: the real home page is index-v2.html · keep the English copy, ignore the German folder · the prices are placeholders, leave them out · use the dark header everywhere": [
+				"Наприклад: справжня головна — index-v2.html · залишити англійські тексти, німецьку теку ігнорувати · ціни — заглушки, не переносити · скрізь використовувати темну шапку"
 			],
-			"Preview": [
-				"Перегляд"
+			"Save instructions": [
+				"Зберегти інструкції"
 			],
-			"Previewing": [
-				"Перегляд"
+			"Saved": [
+				"Збережено"
 			],
-			"2. Pick a page": [
-				"2. Виберіть сторінку"
+			"Your instructions for this design": [
+				"Ваші інструкції для цього дизайну"
 			],
-			"This design has %s. Import one language first; the others can be added later with a translation plugin.": [
-				"Цей дизайн має %s. Спершу імпортуйте одну мову; решту можна додати пізніше плагіном перекладу."
+			"Anything you write here is put at the top of every brief Claude works from, above the design's own documentation, and it stays with this design. Plain sentences are enough.": [
+				"Усе, що ви тут напишете, стає початком кожного брифа, з яким працює Клод, — вище за власну документацію дизайну, — і залишається з цим дизайном. Достатньо простих речень."
 			],
-			"%d files were not unpacked": [
-				"Не розпаковано файлів: %d"
+			"The last build is finished — %d page is on the site.": [
+				"Останню збірку завершено — на сайті %d сторінка.",
+				"Останню збірку завершено — на сайті %d сторінки.",
+				"Останню збірку завершено — на сайті %d сторінок."
 			],
-			"Converting “%s” for the preview…": [
-				"Конвертуємо «%s» для перегляду…"
+			"the menu, header and footer": [
+				"меню, шапка й підвал"
 			],
-			"“%1$s” previewed: %2$d sections. Untick any you do not want built.": [
-				"«%1$s» переглянуто: секцій — %2$d. Зніміть позначку з тих, які не треба будувати."
-			],
-			"Converting the page…": [
-				"Конвертуємо сторінку…"
-			],
-			"Preview: %s": [
-				"Перегляд: %s"
-			],
-			"%1$d of %2$d sections included": [
-				"Включено %1$d з %2$d секцій"
-			],
-			"Include all": [
-				"Включити всі"
-			],
-			"Close preview": [
-				"Закрити перегляд"
-			],
-			"Left: the design as uploaded. Right: the blocks the build will make of it. Untick a section to leave it out of this page.": [
-				"Ліворуч: дизайн, як його завантажено. Праворуч: блоки, які з нього зробить білд. Зніміть позначку із секції, щоб не включати її в цю сторінку."
-			],
-			"Nothing here could become blocks.": [
-				"Тут нічого не можна перетворити на блоки."
-			],
-			"Include": [
-				"Включити"
-			],
-			"Design": [
-				"Дизайн"
-			],
-			"Blocks": [
-				"Блоки"
-			],
-			"Reading the page…": [
-				"Читаю сторінку…"
-			],
-			"Found %1$d sections. %2$d were already converted earlier and have been brought back.": [
-				"Знайдено %1$d секцій. %2$d уже були конвертовані раніше — їх повернуто."
-			],
-			"Found %d sections on this page.": [
-				"На цій сторінці знайдено секцій: %d"
-			],
-			"Checking whether Claude can be reached from here…": [
-				"Перевіряємо, чи можна звідси дістатися до Claude…"
-			],
-			"Claude Code is not installed here and no API key has been saved.": [
-				"Claude Code тут не встановлено, і жодного ключа API не збережено."
-			],
-			"under $0.01": [
-				"менше $0,01"
-			],
-			"Correcting each section with Claude is not available yet. ": [
-				"Виправлення секцій за допомогою Claude поки недоступне. "
-			],
-			"Open Connection settings above to set it up. The build below works without it.": [
-				"Відкрийте «Налаштування з’єднання» вище, щоб його налаштувати. Білд нижче працює й без цього."
-			],
-			"Let Claude correct each section": [
-				"Дозволити Claude виправити кожну секцію"
-			],
-			"The structural conversion is done first either way; Claude is shown that result, what the design's CSS resolves to, and a screenshot when the archive has one, and fixes what is wrong. A section it cannot improve is kept exactly as the structural conversion made it.": [
-				"Структурна конвертація в будь-якому разі виконується першою; Claude отримує її результат, те, у що розв’язується CSS дизайну, і скріншот, якщо він є в архіві, і виправляє те, що не так. Секція, яку він не може покращити, лишається точно такою, якою її зробила структурна конвертація."
-			],
-			"and check the rendered result against the design": [
-				"і звірити відрендерений результат із дизайном"
-			],
-			"A second pass per section: the blocks are rendered on the server and compared with the design. It catches what a conversion written blind cannot see, and doubles the time and the cost.": [
-				"Другий прохід на кожну секцію: блоки рендеряться на сервері й порівнюються з дизайном. Це ловить те, чого не бачить конвертація «наосліп», і подвоює час та вартість."
-			],
-			"About %1$d call to the Anthropic API — roughly %2$s at list prices, billed to your key.": [
-				"Приблизно %1$d виклик до Anthropic API — близько %2$s за прайсом, списується з вашого ключа.",
-				"Приблизно %1$d виклики до Anthropic API — близько %2$s за прайсом, списується з вашого ключа.",
-				"Приблизно %1$d викликів до Anthropic API — близько %2$s за прайсом, списується з вашого ключа."
-			],
-			"About %d call through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed per conversion.": [
-				"Приблизно %d виклик через Claude Code на цій машині, який користується підпискою, під якою авторизований. За конвертацію нічого не списується.",
-				"Приблизно %d виклики через Claude Code на цій машині, який користується підпискою, під якою авторизований. За конвертацію нічого не списується.",
-				"Приблизно %d викликів через Claude Code на цій машині, який користується підпискою, під якою авторизований. За конвертацію нічого не списується."
-			],
-			"Expect this to take minutes rather than seconds — a page is built section by section. Leave the tab open; closing it stops the build where it got to, and what it has already made stays.": [
-				"Розраховуйте на хвилини, а не секунди — сторінка будується секція за секцією. Не закривайте вкладку: закриття зупинить білд там, де він дійшов, а вже створене лишиться."
-			],
-			"Build the whole site": [
-				"Побудувати весь сайт"
+			"the front page and links": [
+				"головна сторінка й посилання"
 			],
 			"Main navigation": [
 				"Головна навігація"

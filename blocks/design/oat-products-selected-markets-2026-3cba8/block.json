@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-oat-products-selected-markets-2026-3cba8",
+    "title": "Video briefing",
+    "category": "qs",
+    "description": "Video briefing — 7 pieces of text, 1 link. From oat-products-selected-markets-2026.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "oat-products-selected-markets-2026",
+        "video",
+        "briefing"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "观看本报告的视频简报",
+                "lede": "用4–5分钟AI辅助视频说明报告的核心结论、方法、局限及商业含义。",
+                "video_link": {
+                    "url": "../videos.html",
+                    "title": "打开视频简报",
+                    "target": ""
+                },
+                "duration": "4:30",
+                "play_symbol": "▶",
+                "video_kicker": "精选报告视频简报",
+                "video_title": "如何阅读一份基于海关数据的市场报告",
+                "video_description": "简明说明HS编码、数据覆盖、排名限制以及数字背后的商业含义。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/reports/oat-products-selected-markets-2026.html",
+    "qsDesignVersion": 7
+}

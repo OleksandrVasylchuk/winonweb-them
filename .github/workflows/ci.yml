@@ -67,7 +67,7 @@ jobs:
       - name: Keep the packaged theme
         uses: actions/upload-artifact@v4
         with:
-          name: wow-signal-theme
+          name: qwerty-soft-signal-theme
           path: artifacts/release/*.zip
           if-no-files-found: error
 
@@ -95,8 +95,8 @@ jobs:
 
     env:
       WP_PATH: ${{ github.workspace }}/wordpress
-      WOW_WP_PATH: ${{ github.workspace }}/wordpress
-      WOW_WP_HOST: 127.0.0.1:8080
+      QSOFT_WP_PATH: ${{ github.workspace }}/wordpress
+      QSOFT_WP_HOST: 127.0.0.1:8080
 
     steps:
       - uses: actions/checkout@v4
@@ -134,20 +134,20 @@ jobs:
           define( 'WP_DEBUG_DISPLAY', false );
           define( 'FS_METHOD', 'direct' );
           PHP
-          wp core install --path="$WP_PATH" --url=http://127.0.0.1:8080 --title="WOW Signal CI" \
+          wp core install --path="$WP_PATH" --url=http://127.0.0.1:8080 --title="Qwerty Soft Signal CI" \
             --admin_user=admin --admin_password=admin --admin_email=ci@example.com --skip-email
 
       - name: Activate the checkout as the theme
         run: |
-          ln -s "$GITHUB_WORKSPACE/theme" "$WP_PATH/wp-content/themes/wow-signal"
-          wp theme activate wow-signal --path="$WP_PATH"
+          ln -s "$GITHUB_WORKSPACE/theme" "$WP_PATH/wp-content/themes/qwerty-soft-signal"
+          wp theme activate qwerty-soft-signal --path="$WP_PATH"
           # Permalinks stay plain on purpose: php -S has no rewrite rules, and
           # tools/axe.mjs falls back to the REST API when there is no sitemap.
           # A post and a page so the archives and the audit have something to render.
           wp post create --path="$WP_PATH" --post_type=post --post_status=publish --post_title="Hello from CI" \
             --post_content='<!-- wp:paragraph --><p>A post so archives and the sitemap are not empty.</p><!-- /wp:paragraph -->'
           wp post create --path="$WP_PATH" --post_type=page --post_status=publish --post_title="Contact" \
-            --post_content='<!-- wp:wow/contact-form /-->'
+            --post_content='<!-- wp:qs/contact-form /-->'
 
       - name: Integration tests
         working-directory: theme

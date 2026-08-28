@@ -1,0 +1,46 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-index-aquaprole-9489b1",
+    "title": "Aquaprole 体现真实运营经验。",
+    "category": "qs",
+    "description": "Aquaprole 体现真实运营经验。 — 2 pieces of text, 1 link, 5 repeating items. From index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "index",
+        "aquaprole",
+        "体现真实运营经验"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Aquaprole 体现真实运营经验。",
+                "description": "Robert 的市场情报建立在实际国际贸易经验之上。作为 Aquaprole Group CEO，他整合了加拿大、美国、新加坡、中国和香港的食品贸易业务，涉及采购、物流、市场准入、冷链运营和自有品牌产品开发。",
+                "profile_link": {
+                    "url": "about.html",
+                    "title": "阅读简介",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/index.html",
+    "qsDesignVersion": 7
+}

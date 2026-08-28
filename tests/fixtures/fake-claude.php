@@ -10,7 +10,7 @@
  * be configured.
  *
  * So this is a real program, spawned by the real proc_open() call, reached
- * through the `wow_signal/claude_cli_command` filter. It ignores the arguments
+ * through the `qwerty_soft/claude_cli_command` filter. It ignores the arguments
  * the theme passes and behaves according to the mode named in its first
  * argument:
  *
@@ -26,7 +26,7 @@
  * Run directly, never through the theme. Not shipped: tools/build-zip.mjs
  * excludes tests/.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 declare( strict_types = 1 );
@@ -35,51 +35,51 @@ if ( 'cli' !== PHP_SAPI ) {
 	exit( 1 );
 }
 
-$wow_mode = $argv[1] ?? 'reply';
+$qsoft_mode = $argv[1] ?? 'reply';
 
-if ( 'version' === $wow_mode ) {
+if ( 'version' === $qsoft_mode ) {
 	echo "9.9.9 (Fake Claude)\n";
 	exit( 0 );
 }
 
-if ( 'hang' === $wow_mode ) {
+if ( 'hang' === $qsoft_mode ) {
 	// Read nothing, answer nothing. The parent's deadline has to end this.
 	while ( true ) {
 		usleep( 100000 );
 	}
 }
 
-if ( 'crash' === $wow_mode ) {
+if ( 'crash' === $qsoft_mode ) {
 	fwrite( STDERR, "fake claude: something went wrong\n" );
 	exit( 3 );
 }
 
 // Every remaining mode consumes the whole prompt first, the way the real one does.
-$wow_stdin = '';
+$qsoft_stdin = '';
 
 while ( ! feof( STDIN ) ) {
-	$wow_chunk = fread( STDIN, 8192 );
+	$qsoft_chunk = fread( STDIN, 8192 );
 
-	if ( false === $wow_chunk || '' === $wow_chunk ) {
+	if ( false === $qsoft_chunk || '' === $qsoft_chunk ) {
 		break;
 	}
 
-	$wow_stdin .= $wow_chunk;
+	$qsoft_stdin .= $qsoft_chunk;
 }
 
-if ( 'garbage' === $wow_mode ) {
+if ( 'garbage' === $qsoft_mode ) {
 	echo "not json, not even close\n";
 	exit( 0 );
 }
 
-if ( 'noise' === $wow_mode ) {
+if ( 'noise' === $qsoft_mode ) {
 	// Fill both pipes well past any buffer, so a parent that does not drain deadlocks.
-	for ( $wow_i = 0; $wow_i < 200; $wow_i++ ) {
+	for ( $qsoft_i = 0; $qsoft_i < 200; $qsoft_i++ ) {
 		fwrite( STDERR, str_repeat( 'e', 1024 ) . "\n" );
 	}
 }
 
-$wow_envelope = array(
+$qsoft_envelope = array(
 	'type'           => 'result',
 	'subtype'        => 'success',
 	'is_error'       => false,
@@ -97,12 +97,12 @@ $wow_envelope = array(
 	),
 );
 
-if ( 'failure' === $wow_mode ) {
-	$wow_envelope['is_error'] = true;
-	$wow_envelope['subtype']  = 'error_during_execution';
-	$wow_envelope['result']   = "Credit balance is too low\nsecond line that must not reach the message";
+if ( 'failure' === $qsoft_mode ) {
+	$qsoft_envelope['is_error'] = true;
+	$qsoft_envelope['subtype']  = 'error_during_execution';
+	$qsoft_envelope['result']   = "Credit balance is too low\nsecond line that must not reach the message";
 
-	echo wp_json_encode_fallback( $wow_envelope );
+	echo wp_json_encode_fallback( $qsoft_envelope );
 	exit( 0 );
 }
 
@@ -112,18 +112,18 @@ if ( 'failure' === $wow_mode ) {
  * would be a model answering half a question, which is the failure this whole
  * arrangement exists to rule out.
  */
-$wow_payload = array(
-	'markup'   => "<!-- wp:group {\"tagName\":\"section\"} -->\n<section class=\"wp-block-group\"><!-- wp:paragraph -->\n<p>Received " . strlen( $wow_stdin ) . " bytes.</p>\n<!-- /wp:paragraph --></section>\n<!-- /wp:group -->",
+$qsoft_payload = array(
+	'markup'   => "<!-- wp:group {\"tagName\":\"section\"} -->\n<section class=\"wp-block-group\"><!-- wp:paragraph -->\n<p>Received " . strlen( $qsoft_stdin ) . " bytes.</p>\n<!-- /wp:paragraph --></section>\n<!-- /wp:group -->",
 	'summary'  => 'A section built by the stand-in.',
 	'editable' => array( 'The paragraph' ),
 	'concerns' => array(),
 	'changed'  => array( 'nothing, this is a stand-in' ),
 );
 
-$wow_envelope['structured_output'] = $wow_payload;
-$wow_envelope['result']            = wp_json_encode_fallback( $wow_payload );
+$qsoft_envelope['structured_output'] = $qsoft_payload;
+$qsoft_envelope['result']            = wp_json_encode_fallback( $qsoft_payload );
 
-echo wp_json_encode_fallback( $wow_envelope );
+echo wp_json_encode_fallback( $qsoft_envelope );
 
 exit( 0 );
 

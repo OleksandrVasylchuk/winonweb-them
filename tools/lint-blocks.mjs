@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Block markup linter for WOW — Signal.
+ * Block markup linter for Qwerty Soft — Signal.
  *
  * Templates, template parts and patterns are hand-written block markup. A
  * stray comment or a malformed attribute object shows up in the Site Editor
@@ -16,7 +16,7 @@
  *
  * Usage: npm run lint:blocks
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';

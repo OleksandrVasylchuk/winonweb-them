@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_market_intelligence_index_20cbed",
+    "title": "Methodology principles",
+    "fields": [
+        {
+            "key": "field_qs_market_intelligence_index_20cbed_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Сначала доказательства — затем балл",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_20cbed_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "RKMII™ — авторская аналитическая методология. Ее ценность зависит от качества контроля, а не от самого названия. Балл публикуется только после документирования охвата данных, периода, ограничений и статуса проверки.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_20cbed_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_market_intelligence_index_20cbed_row_check_mark",
+                    "label": "Check mark",
+                    "name": "check_mark",
+                    "type": "text",
+                    "default_value": "✓",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_market_intelligence_index_20cbed_row_principle",
+                    "label": "Principle",
+                    "name": "principle",
+                    "type": "text",
+                    "default_value": "Использовать официальные или надежные источники",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-market-intelligence-index-20cbed"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -2,13 +2,13 @@
 /**
  * What the design import has cost, and what the next press will cost.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -35,7 +35,7 @@ final class Spend {
 	/**
 	 * User meta holding the running total.
 	 */
-	private const META = '_wow_signal_spend';
+	private const META = '_qwerty_soft_spend';
 
 	/**
 	 * Published list prices in US dollars per million tokens, as [ input, output ].
@@ -102,7 +102,7 @@ final class Spend {
 		 *
 		 * @param array<string, array{0:float,1:float}> $prices Model ID => [ input, output ] per million tokens.
 		 */
-		$prices = (array) apply_filters( 'wow_signal/anthropic_prices', self::PRICES );
+		$prices = (array) apply_filters( 'qwerty_soft/anthropic_prices', self::PRICES );
 
 		/*
 		 * The API reports the model that answered as a dated snapshot id

@@ -2,13 +2,13 @@
 /**
  * Safe intake and indexing of an uploaded design archive.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Error;
 use ZipArchive;
@@ -27,8 +27,10 @@ defined( 'ABSPATH' ) || exit;
  *   destination. Every path is normalised and re-checked against the root.
  * - **Zip bomb** — a few KB can expand to gigabytes. Entry count, per-file
  *   size and total uncompressed size are all capped before extraction.
- * - **Executable payloads** — `.php`, `.phtml`, `.htaccess` and friends are
- *   refused outright; only an allow-list of design assets is written.
+ * - **Executable payloads** — `.htaccess`, `.exe`, `.phar` and friends are
+ *   refused outright; only an allow-list of design assets is written. Server
+ *   source a handoff documents itself with — the PHP of a companion plugin —
+ *   is unpacked as text, under a name no handler matches.
  * - **Direct execution** — the working directory is created with its own
  *   `.htaccess` and `index.php`, so even on a misconfigured server nothing
  *   inside it can be requested over HTTP.
@@ -40,22 +42,67 @@ final class DesignArchive {
 	/**
 	 * Directory under wp-content/uploads that holds unpacked archives.
 	 */
-	private const BASE_DIR = 'wow-signal-designs';
+	private const BASE_DIR = 'qwerty-soft-signal-designs';
 
 	/**
-	 * Maximum entries in one archive.
+	 * Directories earlier versions of the theme unpacked into.
+	 *
+	 * The theme was called WOW — Signal before it was called Qwerty Soft, and
+	 * the designs it unpacked then are still on disk taking up room. Clean-up
+	 * sweeps these too, or the one button that says "remove the uploaded
+	 * designs" leaves megabytes behind that nothing on the screen can reach.
 	 */
-	private const MAX_ENTRIES = 3000;
+	private const LEGACY_BASE_DIRS = array( 'wow-signal-designs' );
 
 	/**
-	 * Maximum uncompressed size of a single file (12 MB).
+	 * Maximum entries that will be *written* from one archive.
+	 *
+	 * Counted after vetting, not before: a developer handoff is mostly PDFs,
+	 * specification sheets and dependency trees that never reach disk, and
+	 * refusing the whole upload because the ZIP's table of contents is long
+	 * turned "here is the design" into "re-zip it by hand first".
 	 */
-	private const MAX_FILE_BYTES = 12582912;
+	private const MAX_ENTRIES = 60000;
 
 	/**
-	 * Maximum uncompressed size of the whole archive (200 MB).
+	 * Maximum uncompressed size of a single file (64 MB).
 	 */
-	private const MAX_TOTAL_BYTES = 209715200;
+	private const MAX_FILE_BYTES = 67108864;
+
+	/**
+	 * Maximum uncompressed size written to disk from one archive (1 GB).
+	 */
+	private const MAX_TOTAL_BYTES = 1073741824;
+
+	/**
+	 * Seconds an unpack may take before PHP gives up.
+	 *
+	 * A thousand-file design is minutes of work, not seconds, and the default
+	 * thirty-second limit killed it half-written.
+	 */
+	private const UNPACK_SECONDS = 900;
+
+	/**
+	 * How many archives deep the unpacking goes.
+	 *
+	 * A box of boxes is normal in a handoff; a box of boxes of boxes of boxes
+	 * is a bomb, so the recursion stops rather than following it anywhere.
+	 */
+	private const NESTING_DEPTH = 4;
+
+	/**
+	 * How long a directory path may get before short names are used instead.
+	 *
+	 * Windows refuses anything past 260 characters unless both the system and
+	 * the binary doing the work have opted out, and Apache's PHP normally has
+	 * not — which is why this bites on a developer's own machine and not in
+	 * the tests. The budget leaves room underneath for the site tree an inner
+	 * archive carries: a language folder, a section folder and a long file
+	 * name is comfortably a hundred characters on its own.
+	 *
+	 * @var int
+	 */
+	private const PATH_BUDGET = 150;
 
 	/**
 	 * File extensions that may be written to disk.
@@ -66,15 +113,41 @@ final class DesignArchive {
 	private const ALLOWED_EXTENSIONS = array(
 		'html',
 		'htm',
+
+		/*
+		 * A ZIP inside the ZIP. Handoffs arrive nested — the source in one
+		 * archive, the build in another, the pictures in a third — and a
+		 * design the importer refuses to open because it is wrapped twice is
+		 * a design nobody can import. Written out here, then expanded in
+		 * place by {@see self::expand_nested()} and deleted.
+		 */
+		'zip',
 		'css',
+		'scss',
+		'sass',
+		'less',
 		'js',
 		'mjs',
 		'jsx',
+
+		/*
+		 * Component source. A design exported from a React or Vue project has
+		 * no static HTML at all — the markup only exists once a browser has
+		 * run it — so the components are the design, and refusing them left
+		 * the screen with nothing to read. Nothing here is executable by a web
+		 * server; it is text the importer reads, exactly like the HTML.
+		 */
+		'ts',
+		'tsx',
+		'vue',
 		'json',
 		'csv',
 		'md',
 		'txt',
 		'xml',
+		'yml',
+		'yaml',
+		'webmanifest',
 		'svg',
 		'png',
 		'jpg',
@@ -91,9 +164,54 @@ final class DesignArchive {
 	);
 
 	/**
-	 * Extensions that are refused loudly rather than silently skipped.
+	 * Extensions dropped without a word: paperwork, not design.
 	 */
-	private const DANGEROUS_EXTENSIONS = array(
+	private const PAPERWORK_EXTENSIONS = array(
+		'pdf',
+		'doc',
+		'docx',
+		'xls',
+		'xlsx',
+		'ppt',
+		'pptx',
+		'psd',
+		'ai',
+		'sketch',
+		'fig',
+		'xd',
+		'rar',
+		'7z',
+		'gz',
+		'tgz',
+		'mp4',
+		'mov',
+		'avi',
+		'webm',
+		'mp3',
+		'wav',
+		'map',
+		'lock',
+		'mmd',
+		'db',
+		'sqlite',
+	);
+
+	/**
+	 * Server-side source that is unpacked as plain text under a safe name.
+	 *
+	 * A handoff often ships the WordPress plugin it expects to sit beside —
+	 * seven files of it in one recent package — and those files say what the
+	 * design means by a report, a translation job, a protected download.
+	 * Refusing them threw that away to protect against a risk that is really
+	 * about *serving* the file, not about reading it. So they are unpacked
+	 * with the extension folded into the name — `class-rk-rest-api.php`
+	 * becomes `class-rk-rest-api-php.txt` — which leaves nothing for a
+	 * misconfigured `AddHandler` to match, on top of the directory guards.
+	 *
+	 * The dot is removed rather than suffixed: Apache's mod_mime reads *every*
+	 * extension in a name, so `x.php.txt` would still be handed to PHP.
+	 */
+	private const NEUTRALISED_EXTENSIONS = array(
 		'php',
 		'php3',
 		'php4',
@@ -102,18 +220,29 @@ final class DesignArchive {
 		'php8',
 		'phps',
 		'phtml',
+		'inc',
+		'twig',
+		'blade',
+		'erb',
+		'rb',
+		'py',
+		'pl',
+		'sh',
+		'bash',
+	);
+
+	/**
+	 * Extensions that are refused loudly rather than silently skipped.
+	 */
+	private const DANGEROUS_EXTENSIONS = array(
 		'phar',
 		'htaccess',
 		'htpasswd',
 		'ini',
-		'sh',
-		'bash',
 		'exe',
 		'dll',
 		'so',
 		'cgi',
-		'pl',
-		'py',
 	);
 
 	/**
@@ -125,13 +254,13 @@ final class DesignArchive {
 		$uploads = wp_upload_dir();
 
 		if ( ! empty( $uploads['error'] ) ) {
-			return new WP_Error( 'wow_signal_uploads', (string) $uploads['error'] );
+			return new WP_Error( 'qwerty_soft_uploads', (string) $uploads['error'] );
 		}
 
 		$base = trailingslashit( $uploads['basedir'] ) . self::BASE_DIR;
 
 		if ( ! is_dir( $base ) && ! wp_mkdir_p( $base ) ) {
-			return new WP_Error( 'wow_signal_mkdir', __( 'Could not create the designs folder inside uploads.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_mkdir', __( 'Could not create the designs folder inside uploads.', 'qwerty-soft-signal' ) );
 		}
 
 		self::protect( $base );
@@ -149,7 +278,7 @@ final class DesignArchive {
 	 *
 	 * nginx reads neither guard file. A site on nginx needs a `location`
 	 * block in its server configuration that denies this directory, for
-	 * example `location ^~ /wp-content/uploads/wow-signal-designs/ { deny all; }`
+	 * example `location ^~ /wp-content/uploads/qwerty-soft-signal-designs/ { deny all; }`
 	 * (adjusted to the real uploads path). See the theme documentation.
 	 *
 	 * @param string $dir Absolute directory path.
@@ -185,16 +314,83 @@ final class DesignArchive {
 	}
 
 	/**
-	 * Remove a partially unpacked design.
+	 * Every directory this class is allowed to delete inside, resolved.
 	 *
-	 * Used when an archive turns out to be larger than it declared: the
-	 * half-written tree must not linger in uploads, and its slug must not be
-	 * offered on the designs list.
+	 * The current one, plus the ones older versions of the theme wrote to.
 	 *
-	 * @param string $root Absolute design root.
-	 * @return void
+	 * @return array<int, string> Canonical paths, forward slashes, no trailing slash.
 	 */
-	private static function discard( string $root ): void {
+	private static function managed_bases(): array {
+		$uploads = wp_upload_dir();
+
+		if ( ! empty( $uploads['error'] ) ) {
+			return array();
+		}
+
+		$names = array_merge( array( self::BASE_DIR ), self::LEGACY_BASE_DIRS );
+		$bases = array();
+
+		foreach ( $names as $name ) {
+			$path = realpath( trailingslashit( $uploads['basedir'] ) . $name );
+
+			if ( false !== $path && is_dir( $path ) ) {
+				$bases[] = rtrim( str_replace( '\\', '/', $path ), '/' );
+			}
+		}
+
+		return array_values( array_unique( $bases ) );
+	}
+
+	/**
+	 * Remove a directory and everything under it.
+	 *
+	 * WP_Filesystem is not trusted to finish this on its own. Two ways it
+	 * quietly does not: on a host where the direct transport is unavailable
+	 * `WP_Filesystem()` returns false and nothing at all is deleted, and on
+	 * Windows the final `rmdir()` of a directory whose children were only just
+	 * unlinked fails often enough to be the normal case. Both ended the same
+	 * way — an empty folder still listed on the screen as a design, that no
+	 * button could remove, because `remove()` reported failure and the list
+	 * kept showing what was still on disk.
+	 *
+	 * So: delete depth-first with plain PHP, retry the directory removals,
+	 * and only then fall back to WP_Filesystem for anything left.
+	 *
+	 * @param string $root Absolute directory path.
+	 * @return bool Whether it is gone.
+	 */
+	private static function discard( string $root ): bool {
+		clearstatcache( true, $root );
+
+		if ( ! is_dir( $root ) ) {
+			return true;
+		}
+
+		try {
+			$items = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $root, \FilesystemIterator::SKIP_DOTS ),
+				\RecursiveIteratorIterator::CHILD_FIRST
+			);
+
+			foreach ( $items as $item ) {
+				$path = (string) $item->getPathname();
+
+				if ( $item->isDir() && ! $item->isLink() ) {
+					self::rmdir_hard( $path );
+					continue;
+				}
+
+				self::unlink_hard( $path );
+			}
+		} catch ( \Throwable $error ) {
+			// A tree that changed underneath the iterator; the retry below settles it.
+			unset( $error );
+		}
+
+		if ( self::rmdir_hard( $root ) ) {
+			return true;
+		}
+
 		global $wp_filesystem;
 
 		if ( ! function_exists( 'WP_Filesystem' ) ) {
@@ -204,6 +400,54 @@ final class DesignArchive {
 		if ( WP_Filesystem() && $wp_filesystem ) {
 			$wp_filesystem->delete( $root, true );
 		}
+
+		clearstatcache( true, $root );
+
+		return ! is_dir( $root );
+	}
+
+	/**
+	 * Delete one file, taking the read-only bit off if that is what stopped it.
+	 *
+	 * @param string $path Absolute file path.
+	 * @return bool
+	 */
+	private static function unlink_hard( string $path ): bool {
+		if ( @unlink( $path ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_unlink -- Failure is the expected branch and is handled below; WP_Filesystem may be unavailable here.
+			return true;
+		}
+
+		@chmod( $path, 0644 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- Read-only files are the common cause on Windows.
+
+		return @unlink( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_unlink -- Second attempt; the caller checks the tree afterwards.
+	}
+
+	/**
+	 * Remove one directory, retrying while the filesystem catches up.
+	 *
+	 * @param string $dir Absolute directory path.
+	 * @return bool
+	 */
+	private static function rmdir_hard( string $dir ): bool {
+		for ( $attempt = 0; $attempt < 5; $attempt++ ) {
+			clearstatcache( true, $dir );
+
+			if ( ! is_dir( $dir ) ) {
+				return true;
+			}
+
+			if ( @rmdir( $dir ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Windows returns false while a handle is still closing; retried below.
+				clearstatcache( true, $dir );
+
+				return true;
+			}
+
+			usleep( 50000 );
+		}
+
+		clearstatcache( true, $dir );
+
+		return ! is_dir( $dir );
 	}
 
 	/**
@@ -217,53 +461,70 @@ final class DesignArchive {
 	 * @return bool Whether it is gone.
 	 */
 	public static function remove( string $root ): bool {
-		$base = self::base_dir();
-
-		if ( is_wp_error( $base ) ) {
-			return false;
-		}
-
-		$real_base = realpath( $base );
+		$bases     = self::managed_bases();
 		$real_root = realpath( $root );
 
-		if ( false === $real_base || false === $real_root || ! is_dir( $real_root ) ) {
+		if ( array() === $bases || false === $real_root || ! is_dir( $real_root ) ) {
 			return false;
 		}
 
-		$real_base = rtrim( str_replace( '\\', '/', $real_base ), '/' );
 		$real_root = rtrim( str_replace( '\\', '/', $real_root ), '/' );
+		$inside    = false;
 
-		if ( $real_root === $real_base || ! str_starts_with( $real_root . '/', $real_base . '/' ) ) {
-			return false;
-		}
+		foreach ( $bases as $base ) {
+			if ( $real_root === $base ) {
+				// The folder that holds the designs is never itself a design.
+				return false;
+			}
 
-		self::discard( $real_root );
-
-		return ! is_dir( $real_root );
-	}
-
-	/**
-	 * Delete every unpacked design, keeping the folder and its guard files.
-	 *
-	 * @return int How many designs were removed.
-	 */
-	public static function purge(): int {
-		$base = self::base_dir();
-
-		if ( is_wp_error( $base ) ) {
-			return 0;
-		}
-
-		$removed = 0;
-		$entries = glob( trailingslashit( $base ) . '*', GLOB_ONLYDIR );
-
-		foreach ( $entries ? $entries : array() as $dir ) {
-			if ( self::remove( $dir ) ) {
-				++$removed;
+			if ( str_starts_with( $real_root . '/', $base . '/' ) ) {
+				$inside = true;
 			}
 		}
 
-		return $removed;
+		if ( ! $inside ) {
+			return false;
+		}
+
+		return self::discard( $real_root );
+	}
+
+	/**
+	 * Delete every unpacked design, wherever this theme has ever put one.
+	 *
+	 * The current folder keeps its guard files and stays; a folder left by an
+	 * older name of the theme goes entirely, guard files and all, because
+	 * nothing will ever write to it again.
+	 *
+	 * @return array{removed:int,failed:array<int,string>} What went, and what would not.
+	 */
+	public static function purge(): array {
+		$removed = 0;
+		$failed  = array();
+		$current = self::base_dir();
+		$current = is_wp_error( $current ) ? '' : rtrim( str_replace( '\\', '/', (string) realpath( $current ) ), '/' );
+
+		foreach ( self::managed_bases() as $base ) {
+			$entries = glob( $base . '/*', GLOB_ONLYDIR );
+
+			foreach ( $entries ? $entries : array() as $dir ) {
+				if ( self::remove( $dir ) ) {
+					++$removed;
+					continue;
+				}
+
+				$failed[] = basename( $dir );
+			}
+
+			if ( $base !== $current && array() === $failed ) {
+				self::discard( $base );
+			}
+		}
+
+		return array(
+			'removed' => $removed,
+			'failed'  => $failed,
+		);
 	}
 
 	/**
@@ -272,32 +533,33 @@ final class DesignArchive {
 	 * @return array{count:int,bytes:int}
 	 */
 	public static function footprint(): array {
-		$base = self::base_dir();
+		$count = 0;
+		$bytes = 0;
 
-		if ( is_wp_error( $base ) ) {
-			return array(
-				'count' => 0,
-				'bytes' => 0,
-			);
-		}
+		foreach ( self::managed_bases() as $base ) {
+			$entries = glob( $base . '/*', GLOB_ONLYDIR );
 
-		$entries = glob( trailingslashit( $base ) . '*', GLOB_ONLYDIR );
-		$bytes   = 0;
+			foreach ( $entries ? $entries : array() as $dir ) {
+				++$count;
 
-		foreach ( $entries ? $entries : array() as $dir ) {
-			$iterator = new \RecursiveIteratorIterator(
-				new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS )
-			);
+				try {
+					$iterator = new \RecursiveIteratorIterator(
+						new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS )
+					);
 
-			foreach ( $iterator as $file ) {
-				if ( $file->isFile() ) {
-					$bytes += (int) $file->getSize();
+					foreach ( $iterator as $file ) {
+						if ( $file->isFile() ) {
+							$bytes += (int) $file->getSize();
+						}
+					}
+				} catch ( \Throwable $error ) {
+					unset( $error );
 				}
 			}
 		}
 
 		return array(
-			'count' => $entries ? count( $entries ) : 0,
+			'count' => $count,
 			'bytes' => $bytes,
 		);
 	}
@@ -319,24 +581,24 @@ final class DesignArchive {
 		$head = $size > 0 ? (string) file_get_contents( $path, false, null, 0, 8 ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Eight bytes of a temp upload, for a diagnostic only.
 
 		if ( 0 === $size ) {
-			return __( 'The uploaded file is empty (0 bytes). Zip the design folder again and upload the new file.', 'wow-signal' );
+			return __( 'The uploaded file is empty (0 bytes). Zip the design folder again and upload the new file.', 'qwerty-soft-signal' );
 		}
 
 		$kinds = array(
-			'Rar!'       => __( 'a RAR archive', 'wow-signal' ),
-			"7z\xBC\xAF" => __( 'a 7-Zip archive', 'wow-signal' ),
-			"\x1F\x8B"   => __( 'a gzip/tar.gz archive', 'wow-signal' ),
-			'%PDF'       => __( 'a PDF', 'wow-signal' ),
-			'<!DO'       => __( 'an HTML page', 'wow-signal' ),
-			'<htm'       => __( 'an HTML page', 'wow-signal' ),
-			'{'          => __( 'a JSON file', 'wow-signal' ),
+			'Rar!'       => __( 'a RAR archive', 'qwerty-soft-signal' ),
+			"7z\xBC\xAF" => __( 'a 7-Zip archive', 'qwerty-soft-signal' ),
+			"\x1F\x8B"   => __( 'a gzip/tar.gz archive', 'qwerty-soft-signal' ),
+			'%PDF'       => __( 'a PDF', 'qwerty-soft-signal' ),
+			'<!DO'       => __( 'an HTML page', 'qwerty-soft-signal' ),
+			'<htm'       => __( 'an HTML page', 'qwerty-soft-signal' ),
+			'{'          => __( 'a JSON file', 'qwerty-soft-signal' ),
 		);
 
 		foreach ( $kinds as $magic => $kind ) {
 			if ( str_starts_with( $head, $magic ) ) {
 				return sprintf(
 					/* translators: %s: what the file actually is, e.g. "a RAR archive". */
-					__( 'That file is %s with a .zip name, not a ZIP archive. Create a real ZIP of the design folder (right-click → Compress / Send to → Compressed folder) and upload that.', 'wow-signal' ),
+					__( 'That file is %s with a .zip name, not a ZIP archive. Create a real ZIP of the design folder (right-click → Compress / Send to → Compressed folder) and upload that.', 'qwerty-soft-signal' ),
 					$kind
 				);
 			}
@@ -344,25 +606,25 @@ final class DesignArchive {
 
 		if ( str_starts_with( $head, "PK\x03\x04" ) || str_starts_with( $head, "PK\x05\x06" ) ) {
 			$reasons = array(
-				ZipArchive::ER_INCONS => __( 'it is damaged or was not fully downloaded', 'wow-signal' ),
-				ZipArchive::ER_NOZIP  => __( 'its directory is unreadable', 'wow-signal' ),
-				ZipArchive::ER_MEMORY => __( 'the server ran out of memory reading it', 'wow-signal' ),
-				ZipArchive::ER_OPEN   => __( 'the server could not open the temporary file', 'wow-signal' ),
-				ZipArchive::ER_READ   => __( 'the server could not read the temporary file', 'wow-signal' ),
-				ZipArchive::ER_SEEK   => __( 'the server could not seek in the temporary file', 'wow-signal' ),
+				ZipArchive::ER_INCONS => __( 'it is damaged or was not fully downloaded', 'qwerty-soft-signal' ),
+				ZipArchive::ER_NOZIP  => __( 'its directory is unreadable', 'qwerty-soft-signal' ),
+				ZipArchive::ER_MEMORY => __( 'the server ran out of memory reading it', 'qwerty-soft-signal' ),
+				ZipArchive::ER_OPEN   => __( 'the server could not open the temporary file', 'qwerty-soft-signal' ),
+				ZipArchive::ER_READ   => __( 'the server could not read the temporary file', 'qwerty-soft-signal' ),
+				ZipArchive::ER_SEEK   => __( 'the server could not seek in the temporary file', 'qwerty-soft-signal' ),
 			);
 
 			return sprintf(
 				/* translators: 1: reason, 2: libzip error code. */
-				__( 'That ZIP looks right but %1$s (code %2$d). Re-zip the folder and try again; if it keeps happening, the file may use a compression PHP cannot read — choose "Deflate"/standard ZIP in your archiver.', 'wow-signal' ),
-				$reasons[ $code ] ?? __( 'could not be opened', 'wow-signal' ),
+				__( 'That ZIP looks right but %1$s (code %2$d). Re-zip the folder and try again; if it keeps happening, the file may use a compression PHP cannot read — choose "Deflate"/standard ZIP in your archiver.', 'qwerty-soft-signal' ),
+				$reasons[ $code ] ?? __( 'could not be opened', 'qwerty-soft-signal' ),
 				$code
 			);
 		}
 
 		return sprintf(
 			/* translators: 1: libzip error code, 2: file size in bytes. */
-			__( 'That file could not be opened as a ZIP archive (code %1$d, %2$s bytes). It does not start like a ZIP, so it is probably not one: zip the design folder itself and upload the result.', 'wow-signal' ),
+			__( 'That file could not be opened as a ZIP archive (code %1$d, %2$s bytes). It does not start like a ZIP, so it is probably not one: zip the design folder itself and upload the result.', 'qwerty-soft-signal' ),
 			$code,
 			number_format_i18n( $size )
 		);
@@ -378,8 +640,8 @@ final class DesignArchive {
 	public static function unpack( string $zip_path, string $label ) {
 		if ( ! class_exists( 'ZipArchive' ) ) {
 			return new WP_Error(
-				'wow_signal_no_zip',
-				__( 'This server has no ZIP support in PHP, so archives cannot be unpacked. Ask your host to enable the zip extension.', 'wow-signal' )
+				'qwerty_soft_no_zip',
+				__( 'This server has no ZIP support in PHP, so archives cannot be unpacked. Ask your host to enable the zip extension.', 'qwerty-soft-signal' )
 			);
 		}
 
@@ -391,41 +653,50 @@ final class DesignArchive {
 
 		/*
 		 * The slug travels in REST URLs that accept [a-z0-9-] only.
-		 * sanitize_title() percent-encodes anything non-Latin — a file called
-		 * "архів.zip" became "%d0%b0…" and no route would match it again.
+		 * sanitize_title() percent-encodes anything non-Latin - a Cyrillic file
+		 * name became "%d0%b0..." and no route would match it again.
 		 * Keep ASCII only; a name with nothing left falls back to "design".
 		 */
 		$slug = strtolower( remove_accents( $label ) );
 		$slug = trim( (string) preg_replace( '/[^a-z0-9]+/', '-', $slug ), '-' );
-		$slug = substr( $slug, 0, 60 );
+
+		/*
+		 * Short on purpose. Windows refuses a path over 260 characters unless
+		 * both the OS and the running binary have opted out of the limit, and
+		 * Apache's PHP usually has not. This folder is the root of everything
+		 * a handoff unpacks into — a package folder, a section folder, an
+		 * inner archive's folder, then the site's own tree — and sixty
+		 * characters spent here is sixty taken off every file below it. A
+		 * design whose deepest file ran past the limit did not fail loudly: it
+		 * arrived without the archive that held the whole website.
+		 */
+		$slug = substr( $slug, 0, 28 );
 		$slug = '' !== $slug ? $slug : 'design';
 		$slug = $slug . '-' . strtolower( wp_generate_password( 6, false, false ) );
 		$root = trailingslashit( $base ) . $slug;
 
 		if ( ! wp_mkdir_p( $root ) ) {
-			return new WP_Error( 'wow_signal_mkdir', __( 'Could not create a folder for this design.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_mkdir', __( 'Could not create a folder for this design.', 'qwerty-soft-signal' ) );
 		}
 
 		$zip    = new ZipArchive();
 		$opened = $zip->open( $zip_path );
 
 		if ( true !== $opened ) {
-			return new WP_Error( 'wow_signal_bad_zip', self::open_failure_message( $zip_path, is_int( $opened ) ? $opened : 0 ) );
+			return new WP_Error( 'qwerty_soft_bad_zip', self::open_failure_message( $zip_path, is_int( $opened ) ? $opened : 0 ) );
 		}
 
 		$count = $zip->numFiles;
 
-		if ( $count > self::MAX_ENTRIES ) {
-			$zip->close();
-
-			return new WP_Error(
-				'wow_signal_too_many',
-				sprintf(
-					/* translators: %d: maximum number of files. */
-					__( 'That archive holds more than %d files. Send the design folder on its own, without build output or dependencies.', 'wow-signal' ),
-					self::MAX_ENTRIES
-				)
-			);
+		/*
+		 * A developer handoff is not a design folder and never will be: this
+		 * one is four and a half thousand entries, most of them specification
+		 * PDFs that are skipped anyway. Reading it takes minutes, so take the
+		 * minutes rather than refusing the upload and asking a person to
+		 * re-zip a gigabyte by hand.
+		 */
+		if ( function_exists( 'set_time_limit' ) ) {
+			@set_time_limit( self::UNPACK_SECONDS ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Hosts in safe mode refuse this; unpacking still proceeds.
 		}
 
 		$real_root = realpath( $root );
@@ -433,116 +704,24 @@ final class DesignArchive {
 		if ( false === $real_root ) {
 			$zip->close();
 
-			return new WP_Error( 'wow_signal_mkdir', __( 'Could not resolve the destination folder.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_mkdir', __( 'Could not resolve the destination folder.', 'qwerty-soft-signal' ) );
 		}
 
 		$written  = 0;
-		$bytes    = 0;
 		$inflated = 0;
 		$skipped  = array();
+		$dropped  = 0;
 
-		for ( $i = 0; $i < $count; $i++ ) {
-			$stat = $zip->statIndex( $i );
-
-			if ( false === $stat ) {
-				continue;
-			}
-
-			$name = (string) $stat['name'];
-			$size = (int) $stat['size'];
-
-			// Directories are recreated implicitly by the file writes below.
-			if ( '' === $name || str_ends_with( $name, '/' ) ) {
-				continue;
-			}
-
-			$verdict = self::vet_entry( $name, $size );
-
-			if ( null !== $verdict ) {
-				// An empty reason means "drop it quietly" — noise, not a threat.
-				if ( '' !== $verdict ) {
-					$skipped[] = $verdict;
-				}
-
-				continue;
-			}
-
-			$bytes += $size;
-
-			if ( $bytes > self::MAX_TOTAL_BYTES ) {
-				$zip->close();
-				self::discard( $root );
-
-				return new WP_Error(
-					'wow_signal_too_big',
-					__( 'That archive unpacks to more than 200 MB. Remove videos, design binaries and node_modules before sending it.', 'wow-signal' )
-				);
-			}
-
-			$target = self::safe_target( $real_root, $name );
-
-			if ( null === $target ) {
-				$skipped[] = sprintf(
-					/* translators: %s: entry path inside the archive. */
-					__( '%s — refused, the path points outside the folder', 'wow-signal' ),
-					$name
-				);
-				continue;
-			}
-
-			$dir = dirname( $target );
-
-			if ( ! is_dir( $dir ) && ! wp_mkdir_p( $dir ) ) {
-				$skipped[] = $name;
-				continue;
-			}
-
-			$stream = $zip->getStream( $name );
-
-			if ( ! is_resource( $stream ) ) {
-				$skipped[] = $name;
-				continue;
-			}
-
-			$out = fopen( $target, 'wb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Streaming avoids loading a large asset into memory; WP_Filesystem has no streaming API.
-
-			if ( false === $out ) {
-				fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Pairs with getStream().
-				$skipped[] = $name;
-				continue;
-			}
-
-			$copied = stream_copy_to_stream( $stream, $out, self::MAX_FILE_BYTES + 1 );
-			fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Pairs with fopen() above.
-			fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Pairs with getStream().
-
-			/*
-			 * The declared size is only a claim. Count what actually came out
-			 * of the entry, and treat a copy that hit the per-file ceiling as
-			 * truncated — a bomb declares small and inflates large.
-			 */
-			$copied    = false === $copied ? 0 : (int) $copied;
-			$inflated += $copied;
-
-			if ( $copied > self::MAX_FILE_BYTES || $inflated > self::MAX_TOTAL_BYTES ) {
-				$zip->close();
-				self::discard( $root );
-
-				return new WP_Error(
-					'wow_signal_too_big',
-					__( 'That archive unpacks to more than it declares, past the size limit. Remove videos, design binaries and node_modules before sending it.', 'wow-signal' )
-				);
-			}
-
-			++$written;
-		}
-
+		self::extract_into( $zip, $real_root, $written, $inflated, $skipped, $dropped );
 		$zip->close();
+
+		// Archives inside the archive, opened in place until none are left.
+		$nested = self::expand_nested( $real_root, $written, $inflated, $skipped, $dropped );
 
 		if ( 0 === $written ) {
 			return new WP_Error(
-				'wow_signal_empty',
-				__( 'Nothing usable was found in that archive. It should contain the design HTML, its stylesheets and its images.', 'wow-signal' )
+				'qwerty_soft_empty',
+				__( 'Nothing usable was found in that archive. It should contain the design HTML or its components, its stylesheets and its images.', 'qwerty-soft-signal' )
 			);
 		}
 
@@ -550,8 +729,353 @@ final class DesignArchive {
 			'slug'    => $slug,
 			'path'    => $root,
 			'files'   => $written,
-			'bytes'   => $bytes,
-			'skipped' => array_slice( $skipped, 0, 40 ),
+			'bytes'   => $inflated,
+			'skipped' => $skipped,
+			'dropped' => $dropped,
+			'nested'  => $nested,
+		);
+	}
+
+	/**
+	 * Open every archive the archive contained, and every archive in those.
+	 *
+	 * A handoff is often a box of boxes: the source zipped, the build zipped,
+	 * the photographs zipped, sometimes all three inside one more. Each inner
+	 * archive is unpacked into a folder beside itself, vetted exactly like the
+	 * outer one, counted against the same budget, and then deleted — what
+	 * stays on disk is the design, not the packaging.
+	 *
+	 * @param string             $root     Design root, canonical.
+	 * @param int                $written  Files written so far; updated.
+	 * @param int                $inflated Bytes written so far; updated.
+	 * @param array<int, string> $skipped  Skip reasons; appended to.
+	 * @param int                $dropped  Entries dropped; updated.
+	 * @return int How many inner archives were opened.
+	 */
+	private static function expand_nested( string $root, int &$written, int &$inflated, array &$skipped, int &$dropped ): int {
+		$opened = 0;
+
+		for ( $round = 0; $round < self::NESTING_DEPTH; $round++ ) {
+			$found = self::inner_archives( $root );
+
+			if ( array() === $found ) {
+				break;
+			}
+
+			$progress = false;
+
+			foreach ( $found as $archive ) {
+				if ( function_exists( 'set_time_limit' ) ) {
+					@set_time_limit( self::UNPACK_SECONDS ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Refused in safe mode; unpacking still proceeds.
+				}
+
+				/*
+				 * Unpacked beside itself, under a folder named after it, so a
+				 * design that refers to `assets/photos/hero.png` still finds
+				 * it after `assets/photos.zip` has been opened.
+				 */
+				$target = preg_replace( '#\.zip$#i', '', $archive );
+				$target = is_string( $target ) && '' !== $target ? $target : $archive . '-unpacked';
+
+				/*
+				 * A folder named after the archive is the readable choice and
+				 * the wrong one when the name is sixty characters long and the
+				 * archive is already four folders deep. Windows stops at 260
+				 * characters for the whole path, and what stops there is not
+				 * this folder but the site inside it — silently, because an
+				 * archive that cannot be opened is an archive nobody sees.
+				 *
+				 * So the name is kept while it fits and swapped for a short
+				 * stable one when it does not. Same folder every time the same
+				 * archive is unpacked, which is what the links inside it need.
+				 */
+				if ( strlen( $target ) > self::PATH_BUDGET ) {
+					$target = dirname( $archive ) . '/z-' . substr( md5( basename( $archive ) ), 0, 8 );
+				}
+
+				$suffix = 2;
+
+				while ( is_dir( $target ) ) {
+					$target = $target . '-' . $suffix;
+					++$suffix;
+				}
+
+				if ( ! wp_mkdir_p( $target ) ) {
+					self::unlink_hard( $archive );
+					continue;
+				}
+
+				$inner  = new ZipArchive();
+				$result = $inner->open( $archive );
+
+				if ( true !== $result ) {
+					++$dropped;
+
+					if ( count( $skipped ) < 60 ) {
+						$skipped[] = sprintf(
+							/* translators: 1: path inside the design, 2: the ZipArchive error number. */
+							__( '%1$s — an archive inside the design that could not be opened (error %2$d)', 'qwerty-soft-signal' ),
+							ltrim( substr( $archive, strlen( $root ) ), '/' ),
+							is_int( $result ) ? $result : 0
+						);
+					}
+
+					// Kept, not deleted: an archive nobody could open is still evidence.
+					@rmdir( $target ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Removing the empty folder made for an archive that never opened.
+					continue;
+				}
+
+				++$opened;
+				$progress = true;
+
+				/*
+				 * One archive at a time, and one archive's failure is its own.
+				 * Without this a single unreadable inner ZIP took the loop
+				 * down with it and every archive after it stayed closed — and
+				 * because what stays closed is invisible, a handoff whose
+				 * whole website sat in the last of three boxes was imported as
+				 * the two blueprints that happened to come first.
+				 */
+				try {
+					self::extract_into( $inner, (string) realpath( $target ), $written, $inflated, $skipped, $dropped );
+				} catch ( \Throwable $error ) {
+					++$dropped;
+
+					if ( count( $skipped ) < 60 ) {
+						$skipped[] = sprintf(
+							/* translators: 1: path inside the design, 2: the error. */
+							__( '%1$s — an archive inside the design that could not be read (%2$s)', 'qwerty-soft-signal' ),
+							ltrim( substr( $archive, strlen( $root ) ), '/' ),
+							$error->getMessage()
+						);
+					}
+				}
+
+				$inner->close();
+
+				// The packaging has served its purpose.
+				self::unlink_hard( $archive );
+			}
+
+			// A round that opened nothing will not do better on the next pass.
+			if ( ! $progress ) {
+				break;
+			}
+		}
+
+		/*
+		 * Anything still boxed at the end is said out loud. Silence here is
+		 * the worst outcome this class can produce: the design looks complete,
+		 * the page list looks plausible, and the part somebody actually wanted
+		 * is sitting on disk as a file nothing will ever open.
+		 */
+		foreach ( self::inner_archives( $root ) as $left ) {
+			if ( count( $skipped ) < 60 ) {
+				$skipped[] = sprintf(
+					/* translators: %s: path inside the design. */
+					__( '%s — an archive inside the design that is still unopened; its pages are not in this import.', 'qwerty-soft-signal' ),
+					ltrim( substr( $left, strlen( $root ) ), '/' )
+				);
+			}
+		}
+
+		return $opened;
+	}
+
+	/**
+	 * Every .zip currently sitting inside the design.
+	 *
+	 * @param string $root Design root.
+	 * @return array<int, string> Absolute paths.
+	 */
+	private static function inner_archives( string $root ): array {
+		$found = array();
+
+		try {
+			$iterator = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $root, \FilesystemIterator::SKIP_DOTS )
+			);
+
+			foreach ( $iterator as $file ) {
+				if ( $file->isFile() && 'zip' === strtolower( $file->getExtension() ) ) {
+					$found[] = str_replace( '\\', '/', $file->getPathname() );
+				}
+			}
+		} catch ( \Throwable $error ) {
+			unset( $error );
+		}
+
+		return $found;
+	}
+
+
+	/**
+	 * Write one open archive into a directory, vetting every entry.
+	 *
+	 * Shared by the upload and by every archive found inside it, so an
+	 * inner ZIP is held to exactly the same rules as the outer one: the same
+	 * allow-list, the same zip-slip guard, the same budget, the same order.
+	 *
+	 * @param ZipArchive         $zip       Open archive.
+	 * @param string             $real_root Canonical destination.
+	 * @param int                $written   Files written; updated.
+	 * @param int                $inflated  Bytes written; updated.
+	 * @param array<int, string> $skipped   Skip reasons; appended to.
+	 * @param int                $dropped   Entries dropped; updated.
+	 * @return void
+	 */
+	private static function extract_into( ZipArchive $zip, string $real_root, int &$written, int &$inflated, array &$skipped, int &$dropped ): void {
+		$count = $zip->numFiles;
+
+		/*
+		 * Two passes, and the order is the point. The markup, the stylesheets
+		 * and the component source are what the screen reads; the pictures are
+		 * what fills the disk. Writing the readable files first means a design
+		 * that runs into the size ceiling still arrives with its structure
+		 * intact and only loses pictures at the end, instead of failing whole
+		 * because a folder of photographs happened to be zipped first.
+		 */
+		foreach ( array( true, false ) as $documents_pass ) {
+			for ( $i = 0; $i < $count; $i++ ) {
+				$stat = $zip->statIndex( $i );
+
+				if ( false === $stat ) {
+					continue;
+				}
+
+				$name = (string) $stat['name'];
+				$size = (int) $stat['size'];
+
+				// Directories are recreated implicitly by the file writes below.
+				if ( '' === $name || str_ends_with( $name, '/' ) ) {
+					continue;
+				}
+
+				$extension = strtolower( (string) pathinfo( $name, PATHINFO_EXTENSION ) );
+
+				if ( self::is_document( $extension ) !== $documents_pass ) {
+					continue;
+				}
+
+				$verdict = self::vet_entry( $name, $size );
+
+				if ( null !== $verdict ) {
+					// An empty reason means "drop it quietly" — noise, not a threat.
+					if ( '' !== $verdict ) {
+						++$dropped;
+
+						if ( count( $skipped ) < 60 ) {
+							$skipped[] = $verdict;
+						}
+					}
+
+					continue;
+				}
+
+				/*
+				 * Past the budget: stop writing, but keep what is already
+				 * there. The design is usable with fewer pictures and useless
+				 * with none of it, which is what refusing the upload gave.
+				 */
+				if ( $inflated + $size > self::MAX_TOTAL_BYTES || $written >= self::MAX_ENTRIES ) {
+					++$dropped;
+
+					if ( count( $skipped ) < 60 ) {
+						$skipped[] = sprintf(
+							/* translators: %s: entry path inside the archive. */
+							__( '%s — not unpacked, the design had already reached the size limit', 'qwerty-soft-signal' ),
+							$name
+						);
+					}
+
+					continue;
+				}
+
+				$target = self::safe_target( $real_root, $name );
+
+				if ( null === $target ) {
+					++$dropped;
+					$skipped[] = sprintf(
+						/* translators: %s: entry path inside the archive. */
+						__( '%s — refused, the path points outside the folder', 'qwerty-soft-signal' ),
+						$name
+					);
+					continue;
+				}
+
+				$dir = dirname( $target );
+
+				if ( ! is_dir( $dir ) && ! wp_mkdir_p( $dir ) ) {
+					++$dropped;
+					$skipped[] = $name;
+					continue;
+				}
+
+				$stream = $zip->getStream( $name );
+
+				if ( ! is_resource( $stream ) ) {
+					++$dropped;
+					$skipped[] = $name;
+					continue;
+				}
+
+				$out = fopen( $target, 'wb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Streaming avoids loading a large asset into memory; WP_Filesystem has no streaming API.
+
+				if ( false === $out ) {
+					fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Pairs with getStream().
+					++$dropped;
+					$skipped[] = $name;
+					continue;
+				}
+
+				$copied = stream_copy_to_stream( $stream, $out, self::MAX_FILE_BYTES + 1 );
+				fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Pairs with fopen() above.
+				fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Pairs with getStream().
+
+				/*
+				 * The declared size is only a claim. Count what actually came
+				 * out of the entry, and treat a copy that hit the per-file
+				 * ceiling as truncated — a bomb declares small and inflates
+				 * large. One such entry is deleted; it does not condemn the
+				 * whole archive.
+				 */
+				$copied = false === $copied ? 0 : (int) $copied;
+
+				if ( $copied > self::MAX_FILE_BYTES ) {
+					self::unlink_hard( $target );
+					++$dropped;
+
+					if ( count( $skipped ) < 60 ) {
+						$skipped[] = sprintf(
+							/* translators: %s: entry path inside the archive. */
+							__( '%s — refused, it unpacks to far more than it declares', 'qwerty-soft-signal' ),
+							$name
+						);
+					}
+
+					continue;
+				}
+
+				$inflated += $copied;
+				++$written;
+			}
+		}
+	}
+
+	/**
+	 * Whether an extension is something the importer reads rather than serves.
+	 *
+	 * @param string $extension Lower-case extension, no dot.
+	 * @return bool
+	 */
+	private static function is_document( string $extension ): bool {
+		return in_array(
+			$extension,
+			array_merge(
+				array( 'html', 'htm', 'css', 'scss', 'sass', 'less', 'js', 'mjs', 'jsx', 'ts', 'tsx', 'vue', 'json', 'csv', 'md', 'txt', 'xml', 'yml', 'yaml', 'webmanifest' ),
+				self::NEUTRALISED_EXTENSIONS
+			),
+			true
 		);
 	}
 
@@ -582,31 +1106,52 @@ final class DesignArchive {
 		}
 
 		// Dependency trees are never part of a design and blow the file cap.
-		if ( preg_match( '#(^|/)(node_modules|vendor|\.next|dist/cache)(/|$)#i', $name ) ) {
+		if ( preg_match( '#(^|/)(node_modules|vendor|bower_components|\.next|\.nuxt|\.turbo|\.cache|__pycache__|coverage|dist/cache)(/|$)#i', $name ) ) {
+			return '';
+		}
+
+		/*
+		 * The paperwork around a design: specification sheets, manuals,
+		 * spreadsheets, lock files, source maps. A developer handoff carries
+		 * thousands of them, and listing every one as "skipped" buried the two
+		 * lines that mattered under sixteen hundred that did not.
+		 */
+		if ( in_array( $extension, self::PAPERWORK_EXTENSIONS, true ) || str_ends_with( $basename, '.min.js.map' ) ) {
 			return '';
 		}
 
 		if ( in_array( $extension, self::DANGEROUS_EXTENSIONS, true ) ) {
 			return sprintf(
 				/* translators: %s: entry path inside the archive. */
-				__( '%s — refused, executable files are never unpacked', 'wow-signal' ),
+				__( '%s — refused, executable files are never unpacked', 'qwerty-soft-signal' ),
 				$name
 			);
+		}
+
+		// Server-side source is unpacked, but never under a name a server would run.
+		if ( in_array( $extension, self::NEUTRALISED_EXTENSIONS, true ) ) {
+			return $size > self::MAX_FILE_BYTES ? sprintf(
+				/* translators: 1: entry path inside the archive, 2: the per-file size limit, e.g. "64 MB". */
+				__( '%1$s — skipped, larger than %2$s', 'qwerty-soft-signal' ),
+				$name,
+				size_format( self::MAX_FILE_BYTES )
+			) : null;
 		}
 
 		if ( ! in_array( $extension, self::ALLOWED_EXTENSIONS, true ) ) {
 			return sprintf(
 				/* translators: %s: entry path inside the archive. */
-				__( '%s — skipped, not a design file', 'wow-signal' ),
+				__( '%s — skipped, not a design file', 'qwerty-soft-signal' ),
 				$name
 			);
 		}
 
 		if ( $size > self::MAX_FILE_BYTES ) {
 			return sprintf(
-				/* translators: %s: entry path inside the archive. */
-				__( '%s — skipped, larger than 12 MB', 'wow-signal' ),
-				$name
+				/* translators: 1: entry path inside the archive, 2: the per-file size limit, e.g. "64 MB". */
+				__( '%1$s — skipped, larger than %2$s', 'qwerty-soft-signal' ),
+				$name,
+				size_format( self::MAX_FILE_BYTES )
 			);
 		}
 
@@ -727,7 +1272,23 @@ final class DesignArchive {
 		$clean = ltrim( $clean, '.' );
 		$clean = trim( $clean );
 
-		return substr( $clean, 0, 180 );
+		return substr( self::neutralise( $clean ), 0, 180 );
+	}
+
+	/**
+	 * Fold a runnable extension into the file name, leaving plain text behind.
+	 *
+	 * @param string $name File name.
+	 * @return string
+	 */
+	private static function neutralise( string $name ): string {
+		$extension = strtolower( (string) pathinfo( $name, PATHINFO_EXTENSION ) );
+
+		if ( ! in_array( $extension, self::NEUTRALISED_EXTENSIONS, true ) ) {
+			return $name;
+		}
+
+		return substr( $name, 0, -( strlen( $extension ) + 1 ) ) . '-' . $extension . '.txt';
 	}
 
 	/**
@@ -900,6 +1461,7 @@ final class DesignArchive {
 		$stylesheets = array();
 		$images      = 0;
 		$languages   = array();
+		$components  = 0;
 
 		$iterator = new \RecursiveIteratorIterator(
 			new \RecursiveDirectoryIterator( $root, \FilesystemIterator::SKIP_DOTS )
@@ -919,8 +1481,13 @@ final class DesignArchive {
 				continue;
 			}
 
-			if ( 'css' === $extension ) {
+			if ( in_array( $extension, array( 'css', 'scss', 'sass', 'less' ), true ) ) {
 				$stylesheets[] = $relative;
+				continue;
+			}
+
+			if ( in_array( $extension, array( 'tsx', 'jsx', 'vue' ), true ) ) {
+				++$components;
 				continue;
 			}
 
@@ -939,24 +1506,110 @@ final class DesignArchive {
 			$inner                   = '' !== $prefix ? substr( $page['file'], strlen( $prefix ) ) : $page['file'];
 			$pages[ $index ]['path'] = $inner;
 
-			if ( preg_match( '#^([a-z]{2})/#', $inner, $match ) ) {
-				$languages[ $match[1] ] = true;
+			/*
+			 * The address this page will get, worked out by the same function
+			 * that will later give it one. A build list that says how many
+			 * pages it will make and not which, nor what they will be called,
+			 * is a list nobody can check before an hour of work — and checking
+			 * it afterwards is how three pages out of a fourteen-page site
+			 * went unnoticed until they were built.
+			 */
+			$pages[ $index ]['slug'] = SiteAssembler::slug_for( (string) $page['file'] );
+
+			/*
+			 * The language folder, wherever it sits. Looking only at the front
+			 * of the path worked while an archive held one site; a handoff that
+			 * carries two versions of the site side by side has its `en/` and
+			 * `ru/` three folders down, and every page then read as
+			 * language-less — which is how the same page in three languages
+			 * came to be listed as three unrelated pages.
+			 */
+			$language = self::language_in( $inner );
+
+			if ( '' !== $language ) {
+				$languages[ $language ] = true;
 			}
+
+			$pages[ $index ]['language'] = $language;
 		}
 
 		usort(
 			$pages,
 			static function ( array $a, array $b ): int {
-				return $b['sections'] <=> $a['sections'];
+				// Pages with something in them first, app shells last.
+				return array( $b['shell'] ? 0 : 1, $b['sections'], $b['words'] ) <=> array( $a['shell'] ? 0 : 1, $a['sections'], $a['words'] );
 			}
 		);
+
+		$readable = 0;
+
+		foreach ( $pages as $page ) {
+			if ( empty( $page['shell'] ) ) {
+				++$readable;
+			}
+		}
 
 		return array(
 			'pages'       => $pages,
 			'stylesheets' => $stylesheets,
 			'images'      => $images,
+			'components'  => $components,
+			'readable'    => $readable,
 			'languages'   => array_keys( $languages ),
+			'kind'        => self::kind( $pages, $readable, $components ),
 		);
+	}
+
+	/**
+	 * Language codes a folder name is allowed to be.
+	 *
+	 * A closed list on purpose. Any two letters would call `ui/`, `js/` and
+	 * `qa/` languages and quietly merge unrelated pages into one row.
+	 *
+	 * @var array<int, string>
+	 */
+	private const LANGUAGE_CODES = array( 'en', 'ru', 'uk', 'zh', 'de', 'fr', 'es', 'it', 'pt', 'pl', 'nl', 'cs', 'sk', 'sv', 'da', 'fi', 'no', 'tr', 'ar', 'he', 'ja', 'ko', 'hi', 'th', 'vi', 'id', 'ro', 'hu', 'bg', 'el', 'ka', 'kk', 'lt', 'lv', 'et', 'sr', 'hr', 'sl' );
+
+	/**
+	 * The language folder inside a path, if it has one.
+	 *
+	 * @param string $path Path relative to the design root.
+	 * @return string Two-letter code, or an empty string.
+	 */
+	public static function language_in( string $path ): string {
+		foreach ( explode( '/', trim( str_replace( '\\', '/', $path ), '/' ) ) as $segment ) {
+			if ( in_array( strtolower( $segment ), self::LANGUAGE_CODES, true ) ) {
+				return strtolower( $segment );
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * What sort of thing was uploaded, so the screen can say so plainly.
+	 *
+	 * A React or Vue export has HTML files that contain nothing but an empty
+	 * root element: the page is assembled in the browser and there is no
+	 * markup on disk to convert. Saying "nothing on this page could be
+	 * converted" for that is true and useless. Naming it is what lets the
+	 * person do something about it.
+	 *
+	 * @param array<int, array<string, mixed>> $pages      Indexed pages.
+	 * @param int                              $readable   Pages with real markup.
+	 * @param int                              $components Component source files found.
+	 * @return string One of: static, app, empty.
+	 */
+	private static function kind( array $pages, int $readable, int $components ): string {
+		if ( $readable > 0 ) {
+			return 'static';
+		}
+
+		if ( array() !== $pages && $components > 0 ) {
+			return 'app';
+		}
+
+		return array() === $pages && $components > 0 ? 'app' : 'empty';
 	}
 
 	/**
@@ -972,15 +1625,48 @@ final class DesignArchive {
 		$title = '';
 
 		if ( preg_match( '#<title[^>]*>(.*?)</title>#si', $html, $match ) ) {
-			$title = trim( wp_strip_all_tags( $match[1] ) );
+			/*
+			 * Decoded, because the screen prints this as text. A page titled
+			 * "Reports &amp; Store" was showing the entity itself, and after a
+			 * round through the REST API it had become "&amp;amp;".
+			 */
+			$title = trim( html_entity_decode( wp_strip_all_tags( $match[1] ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 		}
+
+		/*
+		 * Only the body counts, and only once the parts a browser would run
+		 * are out of it. `<section>` alone was too narrow a question: a page
+		 * built from <div class="hero"> reported zero sections and sorted to
+		 * the bottom, and an empty React root reported zero for the honest
+		 * reason and looked exactly the same.
+		 */
+		$body = $html;
+
+		if ( preg_match( '#<body[^>]*>(.*)</body>#si', $html, $match ) ) {
+			$body = $match[1];
+		}
+
+		$body    = (string) preg_replace( '#<(script|style|template|noscript)\b[^>]*>.*?</\1>#si', '', $body );
+		$body    = (string) preg_replace( '#<!--.*?-->#s', '', $body );
+		$text    = trim( (string) preg_replace( '#\s+#u', ' ', wp_strip_all_tags( $body ) ) );
+		$words   = '' === $text ? 0 : count( (array) preg_split( '#\s+#u', $text ) );
+		$regions = preg_match_all( '#<(section|article|header|footer|main|aside)\b#i', $body );
+		$blocks  = preg_match_all( '#<(div|ul|ol|table|form|figure)\b#i', $body );
 
 		return array(
 			'file'     => $relative,
 			'title'    => '' !== $title ? $title : $relative,
 			'bytes'    => strlen( $html ),
-			'sections' => preg_match_all( '#<section\b#i', $html ),
-			'headings' => preg_match_all( '#<h[1-3]\b#i', $html ),
+			'sections' => $regions,
+			'headings' => preg_match_all( '#<h[1-3]\b#i', $body ),
+			'words'    => $words,
+
+			/*
+			 * An app shell: markup exists, content does not. Fifteen words is
+			 * comfortably below a real page's opening paragraph and well above
+			 * a "You need JavaScript to run this app" fallback.
+			 */
+			'shell'    => $words < 15 && $regions < 1 && $blocks < 3,
 		);
 	}
 }

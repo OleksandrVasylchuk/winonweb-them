@@ -2,13 +2,13 @@
 /**
  * Splits a design page into the sections a block theme is built from.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use DOMDocument;
 use DOMElement;
@@ -783,12 +783,12 @@ final class SectionSplitter {
 			}
 
 			$figure = $node->ownerDocument->createElement( 'figure' );
-			$figure->setAttribute( 'class', 'wow-import-placeholder' );
+			$figure->setAttribute( 'class', 'qs-import-placeholder' );
 
 			$img = $node->ownerDocument->createElement( 'img' );
 			$img->setAttribute( 'src', $file );
 			$img->setAttribute( 'alt', '' );
-			$img->setAttribute( 'data-wow-placeholder', $name );
+			$img->setAttribute( 'data-qs-placeholder', $name );
 			$figure->appendChild( $img );
 
 			$node->parentNode->replaceChild( $figure, $node );
@@ -796,7 +796,7 @@ final class SectionSplitter {
 			$map[ $name ] = $file;
 			$notes[]      = sprintf(
 				/* translators: 1: name of the element the design's script would have rendered, 2: relative path of the screenshot used instead. */
-				__( 'A JS-rendered visual (%1$s) was replaced with the design\'s screenshot %2$s. Swap it for a real image or embed when the site is live.', 'wow-signal' ),
+				__( 'A JS-rendered visual (%1$s) was replaced with the design\'s screenshot %2$s. Swap it for a real image or embed when the site is live.', 'qwerty-soft-signal' ),
 				$name,
 				$file
 			);
@@ -1239,7 +1239,7 @@ final class SectionSplitter {
 			} else {
 				$first   = $current[0];
 				$wrapper = $first->ownerDocument->createElement( 'div' );
-				$wrapper->setAttribute( 'class', 'wow-import-run' );
+				$wrapper->setAttribute( 'class', 'qs-import-run' );
 				$first->parentNode->insertBefore( $wrapper, $first );
 
 				foreach ( $current as $node ) {
@@ -1537,7 +1537,7 @@ final class SectionSplitter {
 
 		return sprintf(
 			/* translators: %d: section number on the page. */
-			__( 'Section %d', 'wow-signal' ),
+			__( 'Section %d', 'qwerty-soft-signal' ),
 			$position + 1
 		);
 	}

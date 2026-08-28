@@ -1,7 +1,7 @@
 {
 	"domain": "messages",
-	"translation-revision-date": "2026-08-21T17:04:47+0000",
-	"generator": "wow-signal/make-mo.mjs",
+	"translation-revision-date": "2026-08-28T12:01:02+0000",
+	"generator": "qwerty-soft-signal/make-mo.mjs",
 	"locale_data": {
 		"messages": {
 			"": {
@@ -12,8 +12,8 @@
 			"Form": [
 				"Форма"
 			],
-			"Messages go to the site administrator email set under Settings → General. A developer can route a form elsewhere with the wow_signal/contact_recipient filter.": [
-				"Повідомлення надходять на email адміністратора, вказаний у «Налаштування → Загальні». Розробник може перенаправити форму фільтром wow_signal/contact_recipient."
+			"Messages go to the site administrator email set under Settings → General. A developer can route a form elsewhere with the qwerty_soft/contact_recipient filter.": [
+				"Повідомлення надходять на email адміністратора, вказаний у «Налаштування → Загальні». Розробник може перенаправити форму фільтром qwerty_soft/contact_recipient."
 			],
 			"Form name": [
 				"Назва форми"

@@ -1,0 +1,75 @@
+{
+    "key": "group_qs_design_reports_payment_and_delivery_flow_8c6103",
+    "title": "Checkout flow steps",
+    "fields": [
+        {
+            "key": "field_qs_reports_payment_and_delivery_flow_8c6103_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Payment and delivery flow",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_payment_and_delivery_flow_8c6103_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "The production CMS should connect reports to checkout and protected digital delivery. The static prototype shows the structure; the live version should process payments and deliver files automatically.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_payment_and_delivery_flow_8c6103_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_reports_payment_and_delivery_flow_8c6103_row_step_number",
+                    "label": "Step number",
+                    "name": "step_number",
+                    "type": "text",
+                    "default_value": "1",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_reports_payment_and_delivery_flow_8c6103_row_heading",
+                    "label": "Step heading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "Preview",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_reports_payment_and_delivery_flow_8c6103_row_description",
+                    "label": "Step description",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Visitor reads the executive summary, table of contents and sample pages.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-payment-and-delivery-flow-8c6103"
+            }
+        ]
+    ],
+    "active": true
+}

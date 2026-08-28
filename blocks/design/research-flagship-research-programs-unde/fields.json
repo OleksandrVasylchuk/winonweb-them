@@ -1,0 +1,61 @@
+{
+    "key": "group_qs_design_research_flagship_research_programs_unde",
+    "title": "Research programs",
+    "fields": [
+        {
+            "key": "field_qs_research_flagship_research_programs_unde_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Flagship research programs under development",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_flagship_research_programs_unde_intro",
+            "label": "Intro paragraph",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "These programs will become the recurring editorial backbone of the platform. Initial versions can begin as articles and later develop into premium reports, quarterly outlooks and annual publications.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_flagship_research_programs_unde_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_research_flagship_research_programs_unde_row_program_name",
+                    "label": "Program name",
+                    "name": "program_name",
+                    "type": "text",
+                    "default_value": "China Poultry Export Monitor",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_research_flagship_research_programs_unde_row_description",
+                    "label": "What the program covers",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Recurring analysis of China-origin poultry exports, product categories, destination markets, documentation issues and logistics considerations.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-flagship-research-programs-unde"
+            }
+        ]
+    ],
+    "active": true
+}

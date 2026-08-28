@@ -2,13 +2,13 @@
 /**
  * Brand colours in, a complete accessible palette out.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -124,7 +124,7 @@ final class BrandKit {
 		return array(
 			array(
 				'slug'     => 'aurora',
-				'name'     => __( 'Aurora', 'wow-signal' ),
+				'name'     => __( 'Aurora', 'qwerty-soft-signal' ),
 				'gradient' => sprintf(
 					'linear-gradient(120deg, %1$s 0%%, %2$s 52%%, %3$s 100%%)',
 					$colors['accent'],
@@ -134,7 +134,7 @@ final class BrandKit {
 			),
 			array(
 				'slug'     => 'aurora-soft',
-				'name'     => $dark ? __( 'Aurora soft — on dark', 'wow-signal' ) : __( 'Aurora soft — on light', 'wow-signal' ),
+				'name'     => $dark ? __( 'Aurora soft — on dark', 'qwerty-soft-signal' ) : __( 'Aurora soft — on light', 'qwerty-soft-signal' ),
 				'gradient' => sprintf(
 					'linear-gradient(160deg, %1$s 0%%, %2$s 60%%, %3$s 100%%)',
 					$colors['surface'],
@@ -144,7 +144,7 @@ final class BrandKit {
 			),
 			array(
 				'slug'     => 'signal-fade',
-				'name'     => __( 'Signal fade — accent to transparent', 'wow-signal' ),
+				'name'     => __( 'Signal fade — accent to transparent', 'qwerty-soft-signal' ),
 				'gradient' => sprintf(
 					'linear-gradient(180deg, %1$s 0%%, %2$s 100%%)',
 					self::rgba( $colors['accent'], $dark ? 0.16 : 0.12 ),
@@ -170,19 +170,19 @@ final class BrandKit {
 		return array(
 			array(
 				'slug'   => 'soft',
-				'name'   => __( 'Soft', 'wow-signal' ),
+				'name'   => __( 'Soft', 'qwerty-soft-signal' ),
 				'shadow' => '0 1px 2px ' . self::rgba( $ground, $dark ? 0.45 : 0.08 ),
 			),
 			array(
 				'slug'   => 'card',
-				'name'   => __( 'Card', 'wow-signal' ),
+				'name'   => __( 'Card', 'qwerty-soft-signal' ),
 				'shadow' => $dark
 					? '0 12px 32px -12px ' . self::rgba( $ground, 0.7 )
 					: '0 12px 32px -14px ' . self::rgba( $ground, 0.22 ),
 			),
 			array(
 				'slug'   => 'glow',
-				'name'   => __( 'Signal glow', 'wow-signal' ),
+				'name'   => __( 'Signal glow', 'qwerty-soft-signal' ),
 				'shadow' => sprintf(
 					'0 0 0 1px %1$s, 0 18px 48px -%2$dpx %3$s',
 					self::rgba( $colors['accent'], $dark ? 0.35 : 0.28 ),

@@ -1,0 +1,35 @@
+{
+    "key": "group_qs_design_index_gateway_links_5bacb3",
+    "title": "Gateway links",
+    "fields": [
+        {
+            "key": "field_qs_index_gateway_links_5bacb3_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_index_gateway_links_5bacb3_row_language_name",
+                    "label": "Label",
+                    "name": "language_name",
+                    "type": "text",
+                    "default_value": "Global profile and market intelligence",
+                    "instructions": "A short line of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-gateway-links-5bacb3"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,46 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-index-ff4180",
+    "title": "商业执行、监管知识与市场情报。",
+    "category": "qs",
+    "description": "商业执行、监管知识与市场情报。 — 2 pieces of text, 1 picture, 1 link. From index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "index",
+        "商业执行",
+        "监管知识与市场情报"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "商业执行、监管知识与市场情报。",
+                "bio": "Robert Khoubian 是国际食品贸易专业人士和企业家，专注于中国—欧亚食品贸易、冷冻食品供应链和市场准入。自 2004 年以来，他一直活跃于全球食品市场，将商业执行经验、监管知识和实战型市场情报结合起来。",
+                "read_more": {
+                    "url": "about.html",
+                    "title": "阅读简介",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/index.html",
+    "qsDesignVersion": 7
+}

@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-videos-follow-updated-briefings-on-youtu",
+    "title": "YouTube channel band",
+    "category": "qs",
+    "description": "YouTube channel band — 2 pieces of text, 1 link. From videos.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "videos",
+        "youtube",
+        "channel",
+        "band"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Follow updated briefings on YouTube",
+                "description": "Watch new market-intelligence videos, report explainers and short updates as they are published.",
+                "channel_link": {
+                    "url": "#",
+                    "title": "Visit the YouTube channel",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/en/videos.html",
+    "qsDesignVersion": 7
+}

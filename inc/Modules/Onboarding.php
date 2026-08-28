@@ -2,19 +2,19 @@
 /**
  * First-run setup.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
-use Wow\Signal\Support\BrandKit;
-use Wow\Signal\Support\DemoContent;
-use Wow\Signal\Support\DesignTokens;
-use Wow\Signal\Support\StyleVariations;
+use Qwerty\Soft\Contracts\Module;
+use Qwerty\Soft\Support\BrandKit;
+use Qwerty\Soft\Support\DemoContent;
+use Qwerty\Soft\Support\DesignTokens;
+use Qwerty\Soft\Support\StyleVariations;
 use WP_Screen;
 
 defined( 'ABSPATH' ) || exit;
@@ -44,17 +44,17 @@ final class Onboarding implements Module {
 	/**
 	 * Admin page slug.
 	 */
-	private const PAGE = 'wow-signal-setup';
+	private const PAGE = 'qwerty-soft-signal-setup';
 
 	/**
 	 * Option recording whether setup is still outstanding.
 	 */
-	private const OPTION = 'wow_signal_setup';
+	private const OPTION = 'qwerty_soft_setup';
 
 	/**
 	 * Nonce action for every form on the screen.
 	 */
-	private const NONCE = 'wow_signal_setup';
+	private const NONCE = 'qwerty_soft_setup';
 
 	/**
 	 * The steps, in order.
@@ -73,7 +73,7 @@ final class Onboarding implements Module {
 		add_action( 'admin_menu', array( $this, 'add_page' ) );
 		add_action( 'admin_notices', array( $this, 'notice' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
-		add_action( 'admin_post_wow_signal_setup', array( $this, 'handle' ) );
+		add_action( 'admin_post_qwerty_soft_setup', array( $this, 'handle' ) );
 		add_action( 'wp_dashboard_setup', array( $this, 'dashboard_widget' ) );
 	}
 
@@ -113,8 +113,8 @@ final class Onboarding implements Module {
 	 */
 	public function add_page(): void {
 		$hook = add_theme_page(
-			__( 'Set up WOW — Signal', 'wow-signal' ),
-			__( 'Theme setup', 'wow-signal' ),
+			__( 'Set up Qwerty Soft — Signal', 'qwerty-soft-signal' ),
+			__( 'Theme setup', 'qwerty-soft-signal' ),
 			'edit_theme_options',
 			self::PAGE,
 			array( $this, 'render_page' )
@@ -142,17 +142,17 @@ final class Onboarding implements Module {
 		}
 
 		?>
-		<div class="notice notice-info wow-setup-notice">
+		<div class="notice notice-info qs-setup-notice">
 			<p>
-				<strong><?php esc_html_e( 'WOW — Signal is active.', 'wow-signal' ); ?></strong>
-				<?php esc_html_e( 'Three steps turn it into a finished site: pick a look, add your logo and colours, install the starter pages.', 'wow-signal' ); ?>
+				<strong><?php esc_html_e( 'Qwerty Soft — Signal is active.', 'qwerty-soft-signal' ); ?></strong>
+				<?php esc_html_e( 'Three steps turn it into a finished site: pick a look, add your logo and colours, install the starter pages.', 'qwerty-soft-signal' ); ?>
 			</p>
 			<p>
 				<a class="button button-primary" href="<?php echo esc_url( $this->step_url( 'welcome' ) ); ?>">
-					<?php esc_html_e( 'Set up the theme', 'wow-signal' ); ?>
+					<?php esc_html_e( 'Set up the theme', 'qwerty-soft-signal' ); ?>
 				</a>
 				<a class="button button-link" href="<?php echo esc_url( $this->action_url( 'dismiss' ) ); ?>">
-					<?php esc_html_e( 'No thanks, I will do it myself', 'wow-signal' ); ?>
+					<?php esc_html_e( 'No thanks, I will do it myself', 'qwerty-soft-signal' ); ?>
 				</a>
 			</p>
 		</div>
@@ -173,10 +173,10 @@ final class Onboarding implements Module {
 		}
 
 		wp_enqueue_style(
-			'wow-signal-setup',
-			WOW_SIGNAL_URI . '/assets/css/admin-setup.css',
+			'qwerty-soft-signal-setup',
+			QSOFT_URI . '/assets/css/admin-setup.css',
 			array(),
-			WOW_SIGNAL_VERSION
+			QSOFT_VERSION
 		);
 	}
 
@@ -194,26 +194,26 @@ final class Onboarding implements Module {
 
 		$screen->add_help_tab(
 			array(
-				'id'      => 'wow-signal-setup-help',
-				'title'   => __( 'What this changes', 'wow-signal' ),
+				'id'      => 'qwerty-soft-signal-setup-help',
+				'title'   => __( 'What this changes', 'qwerty-soft-signal' ),
 				'content' =>
-					'<p>' . esc_html__( 'Nothing here edits the theme files. The look you pick and the brand colours you enter are written to this site\'s global styles — the same place the Site Editor saves to — so a theme update cannot overwrite them, and you can change or undo any of it later under Appearance → Editor → Styles.', 'wow-signal' ) . '</p>' .
-					'<p>' . esc_html__( 'The starter pages are ordinary pages made from the theme\'s own patterns. Edit them, delete them, or remove the whole set again from Appearance → Design import.', 'wow-signal' ) . '</p>',
+					'<p>' . esc_html__( 'Nothing here edits the theme files. The look you pick and the brand colours you enter are written to this site\'s global styles — the same place the Site Editor saves to — so a theme update cannot overwrite them, and you can change or undo any of it later under Appearance → Editor → Styles.', 'qwerty-soft-signal' ) . '</p>' .
+					'<p>' . esc_html__( 'The starter pages are ordinary pages made from the theme\'s own patterns. Edit them, delete them, or remove the whole set again from Appearance → Design import.', 'qwerty-soft-signal' ) . '</p>',
 			)
 		);
 
 		$screen->add_help_tab(
 			array(
-				'id'      => 'wow-signal-setup-a11y',
-				'title'   => __( 'Colours and contrast', 'wow-signal' ),
+				'id'      => 'qwerty-soft-signal-setup-a11y',
+				'title'   => __( 'Colours and contrast', 'qwerty-soft-signal' ),
 				'content' =>
-					'<p>' . esc_html__( 'Your brand colour is not used exactly as entered. It is walked toward white or black until it is legible on every background the theme renders it on, so the palette clears WCAG 2.2 AA whatever colour you start from. The hue is kept; only the lightness moves, and usually not far.', 'wow-signal' ) . '</p>',
+					'<p>' . esc_html__( 'Your brand colour is not used exactly as entered. It is walked toward white or black until it is legible on every background the theme renders it on, so the palette clears WCAG 2.2 AA whatever colour you start from. The hue is kept; only the lightness moves, and usually not far.', 'qwerty-soft-signal' ) . '</p>',
 			)
 		);
 
 		$screen->set_help_sidebar(
-			'<p><strong>' . esc_html__( 'More help', 'wow-signal' ) . '</strong></p>' .
-			'<p><a href="https://www.winonweb.dev/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Documentation and support', 'wow-signal' ) . '</a></p>'
+			'<p><strong>' . esc_html__( 'More help', 'qwerty-soft-signal' ) . '</strong></p>' .
+			'<p><a href="https://qwerty-soft.com/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Documentation and support', 'qwerty-soft-signal' ) . '</a></p>'
 		);
 	}
 
@@ -228,8 +228,8 @@ final class Onboarding implements Module {
 		}
 
 		wp_add_dashboard_widget(
-			'wow_signal_help',
-			__( 'WOW — Signal', 'wow-signal' ),
+			'qwerty_soft_help',
+			__( 'Qwerty Soft — Signal', 'qwerty-soft-signal' ),
 			array( $this, 'render_widget' )
 		);
 	}
@@ -242,47 +242,47 @@ final class Onboarding implements Module {
 	public function render_widget(): void {
 		$pending = 'pending' === (string) get_option( self::OPTION, '' );
 		?>
-		<div class="wow-setup-widget">
+		<div class="qs-setup-widget">
 			<?php if ( $pending ) : ?>
 				<p>
-					<?php esc_html_e( 'The theme has not been set up yet. Three steps and this site stops looking empty.', 'wow-signal' ); ?>
+					<?php esc_html_e( 'The theme has not been set up yet. Three steps and this site stops looking empty.', 'qwerty-soft-signal' ); ?>
 				</p>
 				<p>
 					<a class="button button-primary" href="<?php echo esc_url( $this->step_url( 'welcome' ) ); ?>">
-						<?php esc_html_e( 'Set up the theme', 'wow-signal' ); ?>
+						<?php esc_html_e( 'Set up the theme', 'qwerty-soft-signal' ); ?>
 					</a>
 				</p>
 			<?php endif; ?>
 
-			<ul class="wow-setup-widget__links">
+			<ul class="qs-setup-widget__links">
 				<li>
 					<a href="<?php echo esc_url( admin_url( 'site-editor.php' ) ); ?>">
-						<?php esc_html_e( 'Edit the site design', 'wow-signal' ); ?>
+						<?php esc_html_e( 'Edit the site design', 'qwerty-soft-signal' ); ?>
 					</a>
 				</li>
 				<li>
-					<a href="<?php echo esc_url( admin_url( 'themes.php?page=wow-signal-import' ) ); ?>">
-						<?php esc_html_e( 'Import a design', 'wow-signal' ); ?>
+					<a href="<?php echo esc_url( admin_url( 'themes.php?page=qwerty-soft-signal-import' ) ); ?>">
+						<?php esc_html_e( 'Import a design', 'qwerty-soft-signal' ); ?>
 					</a>
 				</li>
 				<li>
 					<a href="<?php echo esc_url( $this->step_url( 'style' ) ); ?>">
-						<?php esc_html_e( 'Change the palette', 'wow-signal' ); ?>
+						<?php esc_html_e( 'Change the palette', 'qwerty-soft-signal' ); ?>
 					</a>
 				</li>
 				<li>
-					<a href="https://www.winonweb.dev/" target="_blank" rel="noopener noreferrer">
-						<?php esc_html_e( 'Documentation and support', 'wow-signal' ); ?>
+					<a href="https://qwerty-soft.com/" target="_blank" rel="noopener noreferrer">
+						<?php esc_html_e( 'Documentation and support', 'qwerty-soft-signal' ); ?>
 					</a>
 				</li>
 			</ul>
 
-			<p class="wow-setup-widget__version">
+			<p class="qs-setup-widget__version">
 				<?php
 				printf(
 					/* translators: %s: theme version number. */
-					esc_html__( 'Version %s', 'wow-signal' ),
-					esc_html( WOW_SIGNAL_VERSION )
+					esc_html__( 'Version %s', 'qwerty-soft-signal' ),
+					esc_html( QSOFT_VERSION )
 				);
 				?>
 			</p>
@@ -299,16 +299,16 @@ final class Onboarding implements Module {
 	 */
 	public function render_page(): void {
 		if ( ! $this->may_setup() ) {
-			wp_die( esc_html__( 'You do not have permission to set up this theme.', 'wow-signal' ) );
+			wp_die( esc_html__( 'You do not have permission to set up this theme.', 'qwerty-soft-signal' ) );
 		}
 
 		$step = $this->current_step();
 		?>
-		<div class="wrap wow-setup">
+		<div class="wrap qs-setup">
 			<?php $this->masthead( $step ); ?>
 			<?php $this->flash(); ?>
 
-			<div class="wow-setup__panel">
+			<div class="qs-setup__panel">
 				<?php
 				switch ( $step ) {
 					case 'style':
@@ -340,31 +340,31 @@ final class Onboarding implements Module {
 	 */
 	private function masthead( string $step ): void {
 		$labels = array(
-			'welcome' => __( 'Start', 'wow-signal' ),
-			'style'   => __( 'Look', 'wow-signal' ),
-			'brand'   => __( 'Brand', 'wow-signal' ),
-			'content' => __( 'Content', 'wow-signal' ),
-			'done'    => __( 'Finish', 'wow-signal' ),
+			'welcome' => __( 'Start', 'qwerty-soft-signal' ),
+			'style'   => __( 'Look', 'qwerty-soft-signal' ),
+			'brand'   => __( 'Brand', 'qwerty-soft-signal' ),
+			'content' => __( 'Content', 'qwerty-soft-signal' ),
+			'done'    => __( 'Finish', 'qwerty-soft-signal' ),
 		);
 
 		$position = (int) array_search( $step, self::STEPS, true );
 		?>
-		<div class="wow-setup__masthead">
-			<p class="wow-setup__brand">
-				<span class="wow-setup__mark" aria-hidden="true">W</span>
+		<div class="qs-setup__masthead">
+			<p class="qs-setup__brand">
+				<span class="qs-setup__mark" aria-hidden="true">Q</span>
 				<?php echo esc_html( wp_get_theme()->get( 'Name' ) ); ?>
 			</p>
 
-			<h1><?php esc_html_e( 'Set up the theme', 'wow-signal' ); ?></h1>
+			<h1><?php esc_html_e( 'Set up the theme', 'qwerty-soft-signal' ); ?></h1>
 
-			<p class="wow-setup__lede">
-				<?php esc_html_e( 'Four short steps. Every one of them is optional, and every one of them can be undone afterwards.', 'wow-signal' ); ?>
+			<p class="qs-setup__lede">
+				<?php esc_html_e( 'Four short steps. Every one of them is optional, and every one of them can be undone afterwards.', 'qwerty-soft-signal' ); ?>
 			</p>
 		</div>
 
-		<ol class="wow-setup__rail">
+		<ol class="qs-setup__rail">
 			<?php foreach ( self::STEPS as $index => $slug ) : ?>
-				<li class="wow-setup__rail-step<?php echo $index < $position ? ' is-done' : ''; ?><?php echo $index === $position ? ' is-current' : ''; ?>">
+				<li class="qs-setup__rail-step<?php echo $index < $position ? ' is-done' : ''; ?><?php echo $index === $position ? ' is-current' : ''; ?>">
 					<?php if ( $index === $position ) : ?>
 						<span aria-current="step"><?php echo esc_html( $labels[ $slug ] ); ?></span>
 					<?php else : ?>
@@ -383,22 +383,22 @@ final class Onboarding implements Module {
 	 */
 	private function flash(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display of a redirect result; nothing is changed here.
-		$notice = isset( $_GET['wow-notice'] ) ? sanitize_key( wp_unslash( $_GET['wow-notice'] ) ) : '';
+		$notice = isset( $_GET['qs-notice'] ) ? sanitize_key( wp_unslash( $_GET['qs-notice'] ) ) : '';
 
 		if ( '' === $notice ) {
 			return;
 		}
 
 		$messages = array(
-			'style'        => array( 'success', __( 'The palette is applied. Every colour on the site follows it.', 'wow-signal' ) ),
-			'style-reset'  => array( 'success', __( 'Back to the theme\'s own palette.', 'wow-signal' ) ),
-			'style-failed' => array( 'error', __( 'That look could not be applied. Pick one of the styles listed, or skip this step.', 'wow-signal' ) ),
-			'brand'        => array( 'success', __( 'Your brand colours are in. They were adjusted where they had to be, so every pair still clears WCAG 2.2 AA.', 'wow-signal' ) ),
-			'brand-failed' => array( 'error', __( 'That did not look like a colour. Enter it as a hex value, for example #1f6feb.', 'wow-signal' ) ),
-			'logo'         => array( 'success', __( 'Logo uploaded and set.', 'wow-signal' ) ),
-			'logo-failed'  => array( 'error', __( 'The logo could not be uploaded. Check the file is an image and within the size this server allows.', 'wow-signal' ) ),
-			'content'      => array( 'success', __( 'The starter pages are in and the front page is set.', 'wow-signal' ) ),
-			'content-none' => array( 'warning', __( 'Nothing was added — those pages already exist on this site.', 'wow-signal' ) ),
+			'style'        => array( 'success', __( 'The palette is applied. Every colour on the site follows it.', 'qwerty-soft-signal' ) ),
+			'style-reset'  => array( 'success', __( 'Back to the theme\'s own palette.', 'qwerty-soft-signal' ) ),
+			'style-failed' => array( 'error', __( 'That look could not be applied. Pick one of the styles listed, or skip this step.', 'qwerty-soft-signal' ) ),
+			'brand'        => array( 'success', __( 'Your brand colours are in. They were adjusted where they had to be, so every pair still clears WCAG 2.2 AA.', 'qwerty-soft-signal' ) ),
+			'brand-failed' => array( 'error', __( 'That did not look like a colour. Enter it as a hex value, for example #1f6feb.', 'qwerty-soft-signal' ) ),
+			'logo'         => array( 'success', __( 'Logo uploaded and set.', 'qwerty-soft-signal' ) ),
+			'logo-failed'  => array( 'error', __( 'The logo could not be uploaded. Check the file is an image and within the size this server allows.', 'qwerty-soft-signal' ) ),
+			'content'      => array( 'success', __( 'The starter pages are in and the front page is set.', 'qwerty-soft-signal' ) ),
+			'content-none' => array( 'warning', __( 'Nothing was added — those pages already exist on this site.', 'qwerty-soft-signal' ) ),
 		);
 
 		if ( ! isset( $messages[ $notice ] ) ) {
@@ -419,24 +419,24 @@ final class Onboarding implements Module {
 	 */
 	private function step_welcome(): void {
 		?>
-		<h2><?php esc_html_e( 'What this does', 'wow-signal' ); ?></h2>
+		<h2><?php esc_html_e( 'What this does', 'qwerty-soft-signal' ); ?></h2>
 
-		<ul class="wow-setup__list">
-			<li><?php esc_html_e( 'Pick one of six palettes, or keep the theme\'s own.', 'wow-signal' ); ?></li>
-			<li><?php esc_html_e( 'Upload a logo and give the theme your brand colours. The rest of the palette is worked out from them and checked for contrast.', 'wow-signal' ); ?></li>
-			<li><?php esc_html_e( 'Install a home, services and contact page built from the theme\'s patterns, with a menu and a front page.', 'wow-signal' ); ?></li>
+		<ul class="qs-setup__list">
+			<li><?php esc_html_e( 'Pick one of six palettes, or keep the theme\'s own.', 'qwerty-soft-signal' ); ?></li>
+			<li><?php esc_html_e( 'Upload a logo and give the theme your brand colours. The rest of the palette is worked out from them and checked for contrast.', 'qwerty-soft-signal' ); ?></li>
+			<li><?php esc_html_e( 'Install a home, services and contact page built from the theme\'s patterns, with a menu and a front page.', 'qwerty-soft-signal' ); ?></li>
 		</ul>
 
-		<p class="wow-setup__note">
-			<?php esc_html_e( 'Nothing is written to the theme files, so an update cannot overwrite any of it. Everything can be changed later in the Site Editor, and the starter pages can be removed again in one press.', 'wow-signal' ); ?>
+		<p class="qs-setup__note">
+			<?php esc_html_e( 'Nothing is written to the theme files, so an update cannot overwrite any of it. Everything can be changed later in the Site Editor, and the starter pages can be removed again in one press.', 'qwerty-soft-signal' ); ?>
 		</p>
 
-		<p class="wow-setup__actions">
+		<p class="qs-setup__actions">
 			<a class="button button-primary button-hero" href="<?php echo esc_url( $this->step_url( 'style' ) ); ?>">
-				<?php esc_html_e( 'Start', 'wow-signal' ); ?>
+				<?php esc_html_e( 'Start', 'qwerty-soft-signal' ); ?>
 			</a>
 			<a class="button button-link" href="<?php echo esc_url( $this->action_url( 'dismiss' ) ); ?>">
-				<?php esc_html_e( 'Skip setup', 'wow-signal' ); ?>
+				<?php esc_html_e( 'Skip setup', 'qwerty-soft-signal' ); ?>
 			</a>
 		</p>
 		<?php
@@ -450,31 +450,31 @@ final class Onboarding implements Module {
 	private function step_style(): void {
 		$variations = StyleVariations::all();
 		?>
-		<h2><?php esc_html_e( 'Pick a look', 'wow-signal' ); ?></h2>
+		<h2><?php esc_html_e( 'Pick a look', 'qwerty-soft-signal' ); ?></h2>
 
-		<p class="wow-setup__note">
-			<?php esc_html_e( 'Each of these is a full palette, not a filter. All of them clear WCAG 2.2 AA on every text pair — that is checked by a script before the theme ships, not by eye.', 'wow-signal' ); ?>
+		<p class="qs-setup__note">
+			<?php esc_html_e( 'Each of these is a full palette, not a filter. All of them clear WCAG 2.2 AA on every text pair — that is checked by a script before the theme ships, not by eye.', 'qwerty-soft-signal' ); ?>
 		</p>
 
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( self::NONCE ); ?>
-			<input type="hidden" name="action" value="wow_signal_setup">
-			<input type="hidden" name="wow_step" value="style">
+			<input type="hidden" name="action" value="qwerty_soft_setup">
+			<input type="hidden" name="qsoft_step" value="style">
 
-			<fieldset class="wow-setup__choices">
-				<legend class="screen-reader-text"><?php esc_html_e( 'Style variation', 'wow-signal' ); ?></legend>
+			<fieldset class="qs-setup__choices">
+				<legend class="screen-reader-text"><?php esc_html_e( 'Style variation', 'qwerty-soft-signal' ); ?></legend>
 
 				<?php foreach ( $variations as $slug => $variation ) : ?>
-					<label class="wow-setup__choice">
-						<input type="radio" name="wow_variation" value="<?php echo esc_attr( $slug ); ?>" <?php checked( '' === $slug ); ?>>
+					<label class="qs-setup__choice">
+						<input type="radio" name="qsoft_variation" value="<?php echo esc_attr( $slug ); ?>" <?php checked( '' === $slug ); ?>>
 
-						<span class="wow-setup__swatch" aria-hidden="true">
+						<span class="qs-setup__swatch" aria-hidden="true">
 							<?php foreach ( $variation['swatch'] as $colour ) : ?>
 								<span style="background:<?php echo esc_attr( $colour ); ?>"></span>
 							<?php endforeach; ?>
 						</span>
 
-						<span class="wow-setup__choice-text">
+						<span class="qs-setup__choice-text">
 							<strong><?php echo esc_html( $variation['title'] ); ?></strong>
 							<span><?php echo esc_html( $variation['description'] ); ?></span>
 						</span>
@@ -482,12 +482,12 @@ final class Onboarding implements Module {
 				<?php endforeach; ?>
 			</fieldset>
 
-			<p class="wow-setup__actions">
+			<p class="qs-setup__actions">
 				<button type="submit" class="button button-primary button-hero">
-					<?php esc_html_e( 'Use this look', 'wow-signal' ); ?>
+					<?php esc_html_e( 'Use this look', 'qwerty-soft-signal' ); ?>
 				</button>
 				<a class="button button-link" href="<?php echo esc_url( $this->step_url( 'brand' ) ); ?>">
-					<?php esc_html_e( 'Skip this step', 'wow-signal' ); ?>
+					<?php esc_html_e( 'Skip this step', 'qwerty-soft-signal' ); ?>
 				</a>
 			</p>
 		</form>
@@ -502,82 +502,82 @@ final class Onboarding implements Module {
 	private function step_brand(): void {
 		$logo = (int) get_theme_mod( 'custom_logo', 0 );
 		?>
-		<h2><?php esc_html_e( 'Your brand', 'wow-signal' ); ?></h2>
+		<h2><?php esc_html_e( 'Your brand', 'qwerty-soft-signal' ); ?></h2>
 
-		<p class="wow-setup__note">
-			<?php esc_html_e( 'Give it a logo and one colour and it will work out the other twelve. Enter two more if your brand has them.', 'wow-signal' ); ?>
+		<p class="qs-setup__note">
+			<?php esc_html_e( 'Give it a logo and one colour and it will work out the other twelve. Enter two more if your brand has them.', 'qwerty-soft-signal' ); ?>
 		</p>
 
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data">
 			<?php wp_nonce_field( self::NONCE ); ?>
-			<input type="hidden" name="action" value="wow_signal_setup">
-			<input type="hidden" name="wow_step" value="brand">
+			<input type="hidden" name="action" value="qwerty_soft_setup">
+			<input type="hidden" name="qsoft_step" value="brand">
 
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row">
-						<label for="wow-logo"><?php esc_html_e( 'Logo', 'wow-signal' ); ?></label>
+						<label for="qs-logo"><?php esc_html_e( 'Logo', 'qwerty-soft-signal' ); ?></label>
 					</th>
 					<td>
 						<?php if ( 0 !== $logo ) : ?>
-							<p class="wow-setup__logo">
+							<p class="qs-setup__logo">
 								<?php echo wp_get_attachment_image( $logo, 'medium', false, array( 'alt' => '' ) ); ?>
 							</p>
 						<?php endif; ?>
 
-						<input type="file" id="wow-logo" name="wow_logo" accept="image/png,image/jpeg,image/webp">
+						<input type="file" id="qs-logo" name="qsoft_logo" accept="image/png,image/jpeg,image/webp">
 						<p class="description">
-							<?php esc_html_e( 'Optional. A transparent PNG about 400 pixels wide works best; JPG and WebP also work. This sets the site logo, which the header already displays.', 'wow-signal' ); ?>
+							<?php esc_html_e( 'Optional. A transparent PNG about 400 pixels wide works best; JPG and WebP also work. This sets the site logo, which the header already displays.', 'qwerty-soft-signal' ); ?>
 						</p>
 					</td>
 				</tr>
 
 				<tr>
-					<th scope="row"><?php esc_html_e( 'Light or dark', 'wow-signal' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'Light or dark', 'qwerty-soft-signal' ); ?></th>
 					<td>
 						<fieldset>
-							<legend class="screen-reader-text"><?php esc_html_e( 'Light or dark', 'wow-signal' ); ?></legend>
-							<label><input type="radio" name="wow_mode" value="dark" checked> <?php esc_html_e( 'Dark — light text on a near-black page', 'wow-signal' ); ?></label><br>
-							<label><input type="radio" name="wow_mode" value="light"> <?php esc_html_e( 'Light — dark text on a white page', 'wow-signal' ); ?></label>
+							<legend class="screen-reader-text"><?php esc_html_e( 'Light or dark', 'qwerty-soft-signal' ); ?></legend>
+							<label><input type="radio" name="qsoft_mode" value="dark" checked> <?php esc_html_e( 'Dark — light text on a near-black page', 'qwerty-soft-signal' ); ?></label><br>
+							<label><input type="radio" name="qsoft_mode" value="light"> <?php esc_html_e( 'Light — dark text on a white page', 'qwerty-soft-signal' ); ?></label>
 						</fieldset>
 					</td>
 				</tr>
 
 				<tr>
 					<th scope="row">
-						<label for="wow-accent"><?php esc_html_e( 'Brand colour', 'wow-signal' ); ?></label>
+						<label for="qs-accent"><?php esc_html_e( 'Brand colour', 'qwerty-soft-signal' ); ?></label>
 					</th>
 					<td>
-						<input type="color" id="wow-accent" name="wow_accent" value="#22d3ee">
+						<input type="color" id="qs-accent" name="qsoft_accent" value="#22d3ee">
 						<p class="description">
-							<?php esc_html_e( 'Buttons, links and highlights. If this exact colour would be hard to read, the theme keeps the hue and moves the lightness until it is.', 'wow-signal' ); ?>
+							<?php esc_html_e( 'Buttons, links and highlights. If this exact colour would be hard to read, the theme keeps the hue and moves the lightness until it is.', 'qwerty-soft-signal' ); ?>
 						</p>
 					</td>
 				</tr>
 
 				<tr>
-					<th scope="row"><?php esc_html_e( 'Secondary colours', 'wow-signal' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'Secondary colours', 'qwerty-soft-signal' ); ?></th>
 					<td>
 						<fieldset>
-							<legend class="screen-reader-text"><?php esc_html_e( 'Secondary colours', 'wow-signal' ); ?></legend>
+							<legend class="screen-reader-text"><?php esc_html_e( 'Secondary colours', 'qwerty-soft-signal' ); ?></legend>
 
 							<p>
 								<label>
-									<input type="checkbox" name="wow_derive" value="1" checked>
-									<?php esc_html_e( 'Work them out from my brand colour', 'wow-signal' ); ?>
+									<input type="checkbox" name="qsoft_derive" value="1" checked>
+									<?php esc_html_e( 'Work them out from my brand colour', 'qwerty-soft-signal' ); ?>
 								</label>
 							</p>
 
 							<p>
-								<label for="wow-accent-2" class="screen-reader-text"><?php esc_html_e( 'Second brand colour', 'wow-signal' ); ?></label>
-								<input type="color" id="wow-accent-2" name="wow_accent_2" value="#a78bfa">
+								<label for="qs-accent-2" class="screen-reader-text"><?php esc_html_e( 'Second brand colour', 'qwerty-soft-signal' ); ?></label>
+								<input type="color" id="qs-accent-2" name="qsoft_accent_2" value="#a78bfa">
 
-								<label for="wow-accent-3" class="screen-reader-text"><?php esc_html_e( 'Third brand colour', 'wow-signal' ); ?></label>
-								<input type="color" id="wow-accent-3" name="wow_accent_3" value="#e879f9">
+								<label for="qs-accent-3" class="screen-reader-text"><?php esc_html_e( 'Third brand colour', 'qwerty-soft-signal' ); ?></label>
+								<input type="color" id="qs-accent-3" name="qsoft_accent_3" value="#e879f9">
 							</p>
 
 							<p class="description">
-								<?php esc_html_e( 'Leave the box ticked and the theme rotates two companions off your brand colour, which is what a one-colour brand wants. Untick it to use the two colours above instead.', 'wow-signal' ); ?>
+								<?php esc_html_e( 'Leave the box ticked and the theme rotates two companions off your brand colour, which is what a one-colour brand wants. Untick it to use the two colours above instead.', 'qwerty-soft-signal' ); ?>
 							</p>
 						</fieldset>
 					</td>
@@ -585,27 +585,27 @@ final class Onboarding implements Module {
 
 				<tr>
 					<th scope="row">
-						<label for="wow-heading"><?php esc_html_e( 'Headings', 'wow-signal' ); ?></label>
+						<label for="qs-heading"><?php esc_html_e( 'Headings', 'qwerty-soft-signal' ); ?></label>
 					</th>
 					<td>
-						<select id="wow-heading" name="wow_heading">
-							<option value=""><?php esc_html_e( 'Keep the theme\'s heading font', 'wow-signal' ); ?></option>
-							<option value="sans"><?php esc_html_e( 'Manrope — the theme sans', 'wow-signal' ); ?></option>
-							<option value="mono"><?php esc_html_e( 'Monospace — editorial, technical', 'wow-signal' ); ?></option>
+						<select id="qs-heading" name="qsoft_heading">
+							<option value=""><?php esc_html_e( 'Keep the theme\'s heading font', 'qwerty-soft-signal' ); ?></option>
+							<option value="sans"><?php esc_html_e( 'Manrope — the theme sans', 'qwerty-soft-signal' ); ?></option>
+							<option value="mono"><?php esc_html_e( 'Monospace — editorial, technical', 'qwerty-soft-signal' ); ?></option>
 						</select>
 						<p class="description">
-							<?php esc_html_e( 'Only the two families the theme already carries. Adding a third would mean a font file the theme does not ship and a request it does not make.', 'wow-signal' ); ?>
+							<?php esc_html_e( 'Only the two families the theme already carries. Adding a third would mean a font file the theme does not ship and a request it does not make.', 'qwerty-soft-signal' ); ?>
 						</p>
 					</td>
 				</tr>
 			</table>
 
-			<p class="wow-setup__actions">
+			<p class="qs-setup__actions">
 				<button type="submit" class="button button-primary button-hero">
-					<?php esc_html_e( 'Apply my brand', 'wow-signal' ); ?>
+					<?php esc_html_e( 'Apply my brand', 'qwerty-soft-signal' ); ?>
 				</button>
 				<a class="button button-link" href="<?php echo esc_url( $this->step_url( 'content' ) ); ?>">
-					<?php esc_html_e( 'Skip this step', 'wow-signal' ); ?>
+					<?php esc_html_e( 'Skip this step', 'qwerty-soft-signal' ); ?>
 				</a>
 			</p>
 		</form>
@@ -620,30 +620,30 @@ final class Onboarding implements Module {
 	private function step_content(): void {
 		$installed = DemoContent::installed();
 		?>
-		<h2><?php esc_html_e( 'Starter pages', 'wow-signal' ); ?></h2>
+		<h2><?php esc_html_e( 'Starter pages', 'qwerty-soft-signal' ); ?></h2>
 
-		<p class="wow-setup__note">
-			<?php esc_html_e( 'A home page, a services page and a contact page, built from the theme\'s own patterns and filled with real copy rather than placeholder text. A menu is created and the home page is set as the front page.', 'wow-signal' ); ?>
+		<p class="qs-setup__note">
+			<?php esc_html_e( 'A home page, a services page and a contact page, built from the theme\'s own patterns and filled with real copy rather than placeholder text. A menu is created and the home page is set as the front page.', 'qwerty-soft-signal' ); ?>
 		</p>
 
 		<?php if ( $installed ) : ?>
-			<p class="wow-setup__note">
-				<strong><?php esc_html_e( 'This site already has starter content.', 'wow-signal' ); ?></strong>
-				<?php esc_html_e( 'Running it again will not duplicate or overwrite anything.', 'wow-signal' ); ?>
+			<p class="qs-setup__note">
+				<strong><?php esc_html_e( 'This site already has starter content.', 'qwerty-soft-signal' ); ?></strong>
+				<?php esc_html_e( 'Running it again will not duplicate or overwrite anything.', 'qwerty-soft-signal' ); ?>
 			</p>
 		<?php endif; ?>
 
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( self::NONCE ); ?>
-			<input type="hidden" name="action" value="wow_signal_setup">
-			<input type="hidden" name="wow_step" value="content">
+			<input type="hidden" name="action" value="qwerty_soft_setup">
+			<input type="hidden" name="qsoft_step" value="content">
 
-			<p class="wow-setup__actions">
+			<p class="qs-setup__actions">
 				<button type="submit" class="button button-primary button-hero">
-					<?php esc_html_e( 'Install the starter pages', 'wow-signal' ); ?>
+					<?php esc_html_e( 'Install the starter pages', 'qwerty-soft-signal' ); ?>
 				</button>
 				<a class="button button-link" href="<?php echo esc_url( $this->step_url( 'done' ) ); ?>">
-					<?php esc_html_e( 'Skip this step', 'wow-signal' ); ?>
+					<?php esc_html_e( 'Skip this step', 'qwerty-soft-signal' ); ?>
 				</a>
 			</p>
 		</form>
@@ -657,32 +657,32 @@ final class Onboarding implements Module {
 	 */
 	private function step_done(): void {
 		?>
-		<h2><?php esc_html_e( 'That is the setup done', 'wow-signal' ); ?></h2>
+		<h2><?php esc_html_e( 'That is the setup done', 'qwerty-soft-signal' ); ?></h2>
 
-		<p class="wow-setup__note">
-			<?php esc_html_e( 'Everything from here is ordinary WordPress. The pages are pages, the palette is in the Site Editor under Styles, and the patterns are in the block inserter under WOW.', 'wow-signal' ); ?>
+		<p class="qs-setup__note">
+			<?php esc_html_e( 'Everything from here is ordinary WordPress. The pages are pages, the palette is in the Site Editor under Styles, and the patterns are in the block inserter under Qwerty Soft.', 'qwerty-soft-signal' ); ?>
 		</p>
 
-		<ul class="wow-setup__list">
+		<ul class="qs-setup__list">
 			<li>
-				<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Look at the site', 'wow-signal' ); ?></a>
+				<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Look at the site', 'qwerty-soft-signal' ); ?></a>
 			</li>
 			<li>
-				<a href="<?php echo esc_url( admin_url( 'site-editor.php' ) ); ?>"><?php esc_html_e( 'Edit the design in the Site Editor', 'wow-signal' ); ?></a>
+				<a href="<?php echo esc_url( admin_url( 'site-editor.php' ) ); ?>"><?php esc_html_e( 'Edit the design in the Site Editor', 'qwerty-soft-signal' ); ?></a>
 			</li>
 			<li>
-				<a href="<?php echo esc_url( admin_url( 'themes.php?page=wow-signal-import' ) ); ?>"><?php esc_html_e( 'Import a design from an HTML archive', 'wow-signal' ); ?></a>
+				<a href="<?php echo esc_url( admin_url( 'themes.php?page=qwerty-soft-signal-import' ) ); ?>"><?php esc_html_e( 'Import a design from an HTML archive', 'qwerty-soft-signal' ); ?></a>
 			</li>
 		</ul>
 
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( self::NONCE ); ?>
-			<input type="hidden" name="action" value="wow_signal_setup">
-			<input type="hidden" name="wow_step" value="finish">
+			<input type="hidden" name="action" value="qwerty_soft_setup">
+			<input type="hidden" name="qsoft_step" value="finish">
 
-			<p class="wow-setup__actions">
+			<p class="qs-setup__actions">
 				<button type="submit" class="button button-primary button-hero">
-					<?php esc_html_e( 'Finish', 'wow-signal' ); ?>
+					<?php esc_html_e( 'Finish', 'qwerty-soft-signal' ); ?>
 				</button>
 			</p>
 		</form>
@@ -698,7 +698,7 @@ final class Onboarding implements Module {
 	 */
 	public function handle(): void {
 		if ( ! $this->may_setup() ) {
-			wp_die( esc_html__( 'You do not have permission to set up this theme.', 'wow-signal' ) );
+			wp_die( esc_html__( 'You do not have permission to set up this theme.', 'qwerty-soft-signal' ) );
 		}
 
 		check_admin_referer( self::NONCE );
@@ -708,7 +708,7 @@ final class Onboarding implements Module {
 		 * but "skip setup" is a nonced link, and admin-post.php dispatches a
 		 * GET to the same action.
 		 */
-		$step = isset( $_REQUEST['wow_step'] ) ? sanitize_key( wp_unslash( $_REQUEST['wow_step'] ) ) : '';
+		$step = isset( $_REQUEST['qsoft_step'] ) ? sanitize_key( wp_unslash( $_REQUEST['qsoft_step'] ) ) : '';
 
 		switch ( $step ) {
 			case 'style':
@@ -749,7 +749,7 @@ final class Onboarding implements Module {
 	 * @return void
 	 */
 	private function save_style(): void {
-		$slug = isset( $_POST['wow_variation'] ) ? sanitize_key( wp_unslash( $_POST['wow_variation'] ) ) : '';
+		$slug = isset( $_POST['qsoft_variation'] ) ? sanitize_key( wp_unslash( $_POST['qsoft_variation'] ) ) : '';
 
 		if ( ! StyleVariations::apply( $slug ) ) {
 			$this->go( 'style', 'style-failed' );
@@ -768,21 +768,21 @@ final class Onboarding implements Module {
 
 		// Only the presence of a filename is read here; the file itself is
 		// handled by media_handle_upload(), which does its own validation.
-		$filename = isset( $_FILES['wow_logo']['name'] )
-			? sanitize_file_name( (string) wp_unslash( $_FILES['wow_logo']['name'] ) ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitised on this line.
+		$filename = isset( $_FILES['qsoft_logo']['name'] )
+			? sanitize_file_name( (string) wp_unslash( $_FILES['qsoft_logo']['name'] ) ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitised on this line.
 			: '';
 
 		if ( '' !== $filename ) {
 			$notice = $this->save_logo();
 		}
 
-		$accent = isset( $_POST['wow_accent'] ) ? BrandKit::hex( sanitize_text_field( wp_unslash( $_POST['wow_accent'] ) ) ) : null;
+		$accent = isset( $_POST['qsoft_accent'] ) ? BrandKit::hex( sanitize_text_field( wp_unslash( $_POST['qsoft_accent'] ) ) ) : null;
 
 		if ( null === $accent ) {
 			$this->go( 'brand', '' !== $notice ? $notice : 'brand-failed' );
 		}
 
-		$dark = ! isset( $_POST['wow_mode'] ) || 'light' !== sanitize_key( wp_unslash( $_POST['wow_mode'] ) );
+		$dark = ! isset( $_POST['qsoft_mode'] ) || 'light' !== sanitize_key( wp_unslash( $_POST['qsoft_mode'] ) );
 
 		/*
 		 * A colour input cannot be left empty, so "no secondary colour" has to
@@ -791,14 +791,14 @@ final class Onboarding implements Module {
 		 * otherwise a one-colour brand silently inherits the theme's violet and
 		 * fuchsia and comes out looking like two brands at once.
 		 */
-		$derive = isset( $_POST['wow_derive'] );
+		$derive = isset( $_POST['qsoft_derive'] );
 
 		$brand = array(
 			'mode'     => $dark ? 'dark' : 'light',
 			'accent'   => (string) $accent,
-			'accent-2' => $derive || ! isset( $_POST['wow_accent_2'] ) ? '' : sanitize_text_field( wp_unslash( $_POST['wow_accent_2'] ) ),
-			'accent-3' => $derive || ! isset( $_POST['wow_accent_3'] ) ? '' : sanitize_text_field( wp_unslash( $_POST['wow_accent_3'] ) ),
-			'heading'  => isset( $_POST['wow_heading'] ) ? sanitize_key( wp_unslash( $_POST['wow_heading'] ) ) : '',
+			'accent-2' => $derive || ! isset( $_POST['qsoft_accent_2'] ) ? '' : sanitize_text_field( wp_unslash( $_POST['qsoft_accent_2'] ) ),
+			'accent-3' => $derive || ! isset( $_POST['qsoft_accent_3'] ) ? '' : sanitize_text_field( wp_unslash( $_POST['qsoft_accent_3'] ) ),
+			'heading'  => isset( $_POST['qsoft_heading'] ) ? sanitize_key( wp_unslash( $_POST['qsoft_heading'] ) ) : '',
 		);
 
 		$tokens = BrandKit::derive( $brand );
@@ -829,7 +829,7 @@ final class Onboarding implements Module {
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 
-		$id = media_handle_upload( 'wow_logo', 0 );
+		$id = media_handle_upload( 'qsoft_logo', 0 );
 
 		if ( is_wp_error( $id ) ) {
 			return 'logo-failed';
@@ -863,7 +863,7 @@ final class Onboarding implements Module {
 	 * @return void
 	 */
 	private function go( string $step, string $notice ): void {
-		wp_safe_redirect( add_query_arg( 'wow-notice', $notice, $this->step_url( $step ) ) );
+		wp_safe_redirect( add_query_arg( 'qs-notice', $notice, $this->step_url( $step ) ) );
 		exit;
 	}
 
@@ -897,7 +897,7 @@ final class Onboarding implements Module {
 	 */
 	private function action_url( string $step ): string {
 		return wp_nonce_url(
-			admin_url( 'admin-post.php?action=wow_signal_setup&wow_step=' . rawurlencode( $step ) ),
+			admin_url( 'admin-post.php?action=qwerty_soft_setup&qsoft_step=' . rawurlencode( $step ) ),
 			self::NONCE
 		);
 	}

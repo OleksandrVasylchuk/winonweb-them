@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
- * POT generator for WOW — Signal.
+ * POT generator for Qwerty Soft — Signal.
  *
  * Scans the theme's PHP for gettext calls and its block.json files for the
  * strings WordPress translates from block metadata, then writes
- * languages/wow-signal.pot.
+ * languages/qwerty-soft-signal.pot.
  *
  * Written in-house rather than pulled from wp-cli so the theme keeps a single
  * small dev dependency tree; the output follows the same POT conventions.
  *
  * Usage: npm run make:pot
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join, relative } from 'node:path';
 
 const root = resolve( dirname( fileURLToPath( import.meta.url ) ), '..' );
-const DOMAIN = 'wow-signal';
+const DOMAIN = 'qwerty-soft-signal';
 
 /** The theme version, read from the one place that owns it: style.css. */
 const VERSION = ( () => {
@@ -50,7 +50,14 @@ function collect( dir, ext, found = [] ) {
 	}
 
 	for ( const entry of readdirSync( dir ) ) {
-		if ( [ 'node_modules', 'vendor', 'artifacts', '.git' ].includes( entry ) ) {
+		/*
+		 * 'design' is the importer's output: blocks generated from a client's
+		 * archive. Their titles are the designer's own words for that one site,
+		 * so extracting them would put a client's copy into the theme's
+		 * translation catalogue and leave every build reporting new untranslated
+		 * strings that nobody should ever translate.
+		 */
+		if ( [ 'node_modules', 'vendor', 'artifacts', '.git', 'design' ].includes( entry ) ) {
 			continue;
 		}
 
@@ -320,17 +327,17 @@ const sorted = [ ...entries.values() ].sort( ( a, b ) => {
 } );
 
 const lines = [
-	'# Copyright (C) 2026 WOW — Win On Web',
+	'# Copyright (C) 2026 Qwerty Soft',
 	'# This file is distributed under the GNU General Public License v2 or later.',
 	'msgid ""',
 	'msgstr ""',
-	`"Project-Id-Version: WOW — Signal ${ VERSION }\\n"`,
-	'"Report-Msgid-Bugs-To: https://www.winonweb.dev/\\n"',
+	`"Project-Id-Version: Qwerty Soft — Signal ${ VERSION }\\n"`,
+	'"Report-Msgid-Bugs-To: https://qwerty-soft.com/\\n"',
 	'"MIME-Version: 1.0\\n"',
 	'"Content-Type: text/plain; charset=UTF-8\\n"',
 	'"Content-Transfer-Encoding: 8bit\\n"',
-	'"Language-Team: WOW — Win On Web\\n"',
-	'"X-Domain: wow-signal\\n"',
+	'"Language-Team: Qwerty Soft\\n"',
+	'"X-Domain: qwerty-soft-signal\\n"',
 	'"Plural-Forms: nplurals=2; plural=(n != 1);\\n"',
 	'',
 ];
@@ -359,7 +366,7 @@ for ( const entry of sorted ) {
 	lines.push( '' );
 }
 
-const target = join( root, 'languages', 'wow-signal.pot' );
+const target = join( root, 'languages', 'qwerty-soft-signal.pot' );
 writeFileSync( target, lines.join( '\n' ), 'utf8' );
 
 console.log( `Wrote ${ relative( root, target ) } — ${ sorted.length } strings.` );

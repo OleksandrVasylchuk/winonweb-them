@@ -2,15 +2,15 @@
 /**
  * Asset loading strategy.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -77,7 +77,7 @@ final class Assets implements Module {
 		foreach ( $this->preload_subsets() as $slug ) {
 			printf(
 				'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin="anonymous">' . "\n",
-				esc_url( WOW_SIGNAL_URI . self::FONT_SUBSETS[ $slug ] )
+				esc_url( QSOFT_URI . self::FONT_SUBSETS[ $slug ] )
 			);
 		}
 	}
@@ -105,7 +105,7 @@ final class Assets implements Module {
 		 *
 		 * @param array<int, string> $subsets Subset slugs, in output order.
 		 */
-		$subsets = (array) apply_filters( 'wow_signal/preload_fonts', $subsets );
+		$subsets = (array) apply_filters( 'qwerty_soft/preload_fonts', $subsets );
 
 		$known = array_filter(
 			$subsets,

@@ -6,7 +6,7 @@
  * transaction; they run under the harness anyway so the output reads the same
  * and a stray write would still be caught.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 declare( strict_types = 1 );
@@ -16,7 +16,7 @@ declare( strict_types = 1 );
 
 require __DIR__ . '/bootstrap.php';
 
-use Wow\Signal\Support\SectionSplitter;
+use Qwerty\Soft\Support\SectionSplitter;
 
 /**
  * Everything a split produced as one string, for "must not contain" checks.
@@ -24,7 +24,7 @@ use Wow\Signal\Support\SectionSplitter;
  * @param array<string, mixed> $split SectionSplitter::split() result.
  * @return string
  */
-function wow_split_text( array $split ): string {
+function qsoft_split_text( array $split ): string {
 	$pieces = array(
 		(string) ( $split['header']['html'] ?? '' ),
 		(string) ( $split['footer']['html'] ?? '' ),
@@ -37,7 +37,7 @@ function wow_split_text( array $split ): string {
 	return implode( "\n", $pieces );
 }
 
-wow_test(
+qsoft_test(
 	'SectionSplitter: the fixture pages',
 	static function (): void {
 		$expected = array(
@@ -56,50 +56,50 @@ wow_test(
 		);
 
 		foreach ( $expected as $file => $want ) {
-			$split = SectionSplitter::split( wow_fixture( 'design/' . $file ) );
-			$all   = wow_split_text( $split );
+			$split = SectionSplitter::split( qsoft_fixture( 'design/' . $file ) );
+			$all   = qsoft_split_text( $split );
 
-			wow_assert( is_array( $split['header'] ), $file . ': header found through the SiteNav import' );
-			wow_assert( str_contains( (string) ( $split['header']['html'] ?? '' ), 'logo.svg' ), $file . ': header carries the logo image', $split['header']['html'] ?? null );
-			wow_assert( is_array( $split['footer'] ), $file . ': footer found through the SiteFooter import' );
-			wow_assert( str_contains( (string) ( $split['footer']['html'] ?? '' ), 'Fixture Co' ), $file . ': footer has its text', $split['footer']['html'] ?? null );
+			qsoft_assert( is_array( $split['header'] ), $file . ': header found through the SiteNav import' );
+			qsoft_assert( str_contains( (string) ( $split['header']['html'] ?? '' ), 'logo.svg' ), $file . ': header carries the logo image', $split['header']['html'] ?? null );
+			qsoft_assert( is_array( $split['footer'] ), $file . ': footer found through the SiteFooter import' );
+			qsoft_assert( str_contains( (string) ( $split['footer']['html'] ?? '' ), 'Fixture Co' ), $file . ': footer has its text', $split['footer']['html'] ?? null );
 
 			$labels = array_map( static fn( array $s ): string => (string) $s['label'], (array) $split['sections'] );
 
-			wow_assert( count( $split['sections'] ) === $want['sections'], $file . ': ' . $want['sections'] . ' sections', $labels );
+			qsoft_assert( count( $split['sections'] ) === $want['sections'], $file . ': ' . $want['sections'] . ' sections', $labels );
 
 			$first = (string) ( $split['sections'][0]['text'] ?? '' );
-			wow_assert( str_contains( $first, $want['first'] ), $file . ': the first section is the one with the h1', $first );
+			qsoft_assert( str_contains( $first, $want['first'] ), $file . ': the first section is the one with the h1', $first );
 
-			wow_assert( ! str_contains( $all, 'Get the monthly note' ), $file . ': the NewsletterPopup (hint-size 0px,0px) is left out' );
-			wow_assert( ! str_contains( $all, 'popup-email' ), $file . ': no trace of the popup form' );
-			wow_assert( ! str_contains( $all, '<sc-for' ), $file . ': no <sc-for> template loop survives' );
-			wow_assert( ! str_contains( $all, '{{' ), $file . ': no {{ placeholder }} survives' );
-			wow_assert( ! str_contains( $all, '<dc-import' ), $file . ': no <dc-import> tag survives' );
-			wow_assert( ! str_contains( $all, '<x-dc' ) && ! str_contains( $all, '<helmet' ), $file . ': the x-dc and helmet wrappers are unwrapped' );
-			wow_assert( ! str_contains( $all, '<script' ) && ! str_contains( $all, '<link' ), $file . ': scripts and links are stripped' );
+			qsoft_assert( ! str_contains( $all, 'Get the monthly note' ), $file . ': the NewsletterPopup (hint-size 0px,0px) is left out' );
+			qsoft_assert( ! str_contains( $all, 'popup-email' ), $file . ': no trace of the popup form' );
+			qsoft_assert( ! str_contains( $all, '<sc-for' ), $file . ': no <sc-for> template loop survives' );
+			qsoft_assert( ! str_contains( $all, '{{' ), $file . ': no {{ placeholder }} survives' );
+			qsoft_assert( ! str_contains( $all, '<dc-import' ), $file . ': no <dc-import> tag survives' );
+			qsoft_assert( ! str_contains( $all, '<x-dc' ) && ! str_contains( $all, '<helmet' ), $file . ': the x-dc and helmet wrappers are unwrapped' );
+			qsoft_assert( ! str_contains( $all, '<script' ) && ! str_contains( $all, '<link' ), $file . ': scripts and links are stripped' );
 		}
 
-		$home = SectionSplitter::split( wow_fixture( 'design/Home.dc.html' ) );
+		$home = SectionSplitter::split( qsoft_fixture( 'design/Home.dc.html' ) );
 
-		wow_assert( 'Fixture Co — Signal for small teams' === $home['title'], 'Home: title read from the helmet', $home['title'] );
+		qsoft_assert( 'Fixture Co — Signal for small teams' === $home['title'], 'Home: title read from the helmet', $home['title'] );
 
 		$hero = $home['sections'][0] ?? array();
-		wow_assert( 'div' === ( $hero['tag'] ?? '' ), 'Home: the hero div outside any <section> is adopted as a section', $hero['tag'] ?? null );
-		wow_assert( 1 === ( $hero['heading']['level'] ?? 0 ) || str_contains( (string) ( $hero['html'] ?? '' ), '<h1' ), 'Home: the hero carries the h1', $hero['heading'] ?? null );
-		wow_assert( ! str_contains( (string) ( $hero['html'] ?? '' ), '<hero-viz' ), 'Home: the <hero-viz> custom element is unwrapped' );
+		qsoft_assert( 'div' === ( $hero['tag'] ?? '' ), 'Home: the hero div outside any <section> is adopted as a section', $hero['tag'] ?? null );
+		qsoft_assert( 1 === ( $hero['heading']['level'] ?? 0 ) || str_contains( (string) ( $hero['html'] ?? '' ), '<h1' ), 'Home: the hero carries the h1', $hero['heading'] ?? null );
+		qsoft_assert( ! str_contains( (string) ( $hero['html'] ?? '' ), '<hero-viz' ), 'Home: the <hero-viz> custom element is unwrapped' );
 
 		$band = $home['sections'][1] ?? array();
-		wow_assert( str_contains( (string) ( $band['html'] ?? '' ), 'background-image:url(img/band.jpg)' ), 'Home: the inline background-image survives for the converter', $band['html'] ?? null );
+		qsoft_assert( str_contains( (string) ( $band['html'] ?? '' ), 'background-image:url(img/band.jpg)' ), 'Home: the inline background-image survives for the converter', $band['html'] ?? null );
 
 		$proof = $home['sections'][3] ?? array();
-		wow_assert( str_contains( (string) ( $proof['html'] ?? '' ), '46,000+' ), 'Home: the metric figure is in the fourth section', $proof['label'] ?? null );
-		wow_assert( str_contains( (string) ( $proof['html'] ?? '' ), 'data:image/png;base64,' ), 'Home: the data: image is still inline at this stage' );
-		wow_assert( 1 === (int) ( $proof['lists'] ?? 0 ) || str_contains( (string) ( $proof['html'] ?? '' ), '<dl' ), 'Home: the FAQ list is in the fourth section' );
+		qsoft_assert( str_contains( (string) ( $proof['html'] ?? '' ), '46,000+' ), 'Home: the metric figure is in the fourth section', $proof['label'] ?? null );
+		qsoft_assert( str_contains( (string) ( $proof['html'] ?? '' ), 'data:image/png;base64,' ), 'Home: the data: image is still inline at this stage' );
+		qsoft_assert( 1 === (int) ( $proof['lists'] ?? 0 ) || str_contains( (string) ( $proof['html'] ?? '' ), '<dl' ), 'Home: the FAQ list is in the fourth section' );
 	}
 );
 
-wow_test(
+qsoft_test(
 	'SectionSplitter: a flat page of 3000 cards splits fast and coarse',
 	static function (): void {
 		$cards = '';
@@ -113,10 +113,10 @@ wow_test(
 			. '<main><h1>Three thousand cards</h1><div class="grid">' . $cards . '</div></main>'
 			. '<footer><p>Footer</p></footer></body></html>';
 
-		$file = tempnam( sys_get_temp_dir(), 'wow-flat-' );
+		$file = tempnam( sys_get_temp_dir(), 'qs-flat-' );
 
 		if ( false === $file ) {
-			wow_assert( false, 'could not create a temporary file' );
+			qsoft_assert( false, 'could not create a temporary file' );
 			return;
 		}
 
@@ -128,17 +128,17 @@ wow_test(
 			$split   = SectionSplitter::split( $file );
 			$elapsed = microtime( true ) - $started;
 
-			wow_assert( $elapsed < 1.0, sprintf( 'split in under a second (took %.3fs)', $elapsed ) );
-			wow_assert( count( $split['sections'] ) < 10, 'fewer than 10 sections', count( $split['sections'] ) );
-			wow_assert( count( $split['sections'] ) >= 1, 'at least one section was found' );
-			wow_assert( is_array( $split['header'] ) && is_array( $split['footer'] ), 'header and footer were still found' );
+			qsoft_assert( $elapsed < 1.0, sprintf( 'split in under a second (took %.3fs)', $elapsed ) );
+			qsoft_assert( count( $split['sections'] ) < 10, 'fewer than 10 sections', count( $split['sections'] ) );
+			qsoft_assert( count( $split['sections'] ) >= 1, 'at least one section was found' );
+			qsoft_assert( is_array( $split['header'] ) && is_array( $split['footer'] ), 'header and footer were still found' );
 
-			$text = wow_split_text( $split );
-			wow_assert( str_contains( $text, 'Card 3000' ), 'the last card is still in the output' );
+			$text = qsoft_split_text( $split );
+			qsoft_assert( str_contains( $text, 'Card 3000' ), 'the last card is still in the output' );
 		} finally {
 			unlink( $file );
 		}
 	}
 );
 
-wow_finish();
+qsoft_finish();

@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-robert-ai-aba67f",
+    "title": "治理规则",
+    "category": "qs",
+    "description": "治理规则 — 3 pieces of text, 4 repeating items. From robert-ai.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "robert-ai",
+        "治理规则"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "kicker": "治理规则",
+                "heading": "安全、声明控制与可信度",
+                "disclaimer": "Robert AI 是 AI 辅助贸易智能系统，不应被视为法律、税务、海关、金融、兽医或制裁建议的替代品。如翻译内容不一致，应以已批准的原始材料为准。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/05_AI_Roadmap/z-08ed030b/robert_khoubian_site_v15_robert_ai/zh/robert-ai.html",
+    "qsDesignVersion": 7
+}

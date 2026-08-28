@@ -1,0 +1,55 @@
+{
+    "key": "group_qs_design_index_market_intell_77d74f",
+    "title": "Коммерческое исполнение, регуляторные знания и market intell",
+    "fields": [
+        {
+            "key": "field_qs_index_market_intell_77d74f_portrait",
+            "label": "Image",
+            "name": "portrait",
+            "type": "image",
+            "return_format": "array",
+            "preview_size": "medium",
+            "instructions": "The picture shown in this position."
+        },
+        {
+            "key": "field_qs_index_market_intell_77d74f_heading",
+            "label": "Subheading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Коммерческое исполнение, регуляторные знания и market intelligence.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_market_intell_77d74f_biography_intro",
+            "label": "Text",
+            "name": "biography_intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Роберт Хубиян — профессионал в международной торговле продуктами питания и предприниматель, специализирующийся на торговле Китай–Евразия, цепочках поставок замороженной продукции и доступе на рынки. С 2004 года он работает на глобальных продовольственных рынках, сочетая коммерческое исполнение с регуляторными знаниями и практической аналитикой.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_market_intell_77d74f_read_more",
+            "label": "Btn",
+            "name": "read_more",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "about.html",
+                "title": "Читать биографию",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-market-intell-77d74f"
+            }
+        ]
+    ],
+    "active": true
+}

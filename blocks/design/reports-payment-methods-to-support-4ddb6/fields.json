@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_reports_payment_methods_to_support_4ddb6",
+    "title": "Payment methods",
+    "fields": [
+        {
+            "key": "field_qs_reports_payment_methods_to_support_4ddb6_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Payment methods to support",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_payment_methods_to_support_4ddb6_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Live site должен поддерживать оплату картами, PayPal и банковским переводом, а paid files должны быть защищены secure download links.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_payment_methods_to_support_4ddb6_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_reports_payment_methods_to_support_4ddb6_row_check_mark",
+                    "label": "Check mark",
+                    "name": "check_mark",
+                    "type": "text",
+                    "default_value": "✓",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_reports_payment_methods_to_support_4ddb6_row_payment_method",
+                    "label": "Payment method",
+                    "name": "payment_method",
+                    "type": "text",
+                    "default_value": "Visa, Mastercard и American Express через Stripe",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-payment-methods-to-support-4ddb6"
+            }
+        ]
+    ],
+    "active": true
+}

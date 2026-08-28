@@ -2,15 +2,15 @@
 /**
  * Baseline SEO: meta description, social cards and structured data.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -51,7 +51,7 @@ final class Seo implements Module {
 		 *
 		 * @param bool $owned True when another plugin handles metadata.
 		 */
-		return (bool) apply_filters( 'wow_signal/seo_delegated', $owned );
+		return (bool) apply_filters( 'qwerty_soft/seo_delegated', $owned );
 	}
 
 	/**
@@ -178,7 +178,7 @@ final class Seo implements Module {
 		 *
 		 * @param array<string, mixed> $node Organization node.
 		 */
-		return (array) apply_filters( 'wow_signal/schema_organization', $node );
+		return (array) apply_filters( 'qwerty_soft/schema_organization', $node );
 	}
 
 	/**
@@ -228,7 +228,7 @@ final class Seo implements Module {
 			array(
 				'@type'    => 'ListItem',
 				'position' => 1,
-				'name'     => __( 'Home', 'wow-signal' ),
+				'name'     => __( 'Home', 'qwerty-soft-signal' ),
 				'item'     => home_url( '/' ),
 			),
 		);
@@ -407,7 +407,7 @@ final class Seo implements Module {
 			return '';
 		}
 
-		$src = wp_get_attachment_image_src( $image_id, 'wow-signal-wide' );
+		$src = wp_get_attachment_image_src( $image_id, 'qwerty-soft-signal-wide' );
 
 		return is_array( $src ) ? (string) $src[0] : '';
 	}

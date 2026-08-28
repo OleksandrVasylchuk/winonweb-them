@@ -1,0 +1,61 @@
+{
+    "key": "group_qs_design_research_decision_making_tools_to_build",
+    "title": "Decision Tools",
+    "fields": [
+        {
+            "key": "field_qs_research_decision_making_tools_to_build_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Decision-making tools to build next",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_decision_making_tools_to_build_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "These tools will convert expertise into practical resources that importers, exporters, brokers and trade teams can use before quoting, shipping or entering a market.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_decision_making_tools_to_build_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_research_decision_making_tools_to_build_row_tool_name",
+                    "label": "Tool name",
+                    "name": "tool_name",
+                    "type": "text",
+                    "default_value": "Supplier Verification Checklist",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_research_decision_making_tools_to_build_row_description",
+                    "label": "What the tool does",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "A practical checklist for assessing factories, exporters, documentation, compliance and commercial credibility.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-decision-making-tools-to-build"
+            }
+        ]
+    ],
+    "active": true
+}

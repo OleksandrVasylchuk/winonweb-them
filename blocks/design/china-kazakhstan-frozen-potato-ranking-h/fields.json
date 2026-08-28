@@ -1,0 +1,177 @@
+{
+    "key": "group_qs_design_china_kazakhstan_frozen_potato_ranking_h",
+    "title": "Report hero",
+    "fields": [
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Customs Data Report",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_heading",
+            "label": "Report title",
+            "name": "heading",
+            "type": "text",
+            "default_value": "China-to-Kazakhstan Frozen Potato Exporter Ranking (HS 2004.10)",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_lede",
+            "label": "Standfirst",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Position of Aquaprole among disclosed exporters, July 2025 – June 2026.",
+            "instructions": "A short paragraph of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_availability_note",
+            "label": "Availability note",
+            "name": "availability_note",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "These pages are designed as report-detail templates. The source DOCX files remain admin-only until redacted public samples and approved commercial versions are prepared.",
+            "instructions": "A short paragraph of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_back_link",
+            "label": "Link back to reports",
+            "name": "back_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "../reports.html",
+                "title": "Return to Reports",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_methodology_link",
+            "label": "Link to the methodology",
+            "name": "methodology_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#methodology",
+                "title": "Methodology discipline",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_status_label",
+            "label": "Status label",
+            "name": "status_label",
+            "type": "text",
+            "default_value": "Admin status",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_status_value",
+            "label": "Status",
+            "name": "status_value",
+            "type": "text",
+            "default_value": "Public sample pending",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_period_label",
+            "label": "Period label",
+            "name": "period_label",
+            "type": "text",
+            "default_value": "Period",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_period_value",
+            "label": "Period",
+            "name": "period_value",
+            "type": "text",
+            "default_value": "July 2025 – June 2026.",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_period_note",
+            "label": "Note under the period",
+            "name": "period_note",
+            "type": "text",
+            "default_value": "China-to-Kazakhstan Frozen Potato Exporter Ranking (HS 2004.10)",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_rank_label",
+            "label": "Rank label",
+            "name": "rank_label",
+            "type": "text",
+            "default_value": "Rank / position",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_rank_value",
+            "label": "Rank",
+            "name": "rank_value",
+            "type": "text",
+            "default_value": "#11 of 20 disclosed exporters; approximately #10 if Kaida group is consolidated",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_china_kazakhstan_frozen_potato_ranking_h_rank_note",
+            "label": "Note under the rank",
+            "name": "rank_note",
+            "type": "text",
+            "default_value": "Rank / position",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-china-kazakhstan-frozen-potato-ranking-h"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -2,13 +2,13 @@
 /**
  * Brings a design's typefaces along with its colours.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Font_Utils;
 use WP_Theme_JSON_Resolver;
@@ -108,7 +108,7 @@ final class DesignFonts {
 		);
 
 		if ( ! is_dir( $root ) ) {
-			$result['skipped'][] = __( 'That design is not on this site.', 'wow-signal' );
+			$result['skipped'][] = __( 'That design is not on this site.', 'qwerty-soft-signal' );
 
 			return $result;
 		}
@@ -119,7 +119,7 @@ final class DesignFonts {
 		$base    = self::font_dir();
 
 		if ( null === $base ) {
-			$result['skipped'][] = __( 'The uploads folder is not writable, so no fonts were imported.', 'wow-signal' );
+			$result['skipped'][] = __( 'The uploads folder is not writable, so no fonts were imported.', 'qwerty-soft-signal' );
 
 			return $result;
 		}
@@ -131,7 +131,7 @@ final class DesignFonts {
 
 			if ( array() === $faces ) {
 				/* translators: %s: font family name. */
-				$result['skipped'][] = sprintf( __( '%s could not be fetched from Google Fonts.', 'wow-signal' ), $name );
+				$result['skipped'][] = sprintf( __( '%s could not be fetched from Google Fonts.', 'qwerty-soft-signal' ), $name );
 				continue;
 			}
 
@@ -158,7 +158,7 @@ final class DesignFonts {
 
 			if ( null === $entry ) {
 				/* translators: %s: font family name. */
-				$result['skipped'][] = sprintf( __( '%s could not be registered in the Font Library.', 'wow-signal' ), $name );
+				$result['skipped'][] = sprintf( __( '%s could not be registered in the Font Library.', 'qwerty-soft-signal' ), $name );
 				continue;
 			}
 
@@ -519,7 +519,7 @@ final class DesignFonts {
 
 		if ( ! self::ensure_dir( $dir ) ) {
 			/* translators: %s: directory path. */
-			$skipped[] = sprintf( __( 'Could not create %s.', 'wow-signal' ), $dir );
+			$skipped[] = sprintf( __( 'Could not create %s.', 'qwerty-soft-signal' ), $dir );
 
 			return array();
 		}
@@ -688,7 +688,7 @@ final class DesignFonts {
 
 		if ( self::$written >= self::MAX_FILES ) {
 			/* translators: %d: number of files. */
-			$skipped[] = sprintf( __( 'Stopped after %d font files.', 'wow-signal' ), self::MAX_FILES );
+			$skipped[] = sprintf( __( 'Stopped after %d font files.', 'qwerty-soft-signal' ), self::MAX_FILES );
 
 			return false;
 		}
@@ -697,14 +697,14 @@ final class DesignFonts {
 
 		if ( null === $body || strlen( $body ) > self::MAX_FONT_BYTES || ! str_starts_with( $body, 'wOF2' ) ) {
 			/* translators: %s: file name. */
-			$skipped[] = sprintf( __( '%s was not a usable font file.', 'wow-signal' ), basename( $dest ) );
+			$skipped[] = sprintf( __( '%s was not a usable font file.', 'qwerty-soft-signal' ), basename( $dest ) );
 
 			return false;
 		}
 
 		if ( false === file_put_contents( $dest, $body ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Writing a verified font file into the site's own uploads folder.
 			/* translators: %s: file name. */
-			$skipped[] = sprintf( __( '%s could not be written.', 'wow-signal' ), basename( $dest ) );
+			$skipped[] = sprintf( __( '%s could not be written.', 'qwerty-soft-signal' ), basename( $dest ) );
 
 			return false;
 		}
@@ -803,7 +803,7 @@ final class DesignFonts {
 
 		if ( ! self::ensure_dir( $dir ) ) {
 			/* translators: %s: directory path. */
-			$skipped[] = sprintf( __( 'Could not create %s.', 'wow-signal' ), $dir );
+			$skipped[] = sprintf( __( 'Could not create %s.', 'qwerty-soft-signal' ), $dir );
 
 			return $out;
 		}
@@ -820,7 +820,7 @@ final class DesignFonts {
 			if ( ! file_exists( $dest ) ) {
 				if ( ! copy( $face['path'], $dest ) ) {
 					/* translators: %s: file name. */
-					$skipped[] = sprintf( __( '%s could not be written.', 'wow-signal' ), $file );
+					$skipped[] = sprintf( __( '%s could not be written.', 'qwerty-soft-signal' ), $file );
 					continue;
 				}
 

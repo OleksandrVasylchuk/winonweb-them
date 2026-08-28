@@ -1,7 +1,7 @@
 {
 	"domain": "messages",
-	"translation-revision-date": "2026-08-21T17:04:47+0000",
-	"generator": "wow-signal/make-mo.mjs",
+	"translation-revision-date": "2026-08-28T12:01:02+0000",
+	"generator": "qwerty-soft-signal/make-mo.mjs",
 	"locale_data": {
 		"messages": {
 			"": {

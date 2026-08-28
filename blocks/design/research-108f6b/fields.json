@@ -1,0 +1,61 @@
+{
+    "key": "group_qs_design_research_108f6b",
+    "title": "Инструменты решений",
+    "fields": [
+        {
+            "key": "field_qs_research_108f6b_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Практические инструменты, которые нужно построить",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_108f6b_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Эти инструменты превратят экспертизу в полезные ресурсы для импортеров, экспортеров, брокеров и торговых команд перед котировкой, отгрузкой или входом на рынок.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_108f6b_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_research_108f6b_row_tool_name",
+                    "label": "Tool name",
+                    "name": "tool_name",
+                    "type": "text",
+                    "default_value": "Supplier Verification Checklist",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_research_108f6b_row_description",
+                    "label": "What the tool does",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Практический чек-лист для оценки заводов, экспортеров, документов, compliance и коммерческой надежности.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-108f6b"
+            }
+        ]
+    ],
+    "active": true
+}

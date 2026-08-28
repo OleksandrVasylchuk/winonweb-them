@@ -1,113 +1,261 @@
 /**
  * Design import screen.
  *
- * Uses WordPress admin colour variables where they exist so the screen follows
- * whichever admin colour scheme the user has chosen.
+ * One surface, three depths: the page ground, the panels that sit on it, and
+ * the insets inside those panels. Everything else — accent bars, tinted
+ * gradients, extra borders — was noise competing with the one thing this
+ * screen exists to make obvious, which is what happens when you press the
+ * button. Colour is spent on state (chosen, running, wrong, destructive) and
+ * on nothing else.
+ *
+ * The palette is the light variation's, which the contrast audit already
+ * clears against white; the dark palette's accent is 1.6:1 on an admin
+ * background and would fail here.
  */
+
+.qs-import {
+	--qs-admin-accent: #2b2bd9;
+	--qs-admin-accent-deep: #1e1ea8;
+	--qs-admin-accent-wash: #eeeefc;
+	--qs-admin-ink: #212121;
+	--qs-admin-line: #dedfe0;
+	--qs-admin-line-strong: #c9ced6;
+	--qs-admin-muted: #4e4b66;
+	--qs-admin-paper: #fff;
+	--qs-admin-soft: #f4f4f4;
+	--qs-admin-warn-ink: #8a4b05;
+	--qs-admin-warn-wash: #fdf5e7;
+	--qs-admin-danger: #b32d2e;
+	--qs-admin-radius: 12px;
+	--qs-admin-radius-sm: 8px;
+	--qs-admin-shadow: 0 1px 2px rgba(10, 10, 24, 0.04), 0 8px 24px -18px rgba(10, 10, 24, 0.45);
+	--qs-admin-shadow-lift: 0 2px 4px rgba(10, 10, 24, 0.06), 0 18px 36px -24px rgba(10, 10, 24, 0.5);
+
+	/*
+	 * The screen takes the window it is given. Every panel here is a grid of
+	 * cards — designs, pages, routes, the two-pane preview — and each one gets
+	 * a column back at every extra hundred pixels. Only the running text keeps
+	 * a measure of its own, further down: a paragraph is not more readable for
+	 * being sixteen hundred pixels wide.
+	 */
+	max-width: none;
+	padding-right: 2rem;
+}
+
+/* --- masthead --- */
 
 /*
- * The screen carries the theme's identity rather than looking like a settings
- * page that happens to be installed. Colours are the light variation's, which
- * the contrast audit already clears against white — the dark palette's accent
- * is 1.6:1 on an admin background and would fail here.
+ * The masthead wears the studio's own colours rather than a second palette
+ * invented for the admin: #2B2BD9 is the blue on qwerty-soft.com and the
+ * theme's own `accent`, #212121 its ink. A tool built in-house should look
+ * like the place that built it.
  */
-.wow-import {
-	--wow-admin-accent: #0e6f85;
-	--wow-admin-ink: #0a0a18;
-	--wow-admin-line: #dcdcde;
-	--wow-admin-muted: #50575e;
-	--wow-admin-paper: #fff;
-	--wow-admin-soft: #f6f7f7;
-	--wow-admin-warn-ink: #8a4b05;
-}
-
-.wow-import__masthead {
+.qs-import__masthead {
 	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 1.5rem 3rem;
+	align-items: end;
 	max-width: none;
 	margin: 1.25rem 0 1.5rem;
-	padding: 1.6rem 1.75rem;
+	padding: 2.15rem 2.25rem 2rem;
 	overflow: hidden;
-	color: #f2f5fb;
+	color: #f6f6fb;
 	background:
-		radial-gradient(120% 140% at 8% 0%, rgba(34, 211, 238, 0.28), transparent 55%),
-		linear-gradient(135deg, #0a0a18, #1b1b3a 62%, #12122b);
-	border-radius: 10px;
+		radial-gradient(75% 130% at 100% 0%, rgba(43, 43, 217, 0.55), transparent 62%),
+		radial-gradient(60% 120% at 0% 100%, rgba(24, 99, 220, 0.35), transparent 60%),
+		#212121;
+	border-radius: var(--qs-admin-radius);
+	box-shadow: var(--qs-admin-shadow);
 }
 
-.wow-import__masthead > h1 {
-	margin: 0.35rem 0 0.5rem;
-	padding: 0;
-	color: var(--wow-admin-paper);
-	font-size: 26px;
-	font-weight: 600;
-	line-height: 1.15;
+.qs-import__masthead-body {
+	min-width: 0;
 }
 
-.wow-import__brand {
-	display: flex;
-	align-items: center;
-	gap: 0.55rem;
+/* The three steps this screen runs on, said before it asks for anything. */
+.qs-import__masthead-steps {
+	display: grid;
+	gap: 0.75rem;
 	margin: 0;
-	color: #22d3ee;
-	font-size: 11px;
-	font-weight: 700;
-	letter-spacing: 0.16em;
-	text-transform: uppercase;
+	padding: 0;
+	list-style: none;
+	counter-reset: none;
 }
 
-.wow-import__mark {
+.qs-import__masthead-steps > li {
+	display: flex;
+	gap: 0.7rem;
+	align-items: baseline;
+	margin: 0;
+}
+
+.qs-import__masthead-num {
+	flex: none;
 	display: grid;
 	place-items: center;
-	width: 26px;
-	height: 26px;
-	color: #0a0a18;
-	background: #22d3ee;
+	width: 22px;
+	height: 22px;
+	color: #f6f6fb;
+	background: rgba(246, 246, 251, 0.14);
 	border-radius: 50%;
-	font-size: 13px;
-	letter-spacing: 0;
+	font-size: 11px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
 }
 
-.wow-import__masthead .wow-import__lede {
-	margin: 0;
-	color: #cdd6e6;
+.qs-import__masthead-step {
+	display: grid;
+	gap: 0.1rem;
+	font-size: 12px;
+	line-height: 1.45;
 }
 
-.wow-import__lede {
-	max-width: none;
-	font-size: 14px;
+.qs-import__masthead-step > strong {
+	color: #f6f6fb;
+	font-weight: 600;
 }
 
-@media (prefers-reduced-motion: no-preference) {
+.qs-import__masthead-step > span {
+	color: rgba(246, 246, 251, 0.62);
+}
 
-	.wow-import__step,
-	.wow-import__section {
-		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+@media (max-width: 900px) {
+
+	.qs-import__masthead {
+		grid-template-columns: 1fr;
+		align-items: start;
 	}
 }
 
-.wow-import__settings {
-	max-width: none;
-	margin: 1rem 0 1.5rem;
-	padding: 0 1.5rem;
-	background: var(--wow-admin-paper);
-	border: 1px solid var(--wow-admin-line);
-	border-radius: 6px;
-	box-shadow: 0 1px 2px rgba(10, 10, 24, 0.05);
+/*
+ * A hairline of the accent along the top edge. It is the only thing tying the
+ * masthead to the panels below it, and it costs one pixel.
+ */
+.qs-import__masthead::after {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto;
+	height: 2px;
+	background: linear-gradient(90deg, #2b2bd9, #1863dc 55%, rgba(24, 99, 220, 0));
 }
 
-.wow-import__settings > summary {
+.qs-import__masthead > h1 {
+	margin: 0.55rem 0 0.6rem;
+	padding: 0;
+	color: var(--qs-admin-paper);
+	font-size: 30px;
+	font-weight: 600;
+	line-height: 1.1;
+	letter-spacing: -0.02em;
+}
+
+.qs-import__brand {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin: 0;
+	color: rgba(246, 246, 251, 0.72);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+}
+
+.qs-import__mark {
+	display: grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	color: #f6f6fb;
+	background: linear-gradient(135deg, #2b2bd9, #1863dc);
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 700;
+	letter-spacing: 0;
+}
+
+.qs-import__masthead .qs-import__lede {
+	margin: 0;
+	max-width: 54ch;
+	color: rgba(246, 246, 251, 0.7);
+	line-height: 1.6;
+}
+
+.qs-import__lede {
+	max-width: 62ch;
+	font-size: 14px;
+}
+
+/* --- connection settings --- */
+
+.qs-import__settings {
+	max-width: none;
+	margin: 0 0 1.5rem;
+	padding: 0 1.5rem;
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius);
+	box-shadow: var(--qs-admin-shadow);
+}
+
+.qs-import__settings > summary {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 0.6rem;
-	padding: 0.9rem 0;
+	padding: 1rem 0;
 	min-height: 24px;
+	color: var(--qs-admin-ink);
+	font-size: 14px;
 	font-weight: 600;
 	cursor: pointer;
 }
 
-.wow-import__settings[open] {
+.qs-import__settings > summary::marker {
+	color: var(--qs-admin-line-strong);
+}
+
+.qs-import__settings[open] {
 	padding-bottom: 0.5rem;
+}
+
+.qs-import__settings[open] > summary {
+	margin-bottom: 0.25rem;
+	border-bottom: 1px solid var(--qs-admin-line);
+}
+
+.qs-import__settings .form-table th {
+	width: 15rem;
+	padding-left: 0;
+	color: var(--qs-admin-ink);
+	vertical-align: top;
+}
+
+.qs-import__settings .form-table td {
+	padding-right: 0;
+}
+
+.qs-import__settings .description {
+	max-width: 68ch;
+	color: var(--qs-admin-muted);
+}
+
+.qs-import__settings code {
+	background: var(--qs-admin-soft);
+	border-radius: 4px;
+	font-size: 12px;
+}
+
+@media (max-width: 782px) {
+
+	.qs-import__settings .form-table th,
+	.qs-import__settings .form-table td {
+		display: block;
+		width: auto;
+		padding-left: 0;
+		padding-right: 0;
+	}
 }
 
 /*
@@ -118,178 +266,495 @@
  * from list prices and the note under them says so — that sentence is not
  * decoration and should not be dropped to save a line.
  */
-.wow-import__meter {
+.qs-import__meter {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: baseline;
-	gap: 0.35rem 1.4rem;
+	gap: 0.35rem 1.6rem;
 	margin: 0.9rem 0;
-	padding: 0.7rem 0.9rem;
-	background: var(--wow-admin-soft);
-	border: 1px solid var(--wow-admin-line);
-	border-left: 3px solid var(--wow-admin-accent);
-	border-radius: 4px;
+	padding: 0.8rem 1rem;
+	background: var(--qs-admin-soft);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
 	font-size: 13px;
 }
 
-.wow-import__meter-figure > strong {
+.qs-import__meter-figure > strong {
 	font-size: 15px;
 	font-variant-numeric: tabular-nums;
 }
 
-.wow-import__meter-figure.is-warning > strong {
-	color: var(--wow-admin-warn-ink);
+.qs-import__meter-figure.is-warning > strong {
+	color: var(--qs-admin-warn-ink);
 }
 
-.wow-import__meter-note {
+.qs-import__meter-note {
 	flex-basis: 100%;
-	color: var(--wow-admin-muted);
+	color: var(--qs-admin-muted);
 	font-size: 12px;
 }
 
 /* Whether a key is set, said plainly rather than left to be guessed. */
-.wow-import__badge {
+.qs-import__badge {
 	display: inline-flex;
 	align-items: center;
-	padding: 0.15rem 0.6rem;
+	padding: 0.2rem 0.65rem;
 	border-radius: 999px;
 	font-size: 11px;
 	font-weight: 700;
 	letter-spacing: 0.02em;
 }
 
-.wow-import__badge.is-on {
+.qs-import__badge.is-on {
 	color: #05502f;
 	background: #d7f5e5;
 }
 
-.wow-import__badge.is-off {
+.qs-import__badge.is-off {
 	color: #4a4a52;
 	background: #ebebef;
+}
+
+/* A quieter label than the badge: a fact about a row, not a status. */
+.qs-import__tag {
+	align-self: flex-start;
+	margin-top: 0.15rem;
+	padding: 0.1rem 0.55rem;
+	color: var(--qs-admin-warn-ink);
+	background: var(--qs-admin-warn-wash);
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
 }
 
 /*
  * One width for every control on the screen. WordPress's own .regular-text is
  * a fixed 25em, which looks lost on a wide screen and overflows a narrow one.
  */
-.wow-import__field {
+.qs-import__field {
 	display: block;
 	width: 100%;
 	max-width: none;
-	min-height: 36px;
-	padding: 0.35rem 0.6rem;
-	border: 1px solid #8c8f94;
-	border-radius: 4px;
-	background: var(--wow-admin-paper);
+	min-height: 38px;
+	padding: 0.4rem 0.7rem;
+	border: 1px solid var(--qs-admin-line-strong);
+	border-radius: var(--qs-admin-radius-sm);
+	background: var(--qs-admin-paper);
 	font-size: 14px;
 	line-height: 1.5;
 }
 
-.wow-import__field:focus {
-	border-color: var(--wow-admin-accent);
-	outline: 2px solid var(--wow-admin-accent);
+.qs-import__field:focus {
+	border-color: var(--qs-admin-accent);
+	outline: 2px solid var(--qs-admin-accent);
 	outline-offset: 1px;
 	box-shadow: none;
 }
 
-.wow-import__settings .form-table th {
-	width: 15rem;
-	padding-left: 0;
-	vertical-align: top;
-}
+/* --- steps --- */
 
-.wow-import__settings .form-table td {
-	padding-right: 0;
-}
-
-@media (max-width: 782px) {
-
-	.wow-import__settings .form-table th,
-	.wow-import__settings .form-table td {
-		display: block;
-		width: auto;
-		padding-left: 0;
-		padding-right: 0;
-	}
-}
-
-.wow-import__step {
+.qs-import__step {
 	position: relative;
 	max-width: none;
 	margin: 0 0 1.5rem;
-	padding: 1.35rem 1.6rem;
-	background: var(--wow-admin-paper);
-	border: 1px solid var(--wow-admin-line);
-	border-left: 3px solid var(--wow-admin-accent);
-	border-radius: 6px;
-	box-shadow: 0 1px 2px rgba(10, 10, 24, 0.05);
+	padding: 1.6rem 1.75rem;
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius);
+	box-shadow: var(--qs-admin-shadow);
 }
 
-.wow-import__step > h2 {
-	margin-top: 0;
-	color: var(--wow-admin-ink);
-	font-size: 15px;
+.qs-import__step > h2 {
+	margin: 0 0 0.9rem;
+	padding: 0;
+	color: var(--qs-admin-ink);
+	font-size: 17px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
 }
 
-.wow-import__hint {
+.qs-import__hint {
+	max-width: 72ch;
+	color: var(--qs-admin-muted);
+	line-height: 1.6;
+}
+
+/* --- the live region --- */
+
+.qs-import__status {
 	max-width: none;
-	color: #50575e;
-}
-
-.wow-import__status {
-	max-width: none;
-	margin: 0 0 1rem;
-	padding: 0.65rem 0.95rem;
+	margin: 0 0 1.25rem;
+	padding: 0.75rem 1.1rem;
 	min-height: 1.2em;
-	background: #eef7fa;
-	border-left: 4px solid var(--wow-admin-accent);
-	border-radius: 0 4px 4px 0;
+	color: var(--qs-admin-ink);
+	background: var(--qs-admin-accent-wash);
+	border: 1px solid rgba(14, 111, 133, 0.22);
+	border-radius: var(--qs-admin-radius-sm);
 	font-size: 13px;
 }
 
-.wow-import__status:empty {
+.qs-import__status:empty {
 	display: none;
 }
 
-.wow-import__status.is-error {
-	background: #fcf0f1;
-	border-left-color: #d63638;
+.qs-import__status.is-error {
+	color: #8a1f20;
+	background: #fdf1f1;
+	border-color: rgba(179, 45, 46, 0.28);
+}
+
+/*
+ * What the archive turned out to be, when it is not what was expected. Amber
+ * rather than red: nothing has gone wrong, the design is simply not one the
+ * structural converter can read, and the sentence explains what to do instead.
+ */
+.qs-import__verdict {
+	max-width: 72ch;
+	margin: 0 0 1rem;
+	padding: 0.85rem 1.1rem;
+	color: var(--qs-admin-warn-ink);
+	background: var(--qs-admin-warn-wash);
+	border: 1px solid rgba(138, 75, 5, 0.22);
+	border-radius: var(--qs-admin-radius-sm);
+	font-size: 13px;
+	line-height: 1.6;
 }
 
 /* --- upload --- */
 
-.wow-import__label {
+.qs-import__label {
 	display: block;
-	margin-bottom: 0.4rem;
+	margin-bottom: 0.45rem;
+	color: var(--qs-admin-ink);
 	font-weight: 600;
 }
 
-.wow-import__file {
+.qs-import__file {
 	display: block;
+	width: 100%;
+	max-width: 34rem;
 	margin-bottom: 0.9rem;
+	padding: 0.8rem;
+	background: var(--qs-admin-soft);
+	border: 1px dashed var(--qs-admin-line-strong);
+	border-radius: var(--qs-admin-radius-sm);
+	font-size: 13px;
+	cursor: pointer;
+}
+
+.qs-import__file:focus-visible {
+	outline: 2px solid var(--qs-admin-accent);
+	outline-offset: 2px;
 }
 
 /* --- one-press build --- */
 
-.wow-import__auto {
-	margin: 1rem 0 1.5rem;
-	padding: 1.1rem 1.25rem;
-	background: linear-gradient(135deg, #f3f9fb, #eef3fa);
-	border: 1px solid var(--wow-admin-accent);
-	border-radius: 6px;
+.qs-import__auto {
+	margin: 1.25rem 0 1.5rem;
+	padding: 1.35rem 1.5rem;
+	background: var(--qs-admin-accent-wash);
+	border: 1px solid rgba(14, 111, 133, 0.28);
+	border-radius: var(--qs-admin-radius);
 }
 
-.wow-import__auto > h3 {
-	margin: 0 0 0.35rem;
-	color: var(--wow-admin-ink);
-	font-size: 15px;
+.qs-import__auto > h3 {
+	margin: 0 0 0.4rem;
+	color: var(--qs-admin-ink);
+	font-size: 16px;
+	font-weight: 600;
 }
 
-.wow-import__auto .wow-import__hint {
+.qs-import__auto .qs-import__hint {
 	margin-top: 0;
 }
 
-.wow-import__language {
+.qs-import__auto .button-hero {
+	border-radius: var(--qs-admin-radius-sm);
+}
+
+.qs-import__language {
+	min-height: 32px;
+}
+
+/* --- how careful the build is --- */
+
+/*
+ * One decision, three cards. This replaced four checkboxes whose combinations
+ * a person had to work out for themselves — "correct each section" plus "check
+ * the rendered result" plus "run on the server" is not three questions, it is
+ * one question about how much care to spend, and the switches follow from it.
+ */
+.qs-import__modes {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+	gap: 0.75rem;
+	margin: 1rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* The way to a page the moment it exists, on the row that says it is done. */
+.qs-import__step-links {
+	display: inline-flex;
+	gap: 0.6rem;
+	margin-left: auto;
+	padding-left: 0.6rem;
+}
+
+.qs-import__step-link {
+	color: var(--qs-admin-accent);
+	font-size: 12px;
+	text-decoration: none;
+}
+
+.qs-import__step-link:hover,
+.qs-import__step-link:focus {
+	text-decoration: underline;
+}
+
+/* How many sections a repeated note covers, said once at the end of it. */
+.qs-import__note-count {
+	margin-left: 0.4rem;
+	padding: 0.05rem 0.4rem;
+	color: var(--qs-admin-muted);
+	background: var(--qs-admin-soft);
+	border-radius: 999px;
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+/* --- exactly which pages a build will make --- */
+
+.qs-import__planned-wrap {
+	margin: 0.6rem 0 0;
+	padding: 0.6rem 0.85rem;
+	background: var(--qs-admin-soft);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
+}
+
+.qs-import__planned-wrap > summary {
+	color: var(--qs-admin-ink);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.qs-import__planned {
+	margin: 0.55rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.qs-import__planned-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.2rem 0.75rem;
+	align-items: baseline;
+	padding: 0.3rem 0;
+	border-top: 1px solid var(--qs-admin-line);
+	font-size: 12px;
+}
+
+.qs-import__planned-row:first-child {
+	border-top: 0;
+}
+
+.qs-import__planned-title {
+	flex: 1 1 16rem;
+	color: var(--qs-admin-ink);
+}
+
+.qs-import__planned-slug {
+	flex: none;
+	padding: 0.05rem 0.4rem;
+	color: var(--qs-admin-accent-deep);
+	background: var(--qs-admin-accent-wash);
+	border-radius: 4px;
+	font-size: 11px;
+}
+
+.qs-import__planned-facts {
+	flex: none;
+	color: var(--qs-admin-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.qs-import__planned-row.is-clash .qs-import__planned-slug {
+	color: var(--qs-admin-warn-ink);
+	background: var(--qs-admin-warn-wash);
+}
+
+.qs-import__planned-clash {
+	color: var(--qs-admin-warn-ink);
+	font-weight: 600;
+}
+
+.qs-import__planned-versions {
+	display: flex;
+	flex: 1 1 100%;
+	flex-wrap: wrap;
+	gap: 0.35rem 0.6rem;
+	align-items: center;
+	padding-top: 0.15rem;
+}
+
+.qs-import__planned-pick {
+	max-width: 100%;
+	font-size: 11px;
+}
+
+/* --- which application in the archive --- */
+
+.qs-import__projects-wrap {
+	margin: 0.6rem 0 1rem;
+}
+
+.qs-import__projects {
+	display: grid;
+	gap: 0.5rem;
+	margin: 0.6rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.qs-import__project {
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
+}
+
+.qs-import__project.is-chosen {
+	border-color: var(--qs-admin-accent);
+	box-shadow: inset 3px 0 0 var(--qs-admin-accent);
+}
+
+.qs-import__project > label {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.65rem;
+	width: 100%;
+	padding: 0.75rem 0.9rem;
+	cursor: pointer;
+}
+
+.qs-import__project-body {
+	display: grid;
+	gap: 0.15rem;
+}
+
+.qs-import__project-name {
+	color: var(--qs-admin-ink);
+	font-weight: 600;
+}
+
+.qs-import__project-meta {
+	color: var(--qs-admin-muted);
+	font-size: 12px;
+}
+
+.qs-import__project-dir {
+	color: var(--qs-admin-muted);
+	font-family: Consolas, Monaco, monospace;
+	font-size: 11px;
+	overflow-wrap: anywhere;
+}
+
+.qs-import__mode {
+	display: flex;
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
+}
+
+.qs-import__mode > label {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.65rem;
+	width: 100%;
+	padding: 0.9rem 1rem;
+	cursor: pointer;
+}
+
+.qs-import__mode input {
+	margin: 0.2rem 0 0;
+	flex: 0 0 auto;
+}
+
+.qs-import__mode-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	min-width: 0;
+}
+
+.qs-import__mode-title {
+	color: var(--qs-admin-ink);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.qs-import__mode-line {
+	color: var(--qs-admin-muted);
+	font-size: 12px;
+	line-height: 1.55;
+}
+
+.qs-import__mode-cost {
+	margin-top: 0.15rem;
+	color: var(--qs-admin-accent-deep);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	font-variant-numeric: tabular-nums;
+}
+
+.qs-import__mode.is-chosen {
+	background: var(--qs-admin-accent-wash);
+	border-color: var(--qs-admin-accent);
+	box-shadow: inset 0 0 0 1px var(--qs-admin-accent);
+}
+
+.qs-import__mode.is-unavailable {
+	opacity: 0.55;
+}
+
+.qs-import__mode.is-unavailable > label {
+	cursor: not-allowed;
+}
+
+.qs-import__mode:focus-within {
+	outline: 2px solid var(--qs-admin-accent);
+	outline-offset: 2px;
+}
+
+/* The switches that are not part of that decision, on one quiet line. */
+.qs-import__options {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.4rem 1.4rem;
+	margin: 1rem 0 0;
+	padding: 0.65rem 0.9rem;
+	background: var(--qs-admin-soft);
+	border-radius: var(--qs-admin-radius-sm);
+	font-size: 13px;
+}
+
+.qs-import__option {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.qs-import__option label {
+	color: var(--qs-admin-muted);
+	cursor: pointer;
+}
+
+.qs-import__option select {
 	min-height: 30px;
 }
 
@@ -297,17 +762,17 @@
  * Destructive, so it reads as destructive — but not hidden. Someone who wants
  * to try a different design has to be able to find the way back at a glance.
  */
-.wow-import__danger {
-	color: #b32d2e;
-	border-color: #b32d2e;
-	background: var(--wow-admin-paper);
+.qs-import__danger {
+	color: var(--qs-admin-danger);
+	border-color: rgba(179, 45, 46, 0.5);
+	background: var(--qs-admin-paper);
 }
 
-.wow-import__danger:hover:not(:disabled),
-.wow-import__danger:focus:not(:disabled) {
-	color: var(--wow-admin-paper);
-	background: #b32d2e;
-	border-color: #b32d2e;
+.qs-import__danger:hover:not(:disabled),
+.qs-import__danger:focus:not(:disabled) {
+	color: var(--qs-admin-paper);
+	background: var(--qs-admin-danger);
+	border-color: var(--qs-admin-danger);
 }
 
 /* --- clean up a previous import --- */
@@ -316,41 +781,50 @@
  * Sits above the upload step because it is about the site, not about any
  * design: what a previous import left behind, and the way to take it out.
  */
-.wow-import__cleanup {
+.qs-import__cleanup {
 	max-width: none;
-	margin: 1rem 0 1.5rem;
-	padding: 1.1rem 1.25rem;
-	color: var(--wow-admin-ink);
-	background: var(--wow-admin-paper);
-	border: 1px solid var(--wow-admin-line);
-	border-left: 4px solid var(--wow-admin-accent);
-	border-radius: 6px;
+	margin: 0 0 1.5rem;
+	padding: 1.35rem 1.5rem;
+	color: var(--qs-admin-ink);
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius);
+	box-shadow: var(--qs-admin-shadow);
 }
 
-.wow-import__cleanup > h3 {
-	margin: 0 0 0.35rem;
-	color: var(--wow-admin-ink);
-	font-size: 15px;
+.qs-import__cleanup > h3 {
+	margin: 0 0 0.45rem;
+	color: var(--qs-admin-ink);
+	font-size: 16px;
+	font-weight: 600;
 }
 
-.wow-import__cleanup > p {
+.qs-import__cleanup > p {
 	margin: 0 0 0.5rem;
+	max-width: 72ch;
 }
 
-.wow-import__cleanup .wow-import__hint {
-	color: var(--wow-admin-muted);
+.qs-import__cleanup .qs-import__hint {
+	color: var(--qs-admin-muted);
 }
 
-.wow-import__choice {
+.qs-import__choice {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 0.25rem;
-	margin: 0.4rem 0 0;
+	gap: 0.3rem;
+	margin: 0.5rem 0 0;
 }
 
-.wow-import__choice > .wow-import__hint {
-	margin: 0;
+.qs-import__choice > label {
+	font-weight: 600;
+}
+
+.qs-import__choice > .qs-import__hint {
+	/* Its own line under the label it belongs to, aligned with the label text. */
+	flex: 1 0 100%;
+	margin: 0.1rem 0 0 1.9rem;
+	font-size: 12px;
 }
 
 /*
@@ -360,290 +834,652 @@
  * network, everything inside it may do both. Somebody scanning this screen
  * should be able to see which is which without reading a word.
  */
-.wow-import__smart {
-	margin: 0.9rem 0 0;
-	padding: 0.7rem 0.9rem;
-	background: var(--wow-admin-soft);
-	border: 1px solid var(--wow-admin-line);
-	border-left: 3px solid var(--wow-admin-accent);
-	border-radius: 4px;
+.qs-import__smart {
+	margin: 1rem 0 0;
+	padding: 0.9rem 1.1rem;
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line-strong);
+	border-radius: var(--qs-admin-radius-sm);
 }
 
-.wow-import__smart > .wow-import__choice:first-child {
+.qs-import__smart > .qs-import__choice:first-child {
 	margin-top: 0;
 }
 
 /* The review pass is a refinement of the choice above it, and sits under it. */
-.wow-import__choice--nested {
-	margin-left: 1.6rem;
+.qs-import__choice--nested {
+	margin-left: 1.9rem;
 }
 
-.wow-import__estimate {
-	margin: 0.6rem 0 0;
-	color: var(--wow-admin-muted);
+.qs-import__estimate {
+	margin: 0.7rem 0 0;
+	color: var(--qs-admin-muted);
 	font-size: 13px;
 	font-variant-numeric: tabular-nums;
 }
 
-.wow-import__changes {
+.qs-import__changes {
 	margin-top: 0.3rem;
 	font-size: 12px;
 }
 
-.wow-import__changes > summary {
-	color: var(--wow-admin-muted);
+.qs-import__changes > summary {
+	color: var(--qs-admin-muted);
 	cursor: pointer;
 }
 
-.wow-import__confirm {
-	margin-top: 0.8rem;
-	padding: 0.8rem 1rem;
-	border: 1px dashed var(--wow-admin-line);
-	border-radius: 6px;
+/*
+ * Typing DELETE, right under whatever asked for it. It is rendered beside its
+ * own button on purpose — a confirmation that appears somewhere else on the
+ * page reads as a button that did nothing.
+ */
+.qs-import__confirm {
+	margin-top: 0.9rem;
+	padding: 1rem 1.1rem;
+	background: #fdf1f1;
+	border: 1px solid rgba(179, 45, 46, 0.3);
+	border-radius: var(--qs-admin-radius-sm);
 }
 
-.wow-import__confirm > label {
+.qs-import__confirm > label {
 	display: block;
+	color: #8a1f20;
 	font-weight: 600;
 }
 
-.wow-import__confirm .wow-import__actions {
+.qs-import__confirm .qs-import__actions {
 	align-items: center;
-	margin-top: 0.4rem;
+	margin-top: 0.5rem;
 }
 
-.wow-import__confirm-field {
-	width: 10rem;
+.qs-import__confirm .qs-import__hint {
+	margin-bottom: 0;
+	color: #7a4444;
+	font-size: 12px;
+}
+
+.qs-import__confirm-field {
+	width: 11rem;
 	max-width: 100%;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.12em;
 	text-transform: uppercase;
 }
 
-.wow-import__routes-wrap {
-	margin-top: 0.9rem;
+.qs-import__routes-wrap {
+	margin-top: 1rem;
 	font-size: 13px;
 }
 
-.wow-import__routes-wrap > summary {
+.qs-import__routes-wrap > summary {
 	min-height: 24px;
-	color: var(--wow-admin-accent);
+	color: var(--qs-admin-accent-deep);
+	font-weight: 600;
 	cursor: pointer;
 }
 
-.wow-import__routes {
-	margin: 0.6rem 0 0;
-	max-width: none;
+.qs-import__routes {
+	margin: 0.7rem 0 0;
+	max-width: 74ch;
 }
 
-.wow-import__routes dt {
-	margin-top: 0.6rem;
+.qs-import__routes dt {
+	margin-top: 0.7rem;
+	color: var(--qs-admin-ink);
 	font-weight: 600;
-	color: var(--wow-admin-ink);
 }
 
-.wow-import__routes dd {
+.qs-import__routes dd {
 	margin: 0.15rem 0 0;
-	color: var(--wow-admin-muted);
+	color: var(--qs-admin-muted);
+	line-height: 1.6;
 }
 
-.wow-import__built {
+.qs-import__built {
 	margin: 0.6rem 0 0 1.2rem;
 	font-size: 13px;
 }
 
-.wow-import__built li {
+.qs-import__built li {
 	margin-bottom: 0.2rem;
 }
 
-/* --- pages --- */
+/* --- the running account --- */
 
-.wow-import__pages {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+/*
+ * What the importer is doing, line by line. Sits directly under the live
+ * region because it answers the same question at a different length: the
+ * status line says what just happened, this says what has happened since the
+ * archive went in.
+ */
+.qs-import__log {
+	margin: 0 0 1.25rem;
+	padding: 0.75rem 1.1rem;
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
+	font-size: 13px;
+}
+
+.qs-import__log.is-live {
+	border-color: rgba(14, 111, 133, 0.35);
+	box-shadow: inset 3px 0 0 var(--qs-admin-accent);
+}
+
+.qs-import__log > summary {
+	min-height: 24px;
+	color: var(--qs-admin-ink);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.qs-import__log-lines {
+	margin: 0.6rem 0 0;
+	padding: 0;
+	max-height: 16rem;
+	overflow-y: auto;
+	list-style: none;
+}
+
+.qs-import__log-line {
+	display: flex;
 	gap: 0.6rem;
-	margin: 1rem 0 0;
+	padding: 0.25rem 0;
+	border-top: 1px solid var(--qs-admin-line);
+}
+
+.qs-import__log-line:first-child {
+	border-top: 0;
+}
+
+.qs-import__log-stage {
+	flex: 0 0 4.5rem;
+	color: var(--qs-admin-muted);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	line-height: 1.7;
+}
+
+.qs-import__log-line.is-render .qs-import__log-stage,
+.qs-import__log-line.is-read .qs-import__log-stage {
+	color: var(--qs-admin-accent-deep);
+}
+
+.qs-import__log-text {
+	flex: 1 1 auto;
+	color: var(--qs-admin-ink);
+	line-height: 1.6;
+}
+
+/* --- the owner's own instructions --- */
+
+.qs-import__notes {
+	margin: 0 0 1.25rem;
+	padding: 0.85rem 1.1rem;
+	background: var(--qs-admin-soft);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
+}
+
+.qs-import__notes > summary {
+	min-height: 24px;
+	color: var(--qs-admin-ink);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.qs-import__notes-field {
+	margin-top: 0.6rem;
+	min-height: 6rem;
+	font-family: inherit;
+	line-height: 1.6;
+	resize: vertical;
+}
+
+/* --- a design that is an application --- */
+
+/*
+ * Kept visibly apart from the build panel below it. Everything there is
+ * offline and repeatable; this is a model reading source code, one call per
+ * page, and it should not look like another checkbox on the same form.
+ */
+.qs-import__source {
+	margin: 1.25rem 0 1.5rem;
+	padding: 1.35rem 1.5rem;
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line-strong);
+	border-radius: var(--qs-admin-radius);
+	box-shadow: var(--qs-admin-shadow);
+}
+
+.qs-import__source > h3 {
+	margin: 0 0 0.4rem;
+	color: var(--qs-admin-ink);
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.qs-import__source-routes {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
+	gap: 0.6rem;
+	margin: 1rem 0;
 	padding: 0;
 	list-style: none;
 }
 
-.wow-import__page {
+.qs-import__source-route {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.7rem 0.9rem;
+	background: var(--qs-admin-soft);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
+}
+
+.qs-import__source-route.is-read {
+	background: var(--qs-admin-accent-wash);
+	border-color: rgba(14, 111, 133, 0.35);
+}
+
+.qs-import__source-route-main {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: 0.15rem;
+	min-width: 0;
+}
+
+.qs-import__source-route .button {
+	flex: 0 0 auto;
+	border-radius: var(--qs-admin-radius-sm);
+}
+
+.qs-import__tag.is-done {
+	color: #05502f;
+	background: #d7f5e5;
+}
+
+/* --- pages --- */
+
+.qs-import__pages {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+	gap: 0.85rem;
+	margin: 1.1rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+/*
+ * The card is the list item. Everything inside it stacks in reading order —
+ * name, where it came from, how much of it there is — and the controls sit on
+ * a footer at the bottom, so a row of cards has one straight line of buttons
+ * across it however long the titles above them run.
+ */
+.qs-import__page-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.95rem 1.05rem 0.85rem;
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
+}
+
+.qs-import__page-item:hover {
+	border-color: var(--qs-admin-line-strong);
+	box-shadow: var(--qs-admin-shadow-lift);
+}
+
+.qs-import__page-item.is-active {
+	background: var(--qs-admin-accent-wash);
+	border-color: var(--qs-admin-accent);
+	box-shadow: inset 0 0 0 1px var(--qs-admin-accent);
+}
+
+/* The title is the surface that chooses the page; it fills the card's top. */
+.qs-import__page {
 	display: flex;
 	flex-direction: column;
 	gap: 0.2rem;
 	width: 100%;
-	min-height: 44px;
-	padding: 0.7rem 0.9rem;
+	padding: 0;
 	text-align: left;
-	background: var(--wow-admin-soft);
-	border: 1px solid #dcdcde;
-	border-radius: 4px;
+	color: var(--qs-admin-ink);
+	background: none;
+	border: 0;
 	cursor: pointer;
 }
 
-.wow-import__page:hover {
-	background: #f0f0f1;
-	border-color: #8c8f94;
+.qs-import__page:hover .qs-import__page-title {
+	color: var(--qs-admin-accent);
 }
 
-.wow-import__page.is-active {
-	background: #eef7fa;
-	border-color: var(--wow-admin-accent);
-	box-shadow: inset 0 0 0 1px var(--wow-admin-accent);
+.qs-import__page:focus-visible {
+	outline: 2px solid var(--qs-admin-accent);
+	outline-offset: 3px;
+	border-radius: 3px;
 }
 
-.wow-import__page:focus-visible {
-	outline: 2px solid var(--wow-admin-accent);
+.qs-import__page-title {
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+}
+
+/*
+ * Where the page sits in the archive: needed to tell two "index.html" apart,
+ * never the first thing to read. The full path is on the row's title attribute.
+ */
+.qs-import__page-path {
+	color: var(--qs-admin-muted);
+	font-size: 11px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+	opacity: 0.85;
+}
+
+/* An already-unpacked design, and a route inside an app: a card that is all button. */
+.qs-import__design {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	width: 100%;
+	min-height: 44px;
+	padding: 0.85rem 1rem;
+	text-align: left;
+	color: var(--qs-admin-ink);
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
+	cursor: pointer;
+}
+
+.qs-import__design:hover {
+	border-color: var(--qs-admin-line-strong);
+	box-shadow: var(--qs-admin-shadow-lift);
+}
+
+.qs-import__design.is-active {
+	background: var(--qs-admin-accent-wash);
+	border-color: var(--qs-admin-accent);
+	box-shadow: inset 0 0 0 1px var(--qs-admin-accent);
+}
+
+.qs-import__design:focus-visible {
+	outline: 2px solid var(--qs-admin-accent);
 	outline-offset: 2px;
 }
 
-.wow-import__page-title {
+.qs-import__page-meta {
+	color: var(--qs-admin-muted);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.qs-import__page-facts,
+.qs-import__page-kept {
+	margin: 0;
+	color: var(--qs-admin-muted);
+	font-size: 12px;
+	line-height: 1.5;
+	font-variant-numeric: tabular-nums;
+}
+
+.qs-import__page-kept {
+	color: var(--qs-admin-accent);
 	font-weight: 600;
 }
 
-.wow-import__page-meta {
-	color: #50575e;
-	font-size: 12px;
-	word-break: break-all;
+/* Controls at the foot, on a line ruled off from the description above it. */
+.qs-import__page-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.6rem;
+	margin-top: auto;
+	padding-top: 0.7rem;
+	border-top: 1px solid var(--qs-admin-line);
 }
 
-.wow-import__skipped {
-	margin: 0.8rem 0;
-	font-size: 12px;
-	color: #50575e;
+/* The languages one page exists in, on the page rather than as more rows. */
+.qs-import__langs {
+	display: inline-flex;
+	gap: 0.3rem;
 }
 
-.wow-import__skipped ul {
-	margin: 0.4rem 0 0 1.2rem;
+.qs-import__lang {
+	min-width: 2.1rem;
+	padding: 0.25rem 0.45rem;
+	color: var(--qs-admin-muted);
+	background: var(--qs-admin-soft);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: 999px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	line-height: 1.2;
+	text-align: center;
+	cursor: pointer;
+}
+
+.qs-import__lang:hover {
+	color: var(--qs-admin-ink);
+	border-color: var(--qs-admin-line-strong);
+}
+
+.qs-import__lang.is-active {
+	color: var(--qs-admin-paper);
+	background: var(--qs-admin-accent);
+	border-color: var(--qs-admin-accent);
+}
+
+.qs-import__lang:focus-visible {
+	outline: 2px solid var(--qs-admin-accent);
+	outline-offset: 2px;
+}
+
+.qs-import__filter {
+	max-width: 24rem;
+	margin: 1.1rem 0 0;
+}
+
+/* The design's own admin screens: importable, rarely wanted, folded. */
+.qs-import__utility {
+	margin: 1rem 0 0;
+	padding: 0.75rem 1rem;
+	background: var(--qs-admin-soft);
+	border-radius: var(--qs-admin-radius-sm);
+}
+
+.qs-import__utility > summary {
+	min-height: 24px;
+	color: var(--qs-admin-muted);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.qs-import__utility .qs-import__pages {
+	margin-top: 0.75rem;
+}
+
+/*
+ * Everything the archive held and the importer did not take. Folded away by
+ * default: on a developer handoff this is hundreds of lines of specification
+ * sheets, and the two lines that matter are the ones above it.
+ */
+.qs-import__skipped {
+	margin: 0.9rem 0;
+	padding: 0.7rem 0.95rem;
+	color: var(--qs-admin-muted);
+	background: var(--qs-admin-soft);
+	border-radius: var(--qs-admin-radius-sm);
+	font-size: 12px;
+}
+
+.qs-import__skipped > summary {
+	min-height: 24px;
+	cursor: pointer;
+}
+
+.qs-import__skipped ul {
+	margin: 0.5rem 0 0 1.2rem;
+	max-height: 18rem;
+	overflow-y: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.qs-import__page-item,
+	.qs-import__design,
+	.qs-import__section,
+	.qs-import__step {
+		transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+	}
 }
 
 /* --- subscription bridge --- */
 
-.wow-import__bridge {
-	margin: 1rem 0 0;
-	padding: 0 1rem;
-	background: var(--wow-admin-soft);
-	border: 1px solid #dcdcde;
-	border-radius: 4px;
+.qs-import__bridge {
+	margin: 1.1rem 0 0;
+	padding: 0 1.1rem;
+	background: var(--qs-admin-soft);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
 }
 
-.wow-import__bridge > summary {
-	padding: 0.75rem 0;
+.qs-import__bridge > summary {
+	padding: 0.8rem 0;
 	min-height: 24px;
 	font-weight: 600;
 	cursor: pointer;
 }
 
-.wow-import__bridge[open] {
+.qs-import__bridge[open] {
 	padding-bottom: 1rem;
 }
 
-.wow-import__bridge-steps {
-	max-width: none;
+.qs-import__bridge-steps {
+	max-width: 72ch;
 	margin: 0 0 1rem 1.2rem;
+	color: var(--qs-admin-muted);
 	font-size: 13px;
-	color: #50575e;
 }
 
-.wow-import__paste {
+.qs-import__paste {
 	display: block;
 	width: 100%;
 	max-width: none;
+	padding: 0.7rem 0.85rem;
+	border: 1px solid var(--qs-admin-line-strong);
+	border-radius: var(--qs-admin-radius-sm);
 	font-family: Consolas, Monaco, monospace;
 	font-size: 12px;
 }
 
 /* --- sections --- */
 
-.wow-import__sections {
-	margin: 1rem 0 0 1.2rem;
+.qs-import__sections {
+	margin: 1.1rem 0 0;
 	padding: 0;
+	list-style: none;
+	counter-reset: qs-section;
 }
 
-.wow-import__section {
+.qs-import__section {
 	margin: 0 0 1rem;
-	padding: 1rem 1.1rem;
-	background: #fbfbfc;
-	border: 1px solid var(--wow-admin-line);
-	border-radius: 6px;
+	padding: 1.1rem 1.25rem;
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
 }
 
-.wow-import__section:hover {
-	border-color: #b9bfc7;
+.qs-import__section:hover {
+	border-color: var(--qs-admin-line-strong);
 }
 
-.wow-import__section-head > strong {
-	color: var(--wow-admin-ink);
-	font-size: 14px;
-}
-
-.wow-import__section-head {
+.qs-import__section-head {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: baseline;
 	gap: 0.6rem;
-	margin-bottom: 0.3rem;
+	margin-bottom: 0.4rem;
 }
 
-.wow-import__section-meta {
-	color: #50575e;
+.qs-import__section-head > strong {
+	color: var(--qs-admin-ink);
+	font-size: 14px;
+}
+
+.qs-import__section-meta {
+	color: var(--qs-admin-muted);
 	font-size: 12px;
 }
 
-.wow-import__excerpt {
-	margin: 0 0 0.7rem;
-	color: #50575e;
+.qs-import__excerpt {
+	margin: 0 0 0.75rem;
+	max-width: 72ch;
+	color: var(--qs-admin-muted);
 	font-size: 13px;
+	line-height: 1.6;
 }
 
-.wow-import__pending {
+.qs-import__pending {
 	margin: 0;
-	color: #50575e;
+	color: var(--qs-admin-muted);
 	font-style: italic;
 }
 
-.wow-import__error {
+.qs-import__error {
 	margin: 0.4rem 0;
-	color: #d63638;
+	color: var(--qs-admin-danger);
 	font-weight: 600;
 }
 
-.wow-import__summary {
+.qs-import__summary {
 	margin: 0 0 0.6rem;
 	font-size: 13px;
 }
 
-.wow-import__label-inline {
-	margin: 0.6rem 0 0.2rem;
-	font-weight: 600;
+.qs-import__label-inline {
+	margin: 0.7rem 0 0.25rem;
+	color: var(--qs-admin-ink);
 	font-size: 13px;
+	font-weight: 600;
 }
 
-.wow-import__editable,
-.wow-import__concerns,
-.wow-import__notes,
-.wow-import__error-list {
+.qs-import__editable,
+.qs-import__concerns,
+.qs-import__notes,
+.qs-import__error-list {
 	margin: 0 0 0 1.2rem;
 	font-size: 13px;
+	line-height: 1.6;
 }
 
-.wow-import__concerns,
-.wow-import__notes {
-	color: #8a6300;
+.qs-import__concerns,
+.qs-import__notes {
+	color: var(--qs-admin-warn-ink);
 }
 
-.wow-import__error-list {
-	color: #d63638;
+.qs-import__error-list {
+	color: var(--qs-admin-danger);
 }
 
-.wow-import__preview-wrap {
-	margin: 0.8rem 0;
+.qs-import__preview-wrap {
+	margin: 0.9rem 0;
 }
 
-.wow-import__preview-wrap > summary {
-	cursor: pointer;
-	font-weight: 600;
-	font-size: 13px;
+.qs-import__preview-wrap > summary {
 	min-height: 24px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
 }
 
 /*
@@ -651,64 +1487,90 @@
  * `contain` and a dark ground stop the imported section's own layout from
  * leaking out into the admin page around it.
  */
-.wow-import__preview {
+.qs-import__preview {
+	display: block;
+	width: 100%;
 	margin-top: 0.6rem;
-	padding: 1rem;
-	max-height: 30rem;
-	overflow: auto;
-	contain: layout paint;
-	background: #0a0a18;
-	color: #f2f5fb;
-	border-radius: 4px;
+
+	/*
+	 * A real height rather than a min-height. A design whose hero is
+	 * `min-height: 100vh` resolves that against the frame, so a frame that
+	 * starts tiny makes the hero tiny and then measures it as tiny — the
+	 * section has to be given room before it can be asked how much it needs.
+	 */
+	height: 33rem;
+	background: #fff;
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
 }
 
-.wow-import__preview img {
+/* A pane that is not a frame — the "nothing here" note — keeps the old ground. */
+div.qs-import__preview {
+	padding: 1.1rem;
+	min-height: 0;
+	background: var(--qs-admin-soft);
+}
+
+.qs-import__preview img {
 	max-width: 100%;
 	height: auto;
 }
 
-.wow-import__actions {
+/*
+ * A band the conversion painted light needs dark text on it, exactly as it
+ * will have on the site. The pane's own ground is dark and the front end's
+ * stylesheet is not loaded in here, so without this a section that converted
+ * perfectly well — white group, default heading colour — previewed as pale
+ * grey on white and read as a mistake the build had not made.
+ */
+.qs-import__preview .has-base-background-color,
+.qs-import__preview .has-surface-background-color,
+.qs-import__preview .has-surface-2-background-color,
+.qs-import__preview .has-border-background-color {
+	color: #212121;
+}
+
+.qs-import__preview .has-contrast-background-color {
+	color: #fff;
+}
+
+.qs-import__actions {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.5rem;
-	margin-top: 0.8rem;
+	margin-top: 0.9rem;
 }
 
-.wow-import__saved {
-	margin: 0.8rem 0 0;
-	padding: 0.5rem 0.8rem;
+.qs-import__saved {
+	margin: 0.9rem 0 0;
+	padding: 0.6rem 0.9rem;
 	background: #edfaef;
-	border-left: 4px solid #00a32a;
+	border: 1px solid rgba(0, 163, 42, 0.3);
+	border-radius: var(--qs-admin-radius-sm);
 	font-size: 13px;
-}
-
-@media (max-width: 782px) {
-
-	.wow-import__step {
-		padding: 1rem;
-	}
-
-	.wow-import__pages {
-		grid-template-columns: 1fr;
-	}
 }
 
 /* --- previously uploaded designs --- */
 
-.wow-import__designs-wrap {
-	margin-top: 1.2rem;
+.qs-import__designs-wrap {
+	margin-top: 1.4rem;
+	padding-top: 1.2rem;
+	border-top: 1px solid var(--qs-admin-line);
 }
 
-.wow-import__designs-wrap > h3 {
-	margin: 0 0 0.4rem;
-	color: var(--wow-admin-ink);
-	font-size: 13px;
+.qs-import__designs-wrap > h3 {
+	margin: 0 0 0.6rem;
+	color: var(--qs-admin-muted);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
 }
 
-.wow-import__designs {
+.qs-import__designs {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-	gap: 0.6rem;
+	grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+	gap: 0.75rem;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -716,116 +1578,121 @@
 
 /* --- page list with a preview per page --- */
 
-.wow-import__page-item {
-	display: flex;
-	align-items: stretch;
-	gap: 0.4rem;
-}
-
-.wow-import__page-item > .wow-import__page {
-	flex: 1 1 auto;
-}
-
-.wow-import__page-preview {
+.qs-import__page-preview {
 	flex: 0 0 auto;
-	align-self: center;
-	min-height: 36px;
+	min-height: 32px;
+	border-radius: var(--qs-admin-radius-sm);
 }
 
-.wow-import__page-preview[aria-pressed="true"] {
-	color: var(--wow-admin-paper);
-	background: var(--wow-admin-accent);
-	border-color: var(--wow-admin-accent);
+.qs-import__page-preview[aria-pressed="true"] {
+	color: var(--qs-admin-paper);
+	background: var(--qs-admin-accent);
+	border-color: var(--qs-admin-accent);
 }
 
 /* --- preview before build: design beside blocks --- */
 
-.wow-import__compare-wrap {
-	margin-top: 1.2rem;
-	padding: 1rem 1.1rem;
-	background: var(--wow-admin-soft);
-	border: 1px solid var(--wow-admin-line);
-	border-radius: 6px;
+.qs-import__compare-wrap {
+	margin-top: 1.4rem;
+	padding: 1.25rem 1.35rem;
+	background: var(--qs-admin-soft);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius);
 }
 
-.wow-import__compare-wrap:focus {
+.qs-import__compare-wrap:focus {
 	outline: none;
 }
 
-.wow-import__compare-head {
+.qs-import__compare-head {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 0.5rem 1.2rem;
 }
 
-.wow-import__compare-head > h3 {
+.qs-import__compare-head > h3 {
 	margin: 0;
-	color: var(--wow-admin-ink);
-	font-size: 15px;
+	color: var(--qs-admin-ink);
+	font-size: 16px;
+	font-weight: 600;
 }
 
-.wow-import__compare-head > .wow-import__actions {
+.qs-import__compare-head > .qs-import__actions {
 	margin: 0 0 0 auto;
 }
 
-.wow-import__compare-count {
+.qs-import__compare-count {
 	margin: 0;
 	font-weight: 600;
 	font-variant-numeric: tabular-nums;
 }
 
-.wow-import__compare {
-	margin: 1rem 0 0;
+.qs-import__compare {
+	margin: 1.1rem 0 0;
 	padding: 0;
 	list-style: none;
 }
 
-.wow-import__compare-row {
+.qs-import__compare-row {
 	margin: 0 0 1rem;
-	padding: 0.8rem 1rem;
-	background: var(--wow-admin-paper);
-	border: 1px solid var(--wow-admin-line);
-	border-radius: 6px;
+	padding: 0.9rem 1.1rem;
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
 }
 
-.wow-import__compare-row.is-excluded {
+.qs-import__compare-row.is-excluded {
 	border-style: dashed;
 }
 
-.wow-import__compare-row.is-excluded .wow-import__compare-panes {
+.qs-import__compare-row.is-excluded .qs-import__compare-panes {
 	opacity: 0.55;
 }
 
-.wow-import__compare-row-head {
+.qs-import__compare-row-head {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 0.8rem;
-	margin-bottom: 0.5rem;
+	margin-bottom: 0.55rem;
 }
 
-.wow-import__compare-row-head > strong {
-	color: var(--wow-admin-ink);
+.qs-import__compare-row-head > strong {
+	color: var(--qs-admin-ink);
 	font-size: 14px;
 }
 
-.wow-import__compare-panes {
+.qs-import__compare-panes {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 0.8rem;
 }
 
-.wow-import__compare-pane > h4 {
-	margin: 0 0 0.3rem;
-	color: var(--wow-admin-muted);
+/*
+ * One pane, the whole width. A section is laid out for a page, and shown in
+ * half of one it reflows into something the built site will never look like —
+ * which read as a broken conversion when the conversion was fine.
+ */
+.qs-import__compare-panes.is-single {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.qs-import__compare-panes.is-single > .qs-import__preview {
+	margin-top: 0;
+	height: 40rem;
+}
+
+.qs-import__compare-pane > h4 {
+	margin: 0 0 0.35rem;
+	color: var(--qs-admin-muted);
 	font-size: 11px;
 	font-weight: 700;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 }
 
-.wow-import__compare-pane > .wow-import__preview {
+.qs-import__compare-pane > .qs-import__preview {
 	margin-top: 0;
 }
 
@@ -834,81 +1701,224 @@
  * written for one, and the dark ground the block preview uses would hide
  * most of it.
  */
-.wow-import__preview--design {
-	color: var(--wow-admin-ink);
-	background: var(--wow-admin-paper);
-	border: 1px solid var(--wow-admin-line);
+.qs-import__preview--design {
+	color: var(--qs-admin-ink);
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
 }
 
 /* --- stepwise build progress --- */
 
-.wow-import__progress {
-	margin-top: 1rem;
-	padding: 0.8rem 1rem;
-	background: var(--wow-admin-paper);
-	border: 1px solid var(--wow-admin-line);
-	border-radius: 6px;
+.qs-import__progress {
+	margin-top: 1.1rem;
+	padding: 1rem 1.15rem;
+	background: var(--qs-admin-paper);
+	border: 1px solid var(--qs-admin-line);
+	border-radius: var(--qs-admin-radius-sm);
 }
 
-.wow-import__bar {
+.qs-import__bar {
 	display: block;
 	width: 100%;
-	height: 0.7rem;
-	accent-color: var(--wow-admin-accent);
+	height: 0.6rem;
+	accent-color: var(--qs-admin-accent);
+	border-radius: 999px;
 }
 
-.wow-import__progress-text {
-	margin: 0.4rem 0 0;
+.qs-import__progress-text {
+	margin: 0.5rem 0 0;
 	font-size: 13px;
 	font-variant-numeric: tabular-nums;
 }
 
+/* What the build is about to leave out, stated where the button is. */
+.qs-import__notice-line {
+	margin: 0.6rem 0 0;
+	padding: 0.55rem 0.8rem;
+	color: var(--qs-admin-warn-ink);
+	background: var(--qs-admin-warn-wash);
+	border-radius: var(--qs-admin-radius-sm);
+	font-size: 13px;
+}
+
+/* The last thing the build said, with a counter that keeps moving beside it. */
+.qs-import__beat {
+	display: flex;
+	gap: 0.6rem;
+	align-items: baseline;
+	justify-content: space-between;
+	margin: 0.55rem 0 0;
+	padding: 0.45rem 0.7rem;
+	color: var(--qs-admin-muted);
+	background: var(--qs-admin-soft);
+	border-radius: var(--qs-admin-radius-sm);
+	font-size: 12px;
+}
+
+.qs-import__beat-text {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.qs-import__beat-time {
+	flex: none;
+	color: var(--qs-admin-ink);
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+}
+
+/*
+ * A build that has stopped. Loud enough that nobody watches a dead progress
+ * bar for an hour, quiet enough that it does not read as data loss: nothing
+ * has been lost, the build simply needs a push.
+ */
+.qs-import__progress.is-stalled {
+	border-color: #e8c88a;
+	background: var(--qs-admin-warn-wash);
+}
+
+.qs-import__stall {
+	margin-top: 0.85rem;
+	padding: 0.85rem 1rem;
+	color: var(--qs-admin-warn-ink);
+	background: var(--qs-admin-paper);
+	border: 1px solid #e8c88a;
+	border-left-width: 4px;
+	border-radius: var(--qs-admin-radius-sm);
+}
+
+.qs-import__stall p {
+	margin: 0.4rem 0 0;
+	font-size: 13px;
+}
+
+.qs-import__stall p:first-child {
+	margin-top: 0;
+}
+
+.qs-import__stall-head strong {
+	font-size: 14px;
+}
+
+/* While the step is being run by hand it is working, not broken. */
+.qs-import__stall.is-working {
+	color: var(--qs-admin-ink);
+	border-color: var(--qs-admin-line-strong);
+	background: var(--qs-admin-soft);
+}
+
+.qs-import__stall.is-working p {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.qs-import__tag.is-stalled {
+	color: var(--qs-admin-paper);
+	background: var(--qs-admin-danger);
+}
+
 /* --- what the build made --- */
 
-.wow-import__table-wrap {
-	margin-top: 0.8rem;
+.qs-import__table-wrap {
+	margin-top: 0.9rem;
 	overflow-x: auto;
 }
 
-.wow-import__table td,
-.wow-import__table th {
+.qs-import__table td,
+.qs-import__table th {
 	vertical-align: middle;
 }
 
-.wow-import__table .wow-import__concerns {
+.qs-import__table .qs-import__concerns {
 	margin-top: 0.3rem;
 }
 
-.wow-import__row-actions {
+.qs-import__row-actions {
 	display: inline-flex;
 	flex-wrap: wrap;
 	gap: 0.35rem;
 }
 
+/* --- narrow screens --- */
+
 @media (max-width: 782px) {
 
-	.wow-import__compare-panes {
+	.qs-import {
+		padding-right: 0.75rem;
+	}
+
+	.qs-import__masthead {
+		padding: 1.5rem 1.25rem;
+	}
+
+	.qs-import__masthead > h1 {
+		font-size: 24px;
+	}
+
+	.qs-import__step,
+	.qs-import__cleanup,
+	.qs-import__auto {
+		padding: 1.1rem;
+	}
+
+	.qs-import__pages,
+	.qs-import__designs {
 		grid-template-columns: 1fr;
 	}
 
-	.wow-import__page-item {
-		flex-direction: column;
+	.qs-import__compare-panes {
+		grid-template-columns: 1fr;
 	}
 
-	.wow-import__page-preview {
-		align-self: stretch;
+	.qs-import__page-foot {
+		flex-wrap: wrap;
 	}
 }
 
 /* While a preview is open the screen uses the whole window: two panes of page need the room. */
-.wow-import.is-previewing .wow-import__step,
-.wow-import.is-previewing .wow-import__status,
-.wow-import.is-previewing .wow-import__settings,
-.wow-import.is-previewing .wow-import__cleanup,
-.wow-import.is-previewing .wow-import__masthead {
+.qs-import.is-previewing {
 	max-width: none;
 }
 
-.wow-import.is-previewing .wow-import__compare-wrap {
+.qs-import.is-previewing .qs-import__step,
+.qs-import.is-previewing .qs-import__status,
+.qs-import.is-previewing .qs-import__settings,
+.qs-import.is-previewing .qs-import__cleanup,
+.qs-import.is-previewing .qs-import__masthead {
+	max-width: none;
+}
+
+.qs-import.is-previewing .qs-import__compare-wrap {
 	margin-inline: 0;
+}
+
+/* --- a prerequisite that stops the build --- */
+
+/*
+ * Warm rather than red. Nothing is broken and nothing was lost: a plugin is
+ * not installed yet, and the sentence inside says what to do about it. Styling
+ * it as an error would make somebody think their design had failed to read.
+ */
+.qs-import__blocked {
+	margin: 1rem 0;
+	padding: 1rem 1.15rem;
+	border: 1px solid var(--qs-admin-warn-ink);
+	border-radius: var(--qs-admin-radius-sm);
+	background: var(--qs-admin-warn-wash);
+	color: var(--qs-admin-warn-ink);
+}
+
+.qs-import__blocked > p:first-child {
+	margin-top: 0;
+	font-weight: 600;
+}
+
+.qs-import__blocked .qs-import__hint {
+	color: inherit;
+}
+
+.qs-import__blocked > p:last-child {
+	margin-bottom: 0;
 }

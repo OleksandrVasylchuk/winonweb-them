@@ -2,13 +2,13 @@
 /**
  * Builds the instructions that turn a design section into block markup.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Error;
 use WP_Theme_JSON_Resolver;
@@ -116,7 +116,7 @@ final class ConversionPrompt {
 	public static function system( bool $guided = false ): string {
 		$lines = array();
 
-		$lines[] = 'You convert one section of a static HTML design into WordPress Gutenberg block markup for the WOW — Signal block theme.';
+		$lines[] = 'You convert one section of a static HTML design into WordPress Gutenberg block markup for the Qwerty Soft — Signal block theme.';
 		$lines[] = '';
 		$lines[] = 'The person who will use your output is not a developer. They must be able to change every word, image and link through the WordPress editor without touching code. That constraint outranks visual fidelity: a section that looks 95% right and is fully editable is a success, and a pixel-perfect section that is one frozen lump is a failure.';
 		$lines[] = '';
@@ -254,6 +254,17 @@ final class ConversionPrompt {
 			? 'This is the first section on the page, so its main heading is the page\'s only `h1`.'
 			: 'This is not the first section on the page, so its top heading is an `h2` at most.';
 
+		$docs = isset( $context['docs'] ) ? trim( (string) $context['docs'] ) : '';
+
+		if ( '' !== $docs ) {
+			$lines[] = '';
+			$lines[] = '### What the design says about itself';
+			$lines[] = '';
+			$lines[] = 'Its own documentation, quoted in part. Where it contradicts the markup, the markup is what the page shows — but this is where the brand colours, the intent of a page and the status of its copy are written down.';
+			$lines[] = '';
+			$lines[] = $docs;
+		}
+
 		$lines = array_merge( $lines, self::pictures( $given, (int) $section['position'] + 1 ) );
 
 		$lines[] = '';
@@ -360,6 +371,27 @@ final class ConversionPrompt {
 
 		$lines[] = '**Block styles** — add via `"className"`: `is-style-card` and `is-style-panel` on a group, `is-style-cards` on columns, `is-style-checks` on a list, `is-style-glow` on an image, `is-style-gradient` on a heading, `is-style-glow-line` on a separator.';
 
+		/*
+		 * The rule that was missing, and its absence was measurable.
+		 *
+		 * `BlockConverter::faithful()` is on by default and keeps the design's
+		 * own values, but the flag never reached this brief — so the offline
+		 * pass preserved the archive's class names and the model, told only
+		 * about the theme's presets, dropped them again. On the Robert
+		 * Khoubian handoff that cost 190 of the 253 class names the design's
+		 * stylesheet targets: the rules shipped, the classes did not, and the
+		 * header and hero rendered as neither the design nor the theme.
+		 *
+		 * It also explains the cost. The review pass compares the result with
+		 * the original, sees a section that no longer matches, corrects it,
+		 * and still does not match — so it runs every round it is allowed
+		 * instead of agreeing on the first. The brief was arguing with the
+		 * reviewer, and the build paid for the argument.
+		 */
+		if ( BlockConverter::faithful() ) {
+			$lines[] = '**Keep the design\'s own class names.** Every `class` attribute in the source belongs on the block you make from it, spelled exactly as it appears, in addition to anything above. The archive\'s stylesheet ships with the page and targets those names; a class you drop is a rule that stops applying, and the section renders unstyled. Never rename, shorten, merge or tidy them.';
+		}
+
 		return implode( "\n", $lines );
 	}
 
@@ -378,7 +410,7 @@ final class ConversionPrompt {
 		 * Ukrainian block summaries. block.json holds the untranslated source
 		 * text, which is what this prompt should be written in.
 		 */
-		$files = glob( WOW_SIGNAL_DIR . '/blocks/*/block.json' );
+		$files = glob( QSOFT_DIR . '/blocks/*/block.json' );
 
 		foreach ( $files ? $files : array() as $file ) {
 			$meta = json_decode( (string) file_get_contents( $file ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Reading the theme's own metadata.
@@ -433,6 +465,24 @@ final class ConversionPrompt {
 		$lines[] = $first
 			? 'This is the first section on the page, so its main heading is the page\'s only `h1`.'
 			: 'This is not the first section on the page, so its top heading is an `h2` at most.';
+
+		/*
+		 * What the handoff wrote about itself, in a few hundred words. The
+		 * whole documentation would be most of the window and this is one
+		 * section of one page — but a design system that names the brand
+		 * colours, or a content note that says which copy is a placeholder,
+		 * changes the answer for every section and is worth its room.
+		 */
+		$docs = isset( $context['docs'] ) ? trim( (string) $context['docs'] ) : '';
+
+		if ( '' !== $docs ) {
+			$lines[] = '';
+			$lines[] = '### What the design says about itself';
+			$lines[] = '';
+			$lines[] = 'Its own documentation, quoted in part. Where it contradicts the markup, the markup is what the page shows.';
+			$lines[] = '';
+			$lines[] = $docs;
+		}
 
 		$lines[] = '';
 		$lines[] = '### The section markup';
@@ -655,7 +705,7 @@ final class ConversionPrompt {
 		$text = trim( $reply );
 
 		if ( '' === $text ) {
-			return new WP_Error( 'wow_signal_empty_paste', __( 'Nothing was pasted.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_empty_paste', __( 'Nothing was pasted.', 'qwerty-soft-signal' ) );
 		}
 
 		// Strip a fenced block if the whole reply is wrapped in one.
@@ -668,8 +718,8 @@ final class ConversionPrompt {
 
 		if ( false === $start || false === $end || $end < $start ) {
 			return new WP_Error(
-				'wow_signal_no_array',
-				__( 'That does not look like the JSON list the brief asked for. Copy the whole reply, including the opening [ and closing ].', 'wow-signal' )
+				'qwerty_soft_no_array',
+				__( 'That does not look like the JSON list the brief asked for. Copy the whole reply, including the opening [ and closing ].', 'qwerty-soft-signal' )
 			);
 		}
 
@@ -677,8 +727,8 @@ final class ConversionPrompt {
 
 		if ( ! is_array( $decoded ) ) {
 			return new WP_Error(
-				'wow_signal_bad_paste',
-				__( 'The pasted reply is not valid JSON. It may have been cut off — ask for it again and copy all of it.', 'wow-signal' )
+				'qwerty_soft_bad_paste',
+				__( 'The pasted reply is not valid JSON. It may have been cut off — ask for it again and copy all of it.', 'qwerty-soft-signal' )
 			);
 		}
 
@@ -713,8 +763,8 @@ final class ConversionPrompt {
 
 		if ( array() === $sections ) {
 			return new WP_Error(
-				'wow_signal_no_sections',
-				__( 'The pasted list has no sections with markup in it.', 'wow-signal' )
+				'qwerty_soft_no_sections',
+				__( 'The pasted list has no sections with markup in it.', 'qwerty-soft-signal' )
 			);
 		}
 

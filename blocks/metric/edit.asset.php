@@ -1,8 +1,8 @@
 <?php
 /**
- * Script dependencies for the wow/metric editor script.
+ * Script dependencies for the qs/metric editor script.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 

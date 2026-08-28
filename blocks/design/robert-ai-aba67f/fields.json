@@ -1,0 +1,70 @@
+{
+    "key": "group_qs_design_robert_ai_aba67f",
+    "title": "治理规则",
+    "fields": [
+        {
+            "key": "field_qs_robert_ai_aba67f_kicker",
+            "label": "Kicker",
+            "name": "kicker",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "治理规则",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_aba67f_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "安全、声明控制与可信度",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_aba67f_disclaimer",
+            "label": "Disclaimer",
+            "name": "disclaimer",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert AI 是 AI 辅助贸易智能系统，不应被视为法律、税务、海关、金融、兽医或制裁建议的替代品。如翻译内容不一致，应以已批准的原始材料为准。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_aba67f_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_robert_ai_aba67f_row_rule",
+                    "label": "Rule",
+                    "name": "rule",
+                    "type": "text",
+                    "default_value": "必须引用来源",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_robert_ai_aba67f_row_description",
+                    "label": "What the rule means",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "重要回答应引用内部报告编号、来源说明或公开页面。",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-robert-ai-aba67f"
+            }
+        ]
+    ],
+    "active": true
+}

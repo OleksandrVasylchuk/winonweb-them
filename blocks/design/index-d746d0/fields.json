@@ -1,0 +1,75 @@
+{
+    "key": "group_qs_design_index_d746d0",
+    "title": "Для решений в международной торговле продуктами питания.",
+    "fields": [
+        {
+            "key": "field_qs_index_d746d0_heading",
+            "label": "Subheading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Для решений в международной торговле продуктами питания.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_d746d0_lede",
+            "label": "Text",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Платформа сфокусирована на информации, которая нужна операторам перед выходом на рынок, выбором поставщиков, расчетом цены и управлением трансграничными рисками.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_d746d0_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_index_d746d0_row_number",
+                    "label": "Label",
+                    "name": "number",
+                    "type": "text",
+                    "default_value": "01",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_index_d746d0_row_heading",
+                    "label": "Subheading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "Доступ на рынки",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_index_d746d0_row_description",
+                    "label": "Text",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Таможенные, налоговые, ветеринарные, документарные и импортные требования в разных юрисдикциях.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-d746d0"
+            }
+        ]
+    ],
+    "active": true
+}

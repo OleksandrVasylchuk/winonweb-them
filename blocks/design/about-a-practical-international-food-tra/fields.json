@@ -1,0 +1,195 @@
+{
+    "key": "group_qs_design_about_a_practical_international_food_tra",
+    "title": "About Content Blocks",
+    "fields": [
+        {
+            "key": "field_qs_about_a_practical_international_food_tra_contents_label",
+            "label": "Contents label",
+            "name": "contents_label",
+            "type": "text",
+            "default_value": "On this page",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_about_a_practical_international_food_tra_profile_link",
+            "label": "Link to Profile",
+            "name": "profile_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#profile",
+                "title": "Profile",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_a_practical_international_food_tra_timeline_link",
+            "label": "Link to Timeline",
+            "name": "timeline_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#timeline",
+                "title": "Timeline",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_a_practical_international_food_tra_market_access_link",
+            "label": "Link to Market Access",
+            "name": "market_access_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#market-access",
+                "title": "Market Access",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_a_practical_international_food_tra_trade_missions_link",
+            "label": "Link to Trade Missions",
+            "name": "trade_missions_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#missions",
+                "title": "Trade Missions",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_a_practical_international_food_tra_selected_projects_link",
+            "label": "Link to Selected Projects",
+            "name": "selected_projects_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#projects",
+                "title": "Selected Projects",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_a_practical_international_food_tra_aquaprole_link",
+            "label": "Link to Aquaprole",
+            "name": "aquaprole_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#aquaprole",
+                "title": "Aquaprole",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_about_a_practical_international_food_tra_technology_link",
+            "label": "Link to Technology",
+            "name": "technology_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#technology",
+                "title": "Technology",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_about_a_practical_international_food_tra_beyond_trade_link",
+            "label": "Link to Beyond Trade",
+            "name": "beyond_trade_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#beyond",
+                "title": "Beyond Trade",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_about_a_practical_international_food_tra_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_about_a_practical_international_food_tra_row_heading",
+                    "label": "Block heading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "A practical international food trade profile.",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_about_a_practical_international_food_tra_row_intro",
+                    "label": "Opening paragraph",
+                    "name": "intro",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Robert Khoubian is an international food trade professional, entrepreneur and market intelligence publisher specializing in China–Eurasia food trade, frozen food supply chains and cross-border market access.",
+                    "instructions": "A short paragraph of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_about_a_practical_international_food_tra_row_body",
+                    "label": "Supporting paragraph",
+                    "name": "body",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Since beginning his career in 2004 with a Canadian trading company, Robert has worked across Russia, CIS markets, China, Southeast Asia, North America and the European Union. His experience covers food trading, market access, customs and veterinary requirements, cold-chain logistics, retail product adaptation and international business development.",
+                    "instructions": "A short paragraph of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-about-a-practical-international-food-tra"
+            }
+        ]
+    ],
+    "active": true
+}

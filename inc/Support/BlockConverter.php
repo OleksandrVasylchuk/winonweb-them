@@ -2,13 +2,13 @@
 /**
  * Deterministic HTML to Gutenberg block conversion.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use DOMDocument;
 use DOMElement;
@@ -215,7 +215,7 @@ final class BlockConverter {
 	 *
 	 * @var array<int, string>
 	 */
-	private const RESERVED_PREFIXES = array( 'wp-', 'is-', 'has-', 'align', 'wow-', 'screen-reader', 'entry-' );
+	private const RESERVED_PREFIXES = array( 'wp-', 'is-', 'has-', 'align', 'qs-', 'screen-reader', 'entry-' );
 
 	/**
 	 * Exact WordPress body/post classes a design may echo; `page-hero` and
@@ -238,11 +238,29 @@ final class BlockConverter {
 	private const MAX_CARRIED = 6;
 
 	/**
+	 * Tags a Group block may be saved with.
+	 *
+	 * @var array<int, string>
+	 */
+	private const GROUP_TAGS = array( 'div', 'header', 'main', 'section', 'article', 'aside', 'footer', 'nav' );
+
+	/**
 	 * The current section's own classes, carried onto its band.
 	 *
 	 * @var array<int, string>
 	 */
 	private array $section_classes = array();
+
+	/**
+	 * The current section's own id, carried onto its band.
+	 *
+	 * A design's primary navigation is half in-page links — `#catalog`,
+	 * `#checkout-flow`, `#newsletter`. Drop the ids and every one of them
+	 * lands at the top of the page instead of at the section it names.
+	 *
+	 * @var string
+	 */
+	private string $section_anchor = '';
 
 	/**
 	 * The section's root element; its classes go on the band, not on an inner panel.
@@ -297,7 +315,8 @@ final class BlockConverter {
 	 * @return array<int, string>
 	 */
 	private function design_classes( array $raw, bool $section = false ): array {
-		$kept = array();
+		$kept     = array();
+		$faithful = self::faithful();
 
 		foreach ( $raw as $class ) {
 			$class = trim( (string) $class );
@@ -319,17 +338,26 @@ final class BlockConverter {
 				continue;
 			}
 
-			if ( in_array( $lower, self::STATE_WORDS, true ) ) {
+			/*
+			 * A state word and a bare `dark` are dead weight when the theme
+			 * does the styling. When the design's own stylesheet does, they
+			 * are load-bearing: `.lang a.active` paints the current language,
+			 * `.dark .card` inverts a card on a dark band. Same for the cap —
+			 * six classes is plenty to hang a theme style on and not enough
+			 * to reproduce a design, where the seventh may be the one the
+			 * grid is written against.
+			 */
+			if ( ! $faithful && in_array( $lower, self::STATE_WORDS, true ) ) {
 				continue;
 			}
 
-			if ( ! $section && in_array( $lower, array( 'dark', 'light' ), true ) ) {
+			if ( ! $faithful && ! $section && in_array( $lower, array( 'dark', 'light' ), true ) ) {
 				continue;
 			}
 
 			$kept[ $class ] = true;
 
-			if ( count( $kept ) >= self::MAX_CARRIED ) {
+			if ( ! $faithful && count( $kept ) >= self::MAX_CARRIED ) {
 				break;
 			}
 		}
@@ -445,6 +473,10 @@ final class BlockConverter {
 			}
 		}
 
+		$this->section_anchor = $this->root instanceof DOMElement
+			? self::clean_anchor( $this->root->getAttribute( 'id' ) )
+			: '';
+
 		$this->cover = $body instanceof DOMElement ? $this->background_image( $section, $body ) : '';
 
 		if ( '' !== $this->cover ) {
@@ -462,7 +494,7 @@ final class BlockConverter {
 		$inner = $body instanceof DOMNode ? $this->children( $body ) : '';
 
 		if ( $this->literal_used ) {
-			$this->concerns[] = __( 'Some sizes from the design had no matching theme preset and were kept as exact values; adjust them in the Site Editor if you want them on the scale.', 'wow-signal' );
+			$this->concerns[] = __( 'Some sizes from the design had no matching theme preset and were kept as exact values; adjust them in the Site Editor if you want them on the scale.', 'qwerty-soft-signal' );
 		}
 
 		if ( '' === trim( $inner ) ) {
@@ -470,12 +502,16 @@ final class BlockConverter {
 				'markup'   => '',
 				'summary'  => '',
 				'editable' => array(),
-				'concerns' => array( __( 'This section held nothing that could become content.', 'wow-signal' ) ),
+				'concerns' => array( __( 'This section held nothing that could become content.', 'qwerty-soft-signal' ) ),
 			);
 		}
 
 		$position = (int) $section['position'];
 		$markup   = $this->band( $inner, $position, (string) $section['label'] );
+
+		if ( self::faithful() ) {
+			$markup = self::as_designed( $markup );
+		}
 
 		return array(
 			'markup'   => $markup,
@@ -483,6 +519,206 @@ final class BlockConverter {
 			'editable' => array_values( array_unique( $this->editable ) ),
 			'concerns' => array_values( array_unique( $this->concerns ) ),
 		);
+	}
+
+	/**
+	 * An element id that is safe to put back on a block.
+	 *
+	 * @param string $id Raw id attribute.
+	 * @return string The id, or '' when it is unusable.
+	 */
+	private static function clean_anchor( string $id ): string {
+		$id = trim( $id );
+
+		return 1 === preg_match( '/^[A-Za-z][A-Za-z0-9_.:-]*$/', $id ) ? $id : '';
+	}
+
+	/**
+	 * Whether the conversion keeps the design's own styling rather than the theme's.
+	 *
+	 * The converter has always done two jobs at once: read the design's
+	 * structure, and restate its styling in the theme's vocabulary — palette
+	 * slugs, spacing steps, layout containers. The second job is what makes an
+	 * imported site editable in the Site Editor, and it is also what makes it
+	 * *not* the design: a hero the archive painted `#101827` at 90px of padding
+	 * becomes `surface` at `spacing|80`, close but not the same.
+	 *
+	 * Faithful is the default because the design is the brief. The design's own
+	 * stylesheet is installed alongside the blocks and its class names are kept
+	 * on them, so with the theme's opinions taken back out the page renders
+	 * exactly as the archive did — the structure is blocks, the styling is the
+	 * design's, and what improves is the markup underneath: real headings, real
+	 * lists, real buttons, alt text, one h1.
+	 *
+	 * Filter it off to get the old behaviour, where an import wears the theme.
+	 *
+	 * @return bool
+	 */
+	public static function faithful(): bool {
+		/**
+		 * Whether an import keeps the design's styling exactly.
+		 *
+		 * @since 1.4.0
+		 *
+		 * @param bool $faithful True to keep the design's own styling.
+		 */
+		return (bool) apply_filters( 'qwerty_soft/faithful_styles', true );
+	}
+
+	/**
+	 * Take the theme's styling opinions back out of finished block markup.
+	 *
+	 * Structure, classes and anything the design itself stated are kept; every
+	 * preset the converter reached for — a palette slug, a spacing step, a
+	 * font-size preset, a layout container, a width alignment — is removed,
+	 * from the block attributes and from the markup they render into.
+	 *
+	 * Done here rather than at each of the forty places that add one: the rule
+	 * is about the finished page, it is stated once, and the conversion above
+	 * stays the same code whichever mode it runs in.
+	 *
+	 * @param string $markup Block markup.
+	 * @return string
+	 */
+	public static function as_designed( string $markup ): string {
+		$blocks = parse_blocks( $markup );
+
+		return serialize_blocks( self::undress( $blocks ) );
+	}
+
+	/**
+	 * Strip theme presets from a tree of parsed blocks.
+	 *
+	 * @param array<int, array<string, mixed>> $blocks Parsed blocks.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function undress( array $blocks ): array {
+		foreach ( $blocks as $index => $block ) {
+			$attrs = is_array( $block['attrs'] ?? null ) ? $block['attrs'] : array();
+
+			foreach ( array( 'align', 'backgroundColor', 'textColor', 'gradient', 'fontSize', 'layout', 'borderColor', 'overlayColor', 'dimRatio' ) as $key ) {
+				unset( $attrs[ $key ] );
+			}
+
+			if ( isset( $attrs['style'] ) && is_array( $attrs['style'] ) ) {
+				$attrs['style'] = self::without_presets( $attrs['style'] );
+
+				if ( array() === $attrs['style'] ) {
+					unset( $attrs['style'] );
+				}
+			}
+
+			$blocks[ $index ]['attrs'] = $attrs;
+
+			foreach ( array( 'innerHTML', 'innerContent' ) as $key ) {
+				if ( ! isset( $block[ $key ] ) ) {
+					continue;
+				}
+
+				$blocks[ $index ][ $key ] = is_array( $block[ $key ] )
+					? array_map(
+						static function ( $piece ) {
+							return is_string( $piece ) ? self::undress_html( $piece ) : $piece;
+						},
+						$block[ $key ]
+					)
+					: self::undress_html( (string) $block[ $key ] );
+			}
+
+			if ( isset( $block['innerBlocks'] ) && is_array( $block['innerBlocks'] ) ) {
+				$blocks[ $index ]['innerBlocks'] = self::undress( $block['innerBlocks'] );
+			}
+		}
+
+		return $blocks;
+	}
+
+	/**
+	 * Drop every style value that points at a theme preset.
+	 *
+	 * A literal the design stated — `border-radius: 8px`, a hex colour lifted
+	 * from its stylesheet — is the design's and stays. Anything written as
+	 * `var:preset|…` or `var:custom|…` is the theme talking and goes.
+	 *
+	 * @param array<string, mixed> $style Style attribute.
+	 * @return array<string, mixed>
+	 */
+	private static function without_presets( array $style ): array {
+		foreach ( $style as $key => $value ) {
+			if ( is_array( $value ) ) {
+				$style[ $key ] = self::without_presets( $value );
+
+				if ( array() === $style[ $key ] ) {
+					unset( $style[ $key ] );
+				}
+
+				continue;
+			}
+
+			if ( is_string( $value ) && ( str_contains( $value, 'var:preset|' ) || str_contains( $value, 'var:custom|' ) || str_contains( $value, 'var(--wp--' ) ) ) {
+				unset( $style[ $key ] );
+			}
+		}
+
+		return $style;
+	}
+
+	/**
+	 * The same removal, in the markup a block renders into.
+	 *
+	 * @param string $html Block HTML.
+	 * @return string
+	 */
+	private static function undress_html( string $html ): string {
+		if ( '' === trim( $html ) ) {
+			return $html;
+		}
+
+		/*
+		 * Preset classes: colours, sizes, widths, layout containers. Bounded
+		 * by whitespace or by the quote on either side, so the first class in
+		 * an attribute is caught as well as the ones after it.
+		 */
+		$html = (string) preg_replace(
+			'#(?<=[\s"])(?:align(?:full|wide)|has-background|has-text-color|has-link-color|has-global-padding|has-custom-font-size|has-[a-z0-9-]+-(?:color|background-color|font-size|gradient-background)|is-layout-[a-z]+|wp-container-[a-z0-9-]+|is-content-justification-[a-z]+|wp-block-[a-z-]+-is-layout-[a-z]+)(?=[\s"])#',
+			'',
+			$html
+		);
+
+		// The gaps those left behind.
+		$html = (string) preg_replace_callback(
+			'#\sclass="([^"]*)"#',
+			static function ( array $found ): string {
+				$classes = trim( (string) preg_replace( '#\s+#', ' ', $found[1] ) );
+
+				return '' === $classes ? '' : ' class="' . $classes . '"';
+			},
+			$html
+		);
+
+		// Inline declarations that resolve to a theme preset.
+		$html = (string) preg_replace_callback(
+			'#\sstyle="([^"]*)"#',
+			static function ( array $found ): string {
+				$kept = array();
+
+				foreach ( explode( ';', $found[1] ) as $declaration ) {
+					$declaration = trim( $declaration );
+
+					if ( '' === $declaration || str_contains( $declaration, 'var(--wp--' ) ) {
+						continue;
+					}
+
+					$kept[] = $declaration;
+				}
+
+				return array() === $kept ? '' : ' style="' . implode( ';', $kept ) . '"';
+			},
+			$html
+		);
+
+		// A class attribute emptied by the above is not worth keeping.
+		return (string) preg_replace( '#\sclass="\s*"#', '', $html );
 	}
 
 	/**
@@ -522,6 +758,11 @@ final class BlockConverter {
 
 		if ( $this->centered ) {
 			$layout['justifyContent'] = 'center';
+		}
+
+		if ( self::faithful() ) {
+			// See as_group(): the design's own stylesheet sets the rhythm inside a band too.
+			$spacing['blockGap'] = '0';
 		}
 
 		$attrs = array(
@@ -564,8 +805,12 @@ final class BlockConverter {
 		// The section's own classes, so the design's stylesheet still finds it.
 		$this->carry_classes( $this->section_classes, $attrs, $classes );
 
+		if ( '' !== $this->section_anchor ) {
+			$attrs['anchor'] = $this->section_anchor;
+		}
+
 		return '<!-- wp:group ' . wp_json_encode( $attrs ) . " -->\n"
-			. '<section class="' . implode( ' ', $classes ) . '" style="' . $css . '">'
+			. '<section' . ( '' === $this->section_anchor ? '' : ' id="' . esc_attr( $this->section_anchor ) . '"' ) . ' class="' . implode( ' ', $classes ) . '" style="' . $css . '">'
 			. $inner
 			. "</section>\n<!-- /wp:group -->";
 	}
@@ -596,7 +841,7 @@ final class BlockConverter {
 			'layout'   => $layout,
 		);
 
-		$this->editable[] = __( 'Background image', 'wow-signal' );
+		$this->editable[] = __( 'Background image', 'qwerty-soft-signal' );
 
 		$classes = array( 'wp-block-cover', 'alignfull' );
 
@@ -881,6 +1126,17 @@ final class BlockConverter {
 			return $this->form( $node );
 		}
 
+		/*
+		 * A button outside a form is not a form control. It is a tab, a filter
+		 * or a toggle the design drives with JavaScript, and its label is
+		 * content: eight stage buttons reading "01 Project Start", "02 Design"
+		 * are eight things the page says. Dropping them with the form controls
+		 * took a quarter of the words off a page whose lists they introduced.
+		 */
+		if ( 'button' === $tag && ! $this->within_form( $node ) ) {
+			return $this->control( $node );
+		}
+
 		if ( in_array( $tag, self::DROP, true ) ) {
 			$this->note_dropped( $tag );
 
@@ -932,6 +1188,28 @@ final class BlockConverter {
 				}
 
 				/*
+				 * A link around a picture is a linked picture, not a sentence
+				 * with a picture in it.
+				 */
+				$picture = $this->only_image( $node );
+
+				if ( null !== $picture ) {
+					return $this->image( $picture, null, $this->href( $node ) );
+				}
+
+				/*
+				 * A link around a whole card — the pattern every Tailwind
+				 * design uses for a product tile — is a card. Read as inline
+				 * text it collapsed into one paragraph: the picture gone, the
+				 * title no longer a heading, three tiles in a grid reduced to
+				 * three sentences with the words in the right order and none
+				 * of the structure anybody would edit.
+				 */
+				if ( $this->wraps_blocks( $node ) ) {
+					return $this->linked_card( $node );
+				}
+
+				/*
 				 * A stand-alone link ("View report →") is a paragraph whose
 				 * whole text is the link. Converting it as plain text would
 				 * keep the words and lose where they went.
@@ -942,7 +1220,7 @@ final class BlockConverter {
 					return '';
 				}
 
-				$this->editable[] = __( 'Link text and target', 'wow-signal' );
+				$this->editable[] = __( 'Link text and target', 'qwerty-soft-signal' );
 
 				return $this->styled_text( $node, '<a href="' . $this->esc_ref( $this->href( $node ) ) . '">' . $label . '</a>' );
 
@@ -955,7 +1233,7 @@ final class BlockConverter {
 				if ( str_contains( $tag, '-' ) && '' === trim( (string) $node->textContent ) && 0 === $node->getElementsByTagName( 'img' )->length ) {
 					$this->concerns[] = sprintf(
 						/* translators: %s: custom element name, e.g. hero-viz. */
-						__( 'A JS-rendered visual (%s) was left out. Add an image block where it stood if the page needs something there.', 'wow-signal' ),
+						__( 'A JS-rendered visual (%s) was left out. Add an image block where it stood if the page needs something there.', 'qwerty-soft-signal' ),
 						$tag
 					);
 
@@ -967,16 +1245,195 @@ final class BlockConverter {
 	}
 
 	/**
+	 * Whether an element sits inside a form.
+	 *
+	 * @param DOMElement $node Element.
+	 * @return bool
+	 */
+	private function within_form( DOMElement $node ): bool {
+		$parent = $node->parentNode;
+
+		while ( $parent instanceof DOMElement ) {
+			if ( 'form' === strtolower( $parent->tagName ) ) {
+				return true;
+			}
+
+			$parent = $parent->parentNode;
+		}
+
+		return false;
+	}
+
+	/**
+	 * A control the design works with JavaScript, kept as the words it shows.
+	 *
+	 * Nothing here can be made to work — the script that ran it is not coming
+	 * with the design — so the honest conversion is its label, styled as the
+	 * design styled it, plus one note saying what it used to do.
+	 *
+	 * @param DOMElement $node Button.
+	 * @return string
+	 */
+	private function control( DOMElement $node ): string {
+		$label = $this->inline( $node );
+
+		// An icon-only control says nothing; there is nothing to keep.
+		if ( '' === trim( wp_strip_all_tags( $label ) ) ) {
+			return '';
+		}
+
+		$this->concerns[] = __( 'A control the design drives with JavaScript — a tab, a filter, a toggle — was kept as its label. Give it something to do in the editor if the page needs it.', 'qwerty-soft-signal' );
+
+		return $this->styled_text( $node, $label );
+	}
+
+	/**
+	 * The single picture a link wraps, when that is all it wraps.
+	 *
+	 * @param DOMElement $node Anchor.
+	 * @return DOMElement|null
+	 */
+	private function only_image( DOMElement $node ): ?DOMElement {
+		$images = $node->getElementsByTagName( 'img' );
+
+		if ( 1 !== $images->length ) {
+			return null;
+		}
+
+		$image = $images->item( 0 );
+
+		return $image instanceof DOMElement && '' === trim( (string) $node->textContent ) ? $image : null;
+	}
+
+	/**
+	 * Whether a link wraps structure rather than words.
+	 *
+	 * A heading inside it, a picture beside text, a list, a table, or simply
+	 * several block children: any of those and the anchor is a card.
+	 *
+	 * @param DOMElement $node Anchor.
+	 * @return bool
+	 */
+	private function wraps_blocks( DOMElement $node ): bool {
+		foreach ( array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'table', 'figure', 'blockquote' ) as $tag ) {
+			if ( $node->getElementsByTagName( $tag )->length > 0 ) {
+				return true;
+			}
+		}
+
+		if ( $node->getElementsByTagName( 'img' )->length > 0 && '' !== trim( (string) $node->textContent ) ) {
+			return true;
+		}
+
+		$blocks = 0;
+
+		foreach ( $node->childNodes as $child ) {
+			if ( $child instanceof DOMElement && in_array( strtolower( $child->tagName ), array( 'div', 'p', 'section', 'article', 'header', 'footer' ), true ) ) {
+				++$blocks;
+			}
+		}
+
+		return $blocks >= 2;
+	}
+
+	/**
+	 * Convert a link that wraps a card, keeping both the card and its destination.
+	 *
+	 * WordPress has no linked Group, so the destination is carried the way a
+	 * person would write it by hand: on the card's title, and on its picture.
+	 * Everything else converts exactly as it would inside a div.
+	 *
+	 * @param DOMElement $node Anchor.
+	 * @return string
+	 */
+	private function linked_card( DOMElement $node ): string {
+		$href = $this->href( $node );
+
+		if ( '#' !== $href ) {
+			$this->link_lead( $node, $href );
+
+			foreach ( $node->getElementsByTagName( 'img' ) as $image ) {
+				$image->setAttribute( 'data-qs-href', $href );
+			}
+		}
+
+		$this->editable[] = __( 'Card title, text, picture and where the card links to', 'qwerty-soft-signal' );
+
+		return $this->container( $node );
+	}
+
+	/**
+	 * Put the card's link on the first thing a reader would click.
+	 *
+	 * The heading if there is one, otherwise the first line with words in it.
+	 *
+	 * @param DOMElement $node Anchor.
+	 * @param string     $href Destination.
+	 * @return void
+	 */
+	private function link_lead( DOMElement $node, string $href ): void {
+		$lead = null;
+
+		foreach ( array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'div' ) as $tag ) {
+			foreach ( $node->getElementsByTagName( $tag ) as $candidate ) {
+				if ( '' === trim( (string) $candidate->textContent ) || $candidate->getElementsByTagName( 'a' )->length > 0 ) {
+					continue;
+				}
+
+				// A container full of other blocks is not the line to link.
+				if ( in_array( $tag, array( 'div', 'span' ), true ) && $candidate->getElementsByTagName( 'div' )->length > 0 ) {
+					continue;
+				}
+
+				$lead = $candidate;
+				break 2;
+			}
+		}
+
+		if ( ! $lead instanceof DOMElement ) {
+			return;
+		}
+
+		$document = $lead->ownerDocument;
+
+		if ( ! $document instanceof DOMDocument ) {
+			return;
+		}
+
+		$link = $document->createElement( 'a' );
+		$link->setAttribute( 'href', $href );
+
+		while ( null !== $lead->firstChild ) {
+			$link->appendChild( $lead->firstChild );
+		}
+
+		$lead->appendChild( $link );
+	}
+
+	/**
 	 * A block-level container: either a column set, a button row, or a pass-through.
 	 *
 	 * @param DOMElement $node Element.
 	 * @return string
 	 */
 	private function container( DOMElement $node ): string {
-		$buttons = $this->button_links( $node );
+		$faithful = self::faithful();
 
-		if ( array() !== $buttons ) {
-			return $this->buttons( $buttons, $node );
+		/*
+		 * A row of `.btn` anchors is a Buttons block — the right block, and
+		 * the wrong pill. What paints a design's button is the class on the
+		 * anchor, and a Button block cannot carry one there without failing
+		 * block validation the moment the page is opened. So the theme mode
+		 * gets the block, and faithful leaves the row as it found it: the
+		 * anchors keep their classes and the design's CSS draws the buttons
+		 * it always drew.
+		 */
+		if ( ! $faithful ) {
+			$buttons = $this->button_links( $node );
+
+			if ( array() !== $buttons ) {
+				return $this->buttons( $buttons, $node );
+			}
 		}
 
 		/*
@@ -990,16 +1447,24 @@ final class BlockConverter {
 			return $quote;
 		}
 
-		$checklist = $this->as_list( $node );
+		/*
+		 * Reading divs as a list or a statistic is a real improvement when the
+		 * theme is about to restyle them anyway. When the design's stylesheet
+		 * is what paints the page, those divs are what its rules match, and
+		 * rewriting them is how a laid-out card becomes a column of lines.
+		 */
+		if ( ! $faithful ) {
+			$checklist = $this->as_list( $node );
 
-		if ( null !== $checklist ) {
-			return $checklist;
-		}
+			if ( null !== $checklist ) {
+				return $checklist;
+			}
 
-		$metric = $this->as_metric( $node );
+			$metric = $this->as_metric( $node );
 
-		if ( null !== $metric ) {
-			return $metric;
+			if ( null !== $metric ) {
+				return $metric;
+			}
 		}
 
 		// A run of similar siblings is a grid in the design; make it columns.
@@ -1018,7 +1483,7 @@ final class BlockConverter {
 		$max_depth = null === $this->css ? 1 : 2;
 		$is_row    = null === $this->css ? true : in_array( $layout, array( 'grid', 'row' ), true );
 
-		if ( count( $cards ) >= 2 && $is_row && $this->depth < $max_depth ) {
+		if ( ! $faithful && count( $cards ) >= 2 && $is_row && $this->depth < $max_depth ) {
 			/*
 			 * A painted grid — a newsletter card holding copy and a form — is
 			 * a panel with columns inside, so its background, border and
@@ -1052,12 +1517,33 @@ final class BlockConverter {
 			$stacked = 'row' === $layout ? array() : $this->stacked_children( $node );
 
 			if ( array() !== $stacked ) {
-				return $this->stack( $stacked );
+				$lines = $this->stack( $stacked );
+
+				/*
+				 * Three lines the design stacked inside `.report-cover` are
+				 * three blocks and one box. The class that paints the box has
+				 * nowhere to go once the lines are separate blocks, so
+				 * faithful keeps the box around them.
+				 */
+				return $faithful ? $this->wrap_group( $node, $lines ) : $lines;
 			}
 
 			$text = $this->inline( $node );
 
 			return '' === trim( wp_strip_all_tags( $text ) ) ? '' : $this->styled_text( $node, $text );
+		}
+
+		/*
+		 * Faithful keeps the box itself. Every wrapper the design wrote stays
+		 * a wrapper — same tag, same classes, nothing added — because that is
+		 * what its stylesheet is written against: `.reports-grid` lays the
+		 * cards out, `.report-card` frames one, `.report-body` pads it.
+		 * Flattening them was the single reason an imported page arrived as a
+		 * column of paragraphs that shared the design's words and none of its
+		 * shape.
+		 */
+		if ( $faithful ) {
+			return $this->as_group( $node );
 		}
 
 		/*
@@ -1073,6 +1559,64 @@ final class BlockConverter {
 		}
 
 		return $this->children( $node );
+	}
+
+	/**
+	 * Keep a container exactly as the design wrote it, as a Group.
+	 *
+	 * @param DOMElement $node Container.
+	 * @return string
+	 */
+	private function as_group( DOMElement $node ): string {
+		return $this->wrap_group( $node, $this->children( $node ) );
+	}
+
+	/**
+	 * Put a container's own tag, classes and anchor back round converted blocks.
+	 *
+	 * @param DOMElement $node  Container.
+	 * @param string     $inner Converted inner blocks.
+	 * @return string
+	 */
+	private function wrap_group( DOMElement $node, string $inner ): string {
+		if ( '' === trim( $inner ) ) {
+			return '';
+		}
+
+		// The section's own element is already the band; wrapping it would nest it inside itself.
+		if ( $node === $this->root ) {
+			return $inner;
+		}
+
+		$tag = strtolower( $node->tagName );
+
+		if ( ! in_array( $tag, self::GROUP_TAGS, true ) ) {
+			$tag = 'div';
+		}
+
+		$attrs   = 'div' === $tag ? array() : array( 'tagName' => $tag );
+		$classes = array( 'wp-block-group' );
+		$id      = self::clean_anchor( $node->getAttribute( 'id' ) );
+
+		/*
+		 * A Group with no gap of its own inherits the theme's, and the theme's
+		 * is twenty-four pixels between children the design had touching. Zero
+		 * hands the rhythm back to the design's stylesheet, which states it —
+		 * and states it at a specificity that still wins, because the rule
+		 * WordPress writes for the gap is wrapped in `:where()`.
+		 */
+		$attrs['style'] = array( 'spacing' => array( 'blockGap' => '0' ) );
+
+		if ( '' !== $id ) {
+			$attrs['anchor'] = $id;
+		}
+
+		$this->carry( $node, $attrs, $classes );
+
+		return '<!-- wp:group' . ( array() === $attrs ? '' : ' ' . wp_json_encode( $attrs ) ) . " -->\n"
+			. '<' . $tag . ( '' === $id ? '' : ' id="' . esc_attr( $id ) . '"' ) . ' class="' . implode( ' ', $classes ) . '">'
+			. $inner
+			. '</' . $tag . ">\n<!-- /wp:group -->";
 	}
 
 	/**
@@ -1246,7 +1790,7 @@ final class BlockConverter {
 			return null;
 		}
 
-		$this->editable[] = __( 'List items', 'wow-signal' );
+		$this->editable[] = __( 'List items', 'qwerty-soft-signal' );
 
 		$out = array();
 
@@ -1315,9 +1859,9 @@ final class BlockConverter {
 			return null;
 		}
 
-		$this->editable[] = __( 'Figure and its caption', 'wow-signal' );
+		$this->editable[] = __( 'Figure and its caption', 'qwerty-soft-signal' );
 
-		return '<!-- wp:wow/metric ' . wp_json_encode(
+		return '<!-- wp:qs/metric ' . wp_json_encode(
 			array(
 				'value' => $value,
 				'label' => $label,
@@ -1355,7 +1899,7 @@ final class BlockConverter {
 			return null;
 		}
 
-		$this->editable[] = __( 'Quotation', 'wow-signal' );
+		$this->editable[] = __( 'Quotation', 'qwerty-soft-signal' );
 
 		$attrs   = array();
 		$classes = array( 'wp-block-quote' );
@@ -1421,13 +1965,29 @@ final class BlockConverter {
 	 * @return string
 	 */
 	private function stack( array $children ): string {
-		$out = array();
+		$out      = array();
+		$faithful = self::faithful();
 
 		foreach ( $children as $child ) {
 			$text = $this->inline( $child );
 
 			if ( '' === trim( wp_strip_all_tags( $text ) ) ) {
 				continue;
+			}
+
+			/*
+			 * The line keeps the tag it was written as.
+			 *
+			 * A design says `<span>Since</span><strong>2004</strong>` and
+			 * styles it `.stat strong { font-size: 22px; font-weight: 700 }`.
+			 * Flattened to two paragraphs both lines came out the same size,
+			 * and the figure a card exists to show read like its caption. The
+			 * tag costs nothing and is what the rule matches.
+			 */
+			$tag = strtolower( $child->tagName );
+
+			if ( $faithful && in_array( $tag, self::INLINE_KEEP, true ) && ! in_array( $tag, array( 'a', 'br' ), true ) ) {
+				$text = '<' . $tag . '>' . $text . '</' . $tag . '>';
 			}
 
 			$out[] = $this->styled_text( $child, $text );
@@ -1824,7 +2384,7 @@ final class BlockConverter {
 				. esc_html( $label )
 				. "</a></div>\n<!-- /wp:button -->";
 
-			$this->editable[] = __( 'Button label and link', 'wow-signal' );
+			$this->editable[] = __( 'Button label and link', 'qwerty-soft-signal' );
 		}
 
 		if ( array() === $out ) {
@@ -1887,7 +2447,7 @@ final class BlockConverter {
 			$size = 'x-large';
 		}
 
-		$this->editable[] = __( 'Heading text', 'wow-signal' );
+		$this->editable[] = __( 'Heading text', 'qwerty-soft-signal' );
 
 		$design = $this->typography( $node, true );
 		$attrs  = array( 'level' => $level );
@@ -1971,7 +2531,7 @@ final class BlockConverter {
 		$plain = trim( wp_strip_all_tags( $text ) );
 
 		if ( $this->is_eyebrow( $node, $plain ) ) {
-			$this->editable[] = __( 'Small label above a heading', 'wow-signal' );
+			$this->editable[] = __( 'Small label above a heading', 'qwerty-soft-signal' );
 
 			/*
 			 * accent-ink rather than accent: a brand colour is picked to be
@@ -2028,7 +2588,7 @@ final class BlockConverter {
 			return $this->heading( $node, 3 );
 		}
 
-		$this->editable[] = __( 'Body text', 'wow-signal' );
+		$this->editable[] = __( 'Body text', 'qwerty-soft-signal' );
 
 		return $this->paragraph( $text, $node );
 	}
@@ -2187,7 +2747,11 @@ final class BlockConverter {
 
 			if ( null !== $marker ) {
 				++$ticked;
-				$child->removeChild( $marker );
+
+				// Faithful leaves the tick where it is: `.check` is what paints it.
+				if ( ! self::faithful() ) {
+					$child->removeChild( $marker );
+				}
 			}
 
 			$text = trim( $this->inline( $child ) );
@@ -2208,9 +2772,9 @@ final class BlockConverter {
 			return '';
 		}
 
-		$this->editable[] = __( 'List items', 'wow-signal' );
+		$this->editable[] = __( 'List items', 'qwerty-soft-signal' );
 
-		$checks  = ! $ordered && $total > 0 && $ticked === $total;
+		$checks  = ! self::faithful() && ! $ordered && $total > 0 && $ticked === $total;
 		$tag     = $ordered ? 'ol' : 'ul';
 		$attrs   = $ordered ? array( 'ordered' => true ) : array();
 		$classes = array( 'wp-block-list' );
@@ -2267,9 +2831,10 @@ final class BlockConverter {
 	 *
 	 * @param DOMElement      $node   Image element.
 	 * @param DOMElement|null $figure The figure wrapping it, whose classes the block also takes.
+	 * @param string          $href   Where the picture links, when it was a link or sits in one.
 	 * @return string
 	 */
-	private function image( DOMElement $node, ?DOMElement $figure = null ): string {
+	private function image( DOMElement $node, ?DOMElement $figure = null, string $href = '' ): string {
 		$src = trim( $node->getAttribute( 'src' ) );
 
 		// A lazy-loaded image keeps its real file in a data attribute.
@@ -2290,10 +2855,10 @@ final class BlockConverter {
 
 		$alt = $node->getAttribute( 'alt' );
 
-		$this->editable[] = __( 'Image and its alt text', 'wow-signal' );
+		$this->editable[] = __( 'Image and its alt text', 'qwerty-soft-signal' );
 
 		if ( '' === trim( $alt ) ) {
-			$this->concerns[] = __( 'An image had no alt text in the design. Describe it in the editor, or mark it decorative.', 'wow-signal' );
+			$this->concerns[] = __( 'An image had no alt text in the design. Describe it in the editor, or mark it decorative.', 'qwerty-soft-signal' );
 		}
 
 		// The figure's classes first, then the picture's own, all on the block.
@@ -2303,9 +2868,27 @@ final class BlockConverter {
 		$this->carry( $figure, $attrs, $classes );
 		$this->carry( $node, $attrs, $classes );
 
+		/*
+		 * A picture that was a link stays a link. The destination arrives
+		 * either from the anchor this image was the whole of, or on the image
+		 * itself when it sits inside a card that is one big link.
+		 */
+		$href = '' !== $href ? $href : trim( $node->getAttribute( 'data-qs-href' ) );
+		$open = '';
+		$shut = '';
+
+		if ( '' !== $href && '#' !== $href ) {
+			$attrs['linkDestination'] = 'custom';
+			$attrs['href']            = $href;
+			$open                     = '<a href="' . $this->esc_ref( $href ) . '">';
+			$shut                     = '</a>';
+		}
+
 		return '<!-- wp:image ' . wp_json_encode( $attrs ) . " -->\n"
 			. '<figure class="' . implode( ' ', $classes ) . '">'
+			. $open
 			. '<img src="' . $this->esc_ref( $src ) . '" alt="' . esc_attr( $alt ) . '"/>'
+			. $shut
 			. "</figure>\n<!-- /wp:image -->";
 	}
 
@@ -2350,7 +2933,7 @@ final class BlockConverter {
 			return '';
 		}
 
-		$this->editable[] = __( 'Quotation', 'wow-signal' );
+		$this->editable[] = __( 'Quotation', 'qwerty-soft-signal' );
 
 		$attrs   = array();
 		$classes = array( 'wp-block-quote' );
@@ -2403,7 +2986,7 @@ final class BlockConverter {
 			return '';
 		}
 
-		$this->editable[] = __( 'Table contents', 'wow-signal' );
+		$this->editable[] = __( 'Table contents', 'qwerty-soft-signal' );
 
 		$attrs   = array( 'hasFixedLayout' => true );
 		$classes = array( 'wp-block-table' );
@@ -2471,7 +3054,17 @@ final class BlockConverter {
 			}
 
 			if ( 'a' === $tag ) {
-				$out .= '<a href="' . $this->esc_ref( $this->href( $child ) ) . '">' . $this->inline( $child ) . '</a>';
+				/*
+				 * `.btn`, `.text-link`, `.nav-cta` — a link's class is how a
+				 * design tells a pill from a sentence. Kept when the design's
+				 * own stylesheet came with it, dropped when the theme is doing
+				 * the styling and the class would only collide.
+				 */
+				$raw          = preg_split( '/\s+/', trim( $child->getAttribute( 'class' ) ) );
+				$link_classes = self::faithful() ? $this->design_classes( is_array( $raw ) ? $raw : array() ) : array();
+				$attr         = array() === $link_classes ? '' : ' class="' . esc_attr( implode( ' ', $link_classes ) ) . '"';
+
+				$out .= '<a' . $attr . ' href="' . $this->esc_ref( $this->href( $child ) ) . '">' . $this->inline( $child ) . '</a>';
 				continue;
 			}
 
@@ -2491,7 +3084,7 @@ final class BlockConverter {
 				continue;
 			}
 
-			if ( null === $keep && 'span' === $tag && null !== $this->css ) {
+			if ( null === $keep && 'span' === $tag && ( null !== $this->css || self::faithful() ) ) {
 				$raw          = preg_split( '/\s+/', trim( $child->getAttribute( 'class' ) ) );
 				$span_classes = $this->design_classes( is_array( $raw ) ? $raw : array() );
 
@@ -2525,7 +3118,7 @@ final class BlockConverter {
 		}
 
 		if ( 1 === preg_match( '#^(javascript|vbscript|data):#i', $href ) ) {
-			$this->concerns[] = __( 'A link ran a script instead of going somewhere; it now points nowhere.', 'wow-signal' );
+			$this->concerns[] = __( 'A link ran a script instead of going somewhere; it now points nowhere.', 'qwerty-soft-signal' );
 
 			return '#';
 		}
@@ -2612,10 +3205,10 @@ final class BlockConverter {
 		$classes = array();
 		$this->carry( $node, $attrs, $classes );
 
-		$this->editable[] = __( 'Form: recipient, labels and success message', 'wow-signal' );
-		$this->concerns[] = __( 'The design’s form was replaced with the theme’s Contact form block, which sends to the site’s admin address. Adjust its fields and recipient in the editor.', 'wow-signal' );
+		$this->editable[] = __( 'Form: recipient, labels and success message', 'qwerty-soft-signal' );
+		$this->concerns[] = __( 'The design’s form was replaced with the theme’s Contact form block, which sends to the site’s admin address. Adjust its fields and recipient in the editor.', 'qwerty-soft-signal' );
 
-		return '<!-- wp:wow/contact-form' . ( array() === $attrs ? '' : ' ' . wp_json_encode( $attrs ) ) . ' /-->';
+		return '<!-- wp:qs/contact-form' . ( array() === $attrs ? '' : ' ' . wp_json_encode( $attrs ) ) . ' /-->';
 	}
 
 	/**
@@ -2626,19 +3219,19 @@ final class BlockConverter {
 	 */
 	private function note_dropped( string $tag ): void {
 		if ( 'form' === $tag || 'input' === $tag || 'select' === $tag || 'textarea' === $tag || 'button' === $tag ) {
-			$this->concerns[] = __( 'This section had a form. Add the theme’s Contact form block where it belongs — a form copied as markup would not send anything.', 'wow-signal' );
+			$this->concerns[] = __( 'This section had a form. Add the theme’s Contact form block where it belongs — a form copied as markup would not send anything.', 'qwerty-soft-signal' );
 
 			return;
 		}
 
 		if ( 'svg' === $tag || 'canvas' === $tag ) {
-			$this->concerns[] = __( 'Decorative vector artwork was left out. The theme’s gradients stand in for it; add a real image if you need the original.', 'wow-signal' );
+			$this->concerns[] = __( 'Decorative vector artwork was left out. The theme’s gradients stand in for it; add a real image if you need the original.', 'qwerty-soft-signal' );
 
 			return;
 		}
 
 		if ( 'iframe' === $tag || 'object' === $tag || 'embed' === $tag ) {
-			$this->concerns[] = __( 'An embedded frame was left out. Use the matching embed block if you need it back.', 'wow-signal' );
+			$this->concerns[] = __( 'An embedded frame was left out. Use the matching embed block if you need it back.', 'qwerty-soft-signal' );
 		}
 	}
 
@@ -3600,7 +4193,7 @@ final class BlockConverter {
 	private function summary( array $section ): string {
 		return sprintf(
 			/* translators: 1: section label, 2: word count, 3: image count. */
-			__( '"%1$s" — %2$d words and %3$d image(s), converted structurally into editable blocks.', 'wow-signal' ),
+			__( '"%1$s" — %2$d words and %3$d image(s), converted structurally into editable blocks.', 'qwerty-soft-signal' ),
 			(string) $section['label'],
 			(int) $section['words'],
 			(int) $section['images']

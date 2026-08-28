@@ -1,0 +1,74 @@
+{
+    "key": "group_qs_design_videos_d3ad00",
+    "title": "视频简报页首",
+    "fields": [
+        {
+            "key": "field_qs_videos_d3ad00_eyebrow",
+            "label": "引导标签",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert Khoubian Market Intelligence",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_d3ad00_heading",
+            "label": "标题",
+            "name": "heading",
+            "type": "text",
+            "default_value": "国际贸易市场情报视频简报",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_d3ad00_intro",
+            "label": "简介文字",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "通过 Robert Khoubian 经批准的数字分身和声音克隆，以4–5分钟解释报告、海关数据方法和市场准入分析。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_d3ad00_latest_briefing_link",
+            "label": "最新简报链接",
+            "name": "latest_briefing_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#latest-video",
+                "title": "最新简报",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_videos_d3ad00_youtube_channel_link",
+            "label": "YouTube 频道链接",
+            "name": "youtube_channel_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#",
+                "title": "访问 YouTube 频道",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-videos-d3ad00"
+            }
+        ]
+    ],
+    "active": true
+}

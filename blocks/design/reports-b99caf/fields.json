@@ -1,0 +1,33 @@
+{
+    "key": "group_qs_design_reports_b99caf",
+    "title": "Подписка на рассылку",
+    "fields": [
+        {
+            "key": "field_qs_reports_b99caf_heading",
+            "label": "Заголовок",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Получать уведомления о новых отчетах",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_b99caf_lede",
+            "label": "Описание под заголовком",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Получайте publication updates, sample reports и market intelligence announcements.",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-b99caf"
+            }
+        ]
+    ],
+    "active": true
+}

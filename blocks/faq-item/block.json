@@ -1,14 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "wow/faq-item",
+	"name": "qs/faq-item",
 	"title": "FAQ question",
-	"category": "wow",
+	"category": "qs",
 	"icon": "editor-help",
 	"description": "One question and its answer. Add these inside an FAQ accordion.",
 	"keywords": [ "faq", "question", "answer" ],
-	"textdomain": "wow-signal",
-	"parent": [ "wow/faq" ],
+	"textdomain": "qwerty-soft-signal",
+	"parent": [ "qs/faq" ],
 	"attributes": {
 		"question": {
 			"type": "string",

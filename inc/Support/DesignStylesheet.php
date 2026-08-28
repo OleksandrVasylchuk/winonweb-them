@@ -2,13 +2,13 @@
 /**
  * The design's own stylesheet, carried onto the site as Additional CSS.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Theme_JSON_Resolver;
 
@@ -37,21 +37,28 @@ final class DesignStylesheet {
 	 *
 	 * @var string
 	 */
-	public const START = '/* wow-signal:design-css:start */';
+	public const START = '/* qwerty-soft-signal:design-css:start */';
 
 	/**
 	 * Closes the slice.
 	 *
 	 * @var string
 	 */
-	public const END = '/* wow-signal:design-css:end */';
+	public const END = '/* qwerty-soft-signal:design-css:end */';
 
 	/**
 	 * Most CSS that is installed, in bytes.
 	 *
+	 * Three hundred kilobytes was chosen when a design meant a hand-written
+	 * stylesheet. A Tailwind build ships every utility the site uses in one
+	 * file — the smaller of the two handoffs here is 146 KB and a larger site
+	 * runs past half a megabyte — and a stylesheet cut off in the middle is
+	 * not a smaller design, it is a broken one: the rules that happened to be
+	 * last are exactly the ones the last sections needed.
+	 *
 	 * @var int
 	 */
-	private const CAP = 307200;
+	private const CAP = 2097152;
 
 	/**
 	 * Largest single file that is read.
@@ -80,8 +87,12 @@ final class DesignStylesheet {
 	/**
 	 * Declarations a container-like selector is not allowed to set.
 	 *
-	 * The block layout owns the content width; a design's `.container`
-	 * narrowing or centring a block wrapper fights it.
+	 * When the theme is doing the styling, the block layout owns the content
+	 * width and a design's `.container` narrowing or centring a block wrapper
+	 * fights it. When the design is doing the styling there is no block
+	 * container at all — that was taken out on purpose — and this rule is the
+	 * only thing centring the page. Stripped anyway, every imported page came
+	 * out flush against the left edge of the window.
 	 *
 	 * @var array<int, string>
 	 */
@@ -99,14 +110,34 @@ final class DesignStylesheet {
 	);
 
 	/**
-	 * Read the design's CSS, rewrite it, and append it to Additional CSS.
+	 * Whether the compilation is for a preview frame rather than for the site.
 	 *
-	 * @param string                                  $root      Design root directory.
-	 * @param array<string, array{id:int,url:string}> $media_map Archive-relative path to imported attachment.
-	 * @return array{bytes:int,rules:int,dropped:int,unmapped:int,installed:bool}
+	 * On the site the theme owns html and body, so a design's rules for them
+	 * are dropped and only its variables survive. In a preview frame the body
+	 * *is* the design's — and a section whose background lived on the body
+	 * previewed as white text on white until this told the two apart.
+	 *
+	 * @var bool
 	 */
-	public static function import( string $root, array $media_map = array() ): array {
-		self::$counts = array(
+	private static bool $preview = false;
+
+	/**
+	 * The design's stylesheets, gathered and rewritten, without installing them.
+	 *
+	 * Split out from import() for the preview, which has to show the design as
+	 * the archive renders it — markup with no stylesheet behind it is not a
+	 * preview of anything, and every Tailwind-shaped design previewed as a
+	 * column of unstyled text until this existed.
+	 *
+	 * @param string                                  $root         Design root directory.
+	 * @param array<string, array{id:int,url:string}> $media_map    Archive-relative path to imported attachment.
+	 * @param bool                                    $for_preview  Keep the design's html and body rules, for a frame that is the design's own page.
+	 * @param array<int, string>                      $pages        Pages whose styling is wanted, absolute paths; every stylesheet in the design when empty.
+	 * @return string
+	 */
+	public static function compile( string $root, array $media_map = array(), bool $for_preview = false, array $pages = array() ): string {
+		self::$preview = $for_preview;
+		self::$counts  = array(
 			'rules'    => 0,
 			'dropped'  => 0,
 			'unmapped' => 0,
@@ -115,7 +146,7 @@ final class DesignStylesheet {
 		$root   = rtrim( str_replace( '\\', '/', $root ), '/' );
 		$pieces = array();
 
-		foreach ( self::gather( $root ) as $sheet ) {
+		foreach ( self::gather( $root, $pages ) as $sheet ) {
 			$pieces[] = self::rewrite( (string) $sheet['css'], (string) $sheet['dir'], $root, $media_map );
 		}
 
@@ -128,6 +159,20 @@ final class DesignStylesheet {
 		if ( strlen( $css ) > self::CAP ) {
 			$css = self::truncate( $css, self::CAP );
 		}
+
+		return $css;
+	}
+
+	/**
+	 * Read the design's CSS, rewrite it, and append it to Additional CSS.
+	 *
+	 * @param string                                  $root      Design root directory.
+	 * @param array<string, array{id:int,url:string}> $media_map Archive-relative path to imported attachment.
+	 * @param array<int, string>                      $pages     Pages being built, absolute paths; every stylesheet in the design when empty.
+	 * @return array{bytes:int,rules:int,dropped:int,unmapped:int,installed:bool}
+	 */
+	public static function import( string $root, array $media_map = array(), array $pages = array() ): array {
+		$css = self::compile( $root, $media_map, false, $pages );
 
 		self::reset();
 
@@ -204,14 +249,31 @@ final class DesignStylesheet {
 	 * Mirrors DesignTokens::gather_css: all .css files, then the inline
 	 * `<style>` blocks of every page, because some exports ship no .css at all.
 	 *
-	 * @param string $root Design root.
+	 * @param string             $root  Design root.
+	 * @param array<int, string> $pages Pages whose styling is wanted, absolute paths; the whole design when empty.
 	 * @return array<int, array{css:string,dir:string}>
 	 */
-	private static function gather( string $root ): array {
+	private static function gather( string $root, array $pages = array() ): array {
 		$sheets = array();
 
 		if ( ! is_dir( $root ) ) {
 			return $sheets;
+		}
+
+		/*
+		 * Named pages are styled by what they link, and by nothing else.
+		 *
+		 * A developer handoff is not one design. The last one held five
+		 * projects side by side — a marketing site, an admin console, two
+		 * prototypes — each with a complete stylesheet of its own, each
+		 * defining `:root`, `body`, `.card`, `.btn` and `.table`. Swept up
+		 * together they overwrite one another in directory order, and the
+		 * page comes out wearing whichever project sorted last. Following the
+		 * page's own `<link>` tags gives it the stylesheet it was written
+		 * against, and only that one.
+		 */
+		if ( array() !== $pages ) {
+			return self::for_pages( $root, $pages );
 		}
 
 		$iterator = new \RecursiveIteratorIterator(
@@ -257,6 +319,147 @@ final class DesignStylesheet {
 		}
 
 		return $sheets;
+	}
+
+	/**
+	 * The stylesheets a set of pages links, plus the CSS written inside them.
+	 *
+	 * @param string             $root  Design root.
+	 * @param array<int, string> $pages Absolute page paths.
+	 * @return array<int, array{css:string,dir:string}>
+	 */
+	private static function for_pages( string $root, array $pages ): array {
+		$sheets = array();
+		$seen   = array();
+
+		foreach ( $pages as $page ) {
+			$page = str_replace( '\\', '/', (string) $page );
+
+			if ( ! is_file( $page ) ) {
+				continue;
+			}
+
+			$html = (string) file_get_contents( $page ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+			$dir  = dirname( $page );
+
+			if ( preg_match_all( '#<link\b[^>]*>#i', $html, $links ) ) {
+				foreach ( $links[0] as $tag ) {
+					if ( 1 !== preg_match( '#\brel\s*=\s*["\']?stylesheet#i', $tag ) ) {
+						continue;
+					}
+
+					if ( 1 !== preg_match( '#\bhref\s*=\s*["\']([^"\']+)["\']#i', $tag, $found ) ) {
+						continue;
+					}
+
+					$href = trim( html_entity_decode( $found[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+
+					// A stylesheet from somewhere else on the internet is not the design's to install.
+					if ( '' === $href || 1 === preg_match( '#^(?:[a-z][a-z0-9+.-]*:|//)#i', $href ) ) {
+						continue;
+					}
+
+					$target = (string) strtok( $href, '?#' );
+					$path   = self::beside( $dir, $target );
+
+					/*
+					 * A link that resolves to nothing is not a mistake to skip
+					 * over. A handoff splits one site across several folders
+					 * and zips them separately, so a page in the AI blueprint
+					 * asks for `../assets/styles.css` and the file is over in
+					 * the website baseline — the same stylesheet, one folder
+					 * further out than the export knew about. Looked up by
+					 * name, nearest copy first, the page gets the sheet it was
+					 * written against instead of nothing at all.
+					 */
+					if ( null === $path || ! str_starts_with( $path, $root . '/' ) ) {
+						$path = self::nearest_named( $root, basename( $target ), $page );
+					}
+
+					if ( null === $path || isset( $seen[ $path ] ) ) {
+						continue;
+					}
+
+					$seen[ $path ] = true;
+
+					if ( ! is_file( $path ) || filesize( $path ) >= self::MAX_FILE ) {
+						continue;
+					}
+
+					$sheets[] = array(
+						'css' => (string) file_get_contents( $path ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+						'dir' => self::relative_dir( $path, $root ),
+					);
+				}
+			}
+
+			if ( preg_match_all( '#<style[^>]*>(.*?)</style>#is', $html, $blocks ) ) {
+				$sheets[] = array(
+					'css' => implode( "\n", $blocks[1] ),
+					'dir' => self::relative_dir( $page, $root ),
+				);
+			}
+		}
+
+		return $sheets;
+	}
+
+	/**
+	 * The copy of a named stylesheet that sits closest to a page.
+	 *
+	 * Closest by shared path: a `styles.css` inside the same project beats one
+	 * in a sibling project, which beats one at the far end of the archive.
+	 *
+	 * @param string $root Design root.
+	 * @param string $name File name, no directory.
+	 * @param string $page Absolute path of the page that asked for it.
+	 * @return string|null
+	 */
+	private static function nearest_named( string $root, string $name, string $page ): ?string {
+		if ( '' === $name || 'css' !== strtolower( (string) pathinfo( $name, PATHINFO_EXTENSION ) ) ) {
+			return null;
+		}
+
+		$best  = null;
+		$score = -1;
+
+		try {
+			$iterator = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $root, \FilesystemIterator::SKIP_DOTS )
+			);
+
+			foreach ( $iterator as $file ) {
+				if ( ! $file->isFile() || $file->getFilename() !== $name || $file->getSize() >= self::MAX_FILE ) {
+					continue;
+				}
+
+				$path  = str_replace( '\\', '/', $file->getPathname() );
+				$share = strspn( $path ^ $page, "\0" );
+
+				if ( $share > $score ) {
+					$score = $share;
+					$best  = $path;
+				}
+			}
+		} catch ( \Throwable $error ) {
+			unset( $error );
+		}
+
+		return $best;
+	}
+
+	/**
+	 * A stylesheet href resolved against the directory it was written in.
+	 *
+	 * @param string $dir  Directory of the page holding the link.
+	 * @param string $href Relative path.
+	 * @return string|null Absolute path, or null when it cannot be resolved.
+	 */
+	private static function beside( string $dir, string $href ): ?string {
+		$href = ltrim( str_replace( '\\', '/', $href ), '/' );
+		$path = realpath( $dir . '/' . $href );
+
+		return false === $path ? null : str_replace( '\\', '/', $path );
 	}
 
 	/**
@@ -410,7 +613,8 @@ final class DesignStylesheet {
 
 		$root_only = self::is_root_selector( $selector );
 		$chrome    = 1 === preg_match( '/(nav|header|topbar|masthead|menu)/i', $selector );
-		$container = 1 === preg_match( '/\.(container|wrap|wrapper|inner|content)(?![\w-])/i', $selector );
+		$container = ! BlockConverter::faithful()
+			&& 1 === preg_match( '/\.(container|wrap|wrapper|inner|content)(?![\w-])/i', $selector );
 		$kept      = array();
 
 		foreach ( self::declarations( $body ) as $declaration ) {
@@ -429,7 +633,7 @@ final class DesignStylesheet {
 				continue;
 			}
 
-			if ( $root_only || ! self::is_safe( $check ) ) {
+			if ( ( $root_only && ! self::$preview ) || ! self::is_safe( $check ) ) {
 				continue;
 			}
 

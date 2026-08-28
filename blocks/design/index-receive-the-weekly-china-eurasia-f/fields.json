@@ -1,0 +1,33 @@
+{
+    "key": "group_qs_design_index_receive_the_weekly_china_eurasia_f",
+    "title": "Receive the Weekly China–Eurasia Food Trade Briefing",
+    "fields": [
+        {
+            "key": "field_qs_index_receive_the_weekly_china_eurasia_f_heading",
+            "label": "Subheading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Receive the Weekly China–Eurasia Food Trade Briefing",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_receive_the_weekly_china_eurasia_f_lede",
+            "label": "Text",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "One concise email covering customs data, market access, frozen food trade and the indicators that matter to operators.",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-receive-the-weekly-china-eurasia-f"
+            }
+        ]
+    ],
+    "active": true
+}

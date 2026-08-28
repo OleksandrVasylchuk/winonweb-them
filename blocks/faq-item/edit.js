@@ -1,5 +1,5 @@
 /**
- * Editor UI for wow/faq-item.
+ * Editor UI for qs/faq-item.
  */
 ( function ( wp ) {
 	'use strict';
@@ -16,18 +16,18 @@
 	var ANSWER_TEMPLATE = [
 		[
 			'core/paragraph',
-			{ placeholder: __( 'Answer the question in a sentence or two…', 'wow-signal' ) },
+			{ placeholder: __( 'Answer the question in a sentence or two…', 'qwerty-soft-signal' ) },
 		],
 	];
 
-	wp.blocks.registerBlockType( 'wow/faq-item', {
+	wp.blocks.registerBlockType( 'qs/faq-item', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
 
-			var blockProps = useBlockProps( { className: 'wow-faq__item is-editor' } );
+			var blockProps = useBlockProps( { className: 'qs-faq__item is-editor' } );
 			var innerProps = useInnerBlocksProps(
-				{ className: 'wow-faq__answer' },
+				{ className: 'qs-faq__answer' },
 				{ template: ANSWER_TEMPLATE, templateLock: false }
 			);
 
@@ -39,10 +39,10 @@
 					null,
 					el(
 						PanelBody,
-						{ title: __( 'Question', 'wow-signal' ) },
+						{ title: __( 'Question', 'qwerty-soft-signal' ) },
 						el( ToggleControl, {
-							label: __( 'Open when the page loads', 'wow-signal' ),
-							help: __( 'Use this for the one question most visitors ask.', 'wow-signal' ),
+							label: __( 'Open when the page loads', 'qwerty-soft-signal' ),
+							help: __( 'Use this for the one question most visitors ask.', 'qwerty-soft-signal' ),
 							checked: !! attributes.startOpen,
 							onChange: function ( value ) {
 								setAttributes( { startOpen: value } );
@@ -55,12 +55,12 @@
 					blockProps,
 					el(
 						'div',
-						{ className: 'wow-faq__question' },
+						{ className: 'qs-faq__question' },
 						el( RichText, {
 							tagName: 'span',
-							className: 'wow-faq__question-text',
+							className: 'qs-faq__question-text',
 							value: attributes.question,
-							placeholder: __( 'Type the question…', 'wow-signal' ),
+							placeholder: __( 'Type the question…', 'qwerty-soft-signal' ),
 							allowedFormats: [ 'core/bold', 'core/italic', 'core/code' ],
 							onChange: function ( value ) {
 								setAttributes( { question: value } );

@@ -4,16 +4,16 @@
  *
  * Each file in tests/wp/ (except bootstrap.php) is one PHP process, so a
  * fatal error in one cannot hide the results of the others. The install is
- * found the way the bootstrap finds it — WOW_WP_PATH, else a wp-load.php above
+ * found the way the bootstrap finds it — QSOFT_WP_PATH, else a wp-load.php above
  * the theme — and when there is none the whole thing is a skip, not a failure:
  * `npm test` does not depend on this, `npm run test:all` does.
  *
  * Usage:
  *   npm run test:wp                       # every test
  *   npm run test:wp -- contact-form seo   # only these
- *   WOW_WP_PATH=/var/www/html npm run test:wp
+ *   QSOFT_WP_PATH=/var/www/html npm run test:wp
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { spawnSync } from 'node:child_process';
@@ -25,9 +25,9 @@ import { requirePhp } from './php.mjs';
 const root = resolve( dirname( fileURLToPath( import.meta.url ) ), '..' );
 const dir = resolve( root, 'tests/wp' );
 
-/** Where WordPress is, or null. Mirrors wow_locate_wordpress() in bootstrap.php. */
+/** Where WordPress is, or null. Mirrors qsoft_locate_wordpress() in bootstrap.php. */
 const locateWordPress = () => {
-	const configured = process.env.WOW_WP_PATH;
+	const configured = process.env.QSOFT_WP_PATH;
 
 	if ( configured ) {
 		return existsSync( resolve( configured, 'wp-load.php' ) ) ? configured : null;
@@ -55,7 +55,7 @@ const locateWordPress = () => {
 const wordpress = locateWordPress();
 
 if ( null === wordpress ) {
-	console.log( 'skipped: no WordPress found (set WOW_WP_PATH)' );
+	console.log( 'skipped: no WordPress found (set QSOFT_WP_PATH)' );
 	process.exit( 0 );
 }
 
@@ -87,7 +87,7 @@ for ( const file of files ) {
 		cwd: root,
 		shell: false,
 		encoding: 'utf8',
-		env: { ...process.env, WOW_WP_PATH: wordpress },
+		env: { ...process.env, QSOFT_WP_PATH: wordpress },
 		maxBuffer: 64 * 1024 * 1024,
 	} );
 

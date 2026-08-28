@@ -1,0 +1,91 @@
+{
+    "key": "group_qs_design_media_robert_khoubian_2922b3",
+    "title": "Media profile",
+    "fields": [
+        {
+            "key": "field_qs_media_robert_khoubian_2922b3_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Robert Khoubian 是谁？",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_robert_khoubian_2922b3_short_bio_heading",
+            "label": "Short bio heading",
+            "name": "short_bio_heading",
+            "type": "text",
+            "default_value": "简短简介",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_robert_khoubian_2922b3_short_bio",
+            "label": "Short bio",
+            "name": "short_bio",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert Khoubian 是国际食品贸易专业人士、企业家和市场情报发布者，专注于中国—欧亚食品贸易、冷冻食品供应链和跨境市场准入。自 2004 年以来，他的工作覆盖中国、俄罗斯及独联体市场、北美、东南亚和欧盟。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_robert_khoubian_2922b3_detailed_bio_heading",
+            "label": "Detailed bio heading",
+            "name": "detailed_bio_heading",
+            "type": "text",
+            "default_value": "详细简介",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_robert_khoubian_2922b3_detailed_bio",
+            "label": "Detailed bio",
+            "name": "detailed_bio",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert 的工作结合了商业执行、监管知识和实用市场情报。他的经验包括国际食品贸易、海关和兽医要求、加拿大政府贸易代表团、零售产品本地化、冷链物流，以及 Aquaprole Group 在加拿大、美国、新加坡、中国和香港的发展。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_robert_khoubian_2922b3_formats_heading",
+            "label": "Formats heading",
+            "name": "formats_heading",
+            "type": "text",
+            "default_value": "适合的形式",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_robert_khoubian_2922b3_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_media_robert_khoubian_2922b3_row_format",
+                    "label": "Format",
+                    "name": "format",
+                    "type": "text",
+                    "default_value": "书面问答",
+                    "instructions": "A short line of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-media-robert-khoubian-2922b3"
+            }
+        ]
+    ],
+    "active": true
+}

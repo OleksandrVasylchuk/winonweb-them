@@ -1,10 +1,10 @@
-# Accessibility conformance report — WOW — Signal
+# Accessibility conformance report — Qwerty Soft — Signal
 
-**Product:** WOW — Signal, a WordPress block theme
+**Product:** Qwerty Soft — Signal, a WordPress block theme
 **Version covered:** 1.2.0
 **Report date:** 17 August 2026
 **Standard:** WCAG 2.2, Level AA
-**Prepared by:** WOW — Win On Web — <https://www.winonweb.dev/>
+**Prepared by:** Qwerty Soft — <https://qwerty-soft.com/>
 
 ---
 
@@ -67,7 +67,7 @@ still visible without failing the build for something the standard does not ask
 for.
 
 Brand colours entered in the setup screen are **not used exactly as given.**
-`Wow\Signal\Support\BrandKit` keeps the hue and walks the lightness until the
+`Qwerty\Soft\Support\BrandKit` keeps the hue and walks the lightness until the
 derived colour clears the same contract, with a small margin. This was swept
 over 127 brand colours across both light and dark modes — 6,858 pairs, 0 below
 threshold — so a client cannot produce an inaccessible palette from that screen.
@@ -88,7 +88,7 @@ the theme's own markup:
   module ids such as `@wordpress/interactivity-js-modulepreload`. HTML5 permits
   any non-empty id without whitespace; the rule's default is the stricter HTML4
   one.
-- **`no-redundant-role`** is off. `.wow-slider__track` is a `<ul>` with
+- **`no-redundant-role`** is off. `.qs-slider__track` is a `<ul>` with
   `list-style: none`, which makes Safari drop list semantics; `role="list"`
   restores them. The role is redundant per spec and necessary in practice.
 - **`long-title`** is off. It measures the length of a `<title>`, which is
@@ -157,7 +157,7 @@ figure stuck part-way.
 - Table header cells are given `scope="col"` or `scope="row"` at render time
   when the author has not set one (WCAG technique H63). The core table block
   does not do this.
-- A skip link to `#wow-main` is the first focusable element on every page.
+- A skip link to `#qs-main` is the first focusable element on every page.
 
 ---
 
@@ -200,6 +200,6 @@ axe-core was run in Chrome against a live installation, excluding `#wpadminbar`.
 ## Feedback
 
 If you find a barrier in this theme, tell us and we will treat it as a defect
-rather than a feature request: <https://www.winonweb.dev/>
+rather than a feature request: <https://qwerty-soft.com/>
 
-© WOW — Win On Web
+© Qwerty Soft

@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-media-78288d",
+    "title": "Media hero",
+    "category": "qs",
+    "description": "Media hero — 7 pieces of text, 1 picture, 2 links, 5 repeating items. From media.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "media",
+        "hero"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "eyebrow": "媒体与新闻资料中心",
+                "heading": "全球食品贸易专家评论。",
+                "lede": "面向记者、会议主办方、贸易协会和行业合作伙伴的资料中心，提供关于中国—欧亚食品贸易、冷冻食品供应链、市场准入和国际贸易执行的专业评论方向。",
+                "primary_cta": {
+                    "url": "#topics",
+                    "title": "采访主题",
+                    "target": ""
+                },
+                "secondary_cta": {
+                    "url": "#contact",
+                    "title": "媒体联系",
+                    "target": ""
+                },
+                "card_eyebrow": "Media Profile",
+                "spokesperson_name": "Robert Khoubian",
+                "spokesperson_focus": "China • Eurasia • Frozen Food Supply Chains",
+                "formats_label": "Media Formats"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/media.html",
+    "qsDesignVersion": 7
+}

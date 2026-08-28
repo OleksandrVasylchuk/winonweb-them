@@ -2,15 +2,15 @@
 /**
  * Core Web Vitals defaults.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -241,7 +241,7 @@ final class Performance implements Module {
 		 *
 		 * @param array<int, string> $origins Absolute origins, e.g. https://cdn.example.com.
 		 */
-		$origins = (array) apply_filters( 'wow_signal/preconnect_origins', array() );
+		$origins = (array) apply_filters( 'qwerty_soft/preconnect_origins', array() );
 
 		foreach ( $origins as $origin ) {
 			if ( is_string( $origin ) && '' !== $origin ) {

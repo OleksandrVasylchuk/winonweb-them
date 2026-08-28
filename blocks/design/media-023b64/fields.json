@@ -1,0 +1,80 @@
+{
+    "key": "group_qs_design_media_023b64",
+    "title": "Media contact",
+    "fields": [
+        {
+            "key": "field_qs_media_023b64_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "媒体联系",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_023b64_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "如需采访、书面评论、会议圆桌、网络研讨会或专业咨询，可直接联系 Robert Khoubian。",
+            "instructions": "A short paragraph of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_023b64_note",
+            "label": "Small note",
+            "name": "note",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "该媒体页面旨在为未来的媒体沟通和行业合作提供清晰资料，同时保持保守、可验证的公开形象。",
+            "instructions": "A short paragraph of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_023b64_email_link",
+            "label": "Email link",
+            "name": "email_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "mailto:robert@robertkhoubian.com",
+                "title": "发送邮件",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_023b64_about_link",
+            "label": "Link to the about page",
+            "name": "about_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "about.html",
+                "title": "关于",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-media-023b64"
+            }
+        ]
+    ],
+    "active": true
+}

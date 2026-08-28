@@ -1,6 +1,6 @@
-=== WOW — Signal ===
+=== Qwerty Soft — Signal ===
 
-Contributors: winonweb
+Contributors: qwertysoft
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
@@ -9,11 +9,11 @@ License: GNU General Public License v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: full-site-editing, block-patterns, block-styles, accessibility-ready, translation-ready, custom-colors, custom-logo, custom-menu, editor-style, featured-images, wide-blocks, one-column, two-columns, right-sidebar, blog, portfolio, e-commerce
 
-A fast, accessible Gutenberg block theme for studios, agencies and service businesses. Built by WOW — Win On Web.
+A fast, accessible Gutenberg block theme for studios, agencies and service businesses. Built by Qwerty Soft.
 
 == Description ==
 
-WOW — Signal is a Full Site Editing theme for people who care what the numbers say after launch.
+Qwerty Soft — Signal is a Full Site Editing theme for people who care what the numbers say after launch.
 
 Everything is editable in the block editor. There is no page builder to license, no framework to learn and no build step to run: what you download is what runs on the server.
 
@@ -44,7 +44,7 @@ Product, catalogue, cart and checkout templates are included and use WooCommerce
 
 1. In wp-admin go to Appearance → Themes → Add New → Upload Theme.
 2. Upload the ZIP and click Activate.
-3. Go to Appearance → Editor to edit templates, or create a page and pick one of the "WOW — Full pages" patterns.
+3. Go to Appearance → Editor to edit templates, or create a page and pick one of the "Qwerty Soft — Full pages" patterns.
 
 No build step, no Composer install, no required plugins.
 
@@ -56,7 +56,7 @@ No. The theme is built on the block editor that ships with WordPress.
 
 = Where do contact form messages go? =
 
-To the site administrator address under Settings → General. A developer can route a form elsewhere with the `wow_signal/contact_recipient` filter, which resolves the recipient on the server — the address is never read from the request.
+To the site administrator address under Settings → General. A developer can route a form elsewhere with the `qwerty_soft/contact_recipient` filter, which resolves the recipient on the server — the address is never read from the request.
 
 = How do I turn the designer credit on or off? =
 
@@ -85,7 +85,7 @@ Adds self-hosted updates, Site Health checks and a safer design import. Your col
 * Design import: the report says what the model changed, what it could not carry, and what came back unusable. A section that fell back to the structural conversion says so rather than looking like one the model approved of.
 
 = 1.3.0 =
-* Updates. The theme now checks the studio's server for new versions and offers them under Appearance → Themes like any other theme. Every package is verified against a published SHA-256 checksum before it is unpacked. What leaves the site is the installed version and a one-way hash of the site address, nothing more; the `wow_signal/check_updates` filter switches the check off entirely.
+* Updates. The theme now checks the studio's server for new versions and offers them under Appearance → Themes like any other theme. Every package is verified against a published SHA-256 checksum before it is unpacked. What leaves the site is the installed version and a one-way hash of the site address, nothing more; the `qwerty_soft/check_updates` filter switches the check off entirely.
 * Site Health. Tools → Site Health reports whether the host has what the design importer needs — the Zip and DOM extensions, a writable uploads folder and outbound HTTPS to Anthropic and Google Fonts — before a job fails half-way through.
 * Design import: the design's typefaces come with it. Google Fonts a design uses are fetched once, stored in the Media Library and registered in the Font Library, so the site sets in the design's own type and visitors never contact Google.
 * Design import: SVG and inline images. Images embedded as data: URIs are written out to files, SVG files are sanitised down to drawing instructions (no scripts, no external references) and given real dimensions in the Media Library.
@@ -99,7 +99,7 @@ Adds self-hosted updates, Site Health checks and a safer design import. Your col
 * Contact form: the feedback token survives a plugin rendering the content early (SEO plugins building og:description), so the error summary cannot vanish before the visible render.
 * SEO: nothing behind a password reaches the head or the structured data. Meta descriptions are cut at 160 characters on a word boundary, and headings are dropped before the content is flattened so an h2 no longer runs into the paragraph after it.
 * Performance: the header's images are never lazy-loaded and core's default threshold is left alone, so a wide logo can no longer push the real LCP image into lazy loading. On WordPress 6.8+ the theme tunes core's own speculation rules instead of printing a second set.
-* Performance: the Cyrillic font subset is preloaded on Cyrillic-locale sites, where the first word on the page needs it; the `wow_signal/preload_fonts` filter now takes subset slugs.
+* Performance: the Cyrillic font subset is preloaded on Cyrillic-locale sites, where the first word on the page needs it; the `qwerty_soft/preload_fonts` filter now takes subset slugs.
 * Security: `Cross-Origin-Opener-Policy` is `same-origin-allow-popups`, so payment and sign-in popups (PayPal, Stripe, "Sign in with…") keep their opener.
 * Accessibility: the slider's arrows use `aria-disabled` rather than `disabled`, so an arrow that runs out while focused does not drop keyboard focus to the page. The slider works in right-to-left documents, and its sizes come from theme.json.
 * Accessibility: the page list core falls back to before a menu exists is folded into the navigation list instead of being nested inside it; `aria-current` is left to core, which sets it itself.
@@ -149,8 +149,8 @@ Adds self-hosted updates, Site Health checks and a safer design import. Your col
 
 == Copyright ==
 
-WOW — Signal, Copyright 2026 WOW — Win On Web
-WOW — Signal is distributed under the terms of the GNU GPL v2 or later.
+Qwerty Soft — Signal, Copyright 2026 Qwerty Soft
+Qwerty Soft — Signal is distributed under the terms of the GNU GPL v2 or later.
 
 Manrope font
 Copyright the Manrope Project Authors

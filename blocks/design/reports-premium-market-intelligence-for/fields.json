@@ -1,0 +1,263 @@
+{
+    "key": "group_qs_design_reports_premium_market_intelligence_for",
+    "title": "Reports Store Hero",
+    "fields": [
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Reports & Store",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Premium market intelligence for food trade decisions.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_hero_lede",
+            "label": "Intro paragraph",
+            "name": "hero_lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "A commerce-ready library for paid reports, practical guides, templates and future corporate subscriptions covering China–Eurasia food trade, frozen food supply chains, market access and trade risk.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_primary_cta",
+            "label": "Primary button",
+            "name": "primary_cta",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#catalog",
+                "title": "Browse Reports",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_secondary_cta",
+            "label": "Secondary button",
+            "name": "secondary_cta",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#checkout-flow",
+                "title": "How Purchase Works",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_panel_eyebrow",
+            "label": "Panel eyebrow",
+            "name": "panel_eyebrow",
+            "type": "text",
+            "default_value": "Reports & Store",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_panel_title",
+            "label": "Panel title",
+            "name": "panel_title",
+            "type": "text",
+            "default_value": "Reports • Guides • Toolkits",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_one_label",
+            "label": "Stat one label",
+            "name": "stat_one_label",
+            "type": "text",
+            "default_value": "Reports",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_one_value",
+            "label": "Stat one value",
+            "name": "stat_one_value",
+            "type": "text",
+            "default_value": "PDF + sample preview",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_one_note",
+            "label": "Stat one note",
+            "name": "stat_one_note",
+            "type": "text",
+            "default_value": "Structured digital publications",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_two_label",
+            "label": "Stat two label",
+            "name": "stat_two_label",
+            "type": "text",
+            "default_value": "Payments",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_two_value",
+            "label": "Stat two value",
+            "name": "stat_two_value",
+            "type": "text",
+            "default_value": "Stripe / PayPal ready",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_two_note",
+            "label": "Stat two note",
+            "name": "stat_two_note",
+            "type": "text",
+            "default_value": "Visa, Mastercard, Amex and bank transfer",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_three_label",
+            "label": "Stat three label",
+            "name": "stat_three_label",
+            "type": "text",
+            "default_value": "Licenses",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_three_value",
+            "label": "Stat three value",
+            "name": "stat_three_value",
+            "type": "text",
+            "default_value": "Individual / Corporate",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_three_note",
+            "label": "Stat three note",
+            "name": "stat_three_note",
+            "type": "text",
+            "default_value": "Usage rights controlled by product",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_four_label",
+            "label": "Stat four label",
+            "name": "stat_four_label",
+            "type": "text",
+            "default_value": "Languages",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_four_value",
+            "label": "Stat four value",
+            "name": "stat_four_value",
+            "type": "text",
+            "default_value": "EN / RU / 中文",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_stat_four_note",
+            "label": "Stat four note",
+            "name": "stat_four_note",
+            "type": "text",
+            "default_value": "More languages can be added later",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_category_strip_label",
+            "label": "Category strip label",
+            "name": "category_strip_label",
+            "type": "text",
+            "default_value": "Reports & Store",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_reports_premium_market_intelligence_for_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_reports_premium_market_intelligence_for_row_category_link",
+                    "label": "Category link",
+                    "name": "category_link",
+                    "type": "link",
+                    "return_format": "array",
+                    "default_value": {
+                        "url": "",
+                        "title": "Reports & Store",
+                        "target": ""
+                    },
+                    "instructions": "Choose a page, or paste a web address, and the text shown for it."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-premium-market-intelligence-for"
+            }
+        ]
+    ],
+    "active": true
+}

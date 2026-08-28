@@ -2,13 +2,13 @@
 /**
  * Reading and applying the theme's style variations.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Theme_JSON_Resolver;
 
@@ -39,13 +39,13 @@ final class StyleVariations {
 	public static function all(): array {
 		$found = array(
 			'' => array(
-				'title'       => __( 'Signal — the theme default', 'wow-signal' ),
-				'description' => __( 'Cyan on near-black. The palette the theme ships with.', 'wow-signal' ),
-				'swatch'      => self::swatch( self::decode( WOW_SIGNAL_DIR . '/theme.json' ) ),
+				'title'       => __( 'Signal — the theme default', 'qwerty-soft-signal' ),
+				'description' => __( 'Cyan on near-black. The palette the theme ships with.', 'qwerty-soft-signal' ),
+				'swatch'      => self::swatch( self::decode( QSOFT_DIR . '/theme.json' ) ),
 			),
 		);
 
-		foreach ( (array) glob( WOW_SIGNAL_DIR . '/styles/*.json' ) as $path ) {
+		foreach ( (array) glob( QSOFT_DIR . '/styles/*.json' ) as $path ) {
 			$data = self::decode( (string) $path );
 
 			if ( array() === $data ) {
@@ -66,10 +66,10 @@ final class StyleVariations {
 			$description = (string) ( $data['description'] ?? '' );
 
 			// phpcs:disable WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction -- The text comes out of a JSON file; make-pot.mjs is what put it in the catalogue, and the low-level call is the same lookup _x() would perform.
-			$title = translate_with_gettext_context( $title, 'Style variation name', 'wow-signal' );
+			$title = translate_with_gettext_context( $title, 'Style variation name', 'qwerty-soft-signal' );
 
 			if ( '' !== $description ) {
-				$description = translate_with_gettext_context( $description, 'Style variation description', 'wow-signal' );
+				$description = translate_with_gettext_context( $description, 'Style variation description', 'qwerty-soft-signal' );
 			}
 			// phpcs:enable WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
 
@@ -103,11 +103,11 @@ final class StyleVariations {
 			return true;
 		}
 
-		$path = WOW_SIGNAL_DIR . '/styles/' . $slug . '.json';
+		$path = QSOFT_DIR . '/styles/' . $slug . '.json';
 
 		// The slug comes off a form; keep it inside styles/ whatever it says.
 		$real = realpath( $path );
-		$root = realpath( WOW_SIGNAL_DIR . '/styles' );
+		$root = realpath( QSOFT_DIR . '/styles' );
 
 		if ( false === $real || false === $root || ! str_starts_with( $real, $root ) ) {
 			return false;

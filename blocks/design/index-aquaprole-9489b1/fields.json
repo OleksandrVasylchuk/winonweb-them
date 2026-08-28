@@ -1,0 +1,79 @@
+{
+    "key": "group_qs_design_index_aquaprole_9489b1",
+    "title": "Aquaprole 体现真实运营经验。",
+    "fields": [
+        {
+            "key": "field_qs_index_aquaprole_9489b1_heading",
+            "label": "Subheading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Aquaprole 体现真实运营经验。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_aquaprole_9489b1_description",
+            "label": "Text",
+            "name": "description",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert 的市场情报建立在实际国际贸易经验之上。作为 Aquaprole Group CEO，他整合了加拿大、美国、新加坡、中国和香港的食品贸易业务，涉及采购、物流、市场准入、冷链运营和自有品牌产品开发。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_aquaprole_9489b1_profile_link",
+            "label": "Btn",
+            "name": "profile_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "about.html",
+                "title": "阅读简介",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it."
+        },
+        {
+            "key": "field_qs_index_aquaprole_9489b1_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_index_aquaprole_9489b1_row_check_mark",
+                    "label": "Check",
+                    "name": "check_mark",
+                    "type": "text",
+                    "default_value": "✓",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_index_aquaprole_9489b1_row_proof_point",
+                    "label": "Label",
+                    "name": "proof_point",
+                    "type": "text",
+                    "default_value": "国际食品贸易与冷冻食品供应链",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-aquaprole-9489b1"
+            }
+        ]
+    ],
+    "active": true
+}

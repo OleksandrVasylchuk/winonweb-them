@@ -1,11 +1,11 @@
 <?php
 /**
- * Script dependencies for the wow/colophon editor script.
+ * Script dependencies for the qs/colophon editor script.
  *
  * Hand-maintained in place of a bundler-generated file: the theme ships no
  * build step, so this is the single source of truth for what edit.js needs.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 

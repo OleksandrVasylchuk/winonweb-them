@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_media_professional_facts_for_media_use_2",
+    "title": "Professional facts",
+    "fields": [
+        {
+            "key": "field_qs_media_professional_facts_for_media_use_2_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Professional facts for media use",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_professional_facts_for_media_use_2_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "The following statements are suitable as professional profile points. High-impact claims requiring source documentation are maintained separately in the project evidence register and should be validated before formal citation.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_professional_facts_for_media_use_2_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_media_professional_facts_for_media_use_2_row_check_mark",
+                    "label": "Check mark",
+                    "name": "check_mark",
+                    "type": "text",
+                    "default_value": "✓",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_media_professional_facts_for_media_use_2_row_fact",
+                    "label": "Fact",
+                    "name": "fact",
+                    "type": "text",
+                    "default_value": "International food trade professional since 2004",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-media-professional-facts-for-media-use-2"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,52 @@
+{
+    "key": "group_qs_design_videos_editorial_transparency_9cd162",
+    "title": "Editorial transparency",
+    "fields": [
+        {
+            "key": "field_qs_videos_editorial_transparency_9cd162_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Editorial transparency",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_editorial_transparency_9cd162_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_videos_editorial_transparency_9cd162_row_heading",
+                    "label": "Card heading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "Approved scripts",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_videos_editorial_transparency_9cd162_row_description",
+                    "label": "Card description",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Every script is reviewed before publication.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-videos-editorial-transparency-9cd162"
+            }
+        ]
+    ],
+    "active": true
+}

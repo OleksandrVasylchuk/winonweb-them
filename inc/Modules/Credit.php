@@ -2,21 +2,21 @@
 /**
  * Optional studio credit in the footer.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 use WP_Customize_Manager;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Adds a single Customizer checkbox controlling the "Design by WOW" line.
+ * Adds a single Customizer checkbox controlling the "Design by Qwerty Soft" line.
  *
  * The credit is opt-in: a fresh install shows nothing. The client turns it on
  * or off with one checkbox and never has to touch the footer template.
@@ -26,7 +26,7 @@ final class Credit implements Module {
 	/**
 	 * Theme mod storing the client's choice.
 	 */
-	public const SETTING = 'wow_signal_show_credit';
+	public const SETTING = 'qwerty_soft_show_credit';
 
 	/**
 	 * Hook the module.
@@ -45,10 +45,10 @@ final class Credit implements Module {
 	 */
 	public function customize( WP_Customize_Manager $wp_customize ): void {
 		$wp_customize->add_section(
-			'wow_signal_credit',
+			'qwerty_soft_credit',
 			array(
-				'title'       => __( 'Footer credit', 'wow-signal' ),
-				'description' => __( 'Show a small "Design by WOW — Win On Web" line at the bottom of every page.', 'wow-signal' ),
+				'title'       => __( 'Footer credit', 'qwerty-soft-signal' ),
+				'description' => __( 'Show a small "Design by Qwerty Soft" line at the bottom of every page.', 'qwerty-soft-signal' ),
 				'priority'    => 200,
 			)
 		);
@@ -67,8 +67,8 @@ final class Credit implements Module {
 		$wp_customize->add_control(
 			self::SETTING,
 			array(
-				'section' => 'wow_signal_credit',
-				'label'   => __( 'Show the designer credit', 'wow-signal' ),
+				'section' => 'qwerty_soft_credit',
+				'label'   => __( 'Show the designer credit', 'qwerty-soft-signal' ),
 				'type'    => 'checkbox',
 			)
 		);
@@ -102,6 +102,6 @@ final class Credit implements Module {
 		 *
 		 * @param bool $enabled Current state.
 		 */
-		return (bool) apply_filters( 'wow_signal/show_credit', $enabled );
+		return (bool) apply_filters( 'qwerty_soft/show_credit', $enabled );
 	}
 }

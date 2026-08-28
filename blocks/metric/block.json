@@ -1,13 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "wow/metric",
+	"name": "qs/metric",
 	"title": "Metric",
-	"category": "wow",
+	"category": "qs",
 	"icon": "chart-bar",
 	"description": "One number with a caption — a Lighthouse score, a conversion lift, a delivery time. Counts up when it scrolls into view.",
 	"keywords": [ "metric", "number", "counter", "statistic", "kpi" ],
-	"textdomain": "wow-signal",
+	"textdomain": "qwerty-soft-signal",
 	"attributes": {
 		"value": {
 			"type": "string",

@@ -1,0 +1,52 @@
+{
+    "key": "group_qs_design_reports_c174ce",
+    "title": "海关数据报告",
+    "fields": [
+        {
+            "key": "field_qs_reports_c174ce_heading",
+            "label": "章节标题",
+            "name": "heading",
+            "type": "text",
+            "default_value": "海关数据报告已作为初始资料载入。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_c174ce_intro",
+            "label": "章节说明",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "这些报告已作为后台验证资料加入原型。公开样本和付费版本应在发布前完成脱敏和审批。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_c174ce_source",
+            "label": "Show",
+            "name": "source",
+            "type": "post_object",
+            "post_type": [],
+            "multiple": 1,
+            "return_format": "id",
+            "instructions": "Leave empty to show the most recent automatically."
+        },
+        {
+            "key": "field_qs_reports_c174ce_limit",
+            "label": "How many",
+            "name": "limit",
+            "type": "number",
+            "default_value": 3,
+            "min": 1,
+            "instructions": "The most this position will display at once."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-c174ce"
+            }
+        ]
+    ],
+    "active": true
+}

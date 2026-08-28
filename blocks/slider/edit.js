@@ -1,5 +1,5 @@
 /**
- * Editor UI for wow/slider.
+ * Editor UI for qs/slider.
  */
 ( function ( wp ) {
 	'use strict';
@@ -23,12 +23,12 @@
 
 	var TEMPLATE = [
 		[ 'core/group', { className: 'is-style-card' }, [
-			[ 'core/heading', { level: 3, placeholder: __( 'Case name', 'wow-signal' ) } ],
-			[ 'core/paragraph', { placeholder: __( 'What changed, and by how much.', 'wow-signal' ) } ],
+			[ 'core/heading', { level: 3, placeholder: __( 'Case name', 'qwerty-soft-signal' ) } ],
+			[ 'core/paragraph', { placeholder: __( 'What changed, and by how much.', 'qwerty-soft-signal' ) } ],
 		] ],
 	];
 
-	wp.blocks.registerBlockType( 'wow/slider', {
+	wp.blocks.registerBlockType( 'qs/slider', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
@@ -36,13 +36,13 @@
 			var slideWidth = LEGACY_WIDTHS[ attributes.slideWidth ] || attributes.slideWidth || WIDTH_MEDIUM;
 
 			var blockProps = useBlockProps( {
-				className: 'wow-slider is-editor',
-				style: { '--wow-slide-width': slideWidth },
-				'data-editor-hint': __( 'Cards wrap here in the editor; visitors scroll them sideways.', 'wow-signal' ),
+				className: 'qs-slider is-editor',
+				style: { '--qs-slide-width': slideWidth },
+				'data-editor-hint': __( 'Cards wrap here in the editor; visitors scroll them sideways.', 'qwerty-soft-signal' ),
 			} );
 
 			var innerProps = useInnerBlocksProps(
-				{ className: 'wow-slider__track' },
+				{ className: 'qs-slider__track' },
 				{ template: TEMPLATE, templateLock: false, orientation: 'horizontal' }
 			);
 
@@ -54,22 +54,22 @@
 					null,
 					el(
 						PanelBody,
-						{ title: __( 'Slider', 'wow-signal' ) },
+						{ title: __( 'Slider', 'qwerty-soft-signal' ) },
 						el( TextControl, {
-							label: __( 'What is in this slider', 'wow-signal' ),
-							help: __( 'A short description read aloud by screen readers, for example "Client case studies".', 'wow-signal' ),
+							label: __( 'What is in this slider', 'qwerty-soft-signal' ),
+							help: __( 'A short description read aloud by screen readers, for example "Client case studies".', 'qwerty-soft-signal' ),
 							value: attributes.label,
 							onChange: function ( value ) {
 								setAttributes( { label: value } );
 							},
 						} ),
 						el( SelectControl, {
-							label: __( 'Card width', 'wow-signal' ),
+							label: __( 'Card width', 'qwerty-soft-signal' ),
 							value: slideWidth,
 							options: [
-								{ label: __( 'Narrow', 'wow-signal' ), value: WIDTH_NARROW },
-								{ label: __( 'Medium', 'wow-signal' ), value: WIDTH_MEDIUM },
-								{ label: __( 'Wide', 'wow-signal' ), value: WIDTH_WIDE },
+								{ label: __( 'Narrow', 'qwerty-soft-signal' ), value: WIDTH_NARROW },
+								{ label: __( 'Medium', 'qwerty-soft-signal' ), value: WIDTH_MEDIUM },
+								{ label: __( 'Wide', 'qwerty-soft-signal' ), value: WIDTH_WIDE },
 							],
 							onChange: function ( value ) {
 								setAttributes( { slideWidth: value } );

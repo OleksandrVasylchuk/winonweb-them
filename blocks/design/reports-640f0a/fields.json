@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_reports_640f0a",
+    "title": "后台上传字段",
+    "fields": [
+        {
+            "key": "field_qs_reports_640f0a_heading",
+            "label": "板块标题",
+            "name": "heading",
+            "type": "text",
+            "default_value": "后台上传字段",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_640f0a_intro",
+            "label": "说明文字",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "当你准备好每份报告后，后台应允许在没有开发人员参与的情况下上传或编辑这些字段。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_640f0a_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_reports_640f0a_row_check_mark",
+                    "label": "对勾符号",
+                    "name": "check_mark",
+                    "type": "text",
+                    "default_value": "✓",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_reports_640f0a_row_field_name",
+                    "label": "字段名称",
+                    "name": "field_name",
+                    "type": "text",
+                    "default_value": "标题、副标题、slug 和状态",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-640f0a"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-research-decision-making-tools-to-build",
+    "title": "Decision Tools",
+    "category": "qs",
+    "description": "Decision Tools — 2 pieces of text, 6 repeating items. From research.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "research",
+        "decision",
+        "tools"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Decision-making tools to build next",
+                "intro": "These tools will convert expertise into practical resources that importers, exporters, brokers and trade teams can use before quoting, shipping or entering a market."
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/en/research.html",
+    "qsDesignVersion": 7
+}

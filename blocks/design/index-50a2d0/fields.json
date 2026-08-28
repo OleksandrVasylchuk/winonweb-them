@@ -1,0 +1,77 @@
+{
+    "key": "group_qs_design_index_50a2d0",
+    "title": "Рынки, подтвержденные практическим опытом.",
+    "fields": [
+        {
+            "key": "field_qs_index_50a2d0_heading",
+            "label": "Subheading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Рынки, подтвержденные практическим опытом.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_50a2d0_intro",
+            "label": "Text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Работа Роберта охватывает рынки поставщиков, рынки назначения, государственные торговые миссии и проекты вывода продуктов в регулируемые розничные каналы. Фокус — не теория, а практическое исполнение в food trade corridors.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_50a2d0_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_index_50a2d0_row_region",
+                    "label": "Label — Северная Америка",
+                    "name": "region",
+                    "type": "text",
+                    "default_value": "Северная Америка",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_index_50a2d0_row_countries",
+                    "label": "Label — Канада",
+                    "name": "countries",
+                    "type": "text",
+                    "default_value": "Канада",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_index_50a2d0_row_more_countries",
+                    "label": "Label — США",
+                    "name": "more_countries",
+                    "type": "text",
+                    "default_value": "США",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-50a2d0"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,10 +1,10 @@
 /**
- * wow/colophon — front end and editor.
+ * qs/colophon — front end and editor.
  *
  * Loads only on pages where the block renders.
  */
 
-.wow-colophon {
+.qs-colophon {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -14,7 +14,7 @@
 	font-size: var(--wp--preset--font-size--small);
 }
 
-.wow-colophon__credit::before {
+.qs-colophon__credit::before {
 	content: "·";
 	margin-inline-end: var(--wp--preset--spacing--40);
 	color: var(--wp--preset--color--border-strong);
@@ -27,19 +27,19 @@
  */
 @media (max-width: 480px) {
 
-	.wow-colophon__credit::before {
+	.qs-colophon__credit::before {
 		content: none;
 	}
 }
 
-.wow-colophon a {
+.qs-colophon a {
 	color: inherit;
 	text-decoration-color: var(--wp--preset--color--border-strong);
 	text-underline-offset: 0.25em;
 }
 
-.wow-colophon a:hover,
-.wow-colophon a:focus-visible {
+.qs-colophon a:hover,
+.qs-colophon a:focus-visible {
 	color: var(--wp--preset--color--accent);
 	text-decoration-color: currentColor;
 }

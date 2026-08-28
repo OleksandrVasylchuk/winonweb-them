@@ -1,0 +1,155 @@
+{
+    "key": "group_qs_design_oat_products_selected_markets_2026_555eb",
+    "title": "Report hero",
+    "fields": [
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_555eb_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Market Intelligence Brief",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_555eb_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Овсяные продукты в выбранных рынках",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_555eb_lede",
+            "label": "Lede",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Южная Корея • Япония • Филиппины • Мексика • Бразилия • Аргентина",
+            "instructions": "A short paragraph of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_555eb_summary",
+            "label": "Summary",
+            "name": "summary",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Краткая версия отчета для сайта, подготовленная на основе загруженного исходного документа по oat milk, oat flour и новым oat-продуктам в выбранных рынках APAC и Латинской Америки.",
+            "instructions": "A short paragraph of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_555eb_back_link",
+            "label": "Link back to reports",
+            "name": "back_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "../reports.html",
+                "title": "Вернуться к отчетам",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_555eb_dashboard_link",
+            "label": "Link to the dashboard",
+            "name": "dashboard_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#market-dashboard",
+                "title": "Смотреть dashboard",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_555eb_status_label",
+            "label": "Status label",
+            "name": "status_label",
+            "type": "text",
+            "default_value": "Статус публикации",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_555eb_status_value",
+            "label": "Publication status",
+            "name": "status_value",
+            "type": "text",
+            "default_value": "Черновик для сайта",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_555eb_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_oat_products_selected_markets_2026_555eb_row_stat_label",
+                    "label": "Stat label",
+                    "name": "stat_label",
+                    "type": "text",
+                    "default_value": "Период",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_oat_products_selected_markets_2026_555eb_row_stat_value",
+                    "label": "Value",
+                    "name": "stat_value",
+                    "type": "text",
+                    "default_value": "2021–апр. 2026",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                },
+                {
+                    "key": "field_qs_oat_products_selected_markets_2026_555eb_row_stat_note",
+                    "label": "Note",
+                    "name": "stat_note",
+                    "type": "text",
+                    "default_value": "Запуски продуктов",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "33.33"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-oat-products-selected-markets-2026-555eb"
+            }
+        ]
+    ],
+    "active": true
+}

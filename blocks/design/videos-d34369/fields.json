@@ -1,0 +1,74 @@
+{
+    "key": "group_qs_design_videos_d34369",
+    "title": "Video briefings hero",
+    "fields": [
+        {
+            "key": "field_qs_videos_d34369_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Robert Khoubian Market Intelligence",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_d34369_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Видео-брифинги по международной торговле",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_d34369_lede",
+            "label": "Intro text",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Четырех- и пятиминутные объяснения отчетов, методологии таможенных данных и рыночного доступа с утвержденным цифровым аватаром и клоном голоса Роберта Хубияна.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_d34369_latest_briefing_link",
+            "label": "Link to the latest briefing",
+            "name": "latest_briefing_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#latest-video",
+                "title": "Последний брифинг",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_videos_d34369_youtube_channel_link",
+            "label": "Link to the YouTube channel",
+            "name": "youtube_channel_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#",
+                "title": "Перейти на YouTube-канал",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-videos-d34369"
+            }
+        ]
+    ],
+    "active": true
+}

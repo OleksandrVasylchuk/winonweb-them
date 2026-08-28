@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_research_83f307",
+    "title": "研究方法",
+    "fields": [
+        {
+            "key": "field_qs_research_83f307_heading",
+            "label": "标题",
+            "name": "heading",
+            "type": "text",
+            "default_value": "基于实际经营经验的研究方法",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_83f307_description",
+            "label": "说明文字",
+            "name": "description",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "平台应建立在严谨的研究流程之上：实际市场知识、可获得的官方或可靠数据、监管跟踪、已记录的经验，以及事实与观点的明确区分。高影响力商业声明在证明材料准备完成前保留在 evidence register 中。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_83f307_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_research_83f307_row_check_mark",
+                    "label": "对勾符号",
+                    "name": "check_mark",
+                    "type": "text",
+                    "default_value": "✓",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_research_83f307_row_principle",
+                    "label": "研究原则",
+                    "name": "principle",
+                    "type": "text",
+                    "default_value": "在可获得时使用可核查来源",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-83f307"
+            }
+        ]
+    ],
+    "active": true
+}

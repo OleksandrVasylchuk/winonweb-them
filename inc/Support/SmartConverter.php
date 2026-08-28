@@ -2,13 +2,13 @@
 /**
  * Converts a section with a model reading over the converter's shoulder.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -95,6 +95,13 @@ final class SmartConverter {
 	 * @var array<int, array<string, mixed>>
 	 */
 	private array $calls = array();
+
+	/**
+	 * The design's own documentation, quoted once and reused per section.
+	 *
+	 * @var string|null
+	 */
+	private ?string $docs = null;
 
 	/**
 	 * Replies that came back and were thrown away, said in plain words.
@@ -309,7 +316,7 @@ final class SmartConverter {
 			return $this->with_discards( $result );
 		}
 
-		$reviewed = $this->reviewed( $section, $result['markup'], $facts );
+		$reviewed = $this->converged( $section, $result['markup'], $facts );
 
 		if ( null !== $reviewed ) {
 			/*
@@ -327,6 +334,9 @@ final class SmartConverter {
 
 			$result['concerns'] = array_values( array_unique( array_merge( $result['concerns'], $reviewed['concerns'] ) ) );
 			$result['changed']  = array_values( array_unique( array_merge( $result['changed'], $reviewed['changed'] ) ) );
+			$result['rounds']   = (int) $result['rounds'] + (int) $reviewed['rounds'];
+
+			return $this->with_discards( $result );
 		}
 
 		$result['rounds'] = (int) $result['rounds'] + 1;
@@ -388,6 +398,7 @@ final class SmartConverter {
 				'page'     => (string) ( $context['page'] ?? '' ),
 				'lang'     => (string) ( $context['lang'] ?? '' ),
 				'is_first' => $is_first,
+				'docs'     => $this->docs(),
 			)
 		);
 
@@ -421,7 +432,7 @@ final class SmartConverter {
 			$retry = $this->ask( $system, ConversionPrompt::correction( $message, $markup, $why ), $schema );
 
 			$markup = null !== $retry && isset( $retry['markup'] ) ? (string) $retry['markup'] : '';
-			$second = null === $retry ? __( 'the retry could not be sent', 'wow-signal' ) : $this->rejected( $markup );
+			$second = null === $retry ? __( 'the retry could not be sent', 'qwerty-soft-signal' ) : $this->rejected( $markup );
 
 			if ( '' !== $second ) {
 				if ( null !== $retry ) {
@@ -504,7 +515,7 @@ final class SmartConverter {
 				$retry = $this->ask( $system, RefinePrompt::correction( $message, $corrected, $why ), $schema );
 
 				$again = null !== $retry && isset( $retry['markup'] ) ? (string) $retry['markup'] : '';
-				$still = null === $retry ? __( 'the retry could not be sent', 'wow-signal' ) : $this->rejected( $again );
+				$still = null === $retry ? __( 'the retry could not be sent', 'qwerty-soft-signal' ) : $this->rejected( $again );
 
 				if ( '' === $still && 'match' !== (string) ( $retry['verdict'] ?? 'match' ) ) {
 					$corrected = $again;
@@ -534,6 +545,66 @@ final class SmartConverter {
 			'markup'   => $corrected,
 			'concerns' => $concerns,
 			'changed'  => isset( $reply['changed'] ) && is_array( $reply['changed'] ) ? array_map( 'strval', $reply['changed'] ) : array(),
+			'verdict'  => $verdict,
+		);
+	}
+
+	/**
+	 * Review, correct, render again, review again — until it says "match".
+	 *
+	 * One review pass finds what one review pass finds. A section it calls
+	 * "off" gets a correction, and that correction is then never looked at:
+	 * the pass that was meant to prove the blocks match the design stops one
+	 * step before the proof. Looping closes that — each round renders what the
+	 * last round produced and asks the same question of the new markup — and
+	 * stops on the first "match", on the round limit, or as soon as a round
+	 * changes nothing.
+	 *
+	 * The limit is small on purpose. A section that still disagrees after
+	 * three passes disagrees about something blocks cannot express, and a
+	 * fourth round would spend another call to say so again.
+	 *
+	 * @param array<string, mixed> $section Section record.
+	 * @param string               $markup  Markup to check.
+	 * @param string               $facts   Resolved-CSS brief.
+	 * @return array{markup:string,concerns:array<int,string>,changed:array<int,string>,rounds:int}|null
+	 */
+	private function converged( array $section, string $markup, string $facts ) {
+		$rounds   = max( 1, min( 4, (int) ( $this->options['rounds'] ?? 3 ) ) );
+		$concerns = array();
+		$changed  = array();
+		$current  = $markup;
+		$ran      = 0;
+
+		for ( $round = 0; $round < $rounds; $round++ ) {
+			$reviewed = $this->reviewed( $section, $current, $facts );
+			++$ran;
+
+			if ( null === $reviewed ) {
+				break;
+			}
+
+			$concerns = array_merge( $concerns, $reviewed['concerns'] );
+			$changed  = array_merge( $changed, $reviewed['changed'] );
+
+			// Nothing left to correct, or nothing changed by correcting.
+			if ( 'match' === (string) ( $reviewed['verdict'] ?? 'match' ) || $reviewed['markup'] === $current ) {
+				$current = $reviewed['markup'];
+				break;
+			}
+
+			$current = $reviewed['markup'];
+		}
+
+		if ( $current === $markup && array() === $concerns && array() === $changed ) {
+			return null;
+		}
+
+		return array(
+			'markup'   => $current,
+			'concerns' => array_values( array_unique( $concerns ) ),
+			'changed'  => array_values( array_unique( $changed ) ),
+			'rounds'   => $ran,
 		);
 	}
 
@@ -579,7 +650,24 @@ final class SmartConverter {
 			$options['images'] = $images;
 		}
 
+		/*
+		 * A sign of life before every model call, not only between sections.
+		 *
+		 * The watchdog decides a step has died when nothing has been heard
+		 * from it for a lease. A section is several calls — convert, then
+		 * review, then correct — and each of them can run to the transport's
+		 * own timeout, so a section that is working perfectly well used to go
+		 * quiet for longer than the lease and have its page started again by a
+		 * second process. Both then converted the same page, and both wrote
+		 * it. This is the cheapest possible fix: say "still here" at the one
+		 * moment the process is about to disappear into a long call.
+		 */
+		ImportSession::beat();
+
 		$reply = ModelGateway::generate( $system, $prompt, $schema, $options );
+
+		// And again on the way out, so the lease is measured from the reply.
+		ImportSession::beat();
 
 		if ( is_wp_error( $reply ) ) {
 			$this->calls[] = array(
@@ -603,6 +691,22 @@ final class SmartConverter {
 		);
 
 		return $reply;
+	}
+
+	/**
+	 * What the design wrote about itself, read once for the whole design.
+	 *
+	 * Short on purpose: this rides along with every section of every page, so
+	 * it buys the design system and the intent, not the change history.
+	 *
+	 * @return string
+	 */
+	private function docs(): string {
+		if ( null === $this->docs ) {
+			$this->docs = (string) DesignDocs::digest( $this->root, 6000 )['text'];
+		}
+
+		return $this->docs;
 	}
 
 	/**
@@ -632,7 +736,7 @@ final class SmartConverter {
 	 */
 	private function rejected( string $markup ): string {
 		if ( '' === trim( $markup ) ) {
-			return __( 'the reply contained no markup', 'wow-signal' );
+			return __( 'the reply contained no markup', 'qwerty-soft-signal' );
 		}
 
 		$validator = new BlockMarkupValidator();
@@ -678,12 +782,12 @@ final class SmartConverter {
 		$this->discarded[] = 'reviewed' === $pass
 			? sprintf(
 				/* translators: %s: what the validator objected to. */
-				__( 'Claude proposed a correction to this section that would not have been valid block markup, so the section was left as it was (%s).', 'wow-signal' ),
+				__( 'Claude proposed a correction to this section that would not have been valid block markup, so the section was left as it was (%s).', 'qwerty-soft-signal' ),
 				$why
 			)
 			: sprintf(
 				/* translators: %s: what the validator objected to. */
-				__( 'Claude answered for this section but the result was not valid block markup, so the structural conversion was kept (%s).', 'wow-signal' ),
+				__( 'Claude answered for this section but the result was not valid block markup, so the structural conversion was kept (%s).', 'qwerty-soft-signal' ),
 				$why
 			);
 	}

@@ -2,13 +2,13 @@
 /**
  * Runs a generation through the Claude Code CLI installed on the machine.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Error;
 
@@ -39,12 +39,12 @@ final class ClaudeCli {
 	/**
 	 * Option holding an explicit path to the binary.
 	 */
-	public const OPTION_BINARY = 'wow_signal_claude_cli';
+	public const OPTION_BINARY = 'qwerty_soft_claude_cli';
 
 	/**
 	 * Transient caching what a probe of the binary found.
 	 */
-	private const PROBE = 'wow_signal_cli_probe';
+	private const PROBE = 'qwerty_soft_cli_probe';
 
 	/**
 	 * How long a successful probe is trusted.
@@ -102,8 +102,8 @@ final class ClaudeCli {
 	 * @return string
 	 */
 	public static function binary(): string {
-		if ( defined( 'WOW_SIGNAL_CLAUDE_CLI' ) && is_string( WOW_SIGNAL_CLAUDE_CLI ) ) {
-			$pinned = trim( WOW_SIGNAL_CLAUDE_CLI );
+		if ( defined( 'QSOFT_CLAUDE_CLI' ) && is_string( QSOFT_CLAUDE_CLI ) ) {
+			$pinned = trim( QSOFT_CLAUDE_CLI );
 
 			return is_file( $pinned ) ? $pinned : '';
 		}
@@ -123,7 +123,7 @@ final class ClaudeCli {
 	 * @return bool
 	 */
 	public static function binary_is_constant(): bool {
-		return defined( 'WOW_SIGNAL_CLAUDE_CLI' ) && '' !== trim( (string) WOW_SIGNAL_CLAUDE_CLI );
+		return defined( 'QSOFT_CLAUDE_CLI' ) && '' !== trim( (string) QSOFT_CLAUDE_CLI );
 	}
 
 	/**
@@ -191,7 +191,7 @@ final class ClaudeCli {
 		if ( ! self::can_spawn() ) {
 			return array_merge(
 				$empty,
-				array( 'reason' => __( 'This server does not allow PHP to start other programs, so the command-line route cannot be used here. Use an API key instead.', 'wow-signal' ) )
+				array( 'reason' => __( 'This server does not allow PHP to start other programs, so the command-line route cannot be used here. Use an API key instead.', 'qwerty-soft-signal' ) )
 			);
 		}
 
@@ -200,7 +200,7 @@ final class ClaudeCli {
 		if ( '' === $binary ) {
 			return array_merge(
 				$empty,
-				array( 'reason' => __( 'The claude command was not found. Install Claude Code on this machine, or enter the full path to the binary.', 'wow-signal' ) )
+				array( 'reason' => __( 'The claude command was not found. Install Claude Code on this machine, or enter the full path to the binary.', 'qwerty-soft-signal' ) )
 			);
 		}
 
@@ -234,7 +234,7 @@ final class ClaudeCli {
 					'binary' => $binary,
 					'reason' => sprintf(
 						/* translators: %d: process exit code. */
-						__( 'The claude command exited with status %d instead of reporting its version.', 'wow-signal' ),
+						__( 'The claude command exited with status %d instead of reporting its version.', 'qwerty-soft-signal' ),
 						$run['code']
 					),
 				)
@@ -279,7 +279,7 @@ final class ClaudeCli {
 		$status = self::status();
 
 		if ( ! $status['ready'] ) {
-			return new WP_Error( 'wow_signal_cli_unavailable', $status['reason'] );
+			return new WP_Error( 'qwerty_soft_cli_unavailable', $status['reason'] );
 		}
 
 		$model  = isset( $options['model'] ) ? (string) $options['model'] : AnthropicClient::DEFAULT_MODEL;
@@ -320,7 +320,7 @@ final class ClaudeCli {
 			$args[] = $effort;
 		}
 
-		if ( array() === $images ) {
+		if ( array() === $images && array() === $dirs ) {
 			/*
 			 * No tools at all. The model has everything it needs in the
 			 * prompt, and a tool loop could only wander off into the
@@ -330,9 +330,12 @@ final class ClaudeCli {
 			$args[] = '';
 		} else {
 			/*
-			 * Screenshots are files, and the CLI has no way to be handed an
-			 * image inline. Reading is allowed for exactly the directories the
-			 * screenshots live in, and nothing else is: no writing, no shell.
+			 * Reading is allowed for exactly the directories named and nothing
+			 * else: no writing, no shell. Two callers need it. Screenshots are
+			 * files and the CLI has no way to be handed an image inline; and a
+			 * design that is an application is more source than one prompt can
+			 * hold, so the reader is given the folder it was quoted from and
+			 * can open the part of a file the brief had to cut.
 			 */
 			$args[] = '--tools';
 			$args[] = 'Read';
@@ -382,12 +385,12 @@ final class ClaudeCli {
 			}
 
 			return new WP_Error(
-				'wow_signal_cli_output',
+				'qwerty_soft_cli_output',
 				'' === $detail
-					? __( 'The claude command produced no output.', 'wow-signal' )
+					? __( 'The claude command produced no output.', 'qwerty-soft-signal' )
 					: sprintf(
 						/* translators: %s: the first line the command printed. */
-						__( 'The claude command did not return a result: %s', 'wow-signal' ),
+						__( 'The claude command did not return a result: %s', 'qwerty-soft-signal' ),
 						self::first_line( $detail )
 					)
 			);
@@ -399,12 +402,12 @@ final class ClaudeCli {
 				: (string) ( $envelope['subtype'] ?? '' );
 
 			return new WP_Error(
-				'wow_signal_cli_failed',
+				'qwerty_soft_cli_failed',
 				'' === $detail
-					? __( 'The claude command reported a failure.', 'wow-signal' )
+					? __( 'The claude command reported a failure.', 'qwerty-soft-signal' )
 					: sprintf(
 						/* translators: %s: the error the command reported. */
-						__( 'The claude command reported a failure: %s', 'wow-signal' ),
+						__( 'The claude command reported a failure: %s', 'qwerty-soft-signal' ),
 						$detail
 					)
 			);
@@ -424,7 +427,7 @@ final class ClaudeCli {
 		}
 
 		if ( ! is_array( $payload ) ) {
-			return new WP_Error( 'wow_signal_cli_payload', __( 'The reply did not match the expected format.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_cli_payload', __( 'The reply did not match the expected format.', 'qwerty-soft-signal' ) );
 		}
 
 		$usage = isset( $envelope['usage'] ) && is_array( $envelope['usage'] ) ? $envelope['usage'] : array();
@@ -622,8 +625,8 @@ final class ClaudeCli {
 			$clean();
 
 			return new WP_Error(
-				'wow_signal_cli_scratch',
-				__( 'The brief could not be written to a temporary file, so the claude command was not run.', 'wow-signal' )
+				'qwerty_soft_cli_scratch',
+				__( 'The brief could not be written to a temporary file, so the claude command was not run.', 'qwerty-soft-signal' )
 			);
 		}
 
@@ -644,7 +647,7 @@ final class ClaudeCli {
 		 * @param array<int, string> $args    The arguments the theme built.
 		 */
 		$command = (array) apply_filters(
-			'wow_signal/claude_cli_command',
+			'qwerty_soft/claude_cli_command',
 			array_merge( array( $binary ), $args ),
 			$binary,
 			$args
@@ -669,8 +672,8 @@ final class ClaudeCli {
 			$clean();
 
 			return new WP_Error(
-				'wow_signal_cli_spawn',
-				__( 'The claude command could not be started. Check the path to the binary, and that the web server user is allowed to run it.', 'wow-signal' )
+				'qwerty_soft_cli_spawn',
+				__( 'The claude command could not be started. Check the path to the binary, and that the web server user is allowed to run it.', 'qwerty-soft-signal' )
 			);
 		}
 
@@ -698,10 +701,10 @@ final class ClaudeCli {
 				$clean();
 
 				return new WP_Error(
-					'wow_signal_cli_timeout',
+					'qwerty_soft_cli_timeout',
 					sprintf(
 						/* translators: %d: number of seconds. */
-						__( 'The claude command was still running after %d seconds and was stopped. Try a lower effort setting, or a smaller section.', 'wow-signal' ),
+						__( 'The claude command was still running after %d seconds and was stopped. Try a lower effort setting, or a smaller section.', 'qwerty-soft-signal' ),
 						$timeout
 					)
 				);
@@ -737,12 +740,12 @@ final class ClaudeCli {
 
 		if ( '' === $dir || ! is_dir( $dir ) || ! wp_is_writable( $dir ) ) {
 			return new WP_Error(
-				'wow_signal_cli_temp',
-				__( 'There is no writable temporary directory for the claude command to read its brief from.', 'wow-signal' )
+				'qwerty_soft_cli_temp',
+				__( 'There is no writable temporary directory for the claude command to read its brief from.', 'qwerty-soft-signal' )
 			);
 		}
 
-		$stem = $dir . '/wow-signal-cli-' . wp_generate_password( 12, false );
+		$stem = $dir . '/qwerty-soft-signal-cli-' . wp_generate_password( 12, false );
 
 		return array( $stem . '.in', $stem . '.out', $stem . '.err' );
 	}

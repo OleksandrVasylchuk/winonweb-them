@@ -1,0 +1,65 @@
+{
+    "key": "group_qs_design_market_intelligence_index_a7b9f0",
+    "title": "Research callout",
+    "fields": [
+        {
+            "key": "field_qs_market_intelligence_index_a7b9f0_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "谨慎建立指数，可信地发布。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_a7b9f0_body_text",
+            "label": "Body text",
+            "name": "body_text",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "首个公开指数应聚焦一个产品、一个贸易走廊及一个可完整记录的市场分母。证据质量比发布排名的数量更重要。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_a7b9f0_research_link",
+            "label": "Link to research",
+            "name": "research_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "research.html",
+                "title": "浏览研究",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_a7b9f0_reports_link",
+            "label": "Link to reports",
+            "name": "reports_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "reports.html",
+                "title": "Reports",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-market-intelligence-index-a7b9f0"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,65 @@
+{
+    "key": "group_qs_design_research_build_a_research_audience_befor",
+    "title": "Next Step Callout",
+    "fields": [
+        {
+            "key": "field_qs_research_build_a_research_audience_befor_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Build a research audience before selling reports.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_build_a_research_audience_befor_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "The first goal is credibility: publish useful intelligence consistently, earn trust, then convert the strongest research into premium publications.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_build_a_research_audience_befor_primary_link",
+            "label": "Primary link",
+            "name": "primary_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "index.html#newsletter",
+                "title": "Join Intelligence",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_research_build_a_research_audience_befor_secondary_link",
+            "label": "Secondary link",
+            "name": "secondary_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "media.html",
+                "title": "Media Center",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-build-a-research-audience-befor"
+            }
+        ]
+    ],
+    "active": true
+}

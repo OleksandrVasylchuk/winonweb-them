@@ -1,0 +1,148 @@
+{
+    "key": "group_qs_design_media_expert_commentary_on_global_food_t",
+    "title": "Media Hero",
+    "fields": [
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Media & Press Center",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Expert commentary on global food trade.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_hero_lede",
+            "label": "Intro text",
+            "name": "hero_lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Resources for journalists, conference organizers, trade associations and industry partners seeking informed commentary on China–Eurasia food trade, frozen food supply chains, market access and international trade execution.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_primary_link",
+            "label": "Primary link",
+            "name": "primary_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#topics",
+                "title": "Interview Topics",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_secondary_link",
+            "label": "Secondary link",
+            "name": "secondary_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#contact",
+                "title": "Media Contact",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_portrait",
+            "label": "Profile photo",
+            "name": "portrait",
+            "type": "image",
+            "return_format": "array",
+            "preview_size": "medium",
+            "instructions": "The picture shown in this position."
+        },
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_profile_label",
+            "label": "Profile card label",
+            "name": "profile_label",
+            "type": "text",
+            "default_value": "Media Profile",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_person_name",
+            "label": "Name",
+            "name": "person_name",
+            "type": "text",
+            "default_value": "Robert Khoubian",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_expertise",
+            "label": "Areas of expertise",
+            "name": "expertise",
+            "type": "text",
+            "default_value": "China • Eurasia • Frozen Food Supply Chains",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_formats_label",
+            "label": "Media formats label",
+            "name": "formats_label",
+            "type": "text",
+            "default_value": "Media Formats",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_expert_commentary_on_global_food_t_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_media_expert_commentary_on_global_food_t_row_link",
+                    "label": "Media format link",
+                    "name": "link",
+                    "type": "link",
+                    "return_format": "array",
+                    "default_value": {
+                        "url": "",
+                        "title": "Media Formats",
+                        "target": ""
+                    },
+                    "instructions": "Choose a page, or paste a web address, and the text shown for it."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-media-expert-commentary-on-global-food-t"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-about-robert-khoubian-dfc037",
+    "title": "关于页首区",
+    "category": "qs",
+    "description": "关于页首区 — 2 pieces of text, 1 picture, 6 repeating items. From about.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "about",
+        "关于页首区"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "关于 Robert Khoubian",
+                "lead": "国际食品贸易专业人士、企业家和市场情报发布者，专注中国—欧亚食品贸易、冷冻食品供应链和跨境市场准入。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/about.html",
+    "qsDesignVersion": 7
+}

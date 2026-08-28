@@ -1,0 +1,96 @@
+{
+    "key": "group_qs_design_oat_products_selected_markets_2026_eee6f",
+    "title": "Видео-брифинг отчета",
+    "fields": [
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_eee6f_heading",
+            "label": "Заголовок секции",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Посмотрите видео-брифинг",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_eee6f_lede",
+            "label": "Вводный текст",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "4–5-минутное AI-assisted объяснение ключевых выводов, методологии, ограничений и коммерческих последствий отчета.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_eee6f_watch_link",
+            "label": "Ссылка на видео-брифинг",
+            "name": "watch_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "../videos.html",
+                "title": "Открыть видео-брифинг",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_eee6f_video_duration",
+            "label": "Длительность видео",
+            "name": "video_duration",
+            "type": "text",
+            "default_value": "4:30",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_eee6f_play_symbol",
+            "label": "Символ воспроизведения",
+            "name": "play_symbol",
+            "type": "text",
+            "default_value": "▶",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_eee6f_featured_label",
+            "label": "Подпись «Избранное»",
+            "name": "featured_label",
+            "type": "text",
+            "default_value": "Избранный видео-брифинг",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_eee6f_video_title",
+            "label": "Название видео",
+            "name": "video_title",
+            "type": "text",
+            "default_value": "Как правильно читать отчет на основе таможенных данных",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_eee6f_video_summary",
+            "label": "Описание видео",
+            "name": "video_summary",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Краткое объяснение HS-кодов, охвата данных, ограничений рейтингов и коммерческого смысла показателей.",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-oat-products-selected-markets-2026-eee6f"
+            }
+        ]
+    ],
+    "active": true
+}

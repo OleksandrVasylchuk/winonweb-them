@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-about-for-journalists-conference-organiz",
+    "title": "Media inquiries",
+    "category": "qs",
+    "description": "Media inquiries — 2 pieces of text, 2 links. From about.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "about",
+        "media",
+        "inquiries"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "For journalists, conference organizers and industry partners.",
+                "description": "Robert Khoubian can provide perspective on global food trade, China supply chains, Russia and CIS market access, frozen food logistics, regulatory requirements and cross-border trade risk.",
+                "contact_link": {
+                    "url": "mailto:robert@robertkhoubian.com",
+                    "title": "Contact",
+                    "target": ""
+                },
+                "reports_link": {
+                    "url": "reports.html",
+                    "title": "View Reports",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/en/about.html",
+    "qsDesignVersion": 7
+}

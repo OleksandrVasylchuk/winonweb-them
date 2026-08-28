@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-reports-c174ce",
+    "title": "海关数据报告",
+    "category": "qs",
+    "description": "海关数据报告 — 2 pieces of text, 3 repeating items. From reports.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "reports",
+        "海关数据报告"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "海关数据报告已作为初始资料载入。",
+                "intro": "这些报告已作为后台验证资料加入原型。公开样本和付费版本应在发布前完成脱敏和审批。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/reports.html",
+    "qsDesignVersion": 7
+}

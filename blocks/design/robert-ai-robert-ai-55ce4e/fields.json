@@ -1,0 +1,61 @@
+{
+    "key": "group_qs_design_robert_ai_robert_ai_55ce4e",
+    "title": "团队控制方式",
+    "fields": [
+        {
+            "key": "field_qs_robert_ai_robert_ai_55ce4e_kicker",
+            "label": "Kicker",
+            "name": "kicker",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "管理系统",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_55ce4e_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "团队如何控制 Robert AI",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_robert_ai_robert_ai_55ce4e_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_robert_ai_robert_ai_55ce4e_row_heading",
+                    "label": "Card heading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "知识上传",
+                    "instructions": "A short line of text, shown in this position."
+                },
+                {
+                    "key": "field_qs_robert_ai_robert_ai_55ce4e_row_description",
+                    "label": "Card description",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "管理员上传报告、PDF、文字稿、术语表和证据说明。",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-robert-ai-robert-ai-55ce4e"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,52 @@
+{
+    "key": "group_qs_design_research_8e744d",
+    "title": "Исследовательские программы",
+    "fields": [
+        {
+            "key": "field_qs_research_8e744d_heading",
+            "label": "Заголовок раздела",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Флагманские направления в разработке",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_8e744d_lede",
+            "label": "Вступительный текст",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Эти направления должны стать редакционной основой платформы. Сначала они могут выходить как статьи, затем перерасти в платные отчеты, квартальные обзоры и ежегодные публикации.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_8e744d_source",
+            "label": "Show",
+            "name": "source",
+            "type": "post_object",
+            "post_type": [],
+            "multiple": 1,
+            "return_format": "id",
+            "instructions": "Leave empty to show the most recent automatically."
+        },
+        {
+            "key": "field_qs_research_8e744d_limit",
+            "label": "How many",
+            "name": "limit",
+            "type": "number",
+            "default_value": 6,
+            "min": 1,
+            "instructions": "The most this position will display at once."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-8e744d"
+            }
+        ]
+    ],
+    "active": true
+}

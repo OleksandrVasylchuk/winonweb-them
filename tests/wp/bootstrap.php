@@ -15,7 +15,7 @@
  *
  * Run: npm run test:wp
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 declare( strict_types = 1 );
@@ -31,12 +31,12 @@ if ( 'cli' !== PHP_SAPI ) {
 }
 
 /**
- * Find the WordPress install: WOW_WP_PATH first, else walk up from the theme.
+ * Find the WordPress install: QSOFT_WP_PATH first, else walk up from the theme.
  *
  * @return string Absolute directory holding wp-load.php, or empty.
  */
-function wow_locate_wordpress(): string {
-	$configured = getenv( 'WOW_WP_PATH' );
+function qsoft_locate_wordpress(): string {
+	$configured = getenv( 'QSOFT_WP_PATH' );
 
 	if ( is_string( $configured ) && '' !== $configured ) {
 		$configured = rtrim( str_replace( '\\', '/', $configured ), '/' );
@@ -63,10 +63,10 @@ function wow_locate_wordpress(): string {
 	return '';
 }
 
-$wow_wp_path = wow_locate_wordpress();
+$qsoft_wp_path = qsoft_locate_wordpress();
 
-if ( '' === $wow_wp_path ) {
-	echo "skipped: no WordPress found (set WOW_WP_PATH)\n";
+if ( '' === $qsoft_wp_path ) {
+	echo "skipped: no WordPress found (set QSOFT_WP_PATH)\n";
 	exit( 0 );
 }
 
@@ -74,9 +74,9 @@ if ( '' === $wow_wp_path ) {
  * Enough of a request for WordPress to build URLs. The host is corrected to
  * the site's own once the options table is readable.
  */
-$wow_host = getenv( 'WOW_WP_HOST' );
+$qsoft_host = getenv( 'QSOFT_WP_HOST' );
 
-$_SERVER['HTTP_HOST']       = is_string( $wow_host ) && '' !== $wow_host ? $wow_host : 'localhost';
+$_SERVER['HTTP_HOST']       = is_string( $qsoft_host ) && '' !== $qsoft_host ? $qsoft_host : 'localhost';
 $_SERVER['SERVER_NAME']     = $_SERVER['HTTP_HOST'];
 $_SERVER['REQUEST_URI']     = '/';
 $_SERVER['REQUEST_METHOD']  = 'GET';
@@ -84,17 +84,17 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 define( 'WP_USE_THEMES', false ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WordPress's own switch; it must be set before wp-load.php.
-define( 'WOW_SIGNAL_TESTING', true );
+define( 'QSOFT_TESTING', true );
 
-require $wow_wp_path . '/wp-load.php';
+require $qsoft_wp_path . '/wp-load.php';
 
 $_SERVER['HTTP_HOST']   = (string) wp_parse_url( home_url(), PHP_URL_HOST );
 $_SERVER['SERVER_NAME'] = $_SERVER['HTTP_HOST'];
 
 // ----------------------------------------------------------------- counters
 
-$wow_checks   = 0;
-$wow_failures = 0;
+$qsoft_checks   = 0;
+$qsoft_failures = 0;
 
 /**
  * Assert a condition, counting the result.
@@ -107,14 +107,14 @@ $wow_failures = 0;
  * @param mixed  $actual Optional value to print when the assertion fails.
  * @return bool The condition, so callers can bail out of dependent checks.
  */
-function wow_assert( bool $passed, string $label, $actual = null ): bool {
-	++$GLOBALS['wow_checks'];
+function qsoft_assert( bool $passed, string $label, $actual = null ): bool {
+	++$GLOBALS['qsoft_checks'];
 
 	if ( $passed ) {
 		return true;
 	}
 
-	++$GLOBALS['wow_failures'];
+	++$GLOBALS['qsoft_failures'];
 	echo '  FAIL  ' . $label . "\n";
 
 	if ( null !== $actual ) {
@@ -131,7 +131,7 @@ function wow_assert( bool $passed, string $label, $actual = null ): bool {
  * @param string $title Group name.
  * @return void
  */
-function wow_group( string $title ): void {
+function qsoft_group( string $title ): void {
 	echo "\n=== " . $title . " ===\n";
 }
 
@@ -141,7 +141,7 @@ function wow_group( string $title ): void {
  * @param string $text What to say.
  * @return void
  */
-function wow_info( string $text ): void {
+function qsoft_info( string $text ): void {
 	echo '  INFO  ' . $text . "\n";
 }
 
@@ -151,7 +151,7 @@ function wow_info( string $text ): void {
  * @param string $text Why.
  * @return void
  */
-function wow_skip( string $text ): void {
+function qsoft_skip( string $text ): void {
 	echo '  SKIP  ' . $text . "\n";
 }
 
@@ -164,12 +164,12 @@ function wow_skip( string $text ): void {
  *
  * @return never
  */
-function wow_finish(): void {
+function qsoft_finish(): void {
 	remove_all_actions( 'shutdown' );
 
-	printf( "\n%d checks, %d failure(s)\n", $GLOBALS['wow_checks'], $GLOBALS['wow_failures'] );
+	printf( "\n%d checks, %d failure(s)\n", $GLOBALS['qsoft_checks'], $GLOBALS['qsoft_failures'] );
 
-	exit( $GLOBALS['wow_failures'] > 0 ? 1 : 0 );
+	exit( $GLOBALS['qsoft_failures'] > 0 ? 1 : 0 );
 }
 
 // -------------------------------------------------------------- environment
@@ -179,7 +179,7 @@ function wow_finish(): void {
  *
  * @return void
  */
-function wow_preflight(): void {
+function qsoft_preflight(): void {
 	global $wpdb;
 
 	$theme_dir = realpath( dirname( __DIR__, 2 ) );
@@ -230,7 +230,7 @@ function wow_preflight(): void {
 	wp_set_current_user( (int) $admins[0]->ID );
 }
 
-wow_preflight();
+qsoft_preflight();
 
 // -------------------------------------------------------------- isolation
 
@@ -242,16 +242,56 @@ wow_preflight();
  *
  * @return array<int, string>
  */
-function wow_watched_dirs(): array {
+function qsoft_watched_dirs(): array {
 	$uploads = wp_upload_dir();
 	$base    = rtrim( str_replace( '\\', '/', (string) $uploads['basedir'] ), '/' );
 
 	return array(
-		$base . '/wow-signal-designs',
+		$base . '/qwerty-soft-signal-designs',
 		$base . '/fonts',
 		rtrim( str_replace( '\\', '/', (string) $uploads['path'] ), '/' ),
+
+		/*
+		 * And the blocks a build generates, which are files in the theme
+		 * rather than rows in the database and so survive the rollback.
+		 *
+		 * A directory of the suite's own, never the theme's. Watching the real
+		 * one was the earlier attempt and it was not safe: a developer's
+		 * machine usually holds a real import, and "delete whatever appeared
+		 * while the tests ran" deletes a build that happened to be running.
+		 * Every page on that site then points at blocks that are not there,
+		 * and nothing anywhere says why.
+		 */
+		qsoft_test_blocks_dir(),
 	);
 }
+
+/**
+ * Where a test run writes the blocks a build generates.
+ *
+ * Beside the fixture designs under uploads rather than inside the theme, so
+ * that a suite run and a real import cannot reach each other's files.
+ *
+ * @return string Absolute path, without a trailing slash.
+ */
+function qsoft_test_blocks_dir(): string {
+	$uploads = wp_upload_dir();
+
+	return rtrim( str_replace( '\\', '/', (string) $uploads['basedir'] ), '/' ) . '/qwerty-soft-signal-test-blocks';
+}
+
+add_filter(
+	'qwerty_soft/design_blocks_dir',
+	static function (): string {
+		$dir = qsoft_test_blocks_dir();
+
+		if ( ! is_dir( $dir ) ) {
+			wp_mkdir_p( $dir );
+		}
+
+		return $dir;
+	}
+);
 
 /**
  * Every file under a directory, as forward-slash absolute paths.
@@ -259,7 +299,7 @@ function wow_watched_dirs(): array {
  * @param string $dir Directory; missing is fine.
  * @return array<string, true>
  */
-function wow_list_files( string $dir ): array {
+function qsoft_list_files( string $dir ): array {
 	$found = array();
 
 	if ( ! is_dir( $dir ) ) {
@@ -286,11 +326,11 @@ function wow_list_files( string $dir ): array {
  *
  * @return array<string, array<string, true>|null>
  */
-function wow_uploads_snapshot(): array {
+function qsoft_uploads_snapshot(): array {
 	$snapshot = array();
 
-	foreach ( wow_watched_dirs() as $dir ) {
-		$snapshot[ $dir ] = is_dir( $dir ) ? wow_list_files( $dir ) : null;
+	foreach ( qsoft_watched_dirs() as $dir ) {
+		$snapshot[ $dir ] = is_dir( $dir ) ? qsoft_list_files( $dir ) : null;
 	}
 
 	return $snapshot;
@@ -303,11 +343,11 @@ function wow_uploads_snapshot(): array {
  * @param array<int, string>                      $ignore   Path prefixes to leave out.
  * @return array<int, string> Deepest first, so directories come after their contents.
  */
-function wow_uploads_new( array $snapshot, array $ignore = array() ): array {
+function qsoft_uploads_new( array $snapshot, array $ignore = array() ): array {
 	$new = array();
 
 	foreach ( $snapshot as $dir => $before ) {
-		foreach ( wow_list_files( $dir ) as $path => $unused ) {
+		foreach ( qsoft_list_files( $dir ) as $path => $unused ) {
 			if ( null !== $before && isset( $before[ $path ] ) ) {
 				continue;
 			}
@@ -339,12 +379,12 @@ function wow_uploads_new( array $snapshot, array $ignore = array() ): array {
  * @param array<string, array<string, true>|null> $snapshot Picture taken before the test.
  * @return int How many entries were removed.
  */
-function wow_uploads_cleanup( array $snapshot ): int {
+function qsoft_uploads_cleanup( array $snapshot ): int {
 	$removed = 0;
 
-	foreach ( wow_uploads_new( $snapshot ) as $path ) {
+	foreach ( qsoft_uploads_new( $snapshot ) as $path ) {
 		if ( is_dir( $path ) ) {
-			wow_remove_tree( $path );
+			qsoft_remove_tree( $path );
 			++$removed;
 		} elseif ( is_file( $path ) ) {
 			unlink( $path );
@@ -361,12 +401,12 @@ function wow_uploads_cleanup( array $snapshot ): int {
  * @param string $dir Absolute path.
  * @return void
  */
-function wow_remove_tree( string $dir ): void {
+function qsoft_remove_tree( string $dir ): void {
 	if ( ! is_dir( $dir ) ) {
 		return;
 	}
 
-	foreach ( wow_list_files( $dir ) as $path => $unused ) {
+	foreach ( qsoft_list_files( $dir ) as $path => $unused ) {
 		if ( is_dir( $path ) ) {
 			rmdir( $path );
 		} else {
@@ -389,15 +429,15 @@ function wow_remove_tree( string $dir ): void {
  * @param callable $body The test.
  * @return void
  */
-function wow_test( string $name, callable $body ): void {
+function qsoft_test( string $name, callable $body ): void {
 	global $wpdb;
 
-	wow_group( $name );
+	qsoft_group( $name );
 
 	wp_cache_flush();
 
-	$snapshot = wow_uploads_snapshot();
-	$marker   = 'wow_signal_test_marker_' . bin2hex( random_bytes( 4 ) );
+	$snapshot = qsoft_uploads_snapshot();
+	$marker   = 'qwerty_soft_test_marker_' . bin2hex( random_bytes( 4 ) );
 
 	$wpdb->query( 'START TRANSACTION' );
 
@@ -406,7 +446,7 @@ function wow_test( string $name, callable $body ): void {
 
 		$body();
 	} catch ( Throwable $e ) {
-		wow_assert( false, $name . ' threw ' . get_class( $e ) . ': ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine() );
+		qsoft_assert( false, $name . ' threw ' . get_class( $e ) . ': ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine() );
 	} finally {
 		$wpdb->query( 'ROLLBACK' );
 		wp_cache_flush();
@@ -415,13 +455,13 @@ function wow_test( string $name, callable $body ): void {
 
 		if ( null !== $survivor ) {
 			delete_option( $marker );
-			wow_assert( false, $name . ': a COMMIT sneaked in — the marker row survived the rollback. Check the test for DDL or explicit commits.' );
+			qsoft_assert( false, $name . ': a COMMIT sneaked in — the marker row survived the rollback. Check the test for DDL or explicit commits.' );
 		}
 
-		$removed = wow_uploads_cleanup( $snapshot );
+		$removed = qsoft_uploads_cleanup( $snapshot );
 
 		if ( $removed > 0 ) {
-			wow_info( sprintf( 'removed %d file(s)/folder(s) the test left under uploads/', $removed ) );
+			qsoft_info( sprintf( 'removed %d file(s)/folder(s) the test left under uploads/', $removed ) );
 		}
 	}
 }
@@ -432,6 +472,6 @@ function wow_test( string $name, callable $body ): void {
  * @param string $relative Path inside tests/fixtures/.
  * @return string
  */
-function wow_fixture( string $relative ): string {
+function qsoft_fixture( string $relative ): string {
 	return str_replace( '\\', '/', dirname( __DIR__ ) ) . '/fixtures/' . ltrim( $relative, '/' );
 }

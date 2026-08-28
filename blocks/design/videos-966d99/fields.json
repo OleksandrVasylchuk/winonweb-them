@@ -1,0 +1,45 @@
+{
+    "key": "group_qs_design_videos_966d99",
+    "title": "Video library",
+    "fields": [
+        {
+            "key": "field_qs_videos_966d99_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Каждое видео связывает отчет с понятным объяснением доказательств, ограничений и бизнес-выводов.",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_videos_966d99_source",
+            "label": "Show",
+            "name": "source",
+            "type": "post_object",
+            "post_type": [
+                "qs_video"
+            ],
+            "multiple": 1,
+            "return_format": "id",
+            "instructions": "Leave empty to show the most recent automatically."
+        },
+        {
+            "key": "field_qs_videos_966d99_limit",
+            "label": "How many",
+            "name": "limit",
+            "type": "number",
+            "default_value": 3,
+            "min": 1,
+            "instructions": "The most this position will display at once."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-videos-966d99"
+            }
+        ]
+    ],
+    "active": true
+}

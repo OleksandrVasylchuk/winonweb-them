@@ -14,7 +14,7 @@
  *   npm run fetch:html -- http://site.test  # somewhere else
  *   npm run fetch:html -- http://site.test 12
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { mkdirSync, writeFileSync, readdirSync, rmSync } from 'node:fs';
@@ -36,7 +36,7 @@ const limit = Number.parseInt( process.argv[ 3 ] ?? '8', 10 );
 const get = async ( url ) => {
 	const response = await fetch( url, {
 		redirect: 'follow',
-		headers: { 'User-Agent': 'wow-signal-lint/1.0' },
+		headers: { 'User-Agent': 'qwerty-soft-signal-lint/1.0' },
 	} );
 
 	return { status: response.status, body: await response.text() };

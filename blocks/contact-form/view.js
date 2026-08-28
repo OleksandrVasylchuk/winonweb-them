@@ -1,5 +1,5 @@
 /**
- * wow/contact-form — post-submit focus management.
+ * qs/contact-form — post-submit focus management.
  *
  * The form works completely without this file: it is a plain POST, the server
  * validates, and the browser lands back on the page with the messages already
@@ -12,7 +12,7 @@
 	'use strict';
 
 	function boot() {
-		var notice = document.querySelector( '[data-wow-contact-summary], [data-wow-contact-status]' );
+		var notice = document.querySelector( '[data-qs-contact-summary], [data-qs-contact-status]' );
 
 		if ( ! notice ) {
 			return;

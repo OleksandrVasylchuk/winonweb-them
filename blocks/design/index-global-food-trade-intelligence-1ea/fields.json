@@ -1,0 +1,33 @@
+{
+    "key": "group_qs_design_index_global_food_trade_intelligence_1ea",
+    "title": "订阅 Global Food Trade Intelligence",
+    "fields": [
+        {
+            "key": "field_qs_index_global_food_trade_intelligence_1ea_heading",
+            "label": "Subheading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "订阅 Global Food Trade Intelligence",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_index_global_food_trade_intelligence_1ea_lede",
+            "label": "Text",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "每周获取关于中国食品出口、冷冻食品市场、市场准入、贸易风险和国际供应链的洞察。",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-index-global-food-trade-intelligence-1ea"
+            }
+        ]
+    ],
+    "active": true
+}

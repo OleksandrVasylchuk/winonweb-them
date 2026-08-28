@@ -2,15 +2,15 @@
 /**
  * Pattern categories.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,25 +38,25 @@ final class Patterns implements Module {
 	 */
 	public function register_categories(): void {
 		$categories = array(
-			'wow-hero'       => array(
-				'label'       => __( 'WOW — Hero', 'wow-signal' ),
-				'description' => __( 'Opening sections for the top of a page.', 'wow-signal' ),
+			'qs-hero'       => array(
+				'label'       => __( 'Qwerty Soft — Hero', 'qwerty-soft-signal' ),
+				'description' => __( 'Opening sections for the top of a page.', 'qwerty-soft-signal' ),
 			),
-			'wow-content'    => array(
-				'label'       => __( 'WOW — Content', 'wow-signal' ),
-				'description' => __( 'Services, process, features and text sections.', 'wow-signal' ),
+			'qs-content'    => array(
+				'label'       => __( 'Qwerty Soft — Content', 'qwerty-soft-signal' ),
+				'description' => __( 'Services, process, features and text sections.', 'qwerty-soft-signal' ),
 			),
-			'wow-proof'      => array(
-				'label'       => __( 'WOW — Proof', 'wow-signal' ),
-				'description' => __( 'Case studies, metrics, testimonials and client logos.', 'wow-signal' ),
+			'qs-proof'      => array(
+				'label'       => __( 'Qwerty Soft — Proof', 'qwerty-soft-signal' ),
+				'description' => __( 'Case studies, metrics, testimonials and client logos.', 'qwerty-soft-signal' ),
 			),
-			'wow-conversion' => array(
-				'label'       => __( 'WOW — Conversion', 'wow-signal' ),
-				'description' => __( 'Pricing, FAQ, contact and call-to-action sections.', 'wow-signal' ),
+			'qs-conversion' => array(
+				'label'       => __( 'Qwerty Soft — Conversion', 'qwerty-soft-signal' ),
+				'description' => __( 'Pricing, FAQ, contact and call-to-action sections.', 'qwerty-soft-signal' ),
 			),
-			'wow-page'       => array(
-				'label'       => __( 'WOW — Full pages', 'wow-signal' ),
-				'description' => __( 'Complete page layouts you can drop in and edit.', 'wow-signal' ),
+			'qs-page'       => array(
+				'label'       => __( 'Qwerty Soft — Full pages', 'qwerty-soft-signal' ),
+				'description' => __( 'Complete page layouts you can drop in and edit.', 'qwerty-soft-signal' ),
 			),
 		);
 

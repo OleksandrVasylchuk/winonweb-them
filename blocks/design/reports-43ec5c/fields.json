@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_reports_43ec5c",
+    "title": "Report preview checklist",
+    "fields": [
+        {
+            "key": "field_qs_reports_43ec5c_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "报告预览系统",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_43ec5c_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "每份报告都应有公开落地页，提供足够信息证明价值，同时不泄露完整产品。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_reports_43ec5c_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_reports_43ec5c_row_check",
+                    "label": "Check mark",
+                    "name": "check",
+                    "type": "text",
+                    "default_value": "✓",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_reports_43ec5c_row_included_item",
+                    "label": "Included item",
+                    "name": "included_item",
+                    "type": "text",
+                    "default_value": "报告封面",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-reports-43ec5c"
+            }
+        ]
+    ],
+    "active": true
+}

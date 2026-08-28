@@ -2,13 +2,13 @@
 /**
  * Minimal Anthropic Messages API client built on the WordPress HTTP API.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Error;
 
@@ -52,9 +52,9 @@ final class AnthropicClient {
 	 */
 	public static function models(): array {
 		return array(
-			'claude-opus-5'    => __( 'Claude Opus 5 — best quality (default)', 'wow-signal' ),
-			'claude-sonnet-5'  => __( 'Claude Sonnet 5 — faster and cheaper', 'wow-signal' ),
-			'claude-haiku-4-5' => __( 'Claude Haiku 4.5 — fastest, simple sections only', 'wow-signal' ),
+			'claude-opus-5'    => __( 'Claude Opus 5 — best quality (default)', 'qwerty-soft-signal' ),
+			'claude-sonnet-5'  => __( 'Claude Sonnet 5 — faster and cheaper', 'qwerty-soft-signal' ),
+			'claude-haiku-4-5' => __( 'Claude Haiku 4.5 — fastest, simple sections only', 'qwerty-soft-signal' ),
 		);
 	}
 
@@ -65,10 +65,10 @@ final class AnthropicClient {
 	 */
 	public static function effort_levels(): array {
 		return array(
-			'low'    => __( 'Low — quickest, for simple sections', 'wow-signal' ),
-			'medium' => __( 'Medium — balanced', 'wow-signal' ),
-			'high'   => __( 'High — recommended', 'wow-signal' ),
-			'xhigh'  => __( 'Extra high — slowest, for complex layouts', 'wow-signal' ),
+			'low'    => __( 'Low — quickest, for simple sections', 'qwerty-soft-signal' ),
+			'medium' => __( 'Medium — balanced', 'qwerty-soft-signal' ),
+			'high'   => __( 'High — recommended', 'qwerty-soft-signal' ),
+			'xhigh'  => __( 'Extra high — slowest, for complex layouts', 'qwerty-soft-signal' ),
 		);
 	}
 
@@ -81,11 +81,11 @@ final class AnthropicClient {
 	 * @return string
 	 */
 	public static function api_key(): string {
-		if ( defined( 'WOW_SIGNAL_ANTHROPIC_KEY' ) && is_string( WOW_SIGNAL_ANTHROPIC_KEY ) ) {
-			return trim( WOW_SIGNAL_ANTHROPIC_KEY );
+		if ( defined( 'QSOFT_ANTHROPIC_KEY' ) && is_string( QSOFT_ANTHROPIC_KEY ) ) {
+			return trim( QSOFT_ANTHROPIC_KEY );
 		}
 
-		return trim( (string) get_option( 'wow_signal_anthropic_key', '' ) );
+		return trim( (string) get_option( 'qwerty_soft_anthropic_key', '' ) );
 	}
 
 	/**
@@ -94,7 +94,7 @@ final class AnthropicClient {
 	 * @return bool
 	 */
 	public static function key_is_constant(): bool {
-		return defined( 'WOW_SIGNAL_ANTHROPIC_KEY' ) && '' !== trim( (string) WOW_SIGNAL_ANTHROPIC_KEY );
+		return defined( 'QSOFT_ANTHROPIC_KEY' ) && '' !== trim( (string) QSOFT_ANTHROPIC_KEY );
 	}
 
 	/**
@@ -117,8 +117,8 @@ final class AnthropicClient {
 
 		if ( '' === $key ) {
 			return new WP_Error(
-				'wow_signal_no_key',
-				__( 'No Anthropic API key is configured yet. Add one under Appearance → Design import.', 'wow-signal' )
+				'qwerty_soft_no_key',
+				__( 'No Anthropic API key is configured yet. Add one under Appearance → Design import.', 'qwerty-soft-signal' )
 			);
 		}
 
@@ -224,10 +224,10 @@ final class AnthropicClient {
 
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(
-				'wow_signal_http',
+				'qwerty_soft_http',
 				sprintf(
 					/* translators: %s: transport error message. */
-					__( 'Could not reach the Anthropic API: %s', 'wow-signal' ),
+					__( 'Could not reach the Anthropic API: %s', 'qwerty-soft-signal' ),
 					$response->get_error_message()
 				)
 			);
@@ -242,7 +242,7 @@ final class AnthropicClient {
 		}
 
 		if ( ! is_array( $parsed ) ) {
-			return new WP_Error( 'wow_signal_bad_json', __( 'The API returned a response that could not be read.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_bad_json', __( 'The API returned a response that could not be read.', 'qwerty-soft-signal' ) );
 		}
 
 		/*
@@ -252,15 +252,15 @@ final class AnthropicClient {
 		 */
 		if ( 'refusal' === ( $parsed['stop_reason'] ?? '' ) ) {
 			return new WP_Error(
-				'wow_signal_refusal',
-				__( 'Anthropic declined this request. Rephrase the brief and try again — describe the section rather than pasting code from an unrelated system.', 'wow-signal' )
+				'qwerty_soft_refusal',
+				__( 'Anthropic declined this request. Rephrase the brief and try again — describe the section rather than pasting code from an unrelated system.', 'qwerty-soft-signal' )
 			);
 		}
 
 		if ( 'max_tokens' === ( $parsed['stop_reason'] ?? '' ) ) {
 			return new WP_Error(
-				'wow_signal_truncated',
-				__( 'The reply was cut off before it finished. Ask for a smaller section, or split the design into two.', 'wow-signal' )
+				'qwerty_soft_truncated',
+				__( 'The reply was cut off before it finished. Ask for a smaller section, or split the design into two.', 'qwerty-soft-signal' )
 			);
 		}
 
@@ -275,7 +275,7 @@ final class AnthropicClient {
 		$payload = json_decode( $text, true );
 
 		if ( ! is_array( $payload ) ) {
-			return new WP_Error( 'wow_signal_bad_payload', __( 'The reply did not match the expected format.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_bad_payload', __( 'The reply did not match the expected format.', 'qwerty-soft-signal' ) );
 		}
 
 		$payload['_usage'] = isset( $parsed['usage'] ) && is_array( $parsed['usage'] ) ? $parsed['usage'] : array();
@@ -386,19 +386,19 @@ final class AnthropicClient {
 		}
 
 		$messages = array(
-			400 => __( 'The request was rejected as invalid.', 'wow-signal' ),
-			401 => __( 'The API key was not accepted. Check it and save again.', 'wow-signal' ),
-			403 => __( 'This API key does not have access to the selected model.', 'wow-signal' ),
-			404 => __( 'The selected model does not exist. Pick another one in the settings.', 'wow-signal' ),
-			413 => __( 'The design you pasted is too large. Send one section at a time.', 'wow-signal' ),
-			429 => __( 'Rate limit reached. Wait a minute and try again.', 'wow-signal' ),
-			500 => __( 'Anthropic had a server error. Try again shortly.', 'wow-signal' ),
-			529 => __( 'Anthropic is overloaded right now. Try again shortly.', 'wow-signal' ),
+			400 => __( 'The request was rejected as invalid.', 'qwerty-soft-signal' ),
+			401 => __( 'The API key was not accepted. Check it and save again.', 'qwerty-soft-signal' ),
+			403 => __( 'This API key does not have access to the selected model.', 'qwerty-soft-signal' ),
+			404 => __( 'The selected model does not exist. Pick another one in the settings.', 'qwerty-soft-signal' ),
+			413 => __( 'The design you pasted is too large. Send one section at a time.', 'qwerty-soft-signal' ),
+			429 => __( 'Rate limit reached. Wait a minute and try again.', 'qwerty-soft-signal' ),
+			500 => __( 'Anthropic had a server error. Try again shortly.', 'qwerty-soft-signal' ),
+			529 => __( 'Anthropic is overloaded right now. Try again shortly.', 'qwerty-soft-signal' ),
 		);
 
 		$message = $messages[ $status ] ?? sprintf(
 			/* translators: %d: HTTP status code. */
-			__( 'The API returned an unexpected status (%d).', 'wow-signal' ),
+			__( 'The API returned an unexpected status (%d).', 'qwerty-soft-signal' ),
 			$status
 		);
 
@@ -406,6 +406,6 @@ final class AnthropicClient {
 			$message .= ' ' . $detail;
 		}
 
-		return new WP_Error( 'wow_signal_api_' . $status, $message );
+		return new WP_Error( 'qwerty_soft_api_' . $status, $message );
 	}
 }

@@ -1,0 +1,68 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-index-robert-khoubian-b68cd4",
+    "title": "Robert Khoubian",
+    "category": "qs",
+    "description": "Robert Khoubian — 19 pieces of text, 1 picture, 2 links, 5 repeating items. From index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "index",
+        "robert",
+        "khoubian"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "eyebrow": "Профессиональная аналитика для глобальных продовольственных рынков",
+                "heading": "Robert Khoubian",
+                "subheading": "Global Food Trade Expert",
+                "focus_line": "Китай • Евразия • Цепочки поставок замороженных продуктов",
+                "lede": "Независимая аналитика по международной торговле продуктами питания, основанная на более чем 20-летнем практическом опыте в Китае, России, странах СНГ, Северной Америке и глобальных цепочках поставок замороженной продукции.",
+                "primary_link": {
+                    "url": "#expertise",
+                    "title": "Изучить экспертизу",
+                    "target": ""
+                },
+                "secondary_link": {
+                    "url": "about.html",
+                    "title": "Читать биографию",
+                    "target": ""
+                },
+                "portrait_caption_eyebrow": "Global Food Trade",
+                "portrait_caption_name": "Robert Khoubian",
+                "portrait_caption_note": "Research • Intelligence • Trade",
+                "panel_label": "Фокус аналитики",
+                "panel_value": "Китай • Евразия • Global Food Trade",
+                "stat_one_label": "С",
+                "stat_one_value": "2004",
+                "stat_two_label": "Фокус",
+                "stat_two_value": "Доступ на рынки",
+                "stat_three_label": "Рынки",
+                "stat_three_value": "Замороженные продукты",
+                "stat_four_label": "Аудитория",
+                "stat_four_value": "Руководители",
+                "strip_label": "Новая аналитика"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/index.html",
+    "qsDesignVersion": 7
+}

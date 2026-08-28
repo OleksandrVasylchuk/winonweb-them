@@ -1,0 +1,43 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-index-global-food-trade-intelligence-1ea",
+    "title": "订阅 Global Food Trade Intelligence",
+    "category": "qs",
+    "description": "订阅 Global Food Trade Intelligence — 2 pieces of text. From index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "index",
+        "global",
+        "food",
+        "trade",
+        "intelligence"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "订阅 Global Food Trade Intelligence",
+                "lede": "每周获取关于中国食品出口、冷冻食品市场、市场准入、贸易风险和国际供应链的洞察。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/index.html",
+    "qsDesignVersion": 7
+}

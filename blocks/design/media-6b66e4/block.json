@@ -1,0 +1,52 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-media-6b66e4",
+    "title": "媒体照片",
+    "category": "qs",
+    "description": "媒体照片 — 4 pieces of text, 2 pictures, 2 links. From media.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "media",
+        "媒体照片"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "媒体照片",
+                "intro": "当前网站包包含用于网页的专业肖像素材。正式开展媒体推广前，应补充更高分辨率的新闻照片。",
+                "home_portrait_title": "首页肖像",
+                "home_portrait_link": {
+                    "url": "../assets/photos/robert-khoubian-hero.jpg",
+                    "title": "打开图片 →",
+                    "target": ""
+                },
+                "about_portrait_title": "关于页肖像",
+                "about_portrait_link": {
+                    "url": "../assets/photos/robert-khoubian-about.jpg",
+                    "title": "打开图片 →",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/media.html",
+    "qsDesignVersion": 7
+}

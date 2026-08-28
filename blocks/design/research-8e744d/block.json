@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-research-8e744d",
+    "title": "Исследовательские программы",
+    "category": "qs",
+    "description": "Исследовательские программы — 2 pieces of text, 6 repeating items. From research.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "research",
+        "Исследовательские",
+        "программы"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Флагманские направления в разработке",
+                "lede": "Эти направления должны стать редакционной основой платформы. Сначала они могут выходить как статьи, затем перерасти в платные отчеты, квартальные обзоры и ежегодные публикации."
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/research.html",
+    "qsDesignVersion": 7
+}

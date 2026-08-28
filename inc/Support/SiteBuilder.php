@@ -2,13 +2,13 @@
 /**
  * Turns converted sections into an assembled site.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Error;
 use WP_Query;
@@ -30,7 +30,7 @@ final class SiteBuilder {
 	/**
 	 * Meta key recording which design file an attachment came from.
 	 */
-	private const SOURCE_META = '_wow_signal_source';
+	private const SOURCE_META = '_qwerty_soft_source';
 
 	/**
 	 * Extensions worth importing, in order of preference for the master file.
@@ -127,7 +127,7 @@ final class SiteBuilder {
 		$root = rtrim( str_replace( '\\', '/', $root ), '/' );
 
 		if ( ! is_dir( $root ) ) {
-			return new WP_Error( 'wow_signal_no_design', __( 'That design is not on this site.', 'wow-signal' ) );
+			return new WP_Error( 'qwerty_soft_no_design', __( 'That design is not on this site.', 'qwerty-soft-signal' ) );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -351,13 +351,13 @@ final class SiteBuilder {
 	 */
 	private static function sideload( string $path, string $rel, string $alt ) {
 		if ( ! is_readable( $path ) ) {
-			return new WP_Error( 'wow_signal_unreadable', $rel );
+			return new WP_Error( 'qwerty_soft_unreadable', $rel );
 		}
 
 		$uploads = wp_upload_dir();
 
 		if ( ! empty( $uploads['error'] ) ) {
-			return new WP_Error( 'wow_signal_uploads', (string) $uploads['error'] );
+			return new WP_Error( 'qwerty_soft_uploads', (string) $uploads['error'] );
 		}
 
 		$name = wp_unique_filename( $uploads['path'], basename( $rel ) );
@@ -373,14 +373,14 @@ final class SiteBuilder {
 			$clean = self::sanitise_svg( (string) file_get_contents( $path ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
 
 			if ( null === $clean ) {
-				return new WP_Error( 'wow_signal_svg_rejected', $rel );
+				return new WP_Error( 'qwerty_soft_svg_rejected', $rel );
 			}
 
 			if ( false === file_put_contents( $dest, $clean ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Writing the sanitised copy into the uploads directory.
-				return new WP_Error( 'wow_signal_copy', $rel );
+				return new WP_Error( 'qwerty_soft_copy', $rel );
 			}
 		} elseif ( ! copy( $path, $dest ) ) {
-			return new WP_Error( 'wow_signal_copy', $rel );
+			return new WP_Error( 'qwerty_soft_copy', $rel );
 		}
 
 		$allow_svg = static function ( $mimes ): array {
@@ -410,7 +410,7 @@ final class SiteBuilder {
 		if ( '' === $mime ) {
 			wp_delete_file( $dest );
 
-			return new WP_Error( 'wow_signal_filetype', $rel );
+			return new WP_Error( 'qwerty_soft_filetype', $rel );
 		}
 
 		$id = wp_insert_attachment(
@@ -670,6 +670,52 @@ final class SiteBuilder {
 			},
 			$markup
 		);
+	}
+
+	/**
+	 * Point every `url(...)` in a stylesheet at the media that was imported.
+	 *
+	 * A wrapped section keeps the design's own CSS, and that CSS names its
+	 * pictures the way the archive did — `url(img/band.jpg)`, relative to
+	 * where the stylesheet used to sit. Copied into a block's own directory
+	 * those addresses resolve to nothing, so a hero with a background image
+	 * renders as a coloured rectangle and nothing says why.
+	 *
+	 * @param string                                  $css      Stylesheet text.
+	 * @param array<string, array{id:int,url:string}> $map      Path to attachment.
+	 * @param string                                  $page_dir Directory of the page.
+	 * @return string
+	 */
+	public static function relink_css_urls( string $css, array $map, string $page_dir = '' ): string {
+		if ( array() === $map || '' === trim( $css ) ) {
+			return $css;
+		}
+
+		return (string) preg_replace_callback(
+			'#url\(\s*([\'"]?)([^\'")]+)\1\s*\)#i',
+			static function ( array $found ) use ( $map, $page_dir ): string {
+				$resolved = self::resolve( $found[2], $map, $page_dir );
+
+				return null === $resolved ? $found[0] : 'url("' . $resolved['url'] . '")';
+			},
+			$css
+		);
+	}
+
+	/**
+	 * The attachment one of the design's own image paths was imported as.
+	 *
+	 * The same resolution the markup rewrite uses, exposed because a wrapped
+	 * section needs the attachment's id rather than its address: an ACF image
+	 * field holding a bare URL renders but cannot be changed from the library.
+	 *
+	 * @param string                                  $src      Original attribute value.
+	 * @param array<string, array{id:int,url:string}> $map      Path to attachment.
+	 * @param string                                  $page_dir Directory of the page.
+	 * @return array{id:int,url:string}|null
+	 */
+	public static function attachment_for( string $src, array $map, string $page_dir = '' ) {
+		return self::resolve( $src, $map, $page_dir );
 	}
 
 	/**

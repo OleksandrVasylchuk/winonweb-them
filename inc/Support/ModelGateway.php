@@ -2,13 +2,13 @@
 /**
  * One way in to the model, whichever route this machine can actually take.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Support;
+namespace Qwerty\Soft\Support;
 
 use WP_Error;
 
@@ -39,7 +39,7 @@ final class ModelGateway {
 	/**
 	 * Option holding the administrator's transport preference.
 	 */
-	public const OPTION_TRANSPORT = 'wow_signal_ai_transport';
+	public const OPTION_TRANSPORT = 'qwerty_soft_ai_transport';
 
 	/**
 	 * The routes an administrator may pick between.
@@ -48,9 +48,9 @@ final class ModelGateway {
 	 */
 	public static function transports(): array {
 		return array(
-			'auto' => __( 'Automatic — the command line when this machine has it, the API otherwise', 'wow-signal' ),
-			'cli'  => __( 'Claude Code on this machine — uses the signed-in subscription, no API charges', 'wow-signal' ),
-			'api'  => __( 'Anthropic API — works on any host, billed per conversion', 'wow-signal' ),
+			'auto' => __( 'Automatic — the command line when this machine has it, the API otherwise', 'qwerty-soft-signal' ),
+			'cli'  => __( 'Claude Code on this machine — uses the signed-in subscription, no API charges', 'qwerty-soft-signal' ),
+			'api'  => __( 'Anthropic API — works on any host, billed per conversion', 'qwerty-soft-signal' ),
 		);
 	}
 
@@ -132,7 +132,7 @@ final class ModelGateway {
 				'ready'   => false,
 				'binary'  => ClaudeCli::binary(),
 				'version' => '',
-				'reason'  => __( 'Not checked — this site is set to use the API.', 'wow-signal' ),
+				'reason'  => __( 'Not checked — this site is set to use the API.', 'qwerty-soft-signal' ),
 			)
 			: ClaudeCli::status( $fresh );
 
@@ -141,9 +141,9 @@ final class ModelGateway {
 		if ( 'cli' === $route && ! $cli['ready'] ) {
 			$reason = $cli['reason'];
 		} elseif ( 'api' === $route && '' === $key ) {
-			$reason = __( 'No Anthropic API key is saved yet.', 'wow-signal' );
+			$reason = __( 'No Anthropic API key is saved yet.', 'qwerty-soft-signal' );
 		} elseif ( '' === $route ) {
-			$reason = __( 'Neither route is set up: Claude Code is not installed here, and no API key has been saved.', 'wow-signal' );
+			$reason = __( 'Neither route is set up: Claude Code is not installed here, and no API key has been saved.', 'qwerty-soft-signal' );
 		}
 
 		return array(
@@ -189,7 +189,7 @@ final class ModelGateway {
 		 * @param array<string, mixed>                $schema  Reply schema.
 		 * @param array<string, mixed>                $options Model, effort, images and the rest.
 		 */
-		$given = apply_filters( 'wow_signal/model_reply', null, $system, $prompt, $schema, $options );
+		$given = apply_filters( 'qwerty_soft/model_reply', null, $system, $prompt, $schema, $options );
 
 		if ( null !== $given ) {
 			return $given;
@@ -212,8 +212,8 @@ final class ModelGateway {
 		}
 
 		return new WP_Error(
-			'wow_signal_no_route',
-			__( 'There is no way to reach a model from here yet. Install Claude Code on this machine, or add an Anthropic API key under Appearance → Design import.', 'wow-signal' )
+			'qwerty_soft_no_route',
+			__( 'There is no way to reach a model from here yet. Install Claude Code on this machine, or add an Anthropic API key under Appearance → Design import.', 'qwerty-soft-signal' )
 		);
 	}
 

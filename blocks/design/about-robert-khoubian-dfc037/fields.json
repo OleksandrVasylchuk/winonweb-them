@@ -1,0 +1,75 @@
+{
+    "key": "group_qs_design_about_robert_khoubian_dfc037",
+    "title": "关于页首区",
+    "fields": [
+        {
+            "key": "field_qs_about_robert_khoubian_dfc037_heading",
+            "label": "标题",
+            "name": "heading",
+            "type": "text",
+            "default_value": "关于 Robert Khoubian",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_about_robert_khoubian_dfc037_lead",
+            "label": "导语",
+            "name": "lead",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "国际食品贸易专业人士、企业家和市场情报发布者，专注中国—欧亚食品贸易、冷冻食品供应链和跨境市场准入。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_about_robert_khoubian_dfc037_image",
+            "label": "人物照片",
+            "name": "image",
+            "type": "image",
+            "return_format": "array",
+            "preview_size": "medium",
+            "instructions": "The picture shown in this position."
+        },
+        {
+            "key": "field_qs_about_robert_khoubian_dfc037_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_about_robert_khoubian_dfc037_row_fact_label",
+                    "label": "事实名称",
+                    "name": "fact_label",
+                    "type": "text",
+                    "default_value": "始于",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_about_robert_khoubian_dfc037_row_fact_value",
+                    "label": "事实内容",
+                    "name": "fact_value",
+                    "type": "text",
+                    "default_value": "2004 年食品贸易",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-about-robert-khoubian-dfc037"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,19 +1,19 @@
 <?php
 /**
- * WOW — Signal theme bootstrap.
+ * Qwerty Soft — Signal theme bootstrap.
  *
  * The whole theme is a block theme: templates are HTML, design tokens live in
  * theme.json, and PHP only does the things markup cannot — registering blocks,
  * hardening output, and wiring performance defaults.
  *
- * @package Wow\Signal
- * @author  WOW — Win On Web <https://www.winonweb.dev/>
+ * @package Qwerty\Soft
+ * @author  Qwerty Soft <https://qwerty-soft.com/>
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal;
+namespace Qwerty\Soft;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,21 +22,21 @@ defined( 'ABSPATH' ) || exit;
  *
  * Read from style.css so there is exactly one place to bump a release.
  */
-if ( ! defined( 'WOW_SIGNAL_VERSION' ) ) {
-	$wow_signal_theme = wp_get_theme( get_template() );
-	$wow_signal_ver   = $wow_signal_theme->get( 'Version' );
+if ( ! defined( 'QSOFT_VERSION' ) ) {
+	$qwerty_soft_theme = wp_get_theme( get_template() );
+	$qwerty_soft_ver   = $qwerty_soft_theme->get( 'Version' );
 
-	define( 'WOW_SIGNAL_VERSION', is_string( $wow_signal_ver ) && '' !== $wow_signal_ver ? $wow_signal_ver : '0.0.0' );
+	define( 'QSOFT_VERSION', is_string( $qwerty_soft_ver ) && '' !== $qwerty_soft_ver ? $qwerty_soft_ver : '0.0.0' );
 
-	unset( $wow_signal_theme, $wow_signal_ver );
+	unset( $qwerty_soft_theme, $qwerty_soft_ver );
 }
 
-define( 'WOW_SIGNAL_DIR', get_template_directory() );
-define( 'WOW_SIGNAL_URI', get_template_directory_uri() );
-define( 'WOW_SIGNAL_TEXTDOMAIN', 'wow-signal' );
+define( 'QSOFT_DIR', get_template_directory() );
+define( 'QSOFT_URI', get_template_directory_uri() );
+define( 'QSOFT_TEXTDOMAIN', 'qwerty-soft-signal' );
 
 /**
- * PSR-4 autoloader for Wow\Signal\* => inc/*.
+ * PSR-4 autoloader for Qwerty\Soft\* => inc/*.
  *
  * The theme deliberately does not require Composer at runtime: a client can
  * upload the ZIP and activate it. Composer is a development dependency only
@@ -53,11 +53,11 @@ function autoload( string $class_name ): void {
 	}
 
 	$relative = substr( $class_name, strlen( $prefix ) );
-	$path     = WOW_SIGNAL_DIR . '/inc/' . str_replace( '\\', '/', $relative ) . '.php';
+	$path     = QSOFT_DIR . '/inc/' . str_replace( '\\', '/', $relative ) . '.php';
 
 	// Never let a crafted class name escape the inc/ directory.
 	$real = realpath( $path );
-	$root = realpath( WOW_SIGNAL_DIR . '/inc' );
+	$root = realpath( QSOFT_DIR . '/inc' );
 
 	if ( false === $real || false === $root || ! str_starts_with( $real, $root ) ) {
 		return;

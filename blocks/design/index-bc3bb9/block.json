@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-index-bc3bb9",
+    "title": "来自实战经验的市场覆盖。",
+    "category": "qs",
+    "description": "来自实战经验的市场覆盖。 — 2 pieces of text, 5 repeating items. From index.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "index",
+        "来自实战经验的市场覆盖"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "来自实战经验的市场覆盖。",
+                "lede": "Robert 的工作覆盖供应市场、目的地市场、政府相关贸易代表团以及受监管零售渠道的产品导入项目。重点不是理论，而是食品贸易走廊中的实际执行。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/index.html",
+    "qsDesignVersion": 7
+}

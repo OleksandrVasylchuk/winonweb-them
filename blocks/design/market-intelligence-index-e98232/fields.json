@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_market_intelligence_index_e98232",
+    "title": "Как читать индекс",
+    "fields": [
+        {
+            "key": "field_qs_market_intelligence_index_e98232_heading",
+            "label": "Заголовок раздела",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Как читать индекс",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_e98232_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_market_intelligence_index_e98232_row_score_range",
+                    "label": "Диапазон баллов",
+                    "name": "score_range",
+                    "type": "text",
+                    "default_value": "80–100",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_market_intelligence_index_e98232_row_band_name",
+                    "label": "Название диапазона",
+                    "name": "band_name",
+                    "type": "text",
+                    "default_value": "Приоритетная возможность",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_market_intelligence_index_e98232_row_description",
+                    "label": "Описание",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Сильные основы; переход к проверке конкретной сделки.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-market-intelligence-index-e98232"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_media_b021ed",
+    "title": "Expertise areas",
+    "fields": [
+        {
+            "key": "field_qs_media_b021ed_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "专业领域",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_media_b021ed_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_media_b021ed_row_number",
+                    "label": "Number",
+                    "name": "number",
+                    "type": "text",
+                    "default_value": "01",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_media_b021ed_row_heading",
+                    "label": "Area heading",
+                    "name": "heading",
+                    "type": "text",
+                    "default_value": "中国—欧亚食品贸易",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_media_b021ed_row_description",
+                    "label": "Description",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "中国、俄罗斯、独联体及区域进口市场之间的贸易通道、市场准入和冷冻食品流通。",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-media-b021ed"
+            }
+        ]
+    ],
+    "active": true
+}

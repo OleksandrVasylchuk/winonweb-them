@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-about-5605b5",
+    "title": "Media inquiries",
+    "category": "qs",
+    "description": "Media inquiries — 2 pieces of text, 2 links. From about.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "about",
+        "media",
+        "inquiries"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "Для журналистов, организаторов конференций и отраслевых партнеров.",
+                "description": "Роберт Хубиян может дать экспертный взгляд на global food trade, цепочки поставок из Китая, доступ на рынки России и СНГ, холодильную логистику, регуляторные требования и трансграничные торговые риски.",
+                "contact_link": {
+                    "url": "mailto:robert@robertkhoubian.com",
+                    "title": "Контакт",
+                    "target": ""
+                },
+                "reports_link": {
+                    "url": "reports.html",
+                    "title": "Смотреть отчеты",
+                    "target": ""
+                }
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/ru/about.html",
+    "qsDesignVersion": 7
+}

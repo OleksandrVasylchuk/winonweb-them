@@ -1,0 +1,32 @@
+/*
+ * What the editor has to be told about a wrapped design section.
+ *
+ * A section lifted from a design is the whole band: it carries its own
+ * container, its own gutters and, often, a full-bleed background. On the front
+ * that is exactly what happens, because an imported page's content is a flow
+ * layout and nothing constrains it.
+ *
+ * The editor is not so simple. It draws the post content as a constrained
+ * layout with the theme's content size and its global padding, so every
+ * imported section came up as a narrow column inset from both edges — a page
+ * that looked nothing like the page it produces. Only blocks that declare an
+ * alignment escape that, and a generated block declares none: it has no
+ * alignment to offer, because it is always the full width.
+ *
+ * So they are told to behave here as they already behave there.
+ */
+.block-editor-block-list__layout.is-root-container > [data-type^="qs/design-"] {
+	max-width: none !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+
+/*
+ * And out through the root's padding, the way `.alignfull` does it. Cancelling
+ * the padding on the container itself would pull the page title and any
+ * ordinary block out with it.
+ */
+.block-editor-block-list__layout.is-root-container.has-global-padding > [data-type^="qs/design-"] {
+	margin-left: calc( var( --wp--style--root--padding-left ) * -1 ) !important;
+	margin-right: calc( var( --wp--style--root--padding-right ) * -1 ) !important;
+}

@@ -1,0 +1,66 @@
+{
+    "key": "group_qs_design_research_291c94",
+    "title": "Methodology checklist",
+    "fields": [
+        {
+            "key": "field_qs_research_291c94_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Аналитика, основанная на операционном опыте",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_291c94_lede",
+            "label": "Introduction",
+            "name": "lede",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Платформа должна строиться на дисциплинированной методологии: практическое знание рынков, официальные или надежные данные там, где они доступны, мониторинг требований, документированный опыт и четкое разделение фактов и мнений. Коммерчески чувствительные утверждения остаются в evidence register до подготовки подтверждений.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_research_291c94_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_research_291c94_row_check_mark",
+                    "label": "Check mark",
+                    "name": "check_mark",
+                    "type": "text",
+                    "default_value": "✓",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_research_291c94_row_principle",
+                    "label": "Principle",
+                    "name": "principle",
+                    "type": "text",
+                    "default_value": "Использовать проверяемые источники, когда они доступны",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-research-291c94"
+            }
+        ]
+    ],
+    "active": true
+}

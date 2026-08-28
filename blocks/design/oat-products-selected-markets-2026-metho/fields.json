@@ -1,0 +1,33 @@
+{
+    "key": "group_qs_design_oat_products_selected_markets_2026_metho",
+    "title": "Methodology note",
+    "fields": [
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_metho_heading",
+            "label": "Note heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Methodology and publishing note",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_metho_note",
+            "label": "Note text",
+            "name": "note",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "The source report uses forecast and historical data and references Euromonitor International, Mintel GNPD and Global Trade Tracker. Before this page is made public as a paid or downloadable report, publishing rights for detailed third-party tables should be confirmed. The current page is a website-ready summary and should not be treated as a full reproduction of the source document.",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-oat-products-selected-markets-2026-metho"
+            }
+        ]
+    ],
+    "active": true
+}

@@ -1,5 +1,5 @@
 /**
- * Editor UI for wow/colophon.
+ * Editor UI for qs/colophon.
  *
  * Written against the global `wp` object rather than ES modules so the theme
  * needs no bundler: what ships is what runs.
@@ -15,16 +15,16 @@
 	var TextControl = wp.components.TextControl;
 	var ToggleControl = wp.components.ToggleControl;
 
-	wp.blocks.registerBlockType( 'wow/colophon', {
+	wp.blocks.registerBlockType( 'qs/colophon', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
-			var blockProps = useBlockProps( { className: 'wow-colophon' } );
+			var blockProps = useBlockProps( { className: 'qs-colophon' } );
 
 			var preview = [ attributes.prefix + ' ' + new Date().getFullYear() ];
 
 			if ( attributes.showSiteName ) {
-				preview.push( __( 'Site name', 'wow-signal' ) );
+				preview.push( __( 'Site name', 'qwerty-soft-signal' ) );
 			}
 
 			if ( attributes.extraText ) {
@@ -39,25 +39,25 @@
 					null,
 					el(
 						PanelBody,
-						{ title: __( 'Colophon', 'wow-signal' ) },
+						{ title: __( 'Colophon', 'qwerty-soft-signal' ) },
 						el( TextControl, {
-							label: __( 'Symbol before the year', 'wow-signal' ),
-							help: __( 'Usually ©. Leave empty to show the year on its own.', 'wow-signal' ),
+							label: __( 'Symbol before the year', 'qwerty-soft-signal' ),
+							help: __( 'Usually ©. Leave empty to show the year on its own.', 'qwerty-soft-signal' ),
 							value: attributes.prefix,
 							onChange: function ( value ) {
 								setAttributes( { prefix: value } );
 							},
 						} ),
 						el( ToggleControl, {
-							label: __( 'Show the site name', 'wow-signal' ),
+							label: __( 'Show the site name', 'qwerty-soft-signal' ),
 							checked: !! attributes.showSiteName,
 							onChange: function ( value ) {
 								setAttributes( { showSiteName: value } );
 							},
 						} ),
 						el( TextControl, {
-							label: __( 'Extra text', 'wow-signal' ),
-							help: __( 'Optional. Shown after the site name, for example "All rights reserved".', 'wow-signal' ),
+							label: __( 'Extra text', 'qwerty-soft-signal' ),
+							help: __( 'Optional. Shown after the site name, for example "All rights reserved".', 'qwerty-soft-signal' ),
 							value: attributes.extraText,
 							onChange: function ( value ) {
 								setAttributes( { extraText: value } );
@@ -68,7 +68,7 @@
 				el(
 					'p',
 					blockProps,
-					el( 'span', { className: 'wow-colophon__line' }, preview.join( ' · ' ) )
+					el( 'span', { className: 'qs-colophon__line' }, preview.join( ' · ' ) )
 				)
 			);
 		},

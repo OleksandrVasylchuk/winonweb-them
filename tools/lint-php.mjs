@@ -12,7 +12,7 @@
  *
  * Usage: npm run lint:php
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  */
 
 import { spawnSync } from 'node:child_process';

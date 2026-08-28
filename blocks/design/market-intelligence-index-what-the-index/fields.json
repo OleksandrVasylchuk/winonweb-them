@@ -1,0 +1,75 @@
+{
+    "key": "group_qs_design_market_intelligence_index_what_the_index",
+    "title": "Index framework",
+    "fields": [
+        {
+            "key": "field_qs_market_intelligence_index_what_the_index_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "What the index measures",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_what_the_index_intro",
+            "label": "Intro paragraph",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Each published score is built from documented inputs, standardized sub-scores and a dated methodology note. Weightings may vary by index family, but any published result must disclose the applicable version and source period.",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_what_the_index_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add item",
+            "instructions": "One row per repeated entry. Add, remove or reorder rows as needed.",
+            "sub_fields": [
+                {
+                    "key": "field_qs_market_intelligence_index_what_the_index_row_dimension",
+                    "label": "Dimension",
+                    "name": "dimension",
+                    "type": "text",
+                    "default_value": "Market Size & Demand",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_market_intelligence_index_what_the_index_row_weighting",
+                    "label": "Weighting",
+                    "name": "weighting",
+                    "type": "text",
+                    "default_value": "20%",
+                    "instructions": "A short line of text, shown in this position.",
+                    "wrapper": {
+                        "width": "50"
+                    }
+                },
+                {
+                    "key": "field_qs_market_intelligence_index_what_the_index_row_description",
+                    "label": "What it measures",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 3,
+                    "default_value": "Import value, volume, addressable demand and buyer depth.",
+                    "instructions": "A short paragraph of text, shown in this position."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-market-intelligence-index-what-the-index"
+            }
+        ]
+    ],
+    "active": true
+}

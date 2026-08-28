@@ -1,0 +1,174 @@
+{
+    "key": "group_qs_design_oat_products_selected_markets_2026_a9517",
+    "title": "Market comparison table",
+    "fields": [
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_heading",
+            "label": "Section heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "所选市场对比。",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_intro",
+            "label": "Intro text",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "根据上传报告制作的网站版摘要。除非另有说明，数值单位为千吨。",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_1_name",
+            "label": "Market 1 name",
+            "name": "market_1_name",
+            "type": "text",
+            "default_value": "韩国",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_1_total",
+            "label": "Market 1 total volume (kt)",
+            "name": "market_1_total",
+            "type": "text",
+            "default_value": "56.0",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_2_name",
+            "label": "Market 2 name",
+            "name": "market_2_name",
+            "type": "text",
+            "default_value": "日本",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_2_total",
+            "label": "Market 2 total volume (kt)",
+            "name": "market_2_total",
+            "type": "text",
+            "default_value": "332.0",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_3_name",
+            "label": "Market 3 name",
+            "name": "market_3_name",
+            "type": "text",
+            "default_value": "菲律宾",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_3_total",
+            "label": "Market 3 total volume (kt)",
+            "name": "market_3_total",
+            "type": "text",
+            "default_value": "131.9",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_4_name",
+            "label": "Market 4 name",
+            "name": "market_4_name",
+            "type": "text",
+            "default_value": "墨西哥",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_4_total",
+            "label": "Market 4 total volume (kt)",
+            "name": "market_4_total",
+            "type": "text",
+            "default_value": "4946.0",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_5_name",
+            "label": "Market 5 name",
+            "name": "market_5_name",
+            "type": "text",
+            "default_value": "巴西",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_5_total",
+            "label": "Market 5 total volume (kt)",
+            "name": "market_5_total",
+            "type": "text",
+            "default_value": "1115.9",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_6_name",
+            "label": "Market 6 name",
+            "name": "market_6_name",
+            "type": "text",
+            "default_value": "阿根廷",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_market_6_total",
+            "label": "Market 6 total volume (kt)",
+            "name": "market_6_total",
+            "type": "text",
+            "default_value": "392.3",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_oat_products_selected_markets_2026_a9517_source_note",
+            "label": "Source note",
+            "name": "source_note",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "市场规模为来源报告中的代理类别：其他乳基产品和其他面粉，不能完全拆分出纯燕麦奶或燕麦粉销售。",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-oat-products-selected-markets-2026-a9517"
+            }
+        ]
+    ],
+    "active": true
+}

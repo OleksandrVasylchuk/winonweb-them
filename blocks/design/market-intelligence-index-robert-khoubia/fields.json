@@ -1,0 +1,164 @@
+{
+    "key": "group_qs_design_market_intelligence_index_robert_khoubia",
+    "title": "Market Index Hero",
+    "fields": [
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_eyebrow",
+            "label": "Eyebrow",
+            "name": "eyebrow",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "Proprietary Market Framework",
+            "instructions": "A short paragraph of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Robert Khoubian Market Intelligence Index™",
+            "instructions": "A short line of text, shown in this position."
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_lead",
+            "label": "Lead paragraph",
+            "name": "lead",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "A structured framework for comparing international food trade markets, products and corridors across commercial opportunity, operating feasibility and risk.",
+            "instructions": "A short paragraph of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_index_intro",
+            "label": "Index explanation",
+            "name": "index_intro",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "RKMII™ converts fragmented trade signals into a consistent 0–100 market intelligence score. It is designed to support screening and comparison—not to replace legal, financial, regulatory or transaction-specific due diligence.",
+            "instructions": "A short paragraph of text, shown in this position.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_primary_link",
+            "label": "Primary link",
+            "name": "primary_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#framework",
+                "title": "View Framework",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_secondary_link",
+            "label": "Secondary link",
+            "name": "secondary_link",
+            "type": "link",
+            "return_format": "array",
+            "default_value": {
+                "url": "#interpretation",
+                "title": "How to Read the Index",
+                "target": ""
+            },
+            "instructions": "Choose a page, or paste a web address, and the text shown for it.",
+            "wrapper": {
+                "width": "50"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_score_card_label",
+            "label": "Score card label",
+            "name": "score_card_label",
+            "type": "text",
+            "default_value": "Illustrative Index Profile",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_corridor",
+            "label": "Corridor",
+            "name": "corridor",
+            "type": "text",
+            "default_value": "China → Georgia Poultry",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_score",
+            "label": "Index score",
+            "name": "score",
+            "type": "text",
+            "default_value": "82",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_score_out_of",
+            "label": "Score out of",
+            "name": "score_out_of",
+            "type": "text",
+            "default_value": "/100",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_outlook_label",
+            "label": "Outlook label",
+            "name": "outlook_label",
+            "type": "text",
+            "default_value": "Opportunity outlook",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_outlook",
+            "label": "Outlook",
+            "name": "outlook",
+            "type": "text",
+            "default_value": "Strong",
+            "instructions": "A short line of text, shown in this position.",
+            "wrapper": {
+                "width": "33.33"
+            }
+        },
+        {
+            "key": "field_qs_market_intelligence_index_robert_khoubia_status_note",
+            "label": "Status note",
+            "name": "status_note",
+            "type": "textarea",
+            "rows": 3,
+            "default_value": "STATUS: DEMONSTRATION ONLY",
+            "instructions": "A short paragraph of text, shown in this position."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "qs/design-market-intelligence-index-robert-khoubia"
+            }
+        ]
+    ],
+    "active": true
+}

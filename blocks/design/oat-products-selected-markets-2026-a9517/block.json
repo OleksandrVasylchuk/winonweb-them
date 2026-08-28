@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qs/design-oat-products-selected-markets-2026-a9517",
+    "title": "Market comparison table",
+    "category": "qs",
+    "description": "Market comparison table — 15 pieces of text. From oat-products-selected-markets-2026.html in the design.",
+    "keywords": [
+        "design",
+        "section",
+        "oat-products-selected-markets-2026",
+        "market",
+        "comparison",
+        "table"
+    ],
+    "textdomain": "qwerty-soft-signal",
+    "supports": {
+        "anchor": true,
+        "html": false,
+        "mode": true,
+        "color": false,
+        "spacing": false,
+        "typography": false
+    },
+    "render": "file:./render.php",
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "example": {
+        "attributes": {
+            "mode": "preview",
+            "data": {
+                "heading": "所选市场对比。",
+                "intro": "根据上传报告制作的网站版摘要。除非另有说明，数值单位为千吨。",
+                "market_1_name": "韩国",
+                "market_1_total": "56.0",
+                "market_2_name": "日本",
+                "market_2_total": "332.0",
+                "market_3_name": "菲律宾",
+                "market_3_total": "131.9",
+                "market_4_name": "墨西哥",
+                "market_4_total": "4946.0",
+                "market_5_name": "巴西",
+                "market_5_total": "1115.9",
+                "market_6_name": "阿根廷",
+                "market_6_total": "392.3",
+                "source_note": "市场规模为来源报告中的代理类别：其他乳基产品和其他面粉，不能完全拆分出纯燕麦奶或燕麦粉销售。"
+            }
+        }
+    },
+    "style": "file:./style.css",
+    "qsDesignOrigin": "Robert_Khoubian_V17.2_Developer_Handoff_Package/01_Website_Baseline/z-519e3094/robert_khoubian_site_v13_1_2_v17_2/zh/reports/oat-products-selected-markets-2026.html",
+    "qsDesignVersion": 7
+}

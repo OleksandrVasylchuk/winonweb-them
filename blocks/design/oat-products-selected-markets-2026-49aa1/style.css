@@ -1,0 +1,82 @@
+/*
+ * 方法与发布说明
+ *
+ * Lifted from the design's own stylesheet, unchanged. The selectors
+ * match the class names on render.php because both came out of the
+ * same archive; do not rename either without renaming the other.
+ */
+
+:root{--navy:#06111f; --navy-2:#0b1b2e; --ink:#132033; --muted:#5d6878; --line:#dfe6ef; --soft:#f4f7fb; --soft-2:#eef3f8; --gold:#c7a85d; --gold-2:#e7d39a; --white:#ffffff; --charcoal:#182231; --shadow:0 24px 60px rgba(6,17,31,.16); --radius:22px; --radius-sm:14px; --max:1180px;}
+*{box-sizing:border-box}
+.container{width:min(var(--max),calc(100% - 40px));margin:0 auto}
+.mini-grid div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px}
+.section{padding:92px 0}
+.section-head p{max-width:640px;color:var(--muted);font-size:18px;margin:12px 0 0}
+.expertise-card h3,.topic-card h3,.focus-card h3,.project-card h3,.principle h3{font-size:20px;line-height:1.15;margin:18px 0 10px;color:var(--navy);letter-spacing:-.02em}
+.expertise-card p,.topic-card p,.focus-card p,.project-card p,.principle p{color:var(--muted);margin:0;font-size:15px}
+.soft{background:var(--soft)}
+.footprint-copy p,.proof-copy p{color:var(--muted);font-size:18px}
+.topic-card .tag,.topic-card h3,.topic-card p,.topic-card a{margin-left:22px;margin-right:22px}
+.about-preview p{color:#d9e5f3;font-size:18px}
+.newsletter p{color:var(--muted);font-size:17px}
+.site-footer p{color:#aeb9c8;margin-top:10px}
+.content-block p{color:#4e5d70;font-size:17px}
+.timeline-item h3{margin:0 0 6px;color:var(--navy)}
+.timeline-item p{margin:0;color:#596779}
+.media-strip p{color:#d8e4f2;font-size:18px}
+.gateway p{color:#dbe7f5;font-size:18px}
+.report-card h3{margin:0;color:var(--navy);font-size:24px;line-height:1.12;letter-spacing:-.03em}
+.report-card p{margin:0;color:var(--muted)}
+.license-card h3,.flow-step h3{margin:0 0 10px;color:var(--navy);font-size:22px}
+.license-card p,.flow-step p{margin:0;color:var(--muted)}
+.method-note p{color:var(--muted);font-size:18px;max-width:900px}
+.insight-card h3{margin:0 0 10px;color:var(--navy);font-size:22px;line-height:1.15}
+.insight-card p{margin:0;color:var(--muted)}
+.report-callout{border-left:4px solid var(--gold);background:#fffdf5;border-radius:18px;padding:24px;border:1px solid #ead9a6;box-shadow:0 12px 32px rgba(6,17,31,.03)}
+.report-callout h3{margin-top:0;color:var(--navy)}
+.report-callout p{color:#465568}
+.index-score-card>p{font-size:.68rem;letter-spacing:.08em;font-weight:800;color:#9b5c00;margin:16px 0 0}
+.index-dimension-head h3{margin:0;font-size:1.05rem}
+.index-dimension p{margin:9px 0 0;color:#607086;line-height:1.6}
+.index-band h3,.index-band p{margin:0}
+.index-band p{color:#607086;margin-top:5px}
+.legal-note p{margin:8px 0 0;font-size:.9rem;color:#607086}
+.scorecard-top div{display:flex;flex-direction:column}
+.subscore-row>div:first-child{display:flex;justify-content:space-between;font-size:.87rem}
+.metric-secondary div{padding:14px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);border-radius:16px}
+.compact-reports .report-card h3{font-size:21px}
+.rkmii-home-grid>div>p{font-size:18px;color:var(--muted)}
+.score-bars div{display:grid;grid-template-columns:130px 1fr;gap:14px;align-items:center}
+.video-intelligence p{color:#c7d4e4;font-size:17px}
+.video-player-copy h3{font-size:28px;line-height:1.12;margin:8px 0 8px}
+.video-player-copy p{font-size:14px;margin:0;color:#d5dfeb}
+.video-learn-card h3{font-size:26px;margin:0 0 18px}
+.video-library-hero p{max-width:760px;color:#cad8e7;font-size:18px}
+.video-card-body h3{font-size:22px;line-height:1.18;margin:0 0 10px}
+.video-card-body p{color:var(--muted);margin:0 0 16px}
+.youtube-band p{color:var(--muted);margin:0}
+.transparency-card h3{margin:0 0 8px}
+.transparency-card p{margin:0;color:var(--muted)}
+.report-video-grid p{color:var(--muted)}
+:root{--bg:#07111f; --bg2:#0b1728; --panel:#101d31; --ink:#f7f3ea; --muted:#aeb8c5; --line:rgba(255,255,255,.12); --gold:#d4b46a; --blue:#87b7ff; --white:#fff; --body:#172033; --bodytext:#2c3444;}
+*{box-sizing:border-box}
+.container{width:min(1180px,92vw);margin:0 auto}
+.hero p.lede{font-size:19px;color:#cbd5e1;max-width:640px}
+.section{padding:76px 0}
+.section.dark{background:#07111f;color:#f7f3ea}
+.section.dark .section-kicker{color:var(--gold)}
+.card h3{font-size:21px;margin:8px 0 10px;color:#111827}
+.dark .card h3{color:#fff}
+.card p,.card li{color:#596272}
+.dark .card p,.dark .card li{color:#c6cfda}
+.flow div{background:#fff;border:1px solid #e5dfd2;border-radius:18px;padding:18px}
+:root{--navy:#06111f; --navy2:#0b1b30; --ink:#111827; --muted:#667085; --line:#d9e1ea; --paper:#f6f8fb; --gold:#b8954b; --blue:#2d6cdf; --green:#15803d; --red:#b42318; --amber:#b7791f; --white:#fff; --shadow:0 18px 45px rgba(6,17,31,.12); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;}
+*{box-sizing:border-box}
+.topbar p{margin:0;color:var(--muted);max-width:790px}
+.card h2,.card h3{margin:0 0 10px}
+.card h3{font-size:17px}
+.card p{color:var(--muted);margin:0 0 12px}
+@media (max-width:860px){.section,.about-main{padding:62px 0}}
+@media (max-width:540px){.container{width:min(100% - 28px,var(--max))}}
+@media(max-width:720px){.score-bars div{grid-template-columns:110px 1fr}}
+@media(max-width:900px){.section{padding:54px 0}}

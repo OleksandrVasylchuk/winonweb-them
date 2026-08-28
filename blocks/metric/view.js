@@ -1,5 +1,5 @@
 /**
- * wow/metric — count-up animation.
+ * qs/metric — count-up animation.
  *
  * Progressive enhancement only. The correct number is already rendered by
  * PHP; this file animates towards it and bails out completely when the
@@ -39,8 +39,8 @@
 	}
 
 	function animate( figure ) {
-		var raw = figure.getAttribute( 'data-wow-count-to' ) || '';
-		var number = figure.querySelector( '.wow-metric__number' );
+		var raw = figure.getAttribute( 'data-qs-count-to' ) || '';
+		var number = figure.querySelector( '.qs-metric__number' );
 
 		if ( ! number || ! COUNTABLE.test( raw ) ) {
 			return;
@@ -114,7 +114,7 @@
 	}
 
 	function boot() {
-		var figures = document.querySelectorAll( '.wow-metric__figure[data-wow-count-to]' );
+		var figures = document.querySelectorAll( '.qs-metric__figure[data-qs-count-to]' );
 
 		if ( ! figures.length ) {
 			return;

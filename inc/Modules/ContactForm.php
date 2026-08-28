@@ -2,20 +2,20 @@
 /**
  * Contact form submission handling.
  *
- * @package Wow\Signal
+ * @package Qwerty\Soft
  * @license GPL-2.0-or-later
  */
 
 declare( strict_types = 1 );
 
-namespace Wow\Signal\Modules;
+namespace Qwerty\Soft\Modules;
 
-use Wow\Signal\Contracts\Module;
+use Qwerty\Soft\Contracts\Module;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Server side of the wow/contact-form block.
+ * Server side of the qs/contact-form block.
  *
  * Threat model, and how each part is answered:
  *
@@ -42,22 +42,22 @@ final class ContactForm implements Module {
 	/**
 	 * The admin-post action name.
 	 */
-	public const ACTION = 'wow_signal_contact';
+	public const ACTION = 'qwerty_soft_contact';
 
 	/**
 	 * Nonce field name.
 	 */
-	public const NONCE_FIELD = 'wow_signal_contact_nonce';
+	public const NONCE_FIELD = 'qwerty_soft_contact_nonce';
 
 	/**
 	 * Query argument carrying the result back to the page.
 	 */
-	public const RESULT_ARG = 'wow-contact';
+	public const RESULT_ARG = 'qs-contact';
 
 	/**
 	 * Query argument carrying the transient token for errors.
 	 */
-	public const TOKEN_ARG = 'wow-contact-token';
+	public const TOKEN_ARG = 'qs-contact-token';
 
 	/**
 	 * Minimum seconds between rendering and submitting a form.
@@ -104,24 +104,24 @@ final class ContactForm implements Module {
 		 * the bot checks below instead.
 		 */
 		if ( is_user_logged_in() && ! Security::verify_nonce( self::ACTION, self::NONCE_FIELD ) ) {
-			$this->redirect_with_errors( $back, array( '_form' => __( 'Your session expired. Please try sending the message again.', 'wow-signal' ) ), array() );
+			$this->redirect_with_errors( $back, array( '_form' => __( 'Your session expired. Please try sending the message again.', 'qwerty-soft-signal' ) ), array() );
 		}
 
-		$form_id = Security::post_field( 'wow_signal_form', 'sanitize_key', 'default' );
+		$form_id = Security::post_field( 'qwerty_soft_form', 'sanitize_key', 'default' );
 
 		$submitted = array(
-			'name'    => Security::post_field( 'wow_name', 'sanitize_text_field' ),
-			'email'   => Security::post_field( 'wow_email', 'sanitize_text_field' ),
-			'subject' => Security::post_field( 'wow_subject', 'sanitize_text_field' ),
-			'message' => Security::post_field( 'wow_message', 'sanitize_textarea_field' ),
+			'name'    => Security::post_field( 'qsoft_name', 'sanitize_text_field' ),
+			'email'   => Security::post_field( 'qsoft_email', 'sanitize_text_field' ),
+			'subject' => Security::post_field( 'qsoft_subject', 'sanitize_text_field' ),
+			'message' => Security::post_field( 'qsoft_message', 'sanitize_textarea_field' ),
 		);
 
 		// Honeypot: a real browser leaves this off-screen field empty.
-		$honeypot = Security::post_field( 'wow_website', 'sanitize_text_field' );
+		$honeypot = Security::post_field( 'qsoft_website', 'sanitize_text_field' );
 
 		// Time trap: humans do not complete a form in under three seconds. A
 		// missing timestamp counts as too fast — a browser always sends it.
-		$rendered_at = (int) Security::post_field( 'wow_rendered_at', 'absint', '0' );
+		$rendered_at = (int) Security::post_field( 'qsoft_rendered_at', 'absint', '0' );
 		$too_fast    = $rendered_at <= 0 || ( time() - $rendered_at ) < self::MIN_FILL_SECONDS;
 
 		if ( '' !== $honeypot || $too_fast ) {
@@ -135,7 +135,7 @@ final class ContactForm implements Module {
 		if ( ! $this->within_rate_limit() ) {
 			$this->redirect_with_errors(
 				$back,
-				array( '_form' => __( 'Too many messages sent from this connection. Please try again in a few minutes.', 'wow-signal' ) ),
+				array( '_form' => __( 'Too many messages sent from this connection. Please try again in a few minutes.', 'qwerty-soft-signal' ) ),
 				$submitted
 			);
 		}
@@ -149,7 +149,7 @@ final class ContactForm implements Module {
 		if ( ! $this->send( $submitted, $form_id ) ) {
 			$this->redirect_with_errors(
 				$back,
-				array( '_form' => __( 'The message could not be sent because of a server error. Please email us directly.', 'wow-signal' ) ),
+				array( '_form' => __( 'The message could not be sent because of a server error. Please email us directly.', 'qwerty-soft-signal' ) ),
 				$submitted
 			);
 		}
@@ -175,21 +175,21 @@ final class ContactForm implements Module {
 		$errors = array();
 
 		if ( '' === trim( $fields['name'] ) ) {
-			$errors['name'] = __( 'Please enter your name.', 'wow-signal' );
+			$errors['name'] = __( 'Please enter your name.', 'qwerty-soft-signal' );
 		}
 
 		if ( '' === trim( $fields['email'] ) ) {
-			$errors['email'] = __( 'Please enter your email address.', 'wow-signal' );
+			$errors['email'] = __( 'Please enter your email address.', 'qwerty-soft-signal' );
 		} elseif ( ! is_email( $fields['email'] ) ) {
-			$errors['email'] = __( 'That email address does not look right. Please check it, for example name@company.com.', 'wow-signal' );
+			$errors['email'] = __( 'That email address does not look right. Please check it, for example name@company.com.', 'qwerty-soft-signal' );
 		}
 
 		$message = trim( $fields['message'] );
 
 		if ( '' === $message ) {
-			$errors['message'] = __( 'Please tell us what you need.', 'wow-signal' );
+			$errors['message'] = __( 'Please tell us what you need.', 'qwerty-soft-signal' );
 		} elseif ( mb_strlen( $message ) > 5000 ) {
-			$errors['message'] = __( 'Your message is longer than 5000 characters. Please shorten it.', 'wow-signal' );
+			$errors['message'] = __( 'Your message is longer than 5000 characters. Please shorten it.', 'qwerty-soft-signal' );
 		}
 
 		return $errors;
@@ -216,7 +216,7 @@ final class ContactForm implements Module {
 		 * @param string $recipient Email address.
 		 * @param string $form_id   Identifier set on the block.
 		 */
-		$recipient = (string) apply_filters( 'wow_signal/contact_recipient', $default_recipient, $form_id );
+		$recipient = (string) apply_filters( 'qwerty_soft/contact_recipient', $default_recipient, $form_id );
 
 		if ( ! is_email( $recipient ) ) {
 			return false;
@@ -226,20 +226,20 @@ final class ContactForm implements Module {
 		$subject = '' !== trim( $fields['subject'] )
 			? $fields['subject']
 			/* translators: %s: site name. */
-			: sprintf( __( 'New message from %s', 'wow-signal' ), $site );
+			: sprintf( __( 'New message from %s', 'qwerty-soft-signal' ), $site );
 
 		$body = implode(
 			"\n",
 			array(
-				__( 'Name:', 'wow-signal' ) . ' ' . $fields['name'],
-				__( 'Email:', 'wow-signal' ) . ' ' . $fields['email'],
+				__( 'Name:', 'qwerty-soft-signal' ) . ' ' . $fields['name'],
+				__( 'Email:', 'qwerty-soft-signal' ) . ' ' . $fields['email'],
 				'',
-				__( 'Message:', 'wow-signal' ),
+				__( 'Message:', 'qwerty-soft-signal' ),
 				$fields['message'],
 				'',
 				'---',
 				/* translators: %s: site URL. */
-				sprintf( __( 'Sent from the contact form on %s', 'wow-signal' ), home_url( '/' ) ),
+				sprintf( __( 'Sent from the contact form on %s', 'qwerty-soft-signal' ), home_url( '/' ) ),
 			)
 		);
 
@@ -259,7 +259,7 @@ final class ContactForm implements Module {
 		 * never be read as a second recipient by a lenient MTA.
 		 */
 		$reply_name = trim( (string) preg_replace( '/[<>",;:\r\n]+/', ' ', $fields['name'] ) );
-		$reply_name = '' !== $reply_name ? $reply_name : __( 'Website visitor', 'wow-signal' );
+		$reply_name = '' !== $reply_name ? $reply_name : __( 'Website visitor', 'qwerty-soft-signal' );
 
 		$headers = array(
 			'Content-Type: text/plain; charset=UTF-8',
@@ -276,7 +276,7 @@ final class ContactForm implements Module {
 	 * @return string
 	 */
 	private function rate_limit_key(): string {
-		return 'wow_signal_rl_' . md5( $this->client_ip() );
+		return 'qwerty_soft_rl_' . md5( $this->client_ip() );
 	}
 
 	/**
@@ -309,9 +309,9 @@ final class ContactForm implements Module {
 	 * Proxy headers are deliberately ignored by default: they are trivially
 	 * spoofed, and trusting them would let an attacker bypass the limit at
 	 * will. A site that sits behind a proxy it controls can supply the real
-	 * address through the `wow_signal/contact_client_ip` filter:
+	 * address through the `qwerty_soft/contact_client_ip` filter:
 	 *
-	 *     add_filter( 'wow_signal/contact_client_ip', static function ( $ip ) {
+	 *     add_filter( 'qwerty_soft/contact_client_ip', static function ( $ip ) {
 	 *         return $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $ip;
 	 *     } );
 	 *
@@ -339,7 +339,7 @@ final class ContactForm implements Module {
 		 *
 		 * @param string $ip The IP address from REMOTE_ADDR.
 		 */
-		$ip = (string) apply_filters( 'wow_signal/contact_client_ip', $remote );
+		$ip = (string) apply_filters( 'qwerty_soft/contact_client_ip', $remote );
 
 		$valid = filter_var( $ip, FILTER_VALIDATE_IP );
 
@@ -379,7 +379,7 @@ final class ContactForm implements Module {
 		$token = bin2hex( random_bytes( 10 ) );
 
 		set_transient(
-			'wow_signal_contact_' . $token,
+			'qwerty_soft_contact_' . $token,
 			array(
 				'errors' => $errors,
 				'values' => $values,
@@ -435,7 +435,7 @@ final class ContactForm implements Module {
 			return $cache[ $token ];
 		}
 
-		$key    = 'wow_signal_contact_' . $token;
+		$key    = 'qwerty_soft_contact_' . $token;
 		$stored = get_transient( $key );
 
 		if ( ! is_array( $stored ) ) {

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="WOW — Signal">
-	<description>WordPress coding standards for the WOW — Signal block theme.</description>
+<ruleset name="Qwerty Soft — Signal">
+	<description>WordPress coding standards for the Qwerty Soft — Signal block theme.</description>
 
 	<file>.</file>
 
@@ -10,6 +10,14 @@
 	<exclude-pattern>/languages/*</exclude-pattern>
 	<exclude-pattern>/designs/*</exclude-pattern>
 	<exclude-pattern>/design-reference/*</exclude-pattern>
+
+	<!--
+		Blocks the importer generated from a client's design. They are that
+		site's files rather than the theme's: their markup is the archive's
+		own, their whitespace is whatever the designer wrote, and a developer
+		with a build on their machine would otherwise never see a clean run.
+	-->
+	<exclude-pattern>/blocks/design/*</exclude-pattern>
 
 	<!--
 		The quality gates themselves. tools/ holds command-line scripts that
@@ -71,7 +79,7 @@
 		<exclude-pattern>/inc/Support/*</exclude-pattern>
 	</rule>
 
-	<!-- Hooks in this theme are namespaced with a slash: wow_signal/modules. -->
+	<!-- Hooks in this theme are namespaced with a slash: qwerty_soft/modules. -->
 	<rule ref="WordPress.NamingConventions.ValidHookName">
 		<properties>
 			<property name="additionalWordDelimiters" value="/"/>
@@ -82,7 +90,7 @@
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
-				<element value="wow-signal"/>
+				<element value="qwerty-soft-signal"/>
 			</property>
 		</properties>
 	</rule>
@@ -91,9 +99,9 @@
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array">
-				<element value="wow_signal"/>
-				<element value="wow"/>
-				<element value="Wow\Signal"/>
+				<element value="qwerty_soft"/>
+				<element value="qsoft"/>
+				<element value="Qwerty\Soft"/>
 			</property>
 		</properties>
 		<!--
