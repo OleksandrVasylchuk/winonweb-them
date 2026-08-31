@@ -207,7 +207,33 @@ final class SiteAssembler {
 				}
 			}
 
-			$stylesheet = DesignStylesheet::import( $root, $media, $linked );
+			/*
+			 * Where the design's own CSS goes depends on what is drawing the
+			 * page. A converted page is core blocks wearing the design's class
+			 * names, and nothing on disk belongs to it, so its stylesheet has
+			 * to reach the site as Additional CSS. A wrapped page carries its
+			 * own markup in `render.php`, so the stylesheet — and the script,
+			 * which Additional CSS has no answer for at all — belong beside
+			 * the blocks, loaded by the same per-block mechanism and dropped
+			 * with them when an import is removed.
+			 *
+			 * Installing both was the bug: the Additional CSS copy is a
+			 * concatenation across the handoff's several projects, it loads
+			 * after everything a block enqueues, and its duplicate rules
+			 * therefore won the cascade over the current design's own.
+			 */
+			if ( self::wrapping() ) {
+				DesignStylesheet::reset();
+
+				$written = BlockWriter::write_canonical(
+					DesignStylesheet::compile( $root, $media, false, $linked ),
+					DesignStylesheet::scripts( $root, $linked )
+				);
+
+				$stylesheet['bytes'] = $written['css'];
+			} else {
+				$stylesheet = DesignStylesheet::import( $root, $media, $linked );
+			}
 		}
 
 		return array(

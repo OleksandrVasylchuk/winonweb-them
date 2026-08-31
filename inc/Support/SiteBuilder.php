@@ -654,7 +654,7 @@ final class SiteBuilder {
 		 * the editor reads. Both have to agree or the editor shows a broken
 		 * image over a perfectly good one.
 		 */
-		return (string) preg_replace_callback(
+		$markup = (string) preg_replace_callback(
 			'#(<!-- wp:cover \{[^\n]*?"url":")([^"]+)(")#',
 			static function ( array $found ) use ( $map, $page_dir ): string {
 				$resolved = self::resolve( str_replace( '\/', '/', $found[2] ), $map, $page_dir );
@@ -668,6 +668,24 @@ final class SiteBuilder {
 
 				return '' === $encoded ? $found[0] : $found[1] . $encoded . $found[3];
 			},
+			$markup
+		);
+
+		/*
+		 * A `<picture>` source nobody could resolve — usually a `.webp`
+		 * sibling the archive shipped but the media import never queued,
+		 * since nothing crawls a `<source>`'s `srcset` looking for files to
+		 * bring in. Left in place it is worse than the plain `<img>` this
+		 * function leaves broken elsewhere: a browser that understands the
+		 * source's `type` does not fall back to the `<img>` just because
+		 * that source 404s, so the whole picture renders as nothing rather
+		 * than as a visibly broken image. The `<img>` fallback right beside
+		 * it already resolved correctly, so dropping the dead source is a
+		 * strict improvement, not a loss of information to review later.
+		 */
+		return (string) preg_replace(
+			'#<source\b[^>]*\bsrcset="(?!https?://)(?!data:)[^"]*"[^>]*/?>\s*(?:</source>\s*)?#i',
+			'',
 			$markup
 		);
 	}

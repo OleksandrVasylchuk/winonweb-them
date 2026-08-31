@@ -405,6 +405,89 @@ final class DesignStylesheet {
 	}
 
 	/**
+	 * The design's own scripts, in the order its pages ask for them.
+	 *
+	 * The stylesheet is not the only file a page links. A design's behaviour —
+	 * the button that opens the navigation on a phone, the tab strip, the
+	 * accordion — lives in a script, and a wrapped section that arrives
+	 * without it is a design that looks right and does nothing. This gathers
+	 * those files the same way `for_pages()` gathers stylesheets: only what
+	 * the pages being built actually link, each file once, resolved against
+	 * the archive and never off it.
+	 *
+	 * Scripts from elsewhere on the internet are skipped — a CDN address is
+	 * not the design's to vendor, and a site that fetches one has a
+	 * third-party request the studio did not choose. Inline `<script>` is
+	 * skipped too: it is usually analytics or a JSON-LD block, and the ones
+	 * that are neither are page-specific in a way a shared file must not be.
+	 *
+	 * @param string             $root  Design root directory.
+	 * @param array<int, string> $pages Pages being built, absolute paths.
+	 * @return string The scripts, concatenated, each preceded by its own name.
+	 */
+	public static function scripts( string $root, array $pages ): string {
+		$root  = rtrim( str_replace( '\\', '/', $root ), '/' );
+		$seen  = array();
+		$parts = array();
+
+		foreach ( $pages as $page ) {
+			$page = str_replace( '\\', '/', (string) $page );
+
+			if ( ! is_file( $page ) ) {
+				continue;
+			}
+
+			$html = (string) file_get_contents( $page ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+			$dir  = dirname( $page );
+
+			if ( 1 !== preg_match_all( '#<script\b[^>]*\bsrc\s*=\s*["\']([^"\']+)["\'][^>]*>#i', $html, $found ) && array() === ( $found[1] ?? array() ) ) {
+				continue;
+			}
+
+			foreach ( (array) $found[1] as $src ) {
+				$src = trim( html_entity_decode( (string) $src, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+
+				if ( '' === $src || 1 === preg_match( '#^(?:[a-z][a-z0-9+.-]*:|//)#i', $src ) ) {
+					continue;
+				}
+
+				$target = (string) strtok( $src, '?#' );
+				$path   = self::beside( $dir, $target );
+
+				if ( null === $path || ! str_starts_with( $path, $root . '/' ) ) {
+					$path = self::nearest_named( $root, basename( $target ), $page );
+				}
+
+				if ( null === $path || isset( $seen[ $path ] ) ) {
+					continue;
+				}
+
+				$seen[ $path ] = true;
+
+				if ( ! is_file( $path ) || filesize( $path ) >= self::MAX_FILE ) {
+					continue;
+				}
+
+				$js = trim( (string) file_get_contents( $path ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+
+				if ( '' === $js ) {
+					continue;
+				}
+
+				/*
+				 * Each file is wrapped, so one that ends mid-statement or
+				 * declares a `const` the next one also declares cannot take
+				 * the rest of the design's behaviour down with it.
+				 */
+				$parts[] = '/* ' . str_replace( '*/', '', self::relative_dir( $path, $root ) . '/' . basename( $path ) ) . " */\n"
+					. "( function () {\n" . $js . "\n}() );";
+			}
+		}
+
+		return implode( "\n\n", $parts );
+	}
+
+	/**
 	 * The copy of a named stylesheet that sits closest to a page.
 	 *
 	 * Closest by shared path: a `styles.css` inside the same project beats one

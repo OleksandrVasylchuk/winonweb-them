@@ -2155,308 +2155,268 @@ msgstr ""
 msgid "This screen needs JavaScript."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:116
+#: inc/Modules/Onboarding.php:112
 msgid "Set up Qwerty Soft — Signal"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:117
+#: inc/Modules/Onboarding.php:113
 msgid "Theme setup"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:147
+#: inc/Modules/Onboarding.php:143
 msgid "Qwerty Soft — Signal is active."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:148
-msgid "Three steps turn it into a finished site: pick a look, add your logo and colours, install the starter pages."
+#: inc/Modules/Onboarding.php:144
+msgid "Two steps turn it into a finished site: pick a look, then add your logo and colours."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:152 inc/Modules/Onboarding.php:252 inc/Modules/Onboarding.php:358
+#: inc/Modules/Onboarding.php:148 inc/Modules/Onboarding.php:247 inc/Modules/Onboarding.php:349
 msgid "Set up the theme"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:155
+#: inc/Modules/Onboarding.php:151
 msgid "No thanks, I will do it myself"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:198
+#: inc/Modules/Onboarding.php:194
 msgid "What this changes"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:200
+#: inc/Modules/Onboarding.php:196
 msgid "Nothing here edits the theme files. The look you pick and the brand colours you enter are written to this site's global styles — the same place the Site Editor saves to — so a theme update cannot overwrite them, and you can change or undo any of it later under Appearance → Editor → Styles."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:201
-msgid "The starter pages are ordinary pages made from the theme's own patterns. Edit them, delete them, or remove the whole set again from Appearance → Design import."
-msgstr ""
-
-#: inc/Modules/Onboarding.php:208
+#: inc/Modules/Onboarding.php:203
 msgid "Colours and contrast"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:210
+#: inc/Modules/Onboarding.php:205
 msgid "Your brand colour is not used exactly as entered. It is walked toward white or black until it is legible on every background the theme renders it on, so the palette clears WCAG 2.2 AA whatever colour you start from. The hue is kept; only the lightness moves, and usually not far."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:215
+#: inc/Modules/Onboarding.php:210
 msgid "More help"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:216 inc/Modules/Onboarding.php:275
+#: inc/Modules/Onboarding.php:211 inc/Modules/Onboarding.php:270
 msgid "Documentation and support"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:232 inc/Modules/SiteHealth.php:221
+#: inc/Modules/Onboarding.php:227 inc/Modules/SiteHealth.php:221
 msgid "Qwerty Soft — Signal"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:248
-msgid "The theme has not been set up yet. Three steps and this site stops looking empty."
+#: inc/Modules/Onboarding.php:243
+msgid "The theme has not been set up yet. Two steps and this site stops looking empty."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:260
+#: inc/Modules/Onboarding.php:255
 msgid "Edit the site design"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:265
+#: inc/Modules/Onboarding.php:260
 msgid "Import a design"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:270
+#: inc/Modules/Onboarding.php:265
 msgid "Change the palette"
 msgstr ""
 
 #. translators: %s: theme version number.
-#: inc/Modules/Onboarding.php:284
+#: inc/Modules/Onboarding.php:279
 msgid "Version %s"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:302 inc/Modules/Onboarding.php:701
+#: inc/Modules/Onboarding.php:297 inc/Modules/Onboarding.php:651
 msgid "You do not have permission to set up this theme."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:343 inc/Modules/Onboarding.php:436
+#: inc/Modules/Onboarding.php:335 inc/Modules/Onboarding.php:424
 msgid "Start"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:344
+#: inc/Modules/Onboarding.php:336
 msgid "Look"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:345
+#: inc/Modules/Onboarding.php:337
 msgid "Brand"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:346
-msgid "Content"
-msgstr ""
-
-#: inc/Modules/Onboarding.php:347 inc/Modules/Onboarding.php:685
+#: inc/Modules/Onboarding.php:338 inc/Modules/Onboarding.php:635
 msgid "Finish"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:361
-msgid "Four short steps. Every one of them is optional, and every one of them can be undone afterwards."
+#: inc/Modules/Onboarding.php:352
+msgid "Three short steps. Every one of them is optional, and every one of them can be undone afterwards."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:393
+#: inc/Modules/Onboarding.php:384
 msgid "The palette is applied. Every colour on the site follows it."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:394
+#: inc/Modules/Onboarding.php:385
 msgid "Back to the theme's own palette."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:395
+#: inc/Modules/Onboarding.php:386
 msgid "That look could not be applied. Pick one of the styles listed, or skip this step."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:396
+#: inc/Modules/Onboarding.php:387
 msgid "Your brand colours are in. They were adjusted where they had to be, so every pair still clears WCAG 2.2 AA."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:397
+#: inc/Modules/Onboarding.php:388
 msgid "That did not look like a colour. Enter it as a hex value, for example #1f6feb."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:398
+#: inc/Modules/Onboarding.php:389
 msgid "Logo uploaded and set."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:399
+#: inc/Modules/Onboarding.php:390
 msgid "The logo could not be uploaded. Check the file is an image and within the size this server allows."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:400
-msgid "The starter pages are in and the front page is set."
-msgstr ""
-
-#: inc/Modules/Onboarding.php:401
-msgid "Nothing was added — those pages already exist on this site."
-msgstr ""
-
-#: inc/Modules/Onboarding.php:422
+#: inc/Modules/Onboarding.php:411
 msgid "What this does"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:425
+#: inc/Modules/Onboarding.php:414
 msgid "Pick one of six palettes, or keep the theme's own."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:426
+#: inc/Modules/Onboarding.php:415
 msgid "Upload a logo and give the theme your brand colours. The rest of the palette is worked out from them and checked for contrast."
 msgstr ""
 
+#: inc/Modules/Onboarding.php:419
+msgid "Nothing is written to the theme files, so an update cannot overwrite any of it. Everything can be changed later in the Site Editor."
+msgstr ""
+
 #: inc/Modules/Onboarding.php:427
-msgid "Install a home, services and contact page built from the theme's patterns, with a menu and a front page."
-msgstr ""
-
-#: inc/Modules/Onboarding.php:431
-msgid "Nothing is written to the theme files, so an update cannot overwrite any of it. Everything can be changed later in the Site Editor, and the starter pages can be removed again in one press."
-msgstr ""
-
-#: inc/Modules/Onboarding.php:439
 msgid "Skip setup"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:453
+#: inc/Modules/Onboarding.php:441
 msgid "Pick a look"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:456
+#: inc/Modules/Onboarding.php:444
 msgid "Each of these is a full palette, not a filter. All of them clear WCAG 2.2 AA on every text pair — that is checked by a script before the theme ships, not by eye."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:465
+#: inc/Modules/Onboarding.php:453
 msgid "Style variation"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:487
+#: inc/Modules/Onboarding.php:475
 msgid "Use this look"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:490 inc/Modules/Onboarding.php:608 inc/Modules/Onboarding.php:646
+#: inc/Modules/Onboarding.php:478 inc/Modules/Onboarding.php:596
 msgid "Skip this step"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:505
+#: inc/Modules/Onboarding.php:493
 msgid "Your brand"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:508
+#: inc/Modules/Onboarding.php:496
 msgid "Give it a logo and one colour and it will work out the other twelve. Enter two more if your brand has them."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:519
+#: inc/Modules/Onboarding.php:507
 msgid "Logo"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:530
+#: inc/Modules/Onboarding.php:518
 msgid "Optional. A transparent PNG about 400 pixels wide works best; JPG and WebP also work. This sets the site logo, which the header already displays."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:536 inc/Modules/Onboarding.php:539
+#: inc/Modules/Onboarding.php:524 inc/Modules/Onboarding.php:527
 msgid "Light or dark"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:540
+#: inc/Modules/Onboarding.php:528
 msgid "Dark — light text on a near-black page"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:541
+#: inc/Modules/Onboarding.php:529
 msgid "Light — dark text on a white page"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:548
+#: inc/Modules/Onboarding.php:536
 msgid "Brand colour"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:553
+#: inc/Modules/Onboarding.php:541
 msgid "Buttons, links and highlights. If this exact colour would be hard to read, the theme keeps the hue and moves the lightness until it is."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:559 inc/Modules/Onboarding.php:562
+#: inc/Modules/Onboarding.php:547 inc/Modules/Onboarding.php:550
 msgid "Secondary colours"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:567
+#: inc/Modules/Onboarding.php:555
 msgid "Work them out from my brand colour"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:572
+#: inc/Modules/Onboarding.php:560
 msgid "Second brand colour"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:575
+#: inc/Modules/Onboarding.php:563
 msgid "Third brand colour"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:580
+#: inc/Modules/Onboarding.php:568
 msgid "Leave the box ticked and the theme rotates two companions off your brand colour, which is what a one-colour brand wants. Untick it to use the two colours above instead."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:588
+#: inc/Modules/Onboarding.php:576
 msgid "Headings"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:592
+#: inc/Modules/Onboarding.php:580
 msgid "Keep the theme's heading font"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:593
+#: inc/Modules/Onboarding.php:581
 msgid "Manrope — the theme sans"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:594
+#: inc/Modules/Onboarding.php:582
 msgid "Monospace — editorial, technical"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:597
+#: inc/Modules/Onboarding.php:585
 msgid "Only the two families the theme already carries. Adding a third would mean a font file the theme does not ship and a request it does not make."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:605
+#: inc/Modules/Onboarding.php:593
 msgid "Apply my brand"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:623
-msgid "Starter pages"
-msgstr ""
-
-#: inc/Modules/Onboarding.php:626
-msgid "A home page, a services page and a contact page, built from the theme's own patterns and filled with real copy rather than placeholder text. A menu is created and the home page is set as the front page."
-msgstr ""
-
-#: inc/Modules/Onboarding.php:631
-msgid "This site already has starter content."
-msgstr ""
-
-#: inc/Modules/Onboarding.php:632
-msgid "Running it again will not duplicate or overwrite anything."
-msgstr ""
-
-#: inc/Modules/Onboarding.php:643
-msgid "Install the starter pages"
-msgstr ""
-
-#: inc/Modules/Onboarding.php:660
+#: inc/Modules/Onboarding.php:610
 msgid "That is the setup done"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:663
+#: inc/Modules/Onboarding.php:613
 msgid "Everything from here is ordinary WordPress. The pages are pages, the palette is in the Site Editor under Styles, and the patterns are in the block inserter under Qwerty Soft."
 msgstr ""
 
-#: inc/Modules/Onboarding.php:668
+#: inc/Modules/Onboarding.php:618
 msgid "Look at the site"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:671
+#: inc/Modules/Onboarding.php:621
 msgid "Edit the design in the Site Editor"
 msgstr ""
 
-#: inc/Modules/Onboarding.php:674
+#: inc/Modules/Onboarding.php:624
 msgid "Import a design from an HTML archive"
 msgstr ""
 
@@ -2939,72 +2899,108 @@ msgstr ""
 msgid "Site header"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:593
-msgid "Items"
-msgstr ""
-
-#: inc/Support/BlockWriter.php:597
-msgid "Add item"
-msgstr ""
-
-#: inc/Support/BlockWriter.php:612
-msgid "Show"
-msgstr ""
-
-#: inc/Support/BlockWriter.php:623
-msgid "Leave empty to show the most recent automatically."
-msgstr ""
-
-#: inc/Support/BlockWriter.php:628
-msgid "How many"
-msgstr ""
-
-#: inc/Support/BlockWriter.php:809
+#: inc/Support/BlockWriter.php:1046
 msgid "%d piece of text"
 msgid_plural "%d pieces of text"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Support/BlockWriter.php:814
+#: inc/Support/BlockWriter.php:1051
 msgid "%d picture"
 msgid_plural "%d pictures"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Support/BlockWriter.php:819
+#: inc/Support/BlockWriter.php:1056
 msgid "%d link"
 msgid_plural "%d links"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Support/BlockWriter.php:824
+#: inc/Support/BlockWriter.php:1061
 msgid "%d repeating item"
 msgid_plural "%d repeating items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Support/BlockWriter.php:833
+#: inc/Support/BlockWriter.php:1070
 msgid "A section from the design: %s."
 msgstr ""
 
-#: inc/Support/BlockWriter.php:835
+#: inc/Support/BlockWriter.php:1072
 msgid "%1$s, from %2$s in the design."
 msgstr ""
 
-#: inc/Support/BlockWriter.php:842
+#: inc/Support/BlockWriter.php:1079
 msgid "%1$s — %2$s."
 msgstr ""
 
-#: inc/Support/BlockWriter.php:844
+#: inc/Support/BlockWriter.php:1081
 msgid "%1$s — %2$s. From %3$s in the design."
 msgstr ""
 
-#: inc/Support/BlockWriter.php:855
+#: inc/Support/BlockWriter.php:1092
 msgid "design"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:855
+#: inc/Support/BlockWriter.php:1092
 msgid "section"
+msgstr ""
+
+#: inc/Support/BlockWriter.php:619
+msgid "Items"
+msgstr ""
+
+#: inc/Support/BlockWriter.php:623
+msgid "Add item"
+msgstr ""
+
+#: inc/Support/BlockWriter.php:624
+msgid "One row per repeated entry. Add, remove or reorder rows as needed."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:639
+msgid "Show"
+msgstr ""
+
+#: inc/Support/BlockWriter.php:650
+msgid "Leave empty to show the most recent automatically."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:655
+msgid "How many"
+msgstr ""
+
+#: inc/Support/BlockWriter.php:660
+msgid "The most this position will display at once."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:780
+msgid "A short paragraph of text, shown in this position."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:783
+msgid "Choose a page, or paste a web address, and the text shown for it."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:786
+msgid "The picture shown in this position."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:789
+msgid "A whole number."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:792
+msgid "A web address, including https://."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:795
+msgid "An email address."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:798
+msgid "A short line of text, shown in this position."
 msgstr ""
 
 #: inc/Support/BrandKit.php:127
@@ -3136,26 +3132,6 @@ msgstr ""
 
 #: inc/Support/ConversionPrompt.php:767
 msgid "The pasted list has no sections with markup in it."
-msgstr ""
-
-#: inc/Support/DemoContent.php:154
-msgctxt "Starter page title"
-msgid "Home"
-msgstr ""
-
-#: inc/Support/DemoContent.php:156
-msgctxt "Starter page title"
-msgid "Services"
-msgstr ""
-
-#: inc/Support/DemoContent.php:158
-msgctxt "Starter page title"
-msgid "Contact"
-msgstr ""
-
-#: inc/Support/DemoContent.php:219
-msgctxt "Starter menu name"
-msgid "Primary"
 msgstr ""
 
 #. translators: %s: entry path inside the archive.
@@ -3599,331 +3575,6 @@ msgstr ""
 msgid "Cyan on near-black. The palette the theme ships with."
 msgstr ""
 
-#: patterns/cases-slider.php
-msgctxt "Pattern description"
-msgid "A horizontal slider of case study cards, each with a result, a client and a short summary."
-msgstr ""
-
-#: patterns/cases-slider.php
-msgctxt "Pattern title"
-msgid "Case studies — swipeable cards"
-msgstr ""
-
-#: patterns/cases-slider.php
-msgctxt "Pattern keywords"
-msgid "cases, portfolio, work, slider, carousel, results"
-msgstr ""
-
-#: patterns/cases-slider.php:19
-msgctxt "Pattern placeholder text"
-msgid "Selected work"
-msgstr ""
-
-#: patterns/cases-slider.php:23
-msgctxt "Pattern placeholder text"
-msgid "Every project below is measured against what it was before we touched it."
-msgstr ""
-
-#: patterns/cases-slider.php:31
-msgctxt "Pattern placeholder text"
-msgid "Client case studies"
-msgstr ""
-
-#: patterns/cases-slider.php:33
-msgctxt "Pattern placeholder text"
-msgid "more enquiries in the first quarter"
-msgstr ""
-
-#: patterns/cases-slider.php:36
-msgctxt "Pattern placeholder text"
-msgid "B2B manufacturer, rebuilt"
-msgstr ""
-
-#: patterns/cases-slider.php:40
-msgctxt "Pattern placeholder text"
-msgid "Replaced a page builder with a block theme. The site went from 4.8 seconds to 1.6 and the sales team stopped filing tickets to change a phone number."
-msgstr ""
-
-#: patterns/cases-slider.php:45
-msgctxt "Pattern placeholder text"
-msgid "accessibility score, up from 61"
-msgstr ""
-
-#: patterns/cases-slider.php:48
-msgctxt "Pattern placeholder text"
-msgid "Public sector portal"
-msgstr ""
-
-#: patterns/cases-slider.php:52
-msgctxt "Pattern placeholder text"
-msgid "A full WCAG 2.2 AA remediation with a written audit trail, delivered ahead of a statutory compliance deadline."
-msgstr ""
-
-#: patterns/cases-slider.php:57
-msgctxt "Pattern placeholder text"
-msgid "faster checkout on mobile"
-msgstr ""
-
-#: patterns/cases-slider.php:60
-msgctxt "Pattern placeholder text"
-msgid "WooCommerce performance rescue"
-msgstr ""
-
-#: patterns/cases-slider.php:64
-msgctxt "Pattern placeholder text"
-msgid "Cut eleven plugins, moved the cart to blocks and put the shop assets behind a condition. Same features, a third of the JavaScript."
-msgstr ""
-
-#: patterns/cases-slider.php:69
-msgctxt "Pattern placeholder text"
-msgid "weeks from first call to launch"
-msgstr ""
-
-#: patterns/cases-slider.php:72
-msgctxt "Pattern placeholder text"
-msgid "SaaS marketing site"
-msgstr ""
-
-#: patterns/cases-slider.php:76
-msgctxt "Pattern placeholder text"
-msgid "Next.js front end, WordPress editing behind it. Marketing publishes without a deploy, engineering keeps its type safety."
-msgstr ""
-
-#: patterns/contact-section.php
-msgctxt "Pattern description"
-msgid "A two-column contact section: an accessible enquiry form next to direct contact details."
-msgstr ""
-
-#: patterns/contact-section.php
-msgctxt "Pattern title"
-msgid "Contact — form with direct details"
-msgstr ""
-
-#: patterns/contact-section.php
-msgctxt "Pattern keywords"
-msgid "contact, form, enquiry, email, get in touch"
-msgstr ""
-
-#: patterns/contact-section.php:20
-msgctxt "Pattern placeholder text"
-msgid "Tell us what you are building"
-msgstr ""
-
-#: patterns/contact-section.php:24
-msgctxt "Pattern placeholder text"
-msgid "You will hear back from one of the two people who would actually do the work, within one working day."
-msgstr ""
-
-#: patterns/contact-section.php:33
-msgctxt "Pattern placeholder text"
-msgid "A written scope and a fixed number before anything starts"
-msgstr ""
-
-#: patterns/contact-section.php:37
-msgctxt "Pattern placeholder text"
-msgid "No sales call, no discovery workshop invoice"
-msgstr ""
-
-#: patterns/contact-section.php:41
-msgctxt "Pattern placeholder text"
-msgid "We will tell you if your project is not a fit for us"
-msgstr ""
-
-#: patterns/contact-section.php:48
-msgctxt "Pattern placeholder text"
-msgid "We use your details only to answer this enquiry and delete them after twelve months."
-msgstr ""
-
-#: patterns/cta-band.php
-msgctxt "Pattern description"
-msgid "A wide, high-contrast band with one headline and one button."
-msgstr ""
-
-#: patterns/cta-band.php
-msgctxt "Pattern title"
-msgid "Call to action — full width band"
-msgstr ""
-
-#: patterns/cta-band.php
-msgctxt "Pattern keywords"
-msgid "cta, call to action, banner, conversion, contact"
-msgstr ""
-
-#: patterns/cta-band.php:19
-msgctxt "Pattern placeholder text"
-msgid "Ready to stop losing visitors to a slow site?"
-msgstr ""
-
-#: patterns/cta-band.php:23
-msgctxt "Pattern placeholder text"
-msgid "Send us the URL. We will tell you what is wrong with it, for free, before you decide anything."
-msgstr ""
-
-#: patterns/cta-band.php:32
-msgctxt "Pattern placeholder text"
-msgid "Get a free review"
-msgstr ""
-
-#: patterns/faq-section.php
-msgctxt "Pattern description"
-msgid "A heading and a set of questions that expand and collapse, ready to be picked up by search engines."
-msgstr ""
-
-#: patterns/faq-section.php
-msgctxt "Pattern title"
-msgid "FAQ — accordion with structured data"
-msgstr ""
-
-#: patterns/faq-section.php
-msgctxt "Pattern keywords"
-msgid "faq, questions, accordion, answers, support"
-msgstr ""
-
-#: patterns/faq-section.php:18
-msgctxt "Pattern placeholder text"
-msgid "Questions we get asked"
-msgstr ""
-
-#: patterns/faq-section.php:26
-msgctxt "Pattern placeholder text"
-msgid "How long does a site take?"
-msgstr ""
-
-#: patterns/faq-section.php:28
-msgctxt "Pattern placeholder text"
-msgid "A marketing site is usually four to eight weeks from the scope call. A rebuild with content migration runs longer, and we tell you which one you are in before you commit to anything."
-msgstr ""
-
-#: patterns/faq-section.php:32
-msgctxt "Pattern placeholder text"
-msgid "Do you use page builders?"
-msgstr ""
-
-#: patterns/faq-section.php:34
-msgctxt "Pattern placeholder text"
-msgid "No. We build block themes on the editor that ships with WordPress. It is faster, it has no licence to renew, and it will still open in five years."
-msgstr ""
-
-#: patterns/faq-section.php:38
-msgctxt "Pattern placeholder text"
-msgid "What does accessible actually mean here?"
-msgstr ""
-
-#: patterns/faq-section.php:40
-msgctxt "Pattern placeholder text"
-msgid "WCAG 2.2 level AA, checked with automated tooling and by hand with a keyboard and a screen reader. You get the report, including anything we could not fix and why."
-msgstr ""
-
-#: patterns/faq-section.php:44
-msgctxt "Pattern placeholder text"
-msgid "Who owns the code?"
-msgstr ""
-
-#: patterns/faq-section.php:46
-msgctxt "Pattern placeholder text"
-msgid "You do, from the first commit. The repository is yours, the hosting is in your name, and nothing we write depends on us staying involved."
-msgstr ""
-
-#: patterns/faq-section.php:50
-msgctxt "Pattern placeholder text"
-msgid "Can you work with our existing team?"
-msgstr ""
-
-#: patterns/faq-section.php:52
-msgctxt "Pattern placeholder text"
-msgid "Often, yes. We review pull requests, pair with in-house developers and leave the conventions documented so the work outlives the engagement."
-msgstr ""
-
-#: patterns/hero-home.php
-msgctxt "Pattern description"
-msgid "A full-width opening section with an eyebrow, a large headline, a supporting line, two buttons and a row of metrics."
-msgstr ""
-
-#: patterns/hero-home.php
-msgctxt "Pattern title"
-msgid "Hero — headline, promise and proof"
-msgstr ""
-
-#: patterns/hero-home.php
-msgctxt "Pattern keywords"
-msgid "hero, intro, headline, opening, banner"
-msgstr ""
-
-#: patterns/hero-home.php:19
-msgctxt "Pattern placeholder text"
-msgid "Boutique studio · WordPress & Next.js"
-msgstr ""
-
-#: patterns/hero-home.php:23
-msgctxt "Pattern placeholder text"
-msgid "Websites that win."
-msgstr ""
-
-#: patterns/hero-home.php:27
-msgctxt "Pattern placeholder text"
-msgid "We build fast, accessible, measurable websites. Two senior developers, no account managers, no hand-offs — the people who scope your project are the ones who ship it."
-msgstr ""
-
-#: patterns/hero-home.php:36
-msgctxt "Pattern placeholder text"
-msgid "Start a project"
-msgstr ""
-
-#: patterns/hero-home.php:40
-msgctxt "Pattern placeholder text"
-msgid "See the numbers"
-msgstr ""
-
-#: patterns/hero-home.php:51
-msgctxt "Pattern placeholder text"
-msgid "Average Lighthouse performance score on launch"
-msgstr ""
-
-#: patterns/hero-home.php:55
-msgctxt "Pattern placeholder text"
-msgid "Typical Largest Contentful Paint on 4G"
-msgstr ""
-
-#: patterns/hero-home.php:59
-msgctxt "Pattern placeholder text"
-msgid "Projects delivered to WCAG 2.2 AA"
-msgstr ""
-
-#: patterns/hero-home.php:63
-msgctxt "Pattern placeholder text"
-msgid "Senior developers on every project, start to finish"
-msgstr ""
-
-#: patterns/hero-page.php
-msgctxt "Pattern description"
-msgid "A compact page opener with an eyebrow, a heading and one supporting paragraph."
-msgstr ""
-
-#: patterns/hero-page.php
-msgctxt "Pattern title"
-msgid "Hero — inner page header"
-msgstr ""
-
-#: patterns/hero-page.php
-msgctxt "Pattern keywords"
-msgid "hero, page header, intro, title"
-msgstr ""
-
-#: patterns/hero-page.php:19
-msgctxt "Pattern placeholder text"
-msgid "Services"
-msgstr ""
-
-#: patterns/hero-page.php:23
-msgctxt "Pattern placeholder text"
-msgid "What we do, and what it costs"
-msgstr ""
-
-#: patterns/hero-page.php:27
-msgctxt "Pattern placeholder text"
-msgid "Short version: we build and rescue WordPress and Next.js sites, we quote a fixed number, and we can show you the measurements afterwards."
-msgstr ""
-
 #: patterns/hidden-404.php
 msgctxt "Pattern title"
 msgid "404 content"
@@ -3977,511 +3628,6 @@ msgstr ""
 #: patterns/hidden-no-results.php:19
 msgctxt "Pattern placeholder text"
 msgid "Try a shorter phrase, or a different word for the same thing."
-msgstr ""
-
-#: patterns/logos-strip.php
-msgctxt "Pattern description"
-msgid "A low-key row of client names or logos under the hero. Replace the text with images once you have permission to use them."
-msgstr ""
-
-#: patterns/logos-strip.php
-msgctxt "Pattern title"
-msgid "Client logos — quiet strip"
-msgstr ""
-
-#: patterns/logos-strip.php
-msgctxt "Pattern keywords"
-msgid "logos, clients, brands, trust, partners"
-msgstr ""
-
-#: patterns/logos-strip.php:18
-msgctxt "Pattern placeholder text"
-msgid "Trusted by teams at"
-msgstr ""
-
-#: patterns/logos-strip.php:27
-msgctxt "Pattern placeholder text"
-msgid "Northwind"
-msgstr ""
-
-#: patterns/logos-strip.php:31
-msgctxt "Pattern placeholder text"
-msgid "Kraftverk"
-msgstr ""
-
-#: patterns/logos-strip.php:35
-msgctxt "Pattern placeholder text"
-msgid "Meridian"
-msgstr ""
-
-#: patterns/logos-strip.php:39
-msgctxt "Pattern placeholder text"
-msgid "Volta Labs"
-msgstr ""
-
-#: patterns/logos-strip.php:43
-msgctxt "Pattern placeholder text"
-msgid "Aurora Health"
-msgstr ""
-
-#: patterns/metrics-band.php
-msgctxt "Pattern description"
-msgid "A row of four numbers that count up as the visitor reaches them."
-msgstr ""
-
-#: patterns/metrics-band.php
-msgctxt "Pattern title"
-msgid "Metrics — four figures in a row"
-msgstr ""
-
-#: patterns/metrics-band.php
-msgctxt "Pattern keywords"
-msgid "metrics, numbers, stats, results, kpi, counters"
-msgstr ""
-
-#: patterns/metrics-band.php:19
-msgctxt "Pattern placeholder text"
-msgid "Median Largest Contentful Paint across live client sites"
-msgstr ""
-
-#: patterns/metrics-band.php:23
-msgctxt "Pattern placeholder text"
-msgid "Cumulative Layout Shift on every template we ship"
-msgstr ""
-
-#: patterns/metrics-band.php:27
-msgctxt "Pattern placeholder text"
-msgid "Projects delivered since 2016"
-msgstr ""
-
-#: patterns/metrics-band.php:31
-msgctxt "Pattern placeholder text"
-msgid "Maximum time to a reply from a real developer"
-msgstr ""
-
-#: patterns/page-contact.php
-msgctxt "Pattern description"
-msgid "A contact page with an enquiry form, direct details and the questions people ask before getting in touch."
-msgstr ""
-
-#: patterns/page-contact.php
-msgctxt "Pattern keywords"
-msgid "contact, enquiry, form, full page"
-msgstr ""
-
-#: patterns/page-contact.php
-msgctxt "Pattern title"
-msgid "Page — contact"
-msgstr ""
-
-#: patterns/page-contact.php:21
-msgctxt "Pattern placeholder text"
-msgid "Contact"
-msgstr ""
-
-#: patterns/page-contact.php:25
-msgctxt "Pattern placeholder text"
-msgid "Let us look at your project"
-msgstr ""
-
-#: patterns/page-home.php
-msgctxt "Pattern description"
-msgid "A complete homepage: hero with metrics, client logos, services, case studies, process, testimonials, pricing, FAQ and a contact form."
-msgstr ""
-
-#: patterns/page-home.php
-msgctxt "Pattern keywords"
-msgid "home, homepage, landing, full page, agency"
-msgstr ""
-
-#: patterns/page-home.php
-msgctxt "Pattern title"
-msgid "Page — studio homepage"
-msgstr ""
-
-#: patterns/page-services.php
-msgctxt "Pattern description"
-msgid "A services page: page hero, the service grid, how a project runs, pricing tiers, FAQ and a closing call to action."
-msgstr ""
-
-#: patterns/page-services.php
-msgctxt "Pattern title"
-msgid "Page — services and pricing"
-msgstr ""
-
-#: patterns/page-services.php
-msgctxt "Pattern keywords"
-msgid "services, pricing, offering, full page"
-msgstr ""
-
-#: patterns/pricing-tiers.php
-msgctxt "Pattern title"
-msgid "Pricing — three tiers"
-msgstr ""
-
-#: patterns/pricing-tiers.php
-msgctxt "Pattern keywords"
-msgid "pricing, plans, packages, tiers, cost"
-msgstr ""
-
-#: patterns/pricing-tiers.php
-msgctxt "Pattern description"
-msgid "Three pricing cards with a highlighted middle tier, a feature list and a call to action on each."
-msgstr ""
-
-#: patterns/pricing-tiers.php:100
-msgctxt "Pattern placeholder text"
-msgid "Content migration"
-msgstr ""
-
-#: patterns/pricing-tiers.php:106
-msgctxt "Pattern placeholder text"
-msgid "Ask about Site"
-msgstr ""
-
-#: patterns/pricing-tiers.php:115
-msgctxt "Pattern placeholder text"
-msgid "Partner"
-msgstr ""
-
-#: patterns/pricing-tiers.php:119
-msgctxt "Pattern placeholder text"
-msgid "from €2,400/mo"
-msgstr ""
-
-#: patterns/pricing-tiers.php:123
-msgctxt "Pattern placeholder text"
-msgid "Ongoing development with a reserved share of our week."
-msgstr ""
-
-#: patterns/pricing-tiers.php:128
-msgctxt "Pattern placeholder text"
-msgid "Roadmap sessions every month"
-msgstr ""
-
-#: patterns/pricing-tiers.php:132
-msgctxt "Pattern placeholder text"
-msgid "Core Web Vitals monitoring"
-msgstr ""
-
-#: patterns/pricing-tiers.php:136
-msgctxt "Pattern placeholder text"
-msgid "Security patching within 24 hours"
-msgstr ""
-
-#: patterns/pricing-tiers.php:142
-msgctxt "Pattern placeholder text"
-msgid "Ask about Partner"
-msgstr ""
-
-#: patterns/pricing-tiers.php:19
-msgctxt "Pattern placeholder text"
-msgid "Straight pricing"
-msgstr ""
-
-#: patterns/pricing-tiers.php:23
-msgctxt "Pattern placeholder text"
-msgid "Fixed scope, fixed price, written down before we start. If the scope changes we tell you what it costs before we do it."
-msgstr ""
-
-#: patterns/pricing-tiers.php:35
-msgctxt "Pattern placeholder text"
-msgid "Landing"
-msgstr ""
-
-#: patterns/pricing-tiers.php:39
-msgctxt "Pattern placeholder text"
-msgid "from €3,500"
-msgstr ""
-
-#: patterns/pricing-tiers.php:43
-msgctxt "Pattern placeholder text"
-msgid "One page that has to convert. Two to three weeks."
-msgstr ""
-
-#: patterns/pricing-tiers.php:48
-msgctxt "Pattern placeholder text"
-msgid "Custom block patterns"
-msgstr ""
-
-#: patterns/pricing-tiers.php:52
-msgctxt "Pattern placeholder text"
-msgid "Lighthouse 95+ on launch"
-msgstr ""
-
-#: patterns/pricing-tiers.php:56
-msgctxt "Pattern placeholder text"
-msgid "Analytics and conversion tracking"
-msgstr ""
-
-#: patterns/pricing-tiers.php:62
-msgctxt "Pattern placeholder text"
-msgid "Ask about Landing"
-msgstr ""
-
-#: patterns/pricing-tiers.php:71
-msgctxt "Pattern placeholder text"
-msgid "Most chosen"
-msgstr ""
-
-#: patterns/pricing-tiers.php:75
-msgctxt "Pattern placeholder text"
-msgid "Site"
-msgstr ""
-
-#: patterns/pricing-tiers.php:79
-msgctxt "Pattern placeholder text"
-msgid "from €9,000"
-msgstr ""
-
-#: patterns/pricing-tiers.php:83
-msgctxt "Pattern placeholder text"
-msgid "A complete block theme your team owns. Four to eight weeks."
-msgstr ""
-
-#: patterns/pricing-tiers.php:88
-msgctxt "Pattern placeholder text"
-msgid "Everything in Landing"
-msgstr ""
-
-#: patterns/pricing-tiers.php:92
-msgctxt "Pattern placeholder text"
-msgid "Full Site Editing setup and training"
-msgstr ""
-
-#: patterns/pricing-tiers.php:96
-msgctxt "Pattern placeholder text"
-msgid "WCAG 2.2 AA audit and sign-off"
-msgstr ""
-
-#: patterns/process-steps.php
-msgctxt "Pattern description"
-msgid "Four numbered steps explaining how a project runs, from first call to handover."
-msgstr ""
-
-#: patterns/process-steps.php
-msgctxt "Pattern title"
-msgid "Process — four numbered steps"
-msgstr ""
-
-#: patterns/process-steps.php
-msgctxt "Pattern keywords"
-msgid "process, steps, how it works, timeline, method"
-msgstr ""
-
-#: patterns/process-steps.php:18
-msgctxt "Pattern placeholder text"
-msgid "How a project runs"
-msgstr ""
-
-#: patterns/process-steps.php:28 patterns/services-grid.php:35
-msgctxt "Pattern placeholder text"
-msgid "01"
-msgstr ""
-
-#: patterns/process-steps.php:32
-msgctxt "Pattern placeholder text"
-msgid "Scope call"
-msgstr ""
-
-#: patterns/process-steps.php:36
-msgctxt "Pattern placeholder text"
-msgid "Forty-five minutes with the developers who will build it. You leave with a written scope and a number."
-msgstr ""
-
-#: patterns/process-steps.php:42 patterns/services-grid.php:65
-msgctxt "Pattern placeholder text"
-msgid "02"
-msgstr ""
-
-#: patterns/process-steps.php:46
-msgctxt "Pattern placeholder text"
-msgid "Design in the browser"
-msgstr ""
-
-#: patterns/process-steps.php:50
-msgctxt "Pattern placeholder text"
-msgid "You review real pages on a real device, not a flat mockup that hides how it behaves at 320 pixels."
-msgstr ""
-
-#: patterns/process-steps.php:56 patterns/services-grid.php:95
-msgctxt "Pattern placeholder text"
-msgid "03"
-msgstr ""
-
-#: patterns/process-steps.php:60
-msgctxt "Pattern placeholder text"
-msgid "Build and test"
-msgstr ""
-
-#: patterns/process-steps.php:64
-msgctxt "Pattern placeholder text"
-msgid "Weekly demos on a staging URL. Accessibility and performance are checked as we go, not bolted on at the end."
-msgstr ""
-
-#: patterns/process-steps.php:70
-msgctxt "Pattern placeholder text"
-msgid "04"
-msgstr ""
-
-#: patterns/process-steps.php:74
-msgctxt "Pattern placeholder text"
-msgid "Launch and hand over"
-msgstr ""
-
-#: patterns/process-steps.php:78
-msgctxt "Pattern placeholder text"
-msgid "You get the repository, the documentation and a recorded walkthrough. No lock-in, ever."
-msgstr ""
-
-#: patterns/services-grid.php
-msgctxt "Pattern description"
-msgid "A heading with a short intro and three service cards, each with a title, description and link."
-msgstr ""
-
-#: patterns/services-grid.php
-msgctxt "Pattern title"
-msgid "Services — three card grid"
-msgstr ""
-
-#: patterns/services-grid.php
-msgctxt "Pattern keywords"
-msgid "services, features, cards, offering, grid"
-msgstr ""
-
-#: patterns/services-grid.php:103
-msgctxt "Pattern placeholder text"
-msgid "A site that is slow, broken or unusable on a screen reader. We audit it, fix it, and show you the before and after."
-msgstr ""
-
-#: patterns/services-grid.php:108
-msgctxt "Pattern placeholder text"
-msgid "Core Web Vitals back into the green"
-msgstr ""
-
-#: patterns/services-grid.php:112
-msgctxt "Pattern placeholder text"
-msgid "WCAG 2.2 AA remediation with a report"
-msgstr ""
-
-#: patterns/services-grid.php:116
-msgctxt "Pattern placeholder text"
-msgid "Security and update hygiene, sorted"
-msgstr ""
-
-#: patterns/services-grid.php:19
-msgctxt "Pattern placeholder text"
-msgid "What we build"
-msgstr ""
-
-#: patterns/services-grid.php:23
-msgctxt "Pattern placeholder text"
-msgid "Three ways we work. Every one of them ends with a site you can measure, not a folder of files you cannot maintain."
-msgstr ""
-
-#: patterns/services-grid.php:39
-msgctxt "Pattern placeholder text"
-msgid "WordPress builds"
-msgstr ""
-
-#: patterns/services-grid.php:43
-msgctxt "Pattern placeholder text"
-msgid "Block themes your team can actually edit. No page builder, no plugin sprawl, no locked-in licence renewals."
-msgstr ""
-
-#: patterns/services-grid.php:48
-msgctxt "Pattern placeholder text"
-msgid "Full Site Editing from day one"
-msgstr ""
-
-#: patterns/services-grid.php:52
-msgctxt "Pattern placeholder text"
-msgid "Content model built around your editors"
-msgstr ""
-
-#: patterns/services-grid.php:56
-msgctxt "Pattern placeholder text"
-msgid "Handover docs and a training session"
-msgstr ""
-
-#: patterns/services-grid.php:69
-msgctxt "Pattern placeholder text"
-msgid "React and Next.js"
-msgstr ""
-
-#: patterns/services-grid.php:73
-msgctxt "Pattern placeholder text"
-msgid "Product interfaces and headless front ends where a template alone will not do the job."
-msgstr ""
-
-#: patterns/services-grid.php:78
-msgctxt "Pattern placeholder text"
-msgid "Server rendering and edge caching"
-msgstr ""
-
-#: patterns/services-grid.php:82
-msgctxt "Pattern placeholder text"
-msgid "Typed APIs and a real test suite"
-msgstr ""
-
-#: patterns/services-grid.php:86
-msgctxt "Pattern placeholder text"
-msgid "WordPress as the editing layer, if you want it"
-msgstr ""
-
-#: patterns/services-grid.php:99
-msgctxt "Pattern placeholder text"
-msgid "Rescue and rebuild"
-msgstr ""
-
-#: patterns/testimonials.php
-msgctxt "Pattern title"
-msgid "Testimonials — three quotes"
-msgstr ""
-
-#: patterns/testimonials.php
-msgctxt "Pattern keywords"
-msgid "testimonials, quotes, reviews, clients, social proof"
-msgstr ""
-
-#: patterns/testimonials.php
-msgctxt "Pattern description"
-msgid "Three client quotes with an attribution line under each."
-msgstr ""
-
-#: patterns/testimonials.php:18
-msgctxt "Pattern placeholder text"
-msgid "What clients say afterwards"
-msgstr ""
-
-#: patterns/testimonials.php:29
-msgctxt "Pattern placeholder text"
-msgid "“They rewrote our theme in six weeks and the first thing I noticed was that our editors stopped emailing me to change text.”"
-msgstr ""
-
-#: patterns/testimonials.php:33
-msgctxt "Pattern placeholder text"
-msgid "Marketing lead, industrial manufacturer"
-msgstr ""
-
-#: patterns/testimonials.php:41
-msgctxt "Pattern placeholder text"
-msgid "“We had failed an accessibility audit twice. Qwerty Soft fixed it, documented every decision, and we passed on the next attempt.”"
-msgstr ""
-
-#: patterns/testimonials.php:45
-msgctxt "Pattern placeholder text"
-msgid "Head of digital, public sector"
-msgstr ""
-
-#: patterns/testimonials.php:53
-msgctxt "Pattern placeholder text"
-msgid "“Two developers, no project manager in the middle, and the estimate held. That combination is rarer than it should be.”"
-msgstr ""
-
-#: patterns/testimonials.php:57
-msgctxt "Pattern placeholder text"
-msgid "Founder, B2B SaaS"
 msgstr ""
 
 #: styles/contrast.json

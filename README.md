@@ -291,16 +291,6 @@ Two details that are easy to get wrong and were:
   `BrandKit::gradients()` and `::shadows()` derive both, and
   `StyleVariations::set_presets()` writes them.
 
-### Menus and core's fallback
-
-The first time an unreferenced `core/navigation` block renders — long before
-anybody opens the setup screen — WordPress silently creates a menu whose entire
-content is `wp:page-list`. So "does a menu already exist?" is always true, and
-the page list shows every top-level page alphabetically, which on a fresh site
-means WordPress's own *Sample Page* sits in the header and Home comes second.
-`DemoContent::menu()` recognises that exact fallback and fills it in with real
-links; anything somebody has edited is left alone.
-
 ### Structural locking
 
 `parts/header.html` and `parts/footer.html` carry `"templateLock":"insert"` on

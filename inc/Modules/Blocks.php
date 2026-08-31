@@ -46,8 +46,69 @@ final class Blocks implements Module {
 	 * @return void
 	 */
 	public function register_blocks(): void {
+		$this->register_design_canonical();
+
 		foreach ( $this->block_dirs() as $dir ) {
 			register_block_type( $dir );
+		}
+	}
+
+	/**
+	 * Register the imported design's one shared stylesheet, when it has one.
+	 *
+	 * A design ships a single stylesheet, and its cascade — every rule, in
+	 * the order the designer wrote them — is part of the design. Slicing that
+	 * file into per-block extracts turned out to re-run the cascade in
+	 * whatever order the page's blocks happened to load, with stale duplicate
+	 * rules from other pages of the archive clobbering current ones. So the
+	 * import keeps the whole stylesheet as `_canonical.css` beside the
+	 * generated blocks, and every generated block names this handle in its
+	 * `block.json` — the browser fetches it once, and per-block loading still
+	 * keeps it off pages with no imported section on them.
+	 *
+	 * @return void
+	 */
+	private function register_design_canonical(): void {
+		$dir = \Qwerty\Soft\Support\BlockWriter::dir();
+
+		if ( ! str_starts_with( $dir, QSOFT_DIR ) ) {
+			return;
+		}
+
+		$css = $dir . '/_canonical.css';
+
+		if ( is_readable( $css ) ) {
+			wp_register_style(
+				'qs-design-canonical',
+				QSOFT_URI . substr( $css, strlen( QSOFT_DIR ) ),
+				array(),
+				(string) filemtime( $css )
+			);
+		}
+
+		/*
+		 * The design's own script, on the same terms as its stylesheet and for
+		 * the same reason: it is written against a whole page. This archive's
+		 * is nine lines that open the mobile navigation — split per section it
+		 * would query for a button that lives in another block and quietly do
+		 * nothing. Deferred, because that is what a `<script>` at the end of
+		 * the body was; and `strategy` rather than a hand-written attribute so
+		 * WordPress keeps the ordering promise it makes to anything enqueued
+		 * alongside it.
+		 */
+		$js = $dir . '/_canonical.js';
+
+		if ( is_readable( $js ) ) {
+			wp_register_script(
+				'qs-design-canonical',
+				QSOFT_URI . substr( $js, strlen( QSOFT_DIR ) ),
+				array(),
+				(string) filemtime( $js ),
+				array(
+					'in_footer' => true,
+					'strategy'  => 'defer',
+				)
+			);
 		}
 	}
 

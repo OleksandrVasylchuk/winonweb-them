@@ -1213,12 +1213,20 @@ final class Importer implements Module {
 	 * @return array{pages:int,parts:int,menus:int,media:int,fonts:int,archive:array{count:int,bytes:int}}
 	 */
 	private function import_summary(): array {
+		/*
+		 * Every key the clean-up panel prints, `blocks` included. It used to
+		 * be left out here while `SiteAssembler::summary()` counted it
+		 * correctly, so the screen said "0 section blocks" on a site with two
+		 * hundred of them — and said it directly above the button that
+		 * deletes them.
+		 */
 		$zero = array(
-			'pages' => 0,
-			'parts' => 0,
-			'menus' => 0,
-			'media' => 0,
-			'fonts' => 0,
+			'pages'  => 0,
+			'parts'  => 0,
+			'menus'  => 0,
+			'media'  => 0,
+			'fonts'  => 0,
+			'blocks' => 0,
 		);
 
 		if ( method_exists( SiteAssembler::class, 'summary' ) ) {

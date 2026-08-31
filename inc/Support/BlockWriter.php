@@ -60,6 +60,13 @@ final class BlockWriter {
 	private const TOKEN = '~%1$s.%2$s~';
 
 	/**
+	 * The class every section's own root element carries.
+	 *
+	 * @see mark_root()
+	 */
+	private const ROOT_CLASS = 'qs-design';
+
+	/**
 	 * The ACF options page the site-wide fields live on.
 	 */
 	public const OPTIONS_PAGE = 'qs-design-content';
@@ -338,18 +345,30 @@ final class BlockWriter {
 			'acf'         => array(
 
 				/*
-				 * `preview`, and that is what puts the pencil on the toolbar.
+				 * `preview`, not `auto`.
 				 *
-				 * The block shows the section as it will look, with a pencil
-				 * beside it that swaps the section for its fields in the canvas
-				 * and back again — editing with your eyes on the thing you are
-				 * changing rather than on a sidebar to the right of it.
+				 * Both keep the section looking like itself while it is being
+				 * worked on rather than flipping the whole thing to a form the
+				 * moment somebody clicks it — `auto` does that the instant the
+				 * block is selected, which is a jolt for something the size of
+				 * a section. `preview` waits for a deliberate switch instead.
 				 *
-				 * `auto` looks like the friendlier setting and is the opposite.
-				 * ACF hides the toggle whenever the mode is `auto` (it decides
-				 * for you: fields while the block is selected, preview when it
-				 * is not), so the pencil disappears and a big section flips to a
-				 * form every time somebody so much as clicks it.
+				 * ACF Pro ships a toolbar toggle for exactly that switch. It is
+				 * currently unreachable: ACF Pro 6.8.1's own block toolbar
+				 * component computes `j(clientId) || I()` before deciding
+				 * whether to draw it, where `I()` is
+				 * `document.querySelectorAll('iframe[name="editor-canvas"]').length>0`
+				 * — true on every screen a supported WordPress edits a block
+				 * on, page or Site Editor alike, since 6.3, for any block from
+				 * any plugin. ACF's own changelog (6.3.11) blames this on API
+				 * version 3 specifically, but that is not what the installed
+				 * build's code checks; `apiVersion: 2` was tried here and
+				 * changed nothing live. Fields are edited from the Block
+				 * sidebar tab instead, which ACF attaches independently of the
+				 * toggle and which does work. `preview` is kept anyway — a
+				 * fresh page still shows the section as the design drew it
+				 * rather than as an empty form, and it costs nothing to leave
+				 * the door open for an ACF release that un-hides the toggle.
 				 */
 				'mode'           => 'preview',
 				'renderTemplate' => 'render.php',
@@ -558,6 +577,74 @@ final class BlockWriter {
 	}
 
 	/**
+	 * The handle every generated block names for the design's own assets.
+	 *
+	 * @var string
+	 */
+	public const CANONICAL_HANDLE = 'qs-design-canonical';
+
+	/**
+	 * Write the design's stylesheet and script once, beside the blocks.
+	 *
+	 * A design ships one stylesheet and one script, written against a whole
+	 * page. Slicing either per section re-runs it in whatever order a page's
+	 * blocks happen to load — for CSS that lets a duplicate rule from another
+	 * page of the archive win the cascade, and for JS it means a handler
+	 * querying for a button that lives in a different block and silently
+	 * finding nothing. So both are kept whole and named by every generated
+	 * `block.json`, which leaves per-block loading intact: a page with no
+	 * imported section on it still fetches neither.
+	 *
+	 * @param string $css The design's stylesheet, already rewritten.
+	 * @param string $js  The design's scripts, concatenated.
+	 * @return array{css:int,js:int} Bytes written.
+	 */
+	public static function write_canonical( string $css, string $js ): array {
+		$dir     = self::dir();
+		$written = array(
+			'css' => 0,
+			'js'  => 0,
+		);
+
+		if ( ! wp_mkdir_p( $dir ) ) {
+			return $written;
+		}
+
+		$css = trim( $css );
+
+		if ( '' !== $css ) {
+			$sheet = $css . "\n\n"
+				. "/*\n"
+				. " * The theme sets `h1,h2,h3,h4,h5,h6{color:var(--wp--preset--color--contrast)}`\n"
+				. " * globally (theme.json's `elements.heading`) and loads it after this\n"
+				. " * stylesheet, so a heading above that leans on inheritance for its\n"
+				. " * colour instead of stating one loses the cascade to the theme's rule.\n"
+				. " * One class more specific than the theme's bare tag selector settles\n"
+				. " * it in the section's favour, on `render.php`'s own root — see\n"
+				. " * `BlockWriter::mark_root()`.\n"
+				. " */\n"
+				. '.' . self::ROOT_CLASS . " h1,\n"
+				. '.' . self::ROOT_CLASS . " h2,\n"
+				. '.' . self::ROOT_CLASS . " h3,\n"
+				. '.' . self::ROOT_CLASS . " h4,\n"
+				. '.' . self::ROOT_CLASS . " h5,\n"
+				. '.' . self::ROOT_CLASS . " h6 {\n"
+				. "\tcolor: inherit;\n"
+				. "}\n";
+
+			$written['css'] = (int) file_put_contents( $dir . '/_canonical.css', $sheet );
+		}
+
+		$js = trim( $js );
+
+		if ( '' !== $js ) {
+			$written['js'] = (int) file_put_contents( $dir . '/_canonical.js', $js . "\n" );
+		}
+
+		return $written;
+	}
+
+	/**
 	 * The ACF field group, as local JSON.
 	 *
 	 * @param string               $slug  Block slug.
@@ -596,7 +683,7 @@ final class BlockWriter {
 			$rows = array();
 
 			foreach ( (array) ( $item['fields'] ?? array() ) as $field ) {
-				$rows[] = self::acf_field( $slug . '_row', (array) $field, $rows_say );
+				$rows[] = self::acf_field( $slug . '_row', (array) $field, $rows_say, true );
 			}
 
 			$rows = self::disambiguate_labels( $rows );
@@ -610,6 +697,14 @@ final class BlockWriter {
 				'layout'       => 'block',
 				'button_label' => __( 'Add item', 'qwerty-soft-signal' ),
 				'instructions' => __( 'One row per repeated entry. Add, remove or reorder rows as needed.', 'qwerty-soft-signal' ),
+
+				/*
+				 * Which sub-field a collapsed row shows in its header. Without
+				 * one, a footer's navigation is eight rows all called "Link"
+				 * and the only way to find the one you want is to open each in
+				 * turn. ACF names this setting by field key.
+				 */
+				'collapsed'    => self::row_summary( $rows ),
 				'sub_fields'   => $rows,
 			);
 		}
@@ -699,9 +794,10 @@ final class BlockWriter {
 	 * @param string               $scope Key prefix, so two blocks never collide.
 	 * @param array<string, mixed> $field What SectionPlan found.
 	 * @param array<string, mixed> $says  What the design said, by field name.
+	 * @param bool                 $row   True for a repeater's sub-field.
 	 * @return array<string, mixed>
 	 */
-	private static function acf_field( string $scope, array $field, array $says = array() ): array {
+	private static function acf_field( string $scope, array $field, array $says = array(), bool $row = false ): array {
 		$name = (string) ( $field['name'] ?? 'field' );
 		$type = (string) ( $field['type'] ?? 'text' );
 
@@ -715,8 +811,17 @@ final class BlockWriter {
 			 * the whole of its identity, so two footers both calling a field
 			 * `link` would write to the same row — and the second site would
 			 * quietly show the first one's address. The label stays "Link".
+			 *
+			 * A repeater's sub-field is the exception, and prefixing one was a
+			 * bug: its value is stored under `options_{repeater}_{n}_{name}`,
+			 * so the repeater's own name already scopes it and nothing can
+			 * collide. Prefixed, the sub-field asked ACF for a key that is
+			 * never written, ACF answered with the field's default — the
+			 * archive's own unrewritten `research.html` — and `render.php`,
+			 * which reads the row by its plain name, found no such key at all
+			 * and drew a footer of empty links.
 			 */
-			'name'  => self::stored_name( $name ),
+			'name'  => $row ? $name : self::stored_name( $name ),
 			'type'  => 'text',
 		);
 
@@ -879,9 +984,26 @@ final class BlockWriter {
 	 * @return string
 	 */
 	private static function trim_hint( string $text ): string {
-		$text = trim( wp_strip_all_tags( $text ) );
+		$text = trim( (string) preg_replace( '/\s+/', ' ', wp_strip_all_tags( $text ) ) );
 
-		return mb_strlen( $text ) > 24 ? mb_substr( $text, 0, 24 ) . '…' : $text;
+		if ( mb_strlen( $text ) <= 24 ) {
+			return $text;
+		}
+
+		/*
+		 * Cut at a word, not at the twenty-fourth character. A label reading
+		 * "Text — Market intelligence is f…" is the sort of thing that looks
+		 * like a rendering fault rather than a name, and it is what an editor
+		 * is handed to work with.
+		 */
+		$cut   = mb_substr( $text, 0, 24 );
+		$space = mb_strrpos( $cut, ' ' );
+
+		if ( false !== $space && $space > 8 ) {
+			$cut = mb_substr( $cut, 0, $space );
+		}
+
+		return rtrim( $cut, ' ,.;:—-' ) . '…';
 	}
 
 	/**
@@ -1052,21 +1174,33 @@ final class BlockWriter {
 		$what = '' !== trim( $title ) ? $title : $slug;
 		$page = '' === trim( $origin ) ? '' : basename( $origin );
 
+		/*
+		 * Where the words are edited, said on the block itself, because the
+		 * obvious way to edit one is unavailable and nothing else says so.
+		 * ACF Pro ships a pencil on the block toolbar that swaps the section
+		 * for its fields; its own code hides that pencil whenever the editor
+		 * canvas is an iframe, which is every screen since WordPress 6.3. The
+		 * fields are all still there in the sidebar — an editor just has no
+		 * way of knowing that from looking at a section that ignores clicks.
+		 * The description is the one line WordPress shows directly above them.
+		 */
+		$where = __( 'Its text is edited in the Block tab of the sidebar.', 'qwerty-soft-signal' );
+
 		if ( array() === $parts ) {
 			return '' === $page
-				/* translators: %s: what the section is. */
-				? sprintf( __( 'A section from the design: %s.', 'qwerty-soft-signal' ), $what )
-				/* translators: 1: what the section is, 2: the design file it came from. */
-				: sprintf( __( '%1$s, from %2$s in the design.', 'qwerty-soft-signal' ), $what, $page );
+				/* translators: 1: what the section is, 2: where its fields are edited. */
+				? sprintf( __( 'A section from the design: %1$s. %2$s', 'qwerty-soft-signal' ), $what, $where )
+				/* translators: 1: what the section is, 2: the design file it came from, 3: where its fields are edited. */
+				: sprintf( __( '%1$s, from %2$s in the design. %3$s', 'qwerty-soft-signal' ), $what, $page, $where );
 		}
 
 		$made = implode( ', ', $parts );
 
 		return '' === $page
-			/* translators: 1: what the section is, 2: a list such as "3 pieces of text, 1 link". */
-			? sprintf( __( '%1$s — %2$s.', 'qwerty-soft-signal' ), $what, $made )
-			/* translators: 1: what the section is, 2: a list such as "3 pieces of text, 1 link", 3: the design file it came from. */
-			: sprintf( __( '%1$s — %2$s. From %3$s in the design.', 'qwerty-soft-signal' ), $what, $made, $page );
+			/* translators: 1: what the section is, 2: a list such as "3 pieces of text, 1 link", 3: where its fields are edited. */
+			? sprintf( __( '%1$s — %2$s. %3$s', 'qwerty-soft-signal' ), $what, $made, $where )
+			/* translators: 1: what the section is, 2: a list such as "3 pieces of text, 1 link", 3: the design file it came from, 4: where its fields are edited. */
+			: sprintf( __( '%1$s — %2$s. From %3$s in the design. %4$s', 'qwerty-soft-signal' ), $what, $made, $page, $where );
 	}
 
 	/**
@@ -1139,7 +1273,24 @@ final class BlockWriter {
 			. " * Lifted from the design's own stylesheet, unchanged. The selectors\n"
 			. " * match the class names on render.php because both came out of the\n"
 			. " * same archive; do not rename either without renaming the other.\n */\n\n"
-			. trim( $css ) . "\n";
+			. trim( $css ) . "\n\n"
+			. "/*\n"
+			. " * The theme sets `h1,h2,h3,h4,h5,h6{color:var(--wp--preset--color--contrast)}`\n"
+			. " * globally (theme.json's `elements.heading`) and loads it after this\n"
+			. " * stylesheet, so a heading above that leans on inheritance for its\n"
+			. " * colour instead of stating one loses the cascade to the theme's rule.\n"
+			. " * One class more specific than the theme's bare tag selector settles\n"
+			. " * it in the section's favour, on `render.php`'s own root — see\n"
+			. " * `BlockWriter::mark_root()`.\n"
+			. " */\n"
+			. '.' . self::ROOT_CLASS . " h1,\n"
+			. '.' . self::ROOT_CLASS . " h2,\n"
+			. '.' . self::ROOT_CLASS . " h3,\n"
+			. '.' . self::ROOT_CLASS . " h4,\n"
+			. '.' . self::ROOT_CLASS . " h5,\n"
+			. '.' . self::ROOT_CLASS . " h6 {\n"
+			. "\tcolor: inherit;\n"
+			. "}\n";
 	}
 
 	/**
@@ -1185,6 +1336,8 @@ final class BlockWriter {
 		if ( ! $body instanceof DOMNode ) {
 			return null;
 		}
+
+		self::mark_root( $body );
 
 		$item = $plan['item'] ?? null;
 		$kind = (string) ( $plan['kind'] ?? 'single' );
@@ -1286,17 +1439,60 @@ final class BlockWriter {
 	}
 
 	/**
-	 * Whether a line is a copyright notice with a year frozen into it.
+	 * The sub-field a collapsed repeater row should show in its header.
+	 *
+	 * Whatever reads best as a name for the row: a heading if the row has one,
+	 * then any other words, and a link only when the row is nothing but links
+	 * — a link's own title is the words on it, which is exactly what a
+	 * navigation row wants shown.
+	 *
+	 * @param array<int, array<string, mixed>> $rows The row's fields, as ACF wants them.
+	 * @return string A field key, or empty when there is nothing worth showing.
+	 */
+	private static function row_summary( array $rows ): string {
+		$preferred = array( 'text', 'textarea', 'link' );
+
+		foreach ( $preferred as $type ) {
+			foreach ( $rows as $field ) {
+				if ( ( $field['type'] ?? '' ) !== $type ) {
+					continue;
+				}
+
+				$name = (string) ( $field['name'] ?? '' );
+
+				// A heading is the row's name when it has one, whatever it is called.
+				if ( 'text' === $type && ! preg_match( '/head|title|name|label/i', $name ) ) {
+					continue;
+				}
+
+				return (string) ( $field['key'] ?? '' );
+			}
+		}
+
+		foreach ( $rows as $field ) {
+			if ( in_array( (string) ( $field['type'] ?? '' ), $preferred, true ) ) {
+				return (string) ( $field['key'] ?? '' );
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Whether a line is a copyright notice whose year the clock should own.
+	 *
+	 * A frozen year is the obvious case. The other one is a design that fills
+	 * its year in the browser — `© <span id="year"></span> Name` — where
+	 * wrapping keeps the words, drops the empty span, and leaves "©  Name" on
+	 * every page for good. Both want the same treatment, so the copyright mark
+	 * is what this asks for; {@see DesignField::dated()} replaces a year when
+	 * there is one and writes it in when there is not.
 	 *
 	 * @param string $text What the node says.
 	 * @return bool
 	 */
 	private static function is_dated( string $text ): bool {
-		if ( 1 !== preg_match( '/\b(19|20)\d{2}\b/', $text ) ) {
-			return false;
-		}
-
-		return 1 === preg_match( '/©|&copy;|\bcopyright\b|\(c\)\s*(19|20)\d{2}/i', $text );
+		return 1 === preg_match( '/©|&copy;|\bcopyright\b/i', $text );
 	}
 
 	/**
@@ -1857,6 +2053,37 @@ final class BlockWriter {
 		libxml_use_internal_errors( $previous );
 
 		return $ok ? $dom : null;
+	}
+
+	/**
+	 * The class a section's own root carries, so its own stylesheet can reach it.
+	 *
+	 * A design's heading colour is usually never set on the heading itself —
+	 * `.hero{color:var(--ink)}` and a plain `.hero h1` for size, trusting
+	 * inheritance the way the archive's own page did. The theme sets its own
+	 * `h1,h2,h3,h4,h5,h6{color:var(--wp--preset--color--contrast)}` globally
+	 * (theme.json's `elements.heading`), at the same specificity, and it loads
+	 * after a block's own stylesheet — so on every heading that leans on
+	 * inheritance instead of stating its own colour, the theme's rule wins the
+	 * cascade and the design's colour never renders. This mark gives
+	 * `style_css()` a selector one class more specific than the theme's, so a
+	 * section's own headings answer to the section, not to the theme.
+	 *
+	 * @param DOMNode $body The parsed section's containing body.
+	 * @return void
+	 */
+	private static function mark_root( DOMNode $body ): void {
+		foreach ( $body->childNodes as $child ) {
+			if ( ! $child instanceof DOMElement ) {
+				continue;
+			}
+
+			$classes   = preg_split( '/\s+/', trim( $child->getAttribute( 'class' ) ) );
+			$classes   = array_filter( (array) $classes, static fn( $name ) => '' !== $name );
+			$classes[] = self::ROOT_CLASS;
+
+			$child->setAttribute( 'class', implode( ' ', array_unique( $classes ) ) );
+		}
 	}
 
 	/**

@@ -12,7 +12,6 @@ namespace Qwerty\Soft\Modules;
 
 use Qwerty\Soft\Contracts\Module;
 use Qwerty\Soft\Support\BrandKit;
-use Qwerty\Soft\Support\DemoContent;
 use Qwerty\Soft\Support\DesignTokens;
 use Qwerty\Soft\Support\StyleVariations;
 use WP_Screen;
@@ -20,14 +19,13 @@ use WP_Screen;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The four screens between activating the theme and having a site.
+ * The three screens between activating the theme and having a site.
  *
  * A block theme activates into an empty page. Everything needed to fix that is
- * already in the box — the page patterns, six palettes, a token system that
- * re-themes the whole site from three colours — but a client has no way of
- * knowing that, and the Site Editor does not tell them. This walks them from
- * activation to a finished-looking site: pick a look, drop in a logo and brand
- * colours, install the starter pages.
+ * already in the box — six palettes, a token system that re-themes the whole
+ * site from three colours — but a client has no way of knowing that, and the
+ * Site Editor does not tell them. This walks them from activation to a
+ * finished-looking site: pick a look, and drop in a logo and brand colours.
  *
  * Deliberately built as plain POST forms. The theme's rule is that everything
  * interactive works without JavaScript, and there is no reason the admin should
@@ -35,9 +33,7 @@ defined( 'ABSPATH' ) || exit;
  * console error is worse than no wizard.
  *
  * Every step is optional and every step is reversible: the palette is written
- * to user global styles and can be reset from here or from the Site Editor, and
- * the starter pages carry the import module's ownership meta, so the existing
- * "remove everything this theme added" button takes them out too.
+ * to user global styles and can be reset from here or from the Site Editor.
  */
 final class Onboarding implements Module {
 
@@ -61,7 +57,7 @@ final class Onboarding implements Module {
 	 *
 	 * @var array<int, string>
 	 */
-	private const STEPS = array( 'welcome', 'style', 'brand', 'content', 'done' );
+	private const STEPS = array( 'welcome', 'style', 'brand', 'done' );
 
 	/**
 	 * Hook the module.
@@ -145,7 +141,7 @@ final class Onboarding implements Module {
 		<div class="notice notice-info qs-setup-notice">
 			<p>
 				<strong><?php esc_html_e( 'Qwerty Soft — Signal is active.', 'qwerty-soft-signal' ); ?></strong>
-				<?php esc_html_e( 'Three steps turn it into a finished site: pick a look, add your logo and colours, install the starter pages.', 'qwerty-soft-signal' ); ?>
+				<?php esc_html_e( 'Two steps turn it into a finished site: pick a look, then add your logo and colours.', 'qwerty-soft-signal' ); ?>
 			</p>
 			<p>
 				<a class="button button-primary" href="<?php echo esc_url( $this->step_url( 'welcome' ) ); ?>">
@@ -197,8 +193,7 @@ final class Onboarding implements Module {
 				'id'      => 'qwerty-soft-signal-setup-help',
 				'title'   => __( 'What this changes', 'qwerty-soft-signal' ),
 				'content' =>
-					'<p>' . esc_html__( 'Nothing here edits the theme files. The look you pick and the brand colours you enter are written to this site\'s global styles — the same place the Site Editor saves to — so a theme update cannot overwrite them, and you can change or undo any of it later under Appearance → Editor → Styles.', 'qwerty-soft-signal' ) . '</p>' .
-					'<p>' . esc_html__( 'The starter pages are ordinary pages made from the theme\'s own patterns. Edit them, delete them, or remove the whole set again from Appearance → Design import.', 'qwerty-soft-signal' ) . '</p>',
+					'<p>' . esc_html__( 'Nothing here edits the theme files. The look you pick and the brand colours you enter are written to this site\'s global styles — the same place the Site Editor saves to — so a theme update cannot overwrite them, and you can change or undo any of it later under Appearance → Editor → Styles.', 'qwerty-soft-signal' ) . '</p>',
 			)
 		);
 
@@ -245,7 +240,7 @@ final class Onboarding implements Module {
 		<div class="qs-setup-widget">
 			<?php if ( $pending ) : ?>
 				<p>
-					<?php esc_html_e( 'The theme has not been set up yet. Three steps and this site stops looking empty.', 'qwerty-soft-signal' ); ?>
+					<?php esc_html_e( 'The theme has not been set up yet. Two steps and this site stops looking empty.', 'qwerty-soft-signal' ); ?>
 				</p>
 				<p>
 					<a class="button button-primary" href="<?php echo esc_url( $this->step_url( 'welcome' ) ); ?>">
@@ -317,9 +312,6 @@ final class Onboarding implements Module {
 					case 'brand':
 						$this->step_brand();
 						break;
-					case 'content':
-						$this->step_content();
-						break;
 					case 'done':
 						$this->step_done();
 						break;
@@ -343,7 +335,6 @@ final class Onboarding implements Module {
 			'welcome' => __( 'Start', 'qwerty-soft-signal' ),
 			'style'   => __( 'Look', 'qwerty-soft-signal' ),
 			'brand'   => __( 'Brand', 'qwerty-soft-signal' ),
-			'content' => __( 'Content', 'qwerty-soft-signal' ),
 			'done'    => __( 'Finish', 'qwerty-soft-signal' ),
 		);
 
@@ -358,7 +349,7 @@ final class Onboarding implements Module {
 			<h1><?php esc_html_e( 'Set up the theme', 'qwerty-soft-signal' ); ?></h1>
 
 			<p class="qs-setup__lede">
-				<?php esc_html_e( 'Four short steps. Every one of them is optional, and every one of them can be undone afterwards.', 'qwerty-soft-signal' ); ?>
+				<?php esc_html_e( 'Three short steps. Every one of them is optional, and every one of them can be undone afterwards.', 'qwerty-soft-signal' ); ?>
 			</p>
 		</div>
 
@@ -397,8 +388,6 @@ final class Onboarding implements Module {
 			'brand-failed' => array( 'error', __( 'That did not look like a colour. Enter it as a hex value, for example #1f6feb.', 'qwerty-soft-signal' ) ),
 			'logo'         => array( 'success', __( 'Logo uploaded and set.', 'qwerty-soft-signal' ) ),
 			'logo-failed'  => array( 'error', __( 'The logo could not be uploaded. Check the file is an image and within the size this server allows.', 'qwerty-soft-signal' ) ),
-			'content'      => array( 'success', __( 'The starter pages are in and the front page is set.', 'qwerty-soft-signal' ) ),
-			'content-none' => array( 'warning', __( 'Nothing was added — those pages already exist on this site.', 'qwerty-soft-signal' ) ),
 		);
 
 		if ( ! isset( $messages[ $notice ] ) ) {
@@ -424,11 +413,10 @@ final class Onboarding implements Module {
 		<ul class="qs-setup__list">
 			<li><?php esc_html_e( 'Pick one of six palettes, or keep the theme\'s own.', 'qwerty-soft-signal' ); ?></li>
 			<li><?php esc_html_e( 'Upload a logo and give the theme your brand colours. The rest of the palette is worked out from them and checked for contrast.', 'qwerty-soft-signal' ); ?></li>
-			<li><?php esc_html_e( 'Install a home, services and contact page built from the theme\'s patterns, with a menu and a front page.', 'qwerty-soft-signal' ); ?></li>
 		</ul>
 
 		<p class="qs-setup__note">
-			<?php esc_html_e( 'Nothing is written to the theme files, so an update cannot overwrite any of it. Everything can be changed later in the Site Editor, and the starter pages can be removed again in one press.', 'qwerty-soft-signal' ); ?>
+			<?php esc_html_e( 'Nothing is written to the theme files, so an update cannot overwrite any of it. Everything can be changed later in the Site Editor.', 'qwerty-soft-signal' ); ?>
 		</p>
 
 		<p class="qs-setup__actions">
@@ -604,44 +592,6 @@ final class Onboarding implements Module {
 				<button type="submit" class="button button-primary button-hero">
 					<?php esc_html_e( 'Apply my brand', 'qwerty-soft-signal' ); ?>
 				</button>
-				<a class="button button-link" href="<?php echo esc_url( $this->step_url( 'content' ) ); ?>">
-					<?php esc_html_e( 'Skip this step', 'qwerty-soft-signal' ); ?>
-				</a>
-			</p>
-		</form>
-		<?php
-	}
-
-	/**
-	 * Step four — starter pages.
-	 *
-	 * @return void
-	 */
-	private function step_content(): void {
-		$installed = DemoContent::installed();
-		?>
-		<h2><?php esc_html_e( 'Starter pages', 'qwerty-soft-signal' ); ?></h2>
-
-		<p class="qs-setup__note">
-			<?php esc_html_e( 'A home page, a services page and a contact page, built from the theme\'s own patterns and filled with real copy rather than placeholder text. A menu is created and the home page is set as the front page.', 'qwerty-soft-signal' ); ?>
-		</p>
-
-		<?php if ( $installed ) : ?>
-			<p class="qs-setup__note">
-				<strong><?php esc_html_e( 'This site already has starter content.', 'qwerty-soft-signal' ); ?></strong>
-				<?php esc_html_e( 'Running it again will not duplicate or overwrite anything.', 'qwerty-soft-signal' ); ?>
-			</p>
-		<?php endif; ?>
-
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<?php wp_nonce_field( self::NONCE ); ?>
-			<input type="hidden" name="action" value="qwerty_soft_setup">
-			<input type="hidden" name="qsoft_step" value="content">
-
-			<p class="qs-setup__actions">
-				<button type="submit" class="button button-primary button-hero">
-					<?php esc_html_e( 'Install the starter pages', 'qwerty-soft-signal' ); ?>
-				</button>
 				<a class="button button-link" href="<?php echo esc_url( $this->step_url( 'done' ) ); ?>">
 					<?php esc_html_e( 'Skip this step', 'qwerty-soft-signal' ); ?>
 				</a>
@@ -651,7 +601,7 @@ final class Onboarding implements Module {
 	}
 
 	/**
-	 * Step five — where to go next.
+	 * Step four — where to go next.
 	 *
 	 * @return void
 	 */
@@ -716,9 +666,6 @@ final class Onboarding implements Module {
 				break;
 			case 'brand':
 				$this->save_brand();
-				break;
-			case 'content':
-				$this->save_content();
 				break;
 			case 'finish':
 				update_option( self::OPTION, 'done', false );
@@ -812,7 +759,7 @@ final class Onboarding implements Module {
 			BrandKit::shadows( $tokens['colors'], $dark )
 		);
 
-		$this->go( 'content', '' !== $notice ? $notice : 'brand' );
+		$this->go( 'done', '' !== $notice ? $notice : 'brand' );
 	}
 
 	/**
@@ -838,17 +785,6 @@ final class Onboarding implements Module {
 		set_theme_mod( 'custom_logo', (int) $id );
 
 		return '';
-	}
-
-	/**
-	 * Install the starter pages.
-	 *
-	 * @return void
-	 */
-	private function save_content(): void {
-		$report = DemoContent::install();
-
-		$this->go( 'done', array() === $report['pages'] ? 'content-none' : 'content' );
 	}
 
 	// phpcs:enable WordPress.Security.NonceVerification.Missing

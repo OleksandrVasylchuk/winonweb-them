@@ -356,11 +356,28 @@ final class DesignField {
 			return '';
 		}
 
-		return (string) preg_replace_callback(
-			'/\b(19|20)\d{2}\b/',
-			static function (): string {
-				return (string) gmdate( 'Y' );
-			},
+		if ( 1 === preg_match( '/\b(19|20)\d{2}\b/', $text ) ) {
+			return (string) preg_replace_callback(
+				'/\b(19|20)\d{2}\b/',
+				static function (): string {
+					return (string) gmdate( 'Y' );
+				},
+				$text,
+				1
+			);
+		}
+
+		/*
+		 * No year to replace, which is not the same as a line that does not
+		 * want one. A design that fills its own year in the browser writes
+		 * `© <span id="year"></span> Name`; wrapping keeps the words and drops
+		 * the empty span, and what reaches the page is "©  Name" — a copyright
+		 * line with a hole in it, on every page, for good. The hole is where
+		 * the year goes.
+		 */
+		return (string) preg_replace(
+			'/(©|&copy;|\(c\))\s*/iu',
+			'$1 ' . gmdate( 'Y' ) . ' ',
 			$text,
 			1
 		);

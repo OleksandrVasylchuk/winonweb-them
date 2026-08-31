@@ -356,7 +356,7 @@ final class PlanReview {
 			$label = trim( (string) ( $one['label'] ?? '' ) );
 
 			if ( '' !== $label ) {
-				$fields[ $index ]['label'] = mb_substr( $label, 0, 60 );
+				$fields[ $index ]['label'] = self::clamp( $label, 60 );
 			}
 		}
 
@@ -416,6 +416,33 @@ final class PlanReview {
 	private static function title( array $reply, string $label ): string {
 		$title = trim( (string) ( $reply['title'] ?? '' ) );
 
-		return '' !== $title ? mb_substr( $title, 0, 60 ) : $label;
+		return '' !== $title ? self::clamp( $title, 60 ) : $label;
+	}
+
+	/**
+	 * Text cut to a limit at a word break, not mid-word.
+	 *
+	 * A raw `mb_substr` lands wherever the character count happens to fall —
+	 * mid-word in a title, mid-code in something like "(HS 2004.10)". This
+	 * backs up to the last space inside the limit before cutting, so the
+	 * truncation reads as a truncation rather than a corruption.
+	 *
+	 * @param string $text  What the model said.
+	 * @param int    $limit The character limit, ellipsis included.
+	 * @return string
+	 */
+	private static function clamp( string $text, int $limit ): string {
+		if ( mb_strlen( $text ) <= $limit ) {
+			return $text;
+		}
+
+		$cut   = mb_substr( $text, 0, $limit - 1 );
+		$space = mb_strrpos( $cut, ' ' );
+
+		if ( false !== $space && $space > 0 ) {
+			$cut = mb_substr( $cut, 0, $space );
+		}
+
+		return rtrim( $cut, ' ,.;:—-' ) . '…';
 	}
 }
