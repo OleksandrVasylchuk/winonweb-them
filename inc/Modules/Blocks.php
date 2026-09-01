@@ -54,17 +54,27 @@ final class Blocks implements Module {
 	}
 
 	/**
-	 * Register the imported design's one shared stylesheet, when it has one.
+	 * Register the imported design's shared stylesheets and scripts.
 	 *
-	 * A design ships a single stylesheet, and its cascade — every rule, in
-	 * the order the designer wrote them — is part of the design. Slicing that
-	 * file into per-block extracts turned out to re-run the cascade in
-	 * whatever order the page's blocks happened to load, with stale duplicate
-	 * rules from other pages of the archive clobbering current ones. So the
-	 * import keeps the whole stylesheet as `_canonical.css` beside the
-	 * generated blocks, and every generated block names this handle in its
-	 * `block.json` — the browser fetches it once, and per-block loading still
-	 * keeps it off pages with no imported section on them.
+	 * A design's stylesheet's cascade — every rule, in the order the designer
+	 * wrote them — is part of the design. Slicing that file into per-block
+	 * extracts turned out to re-run the cascade in whatever order the page's
+	 * blocks happened to load, with stale duplicate rules from other pages of
+	 * the archive clobbering current ones. So the import keeps each source
+	 * whole beside the generated blocks — `_canonical.css` for the primary
+	 * site of the handoff, `_canonical-{key}.css` for any other it carries —
+	 * and every generated block names its own source's handle in `block.json`.
+	 * The browser fetches each once, per-block loading keeps a source off
+	 * pages none of whose blocks came from it, and a handoff holding two
+	 * sites no longer dresses every page in whichever stylesheet sorted last.
+	 *
+	 * The scripts ride the same handles, on the same terms and for the same
+	 * reason: a design's script is written against a whole page, and split per
+	 * section it would query for a button that lives in another block and
+	 * quietly do nothing. Deferred, because that is what a `<script>` at the
+	 * end of the body was; and `strategy` rather than a hand-written attribute
+	 * so WordPress keeps the ordering promise it makes to anything enqueued
+	 * alongside it.
 	 *
 	 * @return void
 	 */
@@ -75,41 +85,63 @@ final class Blocks implements Module {
 			return;
 		}
 
-		$css = $dir . '/_canonical.css';
+		foreach ( (array) glob( $dir . '/_canonical*.css' ) as $css ) {
+			$handle = $this->canonical_handle_of( (string) $css );
 
-		if ( is_readable( $css ) ) {
+			if ( '' === $handle || ! is_readable( (string) $css ) ) {
+				continue;
+			}
+
 			wp_register_style(
-				'qs-design-canonical',
-				QSOFT_URI . substr( $css, strlen( QSOFT_DIR ) ),
+				$handle,
+				QSOFT_URI . substr( (string) $css, strlen( QSOFT_DIR ) ),
 				array(),
-				(string) filemtime( $css )
+				(string) filemtime( (string) $css )
 			);
 		}
 
-		/*
-		 * The design's own script, on the same terms as its stylesheet and for
-		 * the same reason: it is written against a whole page. This archive's
-		 * is nine lines that open the mobile navigation — split per section it
-		 * would query for a button that lives in another block and quietly do
-		 * nothing. Deferred, because that is what a `<script>` at the end of
-		 * the body was; and `strategy` rather than a hand-written attribute so
-		 * WordPress keeps the ordering promise it makes to anything enqueued
-		 * alongside it.
-		 */
-		$js = $dir . '/_canonical.js';
+		foreach ( (array) glob( $dir . '/_canonical*.js' ) as $js ) {
+			$handle = $this->canonical_handle_of( (string) $js );
 
-		if ( is_readable( $js ) ) {
+			if ( '' === $handle || ! is_readable( (string) $js ) ) {
+				continue;
+			}
+
 			wp_register_script(
-				'qs-design-canonical',
-				QSOFT_URI . substr( $js, strlen( QSOFT_DIR ) ),
+				$handle,
+				QSOFT_URI . substr( (string) $js, strlen( QSOFT_DIR ) ),
 				array(),
-				(string) filemtime( $js ),
+				(string) filemtime( (string) $js ),
 				array(
 					'in_footer' => true,
 					'strategy'  => 'defer',
 				)
 			);
 		}
+	}
+
+	/**
+	 * The handle a canonical file registers under, from its name.
+	 *
+	 * `_canonical.css` is the primary source; `_canonical-8a1f04c2.css` is
+	 * another site out of the same handoff. Anything else in the directory is
+	 * not the writer's and gets no handle.
+	 *
+	 * @param string $path Absolute file path.
+	 * @return string The handle, or '' for a name the writer never produces.
+	 */
+	private function canonical_handle_of( string $path ): string {
+		$name = (string) pathinfo( $path, PATHINFO_FILENAME );
+
+		if ( '_canonical' === $name ) {
+			return \Qwerty\Soft\Support\BlockWriter::canonical_handle();
+		}
+
+		if ( 1 === preg_match( '/^_canonical-([a-z0-9]{1,16})$/', $name, $found ) ) {
+			return \Qwerty\Soft\Support\BlockWriter::canonical_handle( $found[1] );
+		}
+
+		return '';
 	}
 
 	/**

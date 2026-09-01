@@ -339,69 +339,250 @@ final class DesignStylesheet {
 				continue;
 			}
 
-			$html = (string) file_get_contents( $page ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
-			$dir  = dirname( $page );
-
-			if ( preg_match_all( '#<link\b[^>]*>#i', $html, $links ) ) {
-				foreach ( $links[0] as $tag ) {
-					if ( 1 !== preg_match( '#\brel\s*=\s*["\']?stylesheet#i', $tag ) ) {
-						continue;
-					}
-
-					if ( 1 !== preg_match( '#\bhref\s*=\s*["\']([^"\']+)["\']#i', $tag, $found ) ) {
-						continue;
-					}
-
-					$href = trim( html_entity_decode( $found[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
-
-					// A stylesheet from somewhere else on the internet is not the design's to install.
-					if ( '' === $href || 1 === preg_match( '#^(?:[a-z][a-z0-9+.-]*:|//)#i', $href ) ) {
-						continue;
-					}
-
-					$target = (string) strtok( $href, '?#' );
-					$path   = self::beside( $dir, $target );
-
-					/*
-					 * A link that resolves to nothing is not a mistake to skip
-					 * over. A handoff splits one site across several folders
-					 * and zips them separately, so a page in the AI blueprint
-					 * asks for `../assets/styles.css` and the file is over in
-					 * the website baseline — the same stylesheet, one folder
-					 * further out than the export knew about. Looked up by
-					 * name, nearest copy first, the page gets the sheet it was
-					 * written against instead of nothing at all.
-					 */
-					if ( null === $path || ! str_starts_with( $path, $root . '/' ) ) {
-						$path = self::nearest_named( $root, basename( $target ), $page );
-					}
-
-					if ( null === $path || isset( $seen[ $path ] ) ) {
-						continue;
-					}
-
-					$seen[ $path ] = true;
-
-					if ( ! is_file( $path ) || filesize( $path ) >= self::MAX_FILE ) {
-						continue;
-					}
-
-					$sheets[] = array(
-						'css' => (string) file_get_contents( $path ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
-						'dir' => self::relative_dir( $path, $root ),
-					);
+			foreach ( self::linked_sheets( $root, $page ) as $path ) {
+				if ( isset( $seen[ $path ] ) ) {
+					continue;
 				}
+
+				$seen[ $path ] = true;
+
+				$sheets[] = array(
+					'css' => (string) file_get_contents( $path ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+					'dir' => self::relative_dir( $path, $root ),
+				);
 			}
 
-			if ( preg_match_all( '#<style[^>]*>(.*?)</style>#is', $html, $blocks ) ) {
+			$inline = self::inline_css( $page );
+
+			if ( '' !== $inline ) {
 				$sheets[] = array(
-					'css' => implode( "\n", $blocks[1] ),
+					'css' => $inline,
 					'dir' => self::relative_dir( $page, $root ),
 				);
 			}
 		}
 
 		return $sheets;
+	}
+
+	/**
+	 * The stylesheets one page links, resolved to files inside the archive.
+	 *
+	 * @param string $root Design root.
+	 * @param string $page Absolute page path, forward slashes.
+	 * @return array<int, string> Absolute stylesheet paths, in link order, each once.
+	 */
+	private static function linked_sheets( string $root, string $page ): array {
+		$html   = (string) file_get_contents( $page ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+		$dir    = dirname( $page );
+		$sheets = array();
+
+		if ( ! preg_match_all( '#<link\b[^>]*>#i', $html, $links ) ) {
+			return $sheets;
+		}
+
+		foreach ( $links[0] as $tag ) {
+			if ( 1 !== preg_match( '#\brel\s*=\s*["\']?stylesheet#i', $tag ) ) {
+				continue;
+			}
+
+			if ( 1 !== preg_match( '#\bhref\s*=\s*["\']([^"\']+)["\']#i', $tag, $found ) ) {
+				continue;
+			}
+
+			$href = trim( html_entity_decode( $found[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+
+			// A stylesheet from somewhere else on the internet is not the design's to install.
+			if ( '' === $href || 1 === preg_match( '#^(?:[a-z][a-z0-9+.-]*:|//)#i', $href ) ) {
+				continue;
+			}
+
+			$target = (string) strtok( $href, '?#' );
+			$path   = self::beside( $dir, $target );
+
+			/*
+			 * A link that resolves to nothing is not a mistake to skip
+			 * over. A handoff splits one site across several folders
+			 * and zips them separately, so a page in the AI blueprint
+			 * asks for `../assets/styles.css` and the file is over in
+			 * the website baseline — the same stylesheet, one folder
+			 * further out than the export knew about. Looked up by
+			 * name, nearest copy first, the page gets the sheet it was
+			 * written against instead of nothing at all.
+			 */
+			if ( null === $path || ! str_starts_with( $path, $root . '/' ) ) {
+				$path = self::nearest_named( $root, basename( $target ), $page );
+			}
+
+			if ( null === $path || in_array( $path, $sheets, true ) ) {
+				continue;
+			}
+
+			if ( ! is_file( $path ) || filesize( $path ) >= self::MAX_FILE ) {
+				continue;
+			}
+
+			$sheets[] = $path;
+		}
+
+		return $sheets;
+	}
+
+	/**
+	 * The CSS written inside one page's own `<style>` elements.
+	 *
+	 * @param string $page Absolute page path.
+	 * @return string
+	 */
+	private static function inline_css( string $page ): string {
+		$html = (string) file_get_contents( $page ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+
+		if ( ! preg_match_all( '#<style[^>]*>(.*?)</style>#is', $html, $blocks ) ) {
+			return '';
+		}
+
+		return trim( implode( "\n", $blocks[1] ) );
+	}
+
+	/**
+	 * Which stylesheet source each page belongs to.
+	 *
+	 * A handoff is not always one site. This one carries the website baseline
+	 * and an older AI-roadmap prototype side by side, each with a complete
+	 * stylesheet redefining `:root`, `.brand-mark` and `.site-header`.
+	 * Concatenated, whichever sorts last clobbers the other on every page —
+	 * the logo came out wearing the prototype's gold outline site-wide. So
+	 * pages are grouped by the set of stylesheets they actually link, and each
+	 * group gets a canonical file of its own, loaded only by that group's
+	 * blocks.
+	 *
+	 * @param string             $root  Design root.
+	 * @param array<int, string> $pages Absolute page paths.
+	 * @return array<string, string> Page path (normalized) to source key; '' names the primary source.
+	 */
+	public static function routes( string $root, array $pages ): array {
+		$root   = rtrim( str_replace( '\\', '/', $root ), '/' );
+		$groups = array();
+
+		foreach ( $pages as $page ) {
+			$page = str_replace( '\\', '/', (string) $page );
+
+			if ( ! is_file( $page ) ) {
+				continue;
+			}
+
+			$signature = implode( '|', self::linked_sheets( $root, $page ) );
+
+			$groups[ $signature ][] = $page;
+		}
+
+		/*
+		 * The primary source is the one most pages wear; a tie goes to the
+		 * earlier page, which a build lists front page first.
+		 */
+		$primary = '';
+		$best    = 0;
+
+		foreach ( $groups as $signature => $members ) {
+			if ( count( $members ) > $best ) {
+				$best    = count( $members );
+				$primary = $signature;
+			}
+		}
+
+		$routes = array();
+
+		foreach ( $groups as $signature => $members ) {
+			$key = $signature === $primary ? '' : substr( md5( (string) $signature ), 0, 8 );
+
+			foreach ( $members as $page ) {
+				$routes[ $page ] = $key;
+			}
+		}
+
+		return $routes;
+	}
+
+	/**
+	 * The design's CSS and scripts, compiled per stylesheet source.
+	 *
+	 * `compile()` concatenated everything the built pages linked, which put
+	 * every page in whichever of the handoff's sites sorted last — see
+	 * `routes()`. This keeps each source whole but separate, so a page loads
+	 * the stylesheet it was written against and no other.
+	 *
+	 * @param string                                  $root      Design root directory.
+	 * @param array<string, array{id:int,url:string}> $media_map Archive-relative path to imported attachment.
+	 * @param array<int, string>                      $pages     Pages being built, absolute paths.
+	 * @return array{sources: array<int, array{key:string, css:string, js:string}>, routes: array<string, string>}
+	 */
+	public static function compile_sources( string $root, array $media_map, array $pages ): array {
+		self::$preview = false;
+		self::$counts  = array(
+			'rules'    => 0,
+			'dropped'  => 0,
+			'unmapped' => 0,
+		);
+
+		$root   = rtrim( str_replace( '\\', '/', $root ), '/' );
+		$routes = self::routes( $root, $pages );
+
+		$members = array();
+
+		foreach ( $routes as $page => $key ) {
+			$members[ $key ][] = $page;
+		}
+
+		$sources = array();
+
+		foreach ( $members as $key => $group ) {
+			$pieces = array();
+			$seen   = array();
+
+			foreach ( $group as $page ) {
+				foreach ( self::linked_sheets( $root, $page ) as $path ) {
+					if ( isset( $seen[ $path ] ) ) {
+						continue;
+					}
+
+					$seen[ $path ] = true;
+
+					$pieces[] = self::rewrite(
+						(string) file_get_contents( $path ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+						self::relative_dir( $path, $root ),
+						$root,
+						$media_map
+					);
+				}
+
+				$inline = self::inline_css( $page );
+
+				if ( '' !== $inline ) {
+					$pieces[] = self::rewrite( $inline, self::relative_dir( $page, $root ), $root, $media_map );
+				}
+			}
+
+			$css = trim( implode( "\n", array_filter( $pieces ) ) );
+
+			if ( strlen( $css ) > self::CAP ) {
+				$css = self::prune( $css, self::html_classes( $root ) );
+			}
+
+			if ( strlen( $css ) > self::CAP ) {
+				$css = self::truncate( $css, self::CAP );
+			}
+
+			$sources[] = array(
+				'key' => (string) $key,
+				'css' => $css,
+				'js'  => self::scripts( $root, $group ),
+			);
+		}
+
+		return array(
+			'sources' => $sources,
+			'routes'  => $routes,
+		);
 	}
 
 	/**

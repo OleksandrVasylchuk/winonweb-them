@@ -190,6 +190,15 @@ final class SiteAssembler {
 			'dropped' => 0,
 		);
 
+		// Which canonical source each page's blocks wear — see compile_sources().
+		$sheets = array();
+
+		foreach ( $pages as $page ) {
+			if ( ! empty( $page['shell'] ) ) {
+				Lessons::note( 'shell_skipped' );
+			}
+		}
+
 		if ( class_exists( DesignStylesheet::class ) ) {
 			/*
 			 * Only what the pages being built actually link. A handoff holding
@@ -225,10 +234,36 @@ final class SiteAssembler {
 			if ( self::wrapping() ) {
 				DesignStylesheet::reset();
 
-				$written = BlockWriter::write_canonical(
-					DesignStylesheet::compile( $root, $media, false, $linked ),
-					DesignStylesheet::scripts( $root, $linked )
-				);
+				/*
+				 * One canonical file per stylesheet source, not one altogether.
+				 * This handoff carries the website baseline and an older
+				 * AI-roadmap prototype side by side; concatenated, the
+				 * prototype's `:root` and `.brand-mark` overwrote the
+				 * baseline's on every page. Grouped by what each page links,
+				 * each source loads only where its own pages stand.
+				 */
+				$grouped = DesignStylesheet::compile_sources( $root, $media, $linked );
+				$written = BlockWriter::write_canonical( $grouped['sources'] );
+
+				foreach ( $grouped['sources'] as $source ) {
+					if ( '' !== (string) ( $source['key'] ?? '' ) ) {
+						Lessons::note( 'extra_source' );
+					}
+				}
+
+				foreach ( $pages as $page ) {
+					$path = realpath( trailingslashit( $root ) . ltrim( (string) $page['file'], '/' ) );
+
+					if ( false === $path ) {
+						continue;
+					}
+
+					$path = str_replace( '\\', '/', $path );
+
+					if ( isset( $grouped['routes'][ $path ] ) ) {
+						$sheets[ (string) $page['file'] ] = (string) $grouped['routes'][ $path ];
+					}
+				}
 
 				$stylesheet['bytes'] = $written['css'];
 			} else {
@@ -244,6 +279,10 @@ final class SiteAssembler {
 			'pages'            => array_values( $pages ),
 			'colors'           => $tokens['colors'],
 			'media'            => $media,
+			'sheets'           => $sheets,
+
+			// The archive's product catalogue, when DesignNeeds found one — imported at finish() if the shop is there.
+			'catalog'          => DesignNeeds::catalog( $root ),
 			'routes'           => array(),
 
 			/*
@@ -271,6 +310,17 @@ final class SiteAssembler {
 	}
 
 	/**
+	 * Whether the running build's archive ships a product catalogue.
+	 *
+	 * Set per request from the job, like the stylesheet routes: when true,
+	 * the catalogue import owns the shop's products and a listing's cards
+	 * are not seeded on top of them as near-duplicates.
+	 *
+	 * @var bool
+	 */
+	private static bool $catalog = false;
+
+	/**
 	 * Step two, once per page: convert one design file and create its page.
 	 *
 	 * Safe to repeat. A file that already produced a page in this job has that
@@ -282,6 +332,11 @@ final class SiteAssembler {
 	 * @return array<string, mixed>|WP_Error The page row, or why it was skipped.
 	 */
 	public static function page( array &$job, string $file ) {
+		// Each step is its own request, so the writer relearns which canonical source each page wears.
+		BlockWriter::route_styles( (array) ( $job['sheets'] ?? array() ) );
+
+		self::$catalog = ! empty( $job['catalog']['file'] );
+
 		$page = null;
 
 		foreach ( (array) $job['pages'] as $candidate ) {
@@ -455,6 +510,11 @@ final class SiteAssembler {
 	 * @return array{menu:int,parts:array<int,string>,parts_detail:array<int,array<string,mixed>>,menu_link:string}
 	 */
 	public static function chrome( array &$job ): array {
+		// Same as page(): the writer needs the source map before it writes the header and footer blocks.
+		BlockWriter::route_styles( (array) ( $job['sheets'] ?? array() ) );
+
+		self::$catalog = ! empty( $job['catalog']['file'] );
+
 		$empty = array(
 			'menu'         => 0,
 			'parts'        => array(),
@@ -478,7 +538,7 @@ final class SiteAssembler {
 
 		$chrome = self::build_chrome(
 			(string) $job['root'],
-			(string) $job['pages'][0]['file'],
+			self::front_file( $job ),
 			(array) $job['routes'],
 			self::converter( $job ),
 			(array) $job['media']
@@ -593,6 +653,84 @@ final class SiteAssembler {
 				(int) ( $routes[ $file ]['wrapped'] ?? 0 )
 			);
 		}
+
+		/*
+		 * The archive's catalogue, into the shop, now that the shop's pages
+		 * exist to show it. One import per build, safe to repeat: a product
+		 * is found again by its code and updated in place. Without
+		 * WooCommerce the catalogue simply waits — the advisor on the import
+		 * screen says so and offers the install.
+		 */
+		if ( ! empty( $job['catalog']['file'] ) && post_type_exists( 'product' ) ) {
+			$counts = CatalogImport::run( (string) $job['root'], (string) $job['catalog']['file'], (array) ( $job['media'] ?? array() ) );
+
+			if ( $counts['made'] + $counts['updated'] > 0 ) {
+				ImportLog::add(
+					'build',
+					sprintf(
+						/* translators: 1: products created, 2: products updated, 3: how many got a picture. */
+						__( 'Imported the product catalogue: %1$d products made, %2$d updated, %3$d with a picture.', 'qwerty-soft-signal' ),
+						(int) $counts['made'],
+						(int) $counts['updated'],
+						(int) $counts['images']
+					)
+				);
+
+				$report['catalog'] = $counts;
+			}
+		}
+
+		/*
+		 * The measurement every earlier fault would have failed. "Built 10
+		 * sections" was true of pages that rendered a seventh of the design's
+		 * copy; this says how much of the design each page actually shows,
+		 * flags the thin ones, and leaves the numbers in the journal the next
+		 * import starts from.
+		 */
+		$fidelity_low  = 100;
+		$fidelity_high = 0;
+
+		foreach ( $report['pages'] as $index => $row ) {
+			$measured = Fidelity::of( (string) $job['root'], (string) $row['file'], (int) $row['id'] );
+
+			if ( ! is_array( $measured ) ) {
+				continue;
+			}
+
+			$report['pages'][ $index ]['fidelity'] = (int) $measured['ratio'];
+
+			$fidelity_low  = min( $fidelity_low, (int) $measured['ratio'] );
+			$fidelity_high = max( $fidelity_high, (int) $measured['ratio'] );
+
+			$worry = Fidelity::concern( $measured, (string) $row['title'] );
+
+			if ( '' !== $worry ) {
+				$report['concerns'][] = $worry;
+			}
+		}
+
+		if ( $fidelity_high > 0 ) {
+			ImportLog::add(
+				'build',
+				sprintf(
+					/* translators: 1: lowest page percentage, 2: highest page percentage. */
+					__( 'Measured against the design: the pages render %1$d–%2$d%% of its copy.', 'qwerty-soft-signal' ),
+					$fidelity_low,
+					$fidelity_high
+				)
+			);
+		}
+
+		Lessons::record(
+			array(
+				'design'       => (string) ( $job['slug'] ?? '' ),
+				'kind'         => str_contains( implode( ' ', array_keys( $routes ) ), 'qs-rendered/' ) ? 'application' : 'static',
+				'pages'        => count( $routes ),
+				'fidelity_min' => $fidelity_low,
+				'fidelity_max' => $fidelity_high,
+				'concerns'     => count( (array) ( $report['concerns'] ?? array() ) ),
+			)
+		);
 
 		/*
 		 * A guided build that could not reach the model for some sections
@@ -1570,10 +1708,11 @@ final class SiteAssembler {
 	 *
 	 * @param string                           $type   The post type key.
 	 * @param array<int, array<string, mixed>> $rows  One entry per card, as values() read them.
-	 * @param array<int, array<string, mixed>> $shape The row's fields, from the plan.
+	 * @param array<int, array<string, mixed>> $shape    The row's fields, from the plan.
+	 * @param string                           $language Language the seeding page is in; stamped on each record.
 	 * @return int How many records were created.
 	 */
-	private static function seed_records( string $type, array $rows, array $shape ): int {
+	private static function seed_records( string $type, array $rows, array $shape, string $language = '' ): int {
 		if ( '' === $type || array() === $rows ) {
 			return 0;
 		}
@@ -1605,18 +1744,50 @@ final class SiteAssembler {
 				continue;
 			}
 
-			$existing = get_posts(
+			/*
+			 * One record per title AND language, not one per title. A Russian
+			 * store card that keeps its product's Latin name — "Digital
+			 * Toolkit" — used to match the English record and seed nothing,
+			 * and the Russian listing, filtered to Russian records, came up
+			 * short. A same-titled record with no language stamp is the old
+			 * spelling of "mine": it gets the stamp instead of a twin.
+			 */
+			$twins = get_posts(
 				array(
 					'post_type'        => $type,
 					'post_status'      => 'any',
-					'posts_per_page'   => 1,
+					'posts_per_page'   => 10,
 					'title'            => $title,
 					'suppress_filters' => false,
 				)
 			);
 
-			if ( array() !== $existing ) {
+			$mine = null;
+
+			foreach ( $twins as $twin ) {
+				$stamped = (string) get_post_meta( (int) $twin->ID, self::LANG_META, true );
+
+				if ( $stamped === $language || ( '' === $stamped && null === $mine ) ) {
+					$mine = $twin;
+
+					if ( $stamped === $language ) {
+						break;
+					}
+				}
+			}
+
+			if ( null !== $mine ) {
+				if ( '' !== $language && '' === (string) get_post_meta( (int) $mine->ID, self::LANG_META, true ) ) {
+					update_post_meta( (int) $mine->ID, self::LANG_META, $language );
+				}
+
 				continue;
+			}
+
+			$meta = array( self::OWNED_META => 'record:' . $type );
+
+			if ( '' !== $language ) {
+				$meta[ self::LANG_META ] = $language;
 			}
 
 			$id = wp_insert_post(
@@ -1624,7 +1795,7 @@ final class SiteAssembler {
 					'post_type'   => $type,
 					'post_status' => 'publish',
 					'post_title'  => $title,
-					'meta_input'  => array( self::OWNED_META => 'record:' . $type ),
+					'meta_input'  => $meta,
 				),
 				true
 			);
@@ -1660,55 +1831,163 @@ final class SiteAssembler {
 	 * @return int The menu, or zero when the design has no navigation.
 	 */
 	private static function menu_from_design( array $job, array $routes ): int {
-		$root = (string) ( $job['root'] ?? '' );
-		$file = (string) ( $job['pages'][0]['file'] ?? '' );
+		$root  = (string) ( $job['root'] ?? '' );
+		$front = self::front_file( $job );
 
-		if ( '' === $root || '' === $file || array() === $routes ) {
-			return 0;
-		}
-
-		$split = SectionSplitter::split( trailingslashit( $root ) . $file, $root );
-		$html  = (string) ( $split['header']['html'] ?? '' );
-		$links = self::nav_links( $html, $routes );
-
-		if ( array() === $links ) {
-			$html  = self::chrome_file( $root, array( 'sitenav', 'siteheader', 'nav', 'header', 'menu' ) );
-			$links = self::nav_links( $html, $routes );
-		}
-
-		if ( array() === $links ) {
+		if ( '' === $root || '' === $front || array() === $routes ) {
 			return 0;
 		}
 
 		/*
-		 * An existing menu is rewritten rather than joined by a second one.
-		 * The header looks the menu up by option, so replacing the post would
-		 * work too — but a site that accumulates a navigation per rebuild is
-		 * a site somebody has to tidy by hand.
+		 * One menu per language, because the design has one. The Russian
+		 * header is not the English header translated — it even lists
+		 * different pages — and one shared menu put "Reports" on a page whose
+		 * design says «Отчеты». Each language's menu is read from that
+		 * language's own front page and resolved only against that language's
+		 * routes, which is also what stops three `about.html`s — one per
+		 * language — from answering with whichever sorted last.
 		 */
-		$existing = self::owned_posts( array( 'wp_navigation' ) );
-		$items    = array();
+		$group   = self::group_of( $front );
+		$primary = self::language_of( $front );
+		$fronts  = array( $primary => $front );
+
+		foreach ( $routes as $file => $made ) {
+			$language = self::language_of( (string) $file );
+
+			if ( '' !== $language && $language !== $primary && self::group_of( (string) $file ) === $group ) {
+				$fronts[ $language ] = (string) $file;
+			}
+		}
+
+		$menus = array();
+
+		foreach ( $fronts as $language => $file ) {
+			$mine = array();
+
+			foreach ( $routes as $each => $made ) {
+				if ( self::language_of( (string) $each ) === (string) $language ) {
+					$mine[ $each ] = $made;
+				}
+			}
+
+			$split = SectionSplitter::split( trailingslashit( $root ) . $file, $root );
+			$html  = (string) ( $split['header']['html'] ?? '' );
+			$links = self::nav_links( $html, $mine );
+
+			if ( array() === $links && (string) $language === $primary ) {
+				$html  = self::chrome_file( $root, array( 'sitenav', 'siteheader', 'nav', 'header', 'menu' ) );
+				$links = self::nav_links( $html, $mine );
+			}
+
+			if ( array() === $links ) {
+				continue;
+			}
+
+			$made = self::write_menu( (string) $language, $links );
+
+			if ( $made > 0 ) {
+				$menus[ (string) $language ] = $made;
+			}
+		}
+
+		update_option( SiteOptions::MENUS, $menus, false );
+
+		$main = (int) ( $menus[ $primary ] ?? 0 );
+
+		if ( $main > 0 ) {
+			update_option( SiteOptions::MENU, $main, false );
+		}
+
+		return $main;
+	}
+
+	/**
+	 * Write one language's navigation: rewrite the one it has, or make it.
+	 *
+	 * An existing menu is rewritten rather than joined by a second one — a
+	 * site that accumulates a navigation per rebuild is a site somebody has
+	 * to tidy by hand. A navigation from before languages were stamped
+	 * answers for the first language that asks, which is always the primary.
+	 *
+	 * @param string                           $language Language code; may be '' on a single-language design.
+	 * @param array<int, array<string, mixed>> $links    What nav_links() read.
+	 * @return int The navigation's ID, or zero.
+	 */
+	private static function write_menu( string $language, array $links ): int {
+		$items = array();
 
 		foreach ( $links as $link ) {
 			$items[] = self::menu_item( (int) $link['id'], (string) $link['label'], (string) $link['url'] );
 		}
 
-		if ( array() !== $existing ) {
-			$id = (int) $existing[0]->ID;
+		$mine = null;
 
+		foreach ( self::owned_posts( array( 'wp_navigation' ) ) as $menu ) {
+			$stamped = (string) get_post_meta( (int) $menu->ID, self::LANG_META, true );
+
+			if ( $stamped === $language || ( '' === $stamped && null === $mine ) ) {
+				$mine = $menu;
+
+				if ( $stamped === $language ) {
+					break;
+				}
+			}
+		}
+
+		if ( null !== $mine ) {
 			wp_update_post(
 				array(
-					'ID'           => $id,
+					'ID'           => (int) $mine->ID,
 					'post_content' => wp_slash( implode( "\n\n", $items ) ),
 				)
 			);
 
-			update_option( SiteOptions::MENU, $id, false );
+			if ( '' !== $language ) {
+				update_post_meta( (int) $mine->ID, self::LANG_META, $language );
+			}
 
-			return $id;
+			return (int) $mine->ID;
 		}
 
-		return self::create_menu( $links );
+		$id = self::create_menu( $links );
+
+		if ( $id > 0 && '' !== $language ) {
+			update_post_meta( $id, self::LANG_META, $language );
+
+			wp_update_post(
+				array(
+					'ID'         => $id,
+					/* translators: %s: language code, such as RU. */
+					'post_title' => sprintf( __( 'Main navigation (%s)', 'qwerty-soft-signal' ), strtoupper( $language ) ),
+				)
+			);
+		}
+
+		return $id;
+	}
+
+	/**
+	 * The first page of the job that actually has a body.
+	 *
+	 * A JavaScript handoff lists its `index.html` shells among the pages and
+	 * they sort first, but a shell's body is one empty root element. The
+	 * chrome and the menu both used to read `pages[0]` and found no header,
+	 * no footer and no navigation in it — every built page came out wearing
+	 * the theme's generic chrome instead of the design's own.
+	 *
+	 * @param array<string, mixed> $job Job record.
+	 * @return string The page's file, archive-relative; '' when there are no pages.
+	 */
+	private static function front_file( array $job ): string {
+		$pages = (array) ( $job['pages'] ?? array() );
+
+		foreach ( $pages as $candidate ) {
+			if ( empty( $candidate['shell'] ) ) {
+				return (string) $candidate['file'];
+			}
+		}
+
+		return (string) ( $pages[0]['file'] ?? '' );
 	}
 
 	/**
@@ -1902,10 +2181,17 @@ final class SiteAssembler {
 		 * sections with the same heading on the same page cannot claim one
 		 * directory. The digest is of the markup, so rebuilding an unchanged
 		 * design reuses the block rather than piling up near-duplicates.
+		 *
+		 * The digest goes on LAST, after the length limit has had its say. It
+		 * used to ride inside one long string that the slug then truncated —
+		 * and a page whose file name alone filled the forty characters
+		 * truncated the digest clean off, so every section of
+		 * `china-kazakhstan-frozen-potato-ranking-…` collapsed into a single
+		 * block directory and the page rendered one section four times.
 		 */
-		$slug = BlockWriter::slug(
-			basename( $file, '.html' ) . '-' . (string) $section['label'] . '-' . substr( md5( $html ), 0, 6 )
-		);
+		$digest = substr( md5( $html ), 0, 6 );
+		$slug   = BlockWriter::slug( basename( $file, '.html' ) . '-' . (string) $section['label'] );
+		$slug   = BlockWriter::slug( substr( $slug, 0, 33 ) . '-' . $digest );
 
 		if ( '' === $slug ) {
 			return null;
@@ -1942,6 +2228,30 @@ final class SiteAssembler {
 
 		if ( ! $fresh ) {
 			$plan = BlockWriter::adopt( $plan, $dir );
+
+			// The model is not asked twice; the block remembers its own answer.
+			if ( '' === $singular ) {
+				$singular = BlockWriter::singular_of( $dir );
+			}
+		}
+
+		/*
+		 * A listing that cannot name its record is not a listing. With no
+		 * singular there is no post type to seed, so nothing puts the cards
+		 * into records — and values() leaves a listing's rows out of the
+		 * block on purpose. Between the two, the section rendered its frame
+		 * around an empty grid: the roles, the journey steps, every card the
+		 * designer wrote, gone. A fixed set of cards stored with the block is
+		 * what the section actually is.
+		 *
+		 * Fresh blocks only: an existing block already told adopt() what it
+		 * is, and a real listing legitimately has no singular on a rebuild —
+		 * the review that named it does not run twice.
+		 */
+		if ( $fresh && 'listing' === ( $plan['kind'] ?? '' ) && '' === trim( $singular ) ) {
+			Lessons::note( 'listing_downgraded' );
+
+			$plan['kind'] = 'repeat';
 		}
 
 		/*
@@ -2010,11 +2320,16 @@ final class SiteAssembler {
 				$page_dir
 			);
 
-			self::seed_records(
-				DesignType::key( $singular ),
-				(array) ( $cards['items'] ?? array() ),
-				(array) ( $plan['item']['fields'] ?? array() )
-			);
+			$record_type = DesignType::for_singular( $singular );
+
+			if ( 'product' !== $record_type || ! self::$catalog ) {
+				self::seed_records(
+					$record_type,
+					(array) ( $cards['items'] ?? array() ),
+					(array) ( $plan['item']['fields'] ?? array() ),
+					self::language_of( $file )
+				);
+			}
 		}
 
 		return array(
@@ -2726,11 +3041,19 @@ final class SiteAssembler {
 		/*
 		 * Some exports keep the navigation in its own file rather than in
 		 * every page's header. Look for it by name before giving up on having
-		 * a menu at all.
+		 * a menu at all — but only take it when it actually holds one: the
+		 * old unconditional swap replaced a real header whose links merely
+		 * failed to match with an empty string, and the site got the theme's
+		 * generic chrome instead of the design's.
 		 */
 		if ( array() === $links ) {
-			$header_html = self::chrome_file( $root, array( 'sitenav', 'siteheader', 'nav', 'header', 'menu' ) );
-			$links       = self::nav_links( $header_html, $routes );
+			$named = self::chrome_file( $root, array( 'sitenav', 'siteheader', 'nav', 'header', 'menu' ) );
+			$found = self::nav_links( $named, $routes );
+
+			if ( array() !== $found ) {
+				$header_html = $named;
+				$links       = $found;
+			}
 		}
 
 		/*
@@ -2863,6 +3186,20 @@ final class SiteAssembler {
 
 		foreach ( $routes as $file => $made ) {
 			$lookup[ strtolower( basename( (string) $file ) ) ] = $made;
+
+			/*
+			 * An application's links are routes, not files: `/services`,
+			 * `/my-project/projects`. The page each route became knows the
+			 * slug it was given, and matching on it is what lets the header
+			 * of a rendered SPA keep its navigation — matched by file name
+			 * alone, every one of those links dropped and the header was
+			 * thrown away as having no menu.
+			 */
+			$slug = strtolower( (string) ( $made['slug'] ?? '' ) );
+
+			if ( '' !== $slug && ! isset( $lookup[ $slug ] ) ) {
+				$lookup[ $slug ] = $made;
+			}
 		}
 
 		$dom = new DOMDocument();
@@ -2886,9 +3223,25 @@ final class SiteAssembler {
 				continue;
 			}
 
+			/*
+			 * The language switcher lives inside the design's nav, but it is
+			 * not navigation — the header draws its chips separately, from
+			 * the options. Read into the menu as links they doubled: the menu
+			 * ended in "RU · 中文" twice over, once as chips and once as
+			 * entries.
+			 */
+			$around = $anchor->parentNode instanceof DOMElement ? $anchor->parentNode->getAttribute( 'class' ) : '';
+
+			if ( 1 === preg_match( '/(^|[\s_-])lang(uage)?([\s_-]|$)/i', $anchor->getAttribute( 'class' ) . ' ' . $around ) ) {
+				continue;
+			}
+
 			$pieces   = explode( '#', $href, 2 );
 			$target   = strtolower( basename( $pieces[0] ) );
 			$fragment = isset( $pieces[1] ) ? sanitize_title( $pieces[1] ) : '';
+
+			// The whole path as a slug, the way a route's page was named from it.
+			$slugged = trim( (string) preg_replace( '#[^a-z0-9]+#', '-', strtolower( trim( $pieces[0], '/' ) ) ), '-' );
 
 			/*
 			 * Two ways of reading the same navigation, because the menu is now
@@ -2901,7 +3254,14 @@ final class SiteAssembler {
 			 * exist. Keeping only what the design linked is what stops the
 			 * menu filling with in-page anchors.
 			 */
-			$made = $lookup[ $target ] ?? null;
+
+			/*
+			 * The whole path first, the bare file name second. Matched the
+			 * other way round, `/my-project/projects` answers to its last
+			 * folder and lands on the Projects page — which the menu already
+			 * holds, so the entry deduplicated away and "My Project" vanished.
+			 */
+			$made = ( '' !== $slugged ? $lookup[ $slugged ] ?? null : null ) ?? $lookup[ $target ] ?? null;
 
 			if ( null === $made ) {
 				if ( array() !== $routes || 1 !== preg_match( '/\.html?$/i', $target ) ) {
@@ -3633,6 +3993,29 @@ final class SiteAssembler {
 
 		if ( isset( $index['path'][ $resolved ] ) ) {
 			return $index['path'][ $resolved ];
+		}
+
+		/*
+		 * A link to a directory is a link to its index page. The header's
+		 * language chips say `../ru/`, and left as written they resolve
+		 * against wherever the visitor happens to stand — from a
+		 * subdirectory install's front page that walks OUT of the site and
+		 * lands on `http://localhost/ru/`, which is nobody's page at all.
+		 */
+		if ( '' !== $resolved && str_ends_with( trim( $target ), '/' ) ) {
+			if ( isset( $index['path'][ $resolved . '/index.html' ] ) ) {
+				return $index['path'][ $resolved . '/index.html' ];
+			}
+
+			/*
+			 * A two-letter language directory whose pages were not built —
+			 * a single-language import. The chip still has to stay inside
+			 * this site: the language home under the site's own address is
+			 * where a later multilingual build will put it.
+			 */
+			if ( 1 === preg_match( '#(^|/)([a-z]{2}(?:-[a-z]{2})?)$#', $resolved, $found ) ) {
+				return home_url( '/' . $found[2] . '/' );
+			}
 		}
 
 		$name = strtolower( basename( $resolved ) );

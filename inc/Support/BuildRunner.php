@@ -538,6 +538,17 @@ final class BuildRunner {
 			do {
 				$more = self::step( $user );
 			} while ( $more && $burst && microtime( true ) < $until );
+
+			/*
+			 * A burst that ran out of time with work left hands off
+			 * explicitly. The pre-step booking it is nominally leaving behind
+			 * may already have been spent by a tick that lost the claim while
+			 * this one worked; the only booking this tick can rely on is the
+			 * one it makes now, knowing there is more to do.
+			 */
+			if ( $more && $burst ) {
+				self::schedule( $user );
+			}
 		} catch ( \Throwable $error ) {
 			ImportLog::add(
 				'build',
@@ -637,6 +648,17 @@ final class BuildRunner {
 		 * can win it, whatever the timing. That is the claim.
 		 */
 		if ( ! self::claim( $user, $mark, $job ) ) {
+			/*
+			 * Losing the claim consumed a real cron event — the one the
+			 * working tick booked before its step, counting on it as the
+			 * retry if that step killed the process. Eaten and not replaced,
+			 * the queue was empty by the time the winner's burst ran out, and
+			 * every long build went quiet at a tick boundary until the patrol
+			 * noticed, fifteen minutes later. The loser does no work; the one
+			 * thing it owes the build is the booking it just spent.
+			 */
+			self::schedule( $user );
+
 			return false;
 		}
 

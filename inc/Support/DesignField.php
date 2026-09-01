@@ -331,6 +331,23 @@ final class DesignField {
 	public static function menu(): string {
 		$id = (int) get_option( SiteOptions::MENU, 0 );
 
+		/*
+		 * The page's language picks its menu. The design ships a navigation
+		 * per language — different words, sometimes different pages — and the
+		 * build keeps each one; a Russian page drawing the English menu was
+		 * the design mistranslated by the theme.
+		 */
+		$language = (string) get_post_meta( get_the_ID(), SiteAssembler::LANG_META, true );
+
+		if ( '' !== $language ) {
+			$menus = get_option( SiteOptions::MENUS, array() );
+			$own   = is_array( $menus ) ? (int) ( $menus[ $language ] ?? 0 ) : 0;
+
+			if ( $own > 0 ) {
+				$id = $own;
+			}
+		}
+
 		if ( $id <= 0 || 'wp_navigation' !== get_post_type( $id ) ) {
 			return '';
 		}

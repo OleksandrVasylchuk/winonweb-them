@@ -224,6 +224,18 @@ final class PlanReview {
 			$brief[] = (string) wp_json_encode( $rows, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 		}
 
+		/*
+		 * What this site's earlier imports ran into, so the judgement is made
+		 * with the studio's history rather than from a cold start. One
+		 * factual paragraph from the journal — see Lessons::brief().
+		 */
+		$learned = Lessons::brief();
+
+		if ( '' !== $learned ) {
+			$brief[] = '';
+			$brief[] = 'History from this site\'s earlier imports, to weigh when judging listing against repeat: ' . $learned;
+		}
+
 		$brief[] = '';
 		$brief[] = 'The section\'s markup:';
 		$brief[] = self::trimmed( $html );

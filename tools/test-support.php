@@ -898,7 +898,8 @@ $qsoft_manifest = json_decode( Qwerty\Soft\Support\BlockWriter::block_json( 'hom
 qsoft_assert( 'qs/design-home-hero' === $qsoft_manifest['name'], 'a generated block is named under qs/design-' );
 qsoft_assert( 'qs' === $qsoft_manifest['category'], 'a generated block sits in the Qwerty Soft category so it can be reused' );
 qsoft_assert( 'render.php' === $qsoft_manifest['acf']['renderTemplate'], 'the manifest points ACF at the template' );
-qsoft_assert( 'file:./style.css' === $qsoft_manifest['style'], 'the section carries its own stylesheet' );
+qsoft_assert( 'qs-design-canonical' === $qsoft_manifest['style'], 'the section wears the design\'s canonical stylesheet, never a slice' );
+qsoft_assert( 'qs-design-canonical' === $qsoft_manifest['viewScript'], 'the design\'s own script rides the same handle' );
 
 $qsoft_group = json_decode( Qwerty\Soft\Support\BlockWriter::fields_json( 'home-hero', 'Hero', $qsoft_hero_plan ), true );
 

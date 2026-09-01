@@ -117,6 +117,8 @@ final class Theme {
 			Modules\Credit::class,
 			Modules\Branding::class,
 			Modules\Onboarding::class,
+			Modules\Handbook::class,
+			Modules\Translations::class,
 			Modules\Importer::class,
 			Modules\SiteHealth::class,
 			Modules\Updates::class,

@@ -146,6 +146,17 @@ final class SiteOptions {
 	public const MENU = 'qwerty_soft_design_menu';
 
 	/**
+	 * Option holding one navigation per language: language code => menu ID.
+	 *
+	 * The design's Russian header is not its English header translated — it
+	 * even lists different pages — so each language keeps a menu of its own
+	 * and the header draws the one belonging to the page it stands on.
+	 *
+	 * @var string
+	 */
+	public const MENUS = 'qwerty_soft_design_menus';
+
+	/**
 	 * Every option row an import wrote, as name => value.
 	 *
 	 * @return array<string, mixed>

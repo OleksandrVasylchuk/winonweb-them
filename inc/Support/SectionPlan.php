@@ -193,6 +193,34 @@ final class SectionPlan {
 			'parent'   => self::path_of( $repeat['nodes'][0]->parentNode, $body ),
 		);
 
+		$kind = 1 === count( $item['fields'] ) || $item['count'] < 4 ? 'repeat' : 'listing';
+
+		/*
+		 * Rows that only look alike are not one row repeated.
+		 *
+		 * Three support tiers share a card's shape, but each card carries its
+		 * own bullet list — text the planned fields never reach. The wrap
+		 * ships the first row as the template for all of them, so every card
+		 * came out wearing the first card's bullets, three times over. When
+		 * the text left after the planned fields differs between rows, the
+		 * section is kept whole instead: every element planned as its own
+		 * field, nothing repeated, nothing invented.
+		 *
+		 * Only a would-be repeat is judged. A listing's rows are records, and
+		 * records differing from one another is what records are — their
+		 * variance is absorbed by the type's own fields, not frozen into a
+		 * template.
+		 */
+		if ( 'repeat' === $kind && self::rows_diverge( $repeat['nodes'], $rows ) ) {
+			Lessons::note( 'divergent_single' );
+
+			return array(
+				'kind'   => 'single',
+				'fields' => self::fields_under( $xpath, $body, array() ),
+				'item'   => null,
+			);
+		}
+
 		/*
 		 * Whether this is the section's own furniture or the site's records is
 		 * the one thing here a model should settle, because it is a judgement
@@ -213,10 +241,73 @@ final class SectionPlan {
 		 * model would have called records anyway.
 		 */
 		return array(
-			'kind'   => 1 === count( $item['fields'] ) || $item['count'] < 4 ? 'repeat' : 'listing',
+			'kind'   => $kind,
 			'fields' => $fields,
 			'item'   => $item,
 		);
+	}
+
+	/**
+	 * Whether the rows say different things where no field is planned.
+	 *
+	 * Each row's text, minus what its planned fields already cover, is what
+	 * the repeat template would freeze from the first row and stamp onto all
+	 * of them. Equal residuals — static labels, an arrow, "Learn more" — are
+	 * exactly what a template should carry. Different ones are content that
+	 * repetition would corrupt.
+	 *
+	 * @param array<int, DOMElement>           $nodes  The repeated rows.
+	 * @param array<int, array<string, mixed>> $fields The fields planned for one row.
+	 * @return bool
+	 */
+	private static function rows_diverge( array $nodes, array $fields ): bool {
+		$residuals = array();
+
+		foreach ( $nodes as $node ) {
+			if ( ! $node instanceof DOMElement ) {
+				continue;
+			}
+
+			$residual = trim( (string) preg_replace( '#\s+#u', ' ', $node->textContent ) );
+
+			foreach ( $fields as $field ) {
+				$found = self::at( $node, (string) ( $field['path'] ?? '' ) );
+
+				if ( ! $found instanceof DOMElement ) {
+					continue;
+				}
+
+				$text = trim( (string) preg_replace( '#\s+#u', ' ', $found->textContent ) );
+
+				if ( '' === $text ) {
+					continue;
+				}
+
+				$position = mb_strpos( $residual, $text );
+
+				if ( false !== $position ) {
+					$residual = mb_substr( $residual, 0, $position ) . mb_substr( $residual, $position + mb_strlen( $text ) );
+				}
+			}
+
+			$residuals[] = trim( (string) preg_replace( '#\s+#u', ' ', $residual ) );
+		}
+
+		$first = $residuals[0] ?? '';
+
+		foreach ( $residuals as $residual ) {
+			/*
+			 * Only a difference with something to say. A step number, a badge,
+			 * an ordinal — "1", "2", "3" — differs between rows and means
+			 * nothing lost; the bullet lists of three support tiers are whole
+			 * sentences. The bar is the length of what actually differs.
+			 */
+			if ( $residual !== $first && max( mb_strlen( $residual ), mb_strlen( $first ) ) > 30 ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

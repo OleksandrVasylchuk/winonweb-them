@@ -12,6 +12,7 @@
     "//": "The theme itself has no build step — what is in the repository is what ships. Node is only used for the quality gates below.",
     "scripts": {
         "audit:contrast": "node tools/contrast-audit.mjs",
+        "audit:pixels": "node tools/pixel-diff.mjs",
         "lint:blocks": "node tools/lint-blocks.mjs",
         "lint:php": "node tools/lint-php.mjs",
         "lint:html": "html-validate \"artifacts/html/*.html\"",

@@ -11,1211 +11,1261 @@ msgstr ""
 "X-Domain: qwerty-soft-signal\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: assets/js/admin-import.js:1035
+#. translators: %d: number of pages the build made.
+#: assets/js/admin-import.js:1003
+msgid "The last build is finished — %d page is on the site."
+msgid_plural "The last build is finished — %d pages are on the site."
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/js/admin-import.js:1043
 msgid "A build is running on the server. This is where it has got to."
 msgstr ""
 
-#: assets/js/admin-import.js:1036
+#: assets/js/admin-import.js:1044
 msgid "A build was left unfinished. Its progress is below."
 msgstr ""
 
-#: assets/js/admin-import.js:1068
+#: assets/js/admin-import.js:1076
 msgid "What is happening now"
 msgstr ""
 
-#: assets/js/admin-import.js:1069
+#: assets/js/admin-import.js:1077
 msgid "What happened"
 msgstr ""
 
-#: assets/js/admin-import.js:112
+#: assets/js/admin-import.js:114
 msgid "under $0.01"
 msgstr ""
 
 #. translators: 1: route path, 2: how many are done, 3: how many there are.
-#: assets/js/admin-import.js:1221
+#: assets/js/admin-import.js:1229
 msgid "Reading %1$s — %2$d of %3$d…"
 msgstr ""
 
 #. translators: 1: pages written, 2: routes that failed.
-#: assets/js/admin-import.js:1251
+#: assets/js/admin-import.js:1259
 msgid "Read %1$d pages; %2$d could not be read. The pages that were read are in the list below."
 msgstr ""
 
 #. translators: 1: pages written, 2: routes that failed. */ __( 'Read %1$d pages; %2$d could not be read. The pages that were read are in the list below.', 'qwerty-soft-signal' ), made, failed ) : sprintf( /* translators: %d: number of pages.
-#: assets/js/admin-import.js:1257
+#: assets/js/admin-import.js:1265
 msgid "Read %d page out of the application. It is an ordinary design now — pick a page below."
 msgid_plural "Read %d pages out of the application. It is an ordinary design now — pick a page below."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of sections on the page.
-#: assets/js/admin-import.js:1337
+#: assets/js/admin-import.js:1345
 msgid "%d section"
 msgid_plural "%d sections"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: the address two pages both want.
-#: assets/js/admin-import.js:1357
+#: assets/js/admin-import.js:1365
 msgid "Which version of %s to build"
 msgstr ""
 
-#: assets/js/admin-import.js:136
-msgid "%s MB"
-msgstr ""
-
 #. translators: 1: the folder the version came from, 2: its section count.
-#: assets/js/admin-import.js:1370
+#: assets/js/admin-import.js:1378
 msgid "%1$s — %2$d sections"
 msgstr ""
 
+#: assets/js/admin-import.js:138
+msgid "%s MB"
+msgstr ""
+
 #. translators: %d: how many versions of this page the archive holds.
-#: assets/js/admin-import.js:1386
+#: assets/js/admin-import.js:1394
 msgid "%d versions of this page"
 msgstr ""
 
-#: assets/js/admin-import.js:140
-msgid "%s KB"
-msgstr ""
-
 #. translators: %d: how many pages the build will make.
-#: assets/js/admin-import.js:1404
+#: assets/js/admin-import.js:1412
 msgid "The page this build will make"
 msgid_plural "The %d pages this build will make"
 msgstr[0] ""
 msgstr[1] ""
 
+#: assets/js/admin-import.js:142
+msgid "%s KB"
+msgstr ""
+
+#: assets/js/admin-import.js:1447
+msgid "Installed and active — the build will import the catalogue."
+msgstr ""
+
+#: assets/js/admin-import.js:1455
+msgid "Installing…"
+msgstr ""
+
+#: assets/js/admin-import.js:1458
+msgid "Activate %s"
+msgstr ""
+
+#: assets/js/admin-import.js:1458
+msgid "Install %s"
+msgstr ""
+
+#: assets/js/admin-import.js:1471
+msgid "%s is installed and active."
+msgstr ""
+
+#: assets/js/admin-import.js:1489
+msgid "What this design needs"
+msgstr ""
+
+#: assets/js/admin-import.js:1544
+msgid "The archive root"
+msgstr ""
+
+#. translators: %d: pages this sub-site holds in the chosen language.
+#: assets/js/admin-import.js:1570
+msgid "%d page"
+msgid_plural "%d pages"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/js/admin-import.js:1577
+msgid "the biggest — likely the site itself"
+msgstr ""
+
+#: assets/js/admin-import.js:1585
+msgid "This archive holds more than one site"
+msgstr ""
+
+#: assets/js/admin-import.js:1588
+msgid "Each is a complete tree with a stylesheet of its own. Untick one and the build leaves it out entirely — an address its page was holding falls back to the version another site ships."
+msgstr ""
+
 #. translators: 1: framework, 2: pages it serves, 3: component files.
-#: assets/js/admin-import.js:1460
+#: assets/js/admin-import.js:1637
 msgid "%1$s · %2$d pages · %3$d components"
 msgstr ""
 
 #. translators: %d: how many applications the archive holds.
-#: assets/js/admin-import.js:1478
+#: assets/js/admin-import.js:1655
 msgid "This archive holds %d applications. Only one of them becomes this site — pick it, then preview a page before importing anything."
 msgstr ""
 
-#: assets/js/admin-import.js:1520
+#: assets/js/admin-import.js:1697
 msgid "Read the pages out of the application"
 msgstr ""
 
-#: assets/js/admin-import.js:1534
+#: assets/js/admin-import.js:1711
 msgid "This one has no pages of its own — no router and no page components. Pick another above."
 msgstr ""
 
 #. translators: 1: framework name, e.g. React, 2: number of pages.
-#: assets/js/admin-import.js:1549
+#: assets/js/admin-import.js:1726
 msgid "This design is a %1$s application: its %2$d pages exist as components, not as markup. Claude reads each route — the page component, everything it renders, the layout around it and the stylesheet — and writes down the page it produces. From then on it is an ordinary page here: preview it, convert it, build it."
 msgstr ""
 
 #. translators: %s: why no model can be reached.
-#: assets/js/admin-import.js:1562
+#: assets/js/admin-import.js:1739
 msgid "This is the one thing on this screen that cannot be done offline, and no model can be reached from here. %s"
 msgstr ""
 
 #. translators: %d: number of pages.
-#: assets/js/admin-import.js:1574
+#: assets/js/admin-import.js:1751
 msgid "%d call through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed."
 msgid_plural "One call per page — %d in all — through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of pages.
-#: assets/js/admin-import.js:1584
+#: assets/js/admin-import.js:1761
 msgid "%d call through the Anthropic API. A page of components is a long read, so expect this one to cost more than a section conversion."
 msgid_plural "One call per page — %d in all — through the Anthropic API. A page of components is a long read, so expect these to cost more than a section conversion."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: number of sections, 2: number of words.
-#: assets/js/admin-import.js:1614
+#: assets/js/admin-import.js:1791
 msgid "read — %1$d sections, %2$d words"
 msgstr ""
 
-#: assets/js/admin-import.js:1625
+#: assets/js/admin-import.js:1802
 msgid "Read"
 msgstr ""
 
-#: assets/js/admin-import.js:1625
+#: assets/js/admin-import.js:1802
 msgid "Read again"
 msgstr ""
 
-#: assets/js/admin-import.js:1657
+#: assets/js/admin-import.js:1834
 msgid "Stop after this page"
 msgstr ""
 
-#: assets/js/admin-import.js:1660
+#: assets/js/admin-import.js:1837
 msgid "Stopping — the page being read now will finish."
 msgstr ""
 
-#: assets/js/admin-import.js:1671
+#: assets/js/admin-import.js:1848
 msgid "Read every page"
 msgstr ""
 
 #. translators: %d: number of pages not read yet.
-#: assets/js/admin-import.js:1690
+#: assets/js/admin-import.js:1867
 msgid "Read the %d not read yet"
 msgstr ""
 
 #. translators: %d: number of routes.
-#: assets/js/admin-import.js:1713
+#: assets/js/admin-import.js:1890
 msgid "%d route takes a parameter and is not read"
 msgid_plural "%d routes take a parameter and are not read"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:1723
+#: assets/js/admin-import.js:1900
 msgid "These are one page per record — a product, a project, an order. Build the site from the pages above first, then add the records as posts or products; a single rendered example of each would be a page of one arbitrary record."
 msgstr ""
 
-#: assets/js/admin-import.js:1994
+#: assets/js/admin-import.js:2222
 msgid "an empty app shell, nothing to convert"
 msgstr ""
 
 #. translators: 1: number of sections, 2: number of words.
-#: assets/js/admin-import.js:1997
+#: assets/js/admin-import.js:2225
 msgid "%1$d sections · %2$d words"
 msgstr ""
 
 #. translators: %d: number of sections chosen for the build.
-#: assets/js/admin-import.js:2033
+#: assets/js/admin-import.js:2261
 msgid "%d section kept"
 msgid_plural "%d sections kept"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:2047 assets/js/admin-import.js:2978
-msgid "Language"
-msgstr ""
-
-#: assets/js/admin-import.js:2077
+#: assets/js/admin-import.js:2305
 msgid "Previewing"
 msgstr ""
 
-#: assets/js/admin-import.js:2095
+#: assets/js/admin-import.js:2323
 msgid "2. Pick a page"
 msgstr ""
 
+#. translators: %d: pages the application's router names.
+#: assets/js/admin-import.js:2351
+msgid "This archive is a JavaScript application: its markup only exists once a browser has run it. Its router names %d page, though — read it below and it becomes an ordinary page here."
+msgid_plural "This archive is a JavaScript application: its markup only exists once a browser has run it. Its router names %d pages, though — read them below and each becomes an ordinary page here."
+msgstr[0] ""
+msgstr[1] ""
+
 #. translators: %s: comma-separated language codes.
-#: assets/js/admin-import.js:2124
+#: assets/js/admin-import.js:2388
 msgid "This design has %s. Import one language first; the others can be added later with a translation plugin."
 msgstr ""
 
 #. translators: 1: total files not unpacked, 2: how many of them are listed.
-#: assets/js/admin-import.js:2140
+#: assets/js/admin-import.js:2404
 msgid "%1$d files were not unpacked (first %2$d listed)"
 msgstr ""
 
 #. translators: 1: total files not unpacked, 2: how many of them are listed. */ __( '%1$d files were not unpacked (first %2$d listed)', 'qwerty-soft-signal' ), total, listed ) : sprintf( /* translators: %d: number of files.
-#: assets/js/admin-import.js:2146
+#: assets/js/admin-import.js:2410
 msgid "%d files were not unpacked"
 msgstr ""
 
 #. translators: %d: number of pages.
-#: assets/js/admin-import.js:2173
+#: assets/js/admin-import.js:2437
 msgid "Filter %d pages…"
 msgstr ""
 
 #. translators: %d: number of pages.
-#: assets/js/admin-import.js:2213
+#: assets/js/admin-import.js:2477
 msgid "%d admin or utility page"
 msgid_plural "%d admin and utility pages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:2219
+#: assets/js/admin-import.js:2483
 msgid "Screens the design ships for running the site rather than for visiting it. Import them if you want them; most sites do not."
 msgstr ""
 
 #. translators: %s: page title.
-#: assets/js/admin-import.js:2251
+#: assets/js/admin-import.js:2515
 msgid "Converting “%s” for the preview…"
 msgstr ""
 
 #. translators: 1: page title, 2: number of sections.
-#: assets/js/admin-import.js:2277
+#: assets/js/admin-import.js:2541
 msgid "“%1$s” previewed: %2$d sections. Untick any you do not want built."
 msgstr ""
 
-#: assets/js/admin-import.js:2334
+#: assets/js/admin-import.js:2598
 msgid "Converting the page…"
 msgstr ""
 
 #. translators: %s: page title.
-#: assets/js/admin-import.js:2354
+#: assets/js/admin-import.js:2618
 msgid "Preview: %s"
 msgstr ""
 
 #. translators: %s: page title. */ __( 'Preview: %s', 'qwerty-soft-signal' ), data.title ), } ), el( 'p', { class: 'qs-import__compare-count', role: 'status', text: sprintf( /* translators: 1: sections included, 2: sections on the page.
-#: assets/js/admin-import.js:2363
+#: assets/js/admin-import.js:2627
 msgid "%1$d of %2$d sections included"
 msgstr ""
 
-#: assets/js/admin-import.js:2373
+#: assets/js/admin-import.js:2637
 msgid "Show the design beside it"
 msgstr ""
 
-#: assets/js/admin-import.js:2383
+#: assets/js/admin-import.js:2647
 msgid "Include all"
 msgstr ""
 
-#: assets/js/admin-import.js:2394
+#: assets/js/admin-import.js:2658
 msgid "Close preview"
 msgstr ""
 
-#: assets/js/admin-import.js:2409
+#: assets/js/admin-import.js:2673
 msgid "Left: the design as uploaded. Right: the same section as blocks. Untick a section to leave it out of this page."
 msgstr ""
 
-#: assets/js/admin-import.js:2410
+#: assets/js/admin-import.js:2674
 msgid "Each section as the built page will show it, full width. Untick one to leave it out."
 msgstr ""
 
-#: assets/js/admin-import.js:2463
+#: assets/js/admin-import.js:2727
 msgid "Nothing here could become blocks."
 msgstr ""
 
-#: assets/js/admin-import.js:2470
+#: assets/js/admin-import.js:2734
 msgid "Include"
 msgstr ""
 
-#: assets/js/admin-import.js:2489
+#: assets/js/admin-import.js:2753
 msgid "Design"
 msgstr ""
 
-#: assets/js/admin-import.js:2493
+#: assets/js/admin-import.js:2757
 msgid "Blocks"
 msgstr ""
 
-#: assets/js/admin-import.js:2503
+#: assets/js/admin-import.js:2767
 msgid "Reading the page…"
 msgstr ""
 
 #. translators: 1: number of sections on the page, 2: number already converted.
-#: assets/js/admin-import.js:2533
+#: assets/js/admin-import.js:2797
 msgid "Found %1$d sections. %2$d were already converted earlier and have been brought back."
 msgstr ""
 
 #. translators: 1: number of sections on the page, 2: number already converted. */ __( 'Found %1$d sections. %2$d were already converted earlier and have been brought back.', 'qwerty-soft-signal' ), result.sections.length, resumed ) : sprintf( /* translators: %d: number of sections.
-#: assets/js/admin-import.js:2539
+#: assets/js/admin-import.js:2803
 msgid "Found %d sections on this page."
 msgstr ""
 
-#: assets/js/admin-import.js:2560
+#: assets/js/admin-import.js:2824
 msgid "Checking whether Claude can be reached from here…"
 msgstr ""
 
-#: assets/js/admin-import.js:2568
+#: assets/js/admin-import.js:2832
 msgid "Claude Code is not installed here and no API key has been saved."
 msgstr ""
 
-#: assets/js/admin-import.js:2576
+#: assets/js/admin-import.js:2840
 msgid "Correcting each section with Claude is not available yet. "
 msgstr ""
 
-#: assets/js/admin-import.js:2578
+#: assets/js/admin-import.js:2842
 msgid "Open Connection settings above to set it up. The build below works without it."
 msgstr ""
 
 #. translators: 1: number of model calls, 2: estimated cost.
-#: assets/js/admin-import.js:2600
+#: assets/js/admin-import.js:2864
 msgid "About %1$d call to the Anthropic API — roughly %2$s at list prices, billed to your key."
 msgid_plural "About %1$d calls to the Anthropic API — roughly %2$s at list prices, billed to your key."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of model calls.
-#: assets/js/admin-import.js:2611
+#: assets/js/admin-import.js:2875
 msgid "About %d call through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed."
 msgid_plural "About %d calls through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:2623
+#: assets/js/admin-import.js:2887
 msgid "This runs on the server, page by page. Close the tab if you like — the account below is waiting when you come back."
 msgstr ""
 
-#: assets/js/admin-import.js:2624
+#: assets/js/admin-import.js:2888
 msgid "Expect minutes rather than seconds — a page is built section by section. Closing the tab stops it where it got to, and what it has already made stays."
 msgstr ""
 
-#: assets/js/admin-import.js:2687
+#: assets/js/admin-import.js:2951
 msgid "Straight through"
 msgstr ""
 
-#: assets/js/admin-import.js:2688
+#: assets/js/admin-import.js:2952
 msgid "The structural conversion only. Free, offline, and finished in seconds."
 msgstr ""
 
 #. translators: %d: number of pages.
-#: assets/js/admin-import.js:2691
+#: assets/js/admin-import.js:2955
 msgid "%d page · seconds · no cost"
 msgid_plural "%d pages · seconds · no cost"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:2696
+#: assets/js/admin-import.js:2960
 msgid "Corrected and checked"
 msgstr ""
 
-#: assets/js/admin-import.js:2697
+#: assets/js/admin-import.js:2961
 msgid "Every section is converted, then read by Claude and fixed where the conversion misread the design, then rendered and compared with the original until the two agree."
 msgstr ""
 
 #. translators: 1: number of sections, 2: how long it takes, 3: cost or "no cost".
-#: assets/js/admin-import.js:2700
+#: assets/js/admin-import.js:2964
 msgid "%1$d sections · %2$s · %3$s"
 msgstr ""
 
-#: assets/js/admin-import.js:2703
+#: assets/js/admin-import.js:2967
 msgid "no cost"
 msgstr ""
 
 #. translators: %d: how many languages the design ships.
-#: assets/js/admin-import.js:2770
+#: assets/js/admin-import.js:3034
 msgid "All %d languages"
 msgstr ""
 
 #. translators: %d: how many pages will be built.
-#: assets/js/admin-import.js:2830
+#: assets/js/admin-import.js:3094
 msgid "Build the whole site, corrected and reviewed — %d page"
 msgid_plural "Build the whole site, corrected and reviewed — %d pages"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: how many pages will be built. */ _n( 'Build the whole site, corrected and reviewed — %d page', 'Build the whole site, corrected and reviewed — %d pages', n, 'qwerty-soft-signal' ), n ) : sprintf( /* translators: %d: how many pages will be built.
-#: assets/js/admin-import.js:2840
+#: assets/js/admin-import.js:3104
 msgid "Build the whole site, corrected by Claude — %d page"
 msgid_plural "Build the whole site, corrected by Claude — %d pages"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: how many pages will be built. */ _n( 'Build the whole site, corrected by Claude — %d page', 'Build the whole site, corrected by Claude — %d pages', n, 'qwerty-soft-signal' ), n ); } return sprintf( /* translators: %d: how many pages will be built.
-#: assets/js/admin-import.js:2852
+#: assets/js/admin-import.js:3116
 msgid "Build the whole site — %d page"
 msgid_plural "Build the whole site — %d pages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:2876
+#: assets/js/admin-import.js:3140
 msgid "There is no markup in this design to build from."
 msgstr ""
 
-#: assets/js/admin-import.js:2884
+#: assets/js/admin-import.js:3148
 msgid "Build the site"
 msgstr ""
 
-#: assets/js/admin-import.js:2887
+#: assets/js/admin-import.js:3151
 msgid "Every page as a draft, with its images, menu, header and footer. Undo it and run it again as often as you like — nothing here is one-way."
 msgstr ""
 
-#: assets/js/admin-import.js:2899
+#: assets/js/admin-import.js:3163
 msgid "Install ACF Pro before building."
 msgstr ""
 
-#: assets/js/admin-import.js:2903
+#: assets/js/admin-import.js:3167
 msgid "Each section of the design becomes a block with editable fields, and ACF Pro is what provides those fields. Built without it, the pages would be correct and could never be edited — every section would read \"Unsupported\" in the editor. Activate the plugin and this button turns on by itself."
 msgstr ""
 
-#: assets/js/admin-import.js:2909
+#. translators: %s: a number of hours.
+#: assets/js/admin-import.js:317
+msgid "about %s hours"
+msgstr ""
+
+#: assets/js/admin-import.js:3173
 msgid "Go to Plugins"
 msgstr ""
 
 #. translators: %d: how many blocks are missing.
-#: assets/js/admin-import.js:2933
+#: assets/js/admin-import.js:3197
 msgid "%d block this site uses is missing from the theme."
 msgid_plural "%d blocks this site uses are missing from the theme."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:2944
+#: assets/js/admin-import.js:3208
 msgid "Your pages are untouched — the sections read \"Unsupported\" only because the theme files behind them are gone. They can be written again from the design and from the pages themselves, without asking the model anything."
 msgstr ""
 
-#: assets/js/admin-import.js:2950
+#: assets/js/admin-import.js:3214
 msgid "Restore the missing blocks"
 msgstr ""
 
-#: assets/js/admin-import.js:2989
+#: assets/js/admin-import.js:323
+msgid "about an hour"
+msgstr ""
+
+#: assets/js/admin-import.js:3253
 msgid "Leave this off to review each page as a draft first."
 msgstr ""
 
-#: assets/js/admin-import.js:2990
+#: assets/js/admin-import.js:3254
 msgid "Publish straight away"
 msgstr ""
 
-#: assets/js/admin-import.js:3037
+#. translators: %s: a number of hours. */ __( 'about %s hours', 'qwerty-soft-signal' ), String( Math.round( hours * 2 ) / 2 ) ); } if ( seconds >= 2400 ) { return __( 'about an hour', 'qwerty-soft-signal' ); } return sprintf( /* translators: %d: a number of minutes.
+#: assets/js/admin-import.js:328
+msgid "about %d minutes"
+msgstr ""
+
+#: assets/js/admin-import.js:3301
 msgid "Dashboards, queues, upload forms and download areas the design ships for running the site."
 msgstr ""
 
 #. translators: %d: how many admin and utility screens the design ships.
-#: assets/js/admin-import.js:3040
+#: assets/js/admin-import.js:3304
 msgid "Build the %d admin screen too"
 msgid_plural "Build the %d admin and utility screens too"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: pages that exist only in the other languages.
-#: assets/js/admin-import.js:3088
+#: assets/js/admin-import.js:3352
 msgid "%d is the same page in another language — set Language to “All” above to build it too."
 msgid_plural "%d are the same pages in the other languages — set Language to “All” above to build them too."
 msgstr[0] ""
 msgstr[1] ""
 
-#. translators: %s: a number of hours.
-#: assets/js/admin-import.js:310
-msgid "about %s hours"
-msgstr ""
-
 #. translators: %d: admin and utility screens left out.
-#: assets/js/admin-import.js:3103
+#: assets/js/admin-import.js:3367
 msgid "%d is an admin screen, listed below — tick the box to build it too."
 msgid_plural "%d are admin and utility screens, listed below — tick the box to build them too."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: pages that will be built, 2: pages in the design.
-#: assets/js/admin-import.js:3119
+#: assets/js/admin-import.js:3383
 msgid "Building %1$d of the %2$d pages in this design."
 msgstr ""
 
-#: assets/js/admin-import.js:3149
+#: assets/js/admin-import.js:3419
 msgid "Delete everything and start over"
 msgstr ""
 
-#: assets/js/admin-import.js:3150
+#: assets/js/admin-import.js:3420
 msgid "Removes only what an import created. Your own pages are left alone."
 msgstr ""
 
-#: assets/js/admin-import.js:316
-msgid "about an hour"
-msgstr ""
-
-#. translators: %s: a number of hours. */ __( 'about %s hours', 'qwerty-soft-signal' ), String( Math.round( hours * 2 ) / 2 ) ); } if ( seconds >= 2400 ) { return __( 'about an hour', 'qwerty-soft-signal' ); } return sprintf( /* translators: %d: a number of minutes.
-#: assets/js/admin-import.js:321
-msgid "about %d minutes"
-msgstr ""
-
-#: assets/js/admin-import.js:3234
+#: assets/js/admin-import.js:3504
 msgid "Stop"
 msgstr ""
 
-#: assets/js/admin-import.js:3251 assets/js/admin-import.js:3544
+#: assets/js/admin-import.js:3521 assets/js/admin-import.js:3814
 msgid "Continue the build"
 msgstr ""
 
-#: assets/js/admin-import.js:3270 assets/js/admin-import.js:3303
+#: assets/js/admin-import.js:3540 assets/js/admin-import.js:3573
 msgid "Build progress"
 msgstr ""
 
-#: assets/js/admin-import.js:3277
+#: assets/js/admin-import.js:3547
 msgid "Delete what was built so far"
 msgstr ""
 
-#: assets/js/admin-import.js:3290
+#: assets/js/admin-import.js:3560
 msgid "Dismiss"
 msgstr ""
 
 #. translators: %d: steps in total.
-#: assets/js/admin-import.js:3341
+#: assets/js/admin-import.js:3611
 msgid "All %d steps done"
 msgstr ""
 
 #. translators: 1: the page being built, 2: pages in total.
-#: assets/js/admin-import.js:3367
+#: assets/js/admin-import.js:3637
 msgid "Page %1$d of %2$d"
 msgstr ""
 
 #. translators: 1: the page being built, 2: pages in total. */ __( 'Page %1$d of %2$d', 'qwerty-soft-signal' ), at + 1, pages.length ) : sprintf( /* translators: 1: the step being worked on, 2: steps in total.
-#: assets/js/admin-import.js:3373
+#: assets/js/admin-import.js:3643
 msgid "Step %1$d of %2$d"
 msgstr ""
 
-#: assets/js/admin-import.js:3378
+#: assets/js/admin-import.js:3648
 msgid "Starting…"
 msgstr ""
 
-#: assets/js/admin-import.js:3388
+#: assets/js/admin-import.js:3658
 msgid "%d%%"
 msgstr ""
 
-#: assets/js/admin-import.js:3409
+#: assets/js/admin-import.js:3679
 msgid "Stopped"
 msgstr ""
 
-#: assets/js/admin-import.js:3410
+#: assets/js/admin-import.js:3680
 msgid "Running on the server"
 msgstr ""
 
-#: assets/js/admin-import.js:3443
+#: assets/js/admin-import.js:3713
 msgid "Working…"
 msgstr ""
 
-#: assets/js/admin-import.js:3471
+#: assets/js/admin-import.js:3741
 msgid "Continuing the build. This step runs in this tab, so leave the page open until it finishes."
 msgstr ""
 
-#: assets/js/admin-import.js:3488
+#: assets/js/admin-import.js:3758
 msgid "The build has stopped."
 msgstr ""
 
 #. translators: 1: how long ago the last step finished, 2: the step that should be next.
-#: assets/js/admin-import.js:3494
+#: assets/js/admin-import.js:3764
 msgid "The last step finished %1$s ago and the next one, %2$s, has not started."
 msgstr ""
 
 #. translators: 1: how long ago the last step finished, 2: the step that should be next. */ __( 'The last step finished %1$s ago and the next one, %2$s, has not started.', 'qwerty-soft-signal' ), elapsed( 0, stall.quiet ), stall.label ) : sprintf( /* translators: 1: what was being built, 2: how long it has been silent.
-#: assets/js/admin-import.js:3503
+#: assets/js/admin-import.js:3773
 msgid "Nothing has happened on %1$s for %2$s."
 msgstr ""
 
 #. translators: 1: attempts made, 2: attempts allowed.
-#: assets/js/admin-import.js:3524
+#: assets/js/admin-import.js:3794
 msgid "It has been started %1$d of %2$d times. After that the build sets it aside, carries on with the rest and comes back to it at the end."
 msgstr ""
 
-#: assets/js/admin-import.js:3531
+#: assets/js/admin-import.js:3801
 msgid "It has used every attempt. Continuing now sets this step aside and moves the build on to the rest; it gets one more go once everything else is built."
 msgstr ""
 
-#: assets/js/admin-import.js:3564
+#: assets/js/admin-import.js:3834
 msgid "The next step is booked, but nothing on this site has run it. That is usually WP-Cron: it only fires when somebody makes a request, so a build left alone on a quiet site waits instead of working."
 msgstr ""
 
-#: assets/js/admin-import.js:3571
+#: assets/js/admin-import.js:3841
 msgid "Nothing is booked to start it, so the build is waiting where it stands."
 msgstr ""
 
-#: assets/js/admin-import.js:3574
+#: assets/js/admin-import.js:3844
 msgid "The step ended without finishing and left nothing behind to carry the build on."
 msgstr ""
 
-#: assets/js/admin-import.js:3601
+#: assets/js/admin-import.js:3871
 msgid "Continuing the build…"
 msgstr ""
 
-#: assets/js/admin-import.js:3620 assets/js/admin-import.js:3903
+#: assets/js/admin-import.js:3890 assets/js/admin-import.js:4173
 msgid "The build is complete."
 msgstr ""
 
-#: assets/js/admin-import.js:3621
+#: assets/js/admin-import.js:3891
 msgid "That step is done and the build has moved on."
 msgstr ""
 
-#: assets/js/admin-import.js:3656
+#: assets/js/admin-import.js:3926
 msgid "Writing the missing blocks…"
 msgstr ""
 
 #. translators: 1: how many blocks were written, 2: how many pages they appear on.
-#: assets/js/admin-import.js:3667
+#: assets/js/admin-import.js:3937
 msgid "%1$d block written. Your pages draw the design again — reload one to see it."
 msgid_plural "%1$d blocks written, across %2$d pages. Your pages draw the design again — reload one to see it."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:3708
+#: assets/js/admin-import.js:3978
 msgid "Stopping the build…"
 msgstr ""
 
-#: assets/js/admin-import.js:3718
+#: assets/js/admin-import.js:3988
 msgid "Build stopped. Everything it made is on the site, and Continue picks up where it left off."
 msgstr ""
 
-#: assets/js/admin-import.js:3805 assets/js/admin-import.js:4014
+#: assets/js/admin-import.js:4075 assets/js/admin-import.js:4284
 msgid "View"
 msgstr ""
 
-#: assets/js/admin-import.js:3810 assets/js/admin-import.js:4015
+#: assets/js/admin-import.js:4080 assets/js/admin-import.js:4285
 msgid "Edit"
 msgstr ""
 
-#: assets/js/admin-import.js:3859
+#: assets/js/admin-import.js:412 assets/js/admin-import.js:2305 assets/js/admin-import.js:5491
+msgid "Preview"
+msgstr ""
+
+#: assets/js/admin-import.js:4129
 msgid "%ds"
 msgstr ""
 
 #. translators: %d: a number of seconds. */ return sprintf( __( '%ds', 'qwerty-soft-signal' ), total ); } return sprintf( /* translators: 1: minutes, 2: seconds, always two digits.
-#: assets/js/admin-import.js:3864
+#: assets/js/admin-import.js:4134
 msgid "%1$d:%2$s"
 msgstr ""
 
-#: assets/js/admin-import.js:3908
+#: assets/js/admin-import.js:4178
 msgid "Cancelled after %1$d of %2$d steps."
 msgstr ""
 
-#: assets/js/admin-import.js:3912
+#: assets/js/admin-import.js:4182
 msgid "Reading the design, importing fonts and pictures…"
 msgstr ""
 
-#: assets/js/admin-import.js:3919
+#: assets/js/admin-import.js:4189
 msgid "%1$d of %2$d steps done."
 msgstr ""
 
 #. translators: 1: steps done, 2: steps in total. */ return sprintf( __( '%1$d of %2$d steps done.', 'qwerty-soft-signal' ), job.done, job.total ); } if ( job.smart && 'page' === step.key ) { return sprintf( /* translators: %s: what is being built.
-#: assets/js/admin-import.js:3925
+#: assets/js/admin-import.js:4195
 msgid "Building %s with Claude, section by section — this one takes a while."
 msgstr ""
 
-#: assets/js/admin-import.js:3931
+#: assets/js/admin-import.js:4201
 msgid "Building %s."
 msgstr ""
 
-#: assets/js/admin-import.js:3959
+#: assets/js/admin-import.js:4229
 msgid "Structure only — the button above"
 msgstr ""
 
-#: assets/js/admin-import.js:3960
+#: assets/js/admin-import.js:4230
 msgid "Free, instant, no account. Headings, lists, cards and images become blocks."
 msgstr ""
 
-#: assets/js/admin-import.js:3963
+#: assets/js/admin-import.js:4233
 msgid "Your Claude subscription"
 msgstr ""
 
-#: assets/js/admin-import.js:3964
+#: assets/js/admin-import.js:4234
 msgid "Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button."
 msgstr ""
 
-#: assets/js/admin-import.js:3967
+#: assets/js/admin-import.js:4237
 msgid "An Anthropic API key"
 msgstr ""
 
-#: assets/js/admin-import.js:3968
+#: assets/js/admin-import.js:4238
 msgid "One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above."
 msgstr ""
 
-#: assets/js/admin-import.js:3971
+#: assets/js/admin-import.js:4241
 msgid "Claude Code on this machine"
 msgstr ""
 
-#: assets/js/admin-import.js:3972
+#: assets/js/admin-import.js:4242
 msgid "The same automatic route, run through the claude command instead of the API — so it uses the subscription that command is signed in to and adds nothing to a bill. Only possible where the binary is installed and PHP may start it, which usually means your own machine rather than a client's hosting."
 msgstr ""
 
-#: assets/js/admin-import.js:3984
+#: assets/js/admin-import.js:4254
 msgid "Four ways to convert — which should I use?"
 msgstr ""
 
-#: assets/js/admin-import.js:4002
+#: assets/js/admin-import.js:4272
 msgid "Page"
 msgstr ""
 
-#: assets/js/admin-import.js:4003
+#: assets/js/admin-import.js:4273
 msgid "Status"
 msgstr ""
 
-#: assets/js/admin-import.js:4004
+#: assets/js/admin-import.js:4274
 msgid "Actions"
 msgstr ""
 
-#: assets/js/admin-import.js:4023
+#: assets/js/admin-import.js:4293
 msgid "Publish"
 msgstr ""
 
 #. translators: %d: number of sections.
-#: assets/js/admin-import.js:4046
+#: assets/js/admin-import.js:4316
 msgid "(%d sections)"
 msgstr ""
 
-#: assets/js/admin-import.js:405 assets/js/admin-import.js:2077 assets/js/admin-import.js:5221
-msgid "Preview"
-msgstr ""
-
 #. translators: %d: number of sections kept as the design wrote them.
-#: assets/js/admin-import.js:4064
+#: assets/js/admin-import.js:4334
 msgid "%d became a block of its own, markup and styles as the design wrote them."
 msgid_plural "%d became blocks of their own, markup and styles as the design wrote them."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of sections Claude changed.
-#: assets/js/admin-import.js:4081
+#: assets/js/admin-import.js:4351
 msgid "Claude corrected %d of them."
 msgid_plural "Claude corrected %d of them."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:4093
+#: assets/js/admin-import.js:4363
 msgid "What Claude changed"
 msgstr ""
 
-#: assets/js/admin-import.js:4102
+#: assets/js/admin-import.js:4372
 msgid "Draft"
 msgstr ""
 
-#: assets/js/admin-import.js:4102
+#: assets/js/admin-import.js:4372
 msgid "Published"
 msgstr ""
 
-#: assets/js/admin-import.js:4113
+#: assets/js/admin-import.js:4383
 msgid "The site is built."
 msgstr ""
 
 #. translators: 1: number of calls, 2: tokens in, 3: tokens out, 4: what the same work would cost through the API.
-#: assets/js/admin-import.js:4124
+#: assets/js/admin-import.js:4394
 msgid "%1$d calls through Claude Code on this machine — %2$s tokens in, %3$s out. Nothing was billed; the same work through the API would have cost about %4$s."
 msgstr ""
 
 #. translators: 1: number of calls, 2: tokens in, 3: tokens out, 4: cost.
-#: assets/js/admin-import.js:4135
+#: assets/js/admin-import.js:4405
 msgid "%1$d calls to the Anthropic API — %2$s tokens in, %3$s out, about %4$s."
 msgstr ""
 
 #. translators: %d: number of replies that were thrown away.
-#: assets/js/admin-import.js:4154
+#: assets/js/admin-import.js:4424
 msgid "%d reply came back as markup the editor would have rejected, so that section kept its structural conversion. The section says so in its own notes."
 msgid_plural "%d replies came back as markup the editor would have rejected, so those sections kept their structural conversions. Each section says so in its own notes."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of draft pages.
-#: assets/js/admin-import.js:4176
+#: assets/js/admin-import.js:4446
 msgid "Publish %d draft page"
 msgid_plural "Publish all %d draft pages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:4198 assets/js/admin-import.js:4207
+#: assets/js/admin-import.js:4468 assets/js/admin-import.js:4477
 msgid "Edit in the Site Editor"
 msgstr ""
 
-#: assets/js/admin-import.js:4213
+#: assets/js/admin-import.js:4483
 msgid "Header, footer and menu:"
 msgstr ""
 
-#: assets/js/admin-import.js:4218 assets/js/admin-import.js:5206
+#: assets/js/admin-import.js:4488 assets/js/admin-import.js:5476
 msgid "Worth checking:"
 msgstr ""
 
-#: assets/js/admin-import.js:4222
+#: assets/js/admin-import.js:4492
 msgid "What the build made"
 msgstr ""
 
-#: assets/js/admin-import.js:4223
+#: assets/js/admin-import.js:4493
 msgid "Pages built"
 msgstr ""
 
-#: assets/js/admin-import.js:4229
+#: assets/js/admin-import.js:4499
 msgid "Publishing…"
 msgstr ""
 
 #. translators: %d: number of pages published.
-#: assets/js/admin-import.js:4253
+#: assets/js/admin-import.js:4523
 msgid "Published %d page."
 msgid_plural "Published %d pages."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:4286
+#: assets/js/admin-import.js:4556
 msgid "Starting the build — reading the design, importing fonts and images…"
 msgstr ""
 
-#: assets/js/admin-import.js:4332
+#: assets/js/admin-import.js:4602
 msgid "The build is running on the server. You can close this tab — it will carry on, and this screen picks it up again when you come back."
 msgstr ""
 
 #. translators: 1: pages built, 2: images imported.
-#: assets/js/admin-import.js:4419
+#: assets/js/admin-import.js:4689
 msgid "Built and published %1$d pages and imported %2$d images. Look through them, then edit anything you like."
 msgstr ""
 
 #. translators: 1: pages built, 2: images imported. */ __( 'Built and published %1$d pages and imported %2$d images. Look through them, then edit anything you like.', 'qwerty-soft-signal' ), report.pages.length, report.media ) : sprintf( /* translators: 1: pages built, 2: images imported.
-#: assets/js/admin-import.js:4425
+#: assets/js/admin-import.js:4695
 msgid "Built %1$d draft pages and imported %2$d images. Nothing is public yet — review each page and publish it when it is ready."
 msgstr ""
 
-#: assets/js/admin-import.js:4431
+#: assets/js/admin-import.js:4701
 msgid "The uploaded design has been removed from uploads."
 msgstr ""
 
-#: assets/js/admin-import.js:4449
+#: assets/js/admin-import.js:4719
 msgid "Undoing…"
 msgstr ""
 
-#: assets/js/admin-import.js:4473
+#: assets/js/admin-import.js:4743
 msgid "Nothing was removed: no page, menu or image on this site carries the import mark. Anything you see was made another way and has to go from Pages, in the trash sense."
 msgstr ""
 
 #. translators: 1: pages removed, 2: images removed.
-#: assets/js/admin-import.js:4483
+#: assets/js/admin-import.js:4753
 msgid "Removed %1$d pages and %2$d images. The site is back to how it was."
 msgstr ""
 
-#: assets/js/admin-import.js:4540
+#: assets/js/admin-import.js:4810
 msgid "This cannot be undone. Only content this import created is removed; pages, menus and images you made yourself stay exactly as they are."
 msgstr ""
 
-#: assets/js/admin-import.js:4551
+#: assets/js/admin-import.js:4821
 msgid "This removes the unpacked design files from uploads. Pages, images and fonts already imported are not affected — only the source archive goes, and it can be uploaded again."
 msgstr ""
 
-#: assets/js/admin-import.js:4588
+#: assets/js/admin-import.js:4858
 msgid "Delete now"
 msgstr ""
 
-#: assets/js/admin-import.js:4597
+#: assets/js/admin-import.js:4867
 msgid "Cancel"
 msgstr ""
 
 #. translators: %s: the word to type, in capitals.
-#: assets/js/admin-import.js:4607
+#: assets/js/admin-import.js:4877
 msgid "Type %s to confirm"
 msgstr ""
 
-#: assets/js/admin-import.js:4622
+#: assets/js/admin-import.js:4892
 msgid "Removing the uploaded designs…"
 msgstr ""
 
 #. translators: %s: comma-separated folder names.
-#: assets/js/admin-import.js:4649
+#: assets/js/admin-import.js:4919
 msgid "Could not remove: %s. The folder is still in uploads — the web server may not have permission to delete it, or a file inside is open. Delete it by hand over FTP or in the file manager."
 msgstr ""
 
 #. translators: %d: number of designs removed.
-#: assets/js/admin-import.js:4661
+#: assets/js/admin-import.js:4931
 msgid "Removed %d uploaded design."
 msgid_plural "Removed %d uploaded designs."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:4685
+#: assets/js/admin-import.js:4955
 msgid "Clean up"
 msgstr ""
 
 #. translators: 1: pages, 2: template parts, 3: menus, 4: images, 5: fonts, 6: section blocks.
-#: assets/js/admin-import.js:4692
+#: assets/js/admin-import.js:4962
 msgid "This import created %1$d pages, %2$d template parts, %3$d menus, %4$d images, %5$d fonts, %6$d section blocks."
 msgstr ""
 
-#: assets/js/admin-import.js:4705
+#: assets/js/admin-import.js:4975
 msgid "Your own content is untouched — only what the import added is removed."
 msgstr ""
 
-#: assets/js/admin-import.js:4717
+#: assets/js/admin-import.js:4987
 msgid "Delete everything this import added"
 msgstr ""
 
 #. translators: 1: number of uploaded designs, 2: their size on disk.
-#: assets/js/admin-import.js:4735
+#: assets/js/admin-import.js:5005
 msgid "%1$d uploaded design is still unpacked in uploads, taking %2$s."
 msgid_plural "%1$d uploaded designs are still unpacked in uploads, taking %2$s."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: size on disk.
-#: assets/js/admin-import.js:4752
+#: assets/js/admin-import.js:5022
 msgid "Remove uploaded designs (%s)"
 msgstr ""
 
-#: assets/js/admin-import.js:4767
+#: assets/js/admin-import.js:5037
 msgid "Clean up a previous import"
 msgstr ""
 
-#: assets/js/admin-import.js:4797
+#: assets/js/admin-import.js:5067
 msgid "No cost"
 msgstr ""
 
 #. translators: %d: number of sections not yet converted.
-#: assets/js/admin-import.js:4802
+#: assets/js/admin-import.js:5072
 msgid "to convert %d remaining section"
 msgid_plural "to convert %d remaining sections"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:4814
+#: assets/js/admin-import.js:5084
 msgid "Nothing billed"
 msgstr ""
 
 #. translators: 1: number of conversions run, 2: input tokens, 3: output tokens.
-#: assets/js/admin-import.js:4819
+#: assets/js/admin-import.js:5089
 msgid "so far · %1$d conversions · %2$s in, %3$s out"
 msgstr ""
 
 #. translators: %d: minutes until the hourly limit resets.
-#: assets/js/admin-import.js:4836
+#: assets/js/admin-import.js:5106
 msgid "conversions left this hour · resets in %d min"
 msgstr ""
 
-#: assets/js/admin-import.js:4852
+#: assets/js/admin-import.js:5122
 msgid "Estimated from published list prices — not a bill."
 msgstr ""
 
-#: assets/js/admin-import.js:4853
+#: assets/js/admin-import.js:5123
 msgid "Run through Claude Code on this machine, on its signed-in subscription. The token counts are what it used, not what it charged."
 msgstr ""
 
-#: assets/js/admin-import.js:4874
+#: assets/js/admin-import.js:5144
 msgid "3. Convert each section"
 msgstr ""
 
-#: assets/js/admin-import.js:4877
+#: assets/js/admin-import.js:5147
 msgid "Convert a section, read what it says, then keep it. Nothing reaches your site until you press Keep."
 msgstr ""
 
 #. translators: 1: number of sections, 2: estimated cost.
-#: assets/js/admin-import.js:4887
+#: assets/js/admin-import.js:5157
 msgid "Convert %1$d section — about %2$s"
 msgid_plural "Convert %1$d sections — about %2$s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin-import.js:4891
+#: assets/js/admin-import.js:5161
 msgid "Every section is converted"
 msgstr ""
 
-#: assets/js/admin-import.js:4898
+#: assets/js/admin-import.js:5168
 msgid "Keep the whole page as a draft"
 msgstr ""
 
-#: assets/js/admin-import.js:4904
+#: assets/js/admin-import.js:5174
 msgid "Draft page created."
 msgstr ""
 
-#: assets/js/admin-import.js:4907 assets/js/admin-import.js:5230
+#: assets/js/admin-import.js:5177 assets/js/admin-import.js:5500
 msgid "Open it in the editor"
 msgstr ""
 
-#: assets/js/admin-import.js:4928
+#: assets/js/admin-import.js:5198
 msgid "Paste the whole reply here, including the opening [ and closing ]"
 msgstr ""
 
-#: assets/js/admin-import.js:4950
+#: assets/js/admin-import.js:5220
 msgid "The brief — select it all and copy"
 msgstr ""
 
-#: assets/js/admin-import.js:4957
+#: assets/js/admin-import.js:5227
 msgid "Copy the brief"
 msgstr ""
 
-#: assets/js/admin-import.js:4964
+#: assets/js/admin-import.js:5234
 msgid "No API key? Use your own Claude subscription instead"
 msgstr ""
 
-#: assets/js/admin-import.js:4966
+#: assets/js/admin-import.js:5236
 msgid "Copy the brief for this page."
 msgstr ""
 
-#: assets/js/admin-import.js:4967
+#: assets/js/admin-import.js:5237
 msgid "Paste it into your Claude conversation and send it."
 msgstr ""
 
-#: assets/js/admin-import.js:4968
+#: assets/js/admin-import.js:5238
 msgid "Copy the whole reply and paste it below."
 msgstr ""
 
-#: assets/js/admin-import.js:4976
+#: assets/js/admin-import.js:5246
 msgid "Claude’s reply"
 msgstr ""
 
-#: assets/js/admin-import.js:4983
+#: assets/js/admin-import.js:5253
 msgid "Read the reply"
 msgstr ""
 
-#: assets/js/admin-import.js:4996
+#: assets/js/admin-import.js:5266
 msgid "Building the brief…"
 msgstr ""
 
 #. translators: 1: number of sections, 2: size in kilobytes.
-#: assets/js/admin-import.js:5010
+#: assets/js/admin-import.js:5280
 msgid "Brief for %1$d sections, %2$d KB."
 msgstr ""
 
-#: assets/js/admin-import.js:5017
+#: assets/js/admin-import.js:5287
 msgid "Copied — now paste it into Claude"
 msgstr ""
 
-#: assets/js/admin-import.js:5018
+#: assets/js/admin-import.js:5288
 msgid "Copied. Paste it into Claude, then bring the reply back."
 msgstr ""
 
-#: assets/js/admin-import.js:5033
+#: assets/js/admin-import.js:5303
 msgid "The browser would not copy it, so it is in the box below — select it all and copy it yourself."
 msgstr ""
 
-#: assets/js/admin-import.js:5074
+#: assets/js/admin-import.js:5344
 msgid "The browser refused to copy."
 msgstr ""
 
-#: assets/js/admin-import.js:5081
+#: assets/js/admin-import.js:5351
 msgid "Paste the reply first."
 msgstr ""
 
-#: assets/js/admin-import.js:5085
+#: assets/js/admin-import.js:5355
 msgid "Reading the reply…"
 msgstr ""
 
 #. translators: 1: sections received, 2: sections expected.
-#: assets/js/admin-import.js:5103
+#: assets/js/admin-import.js:5373
 msgid "Read %1$d sections, but this page has %2$d. Check the reply was not cut off."
 msgstr ""
 
 #. translators: 1: sections received, 2: sections expected. */ __( 'Read %1$d sections, but this page has %2$d. Check the reply was not cut off.', 'qwerty-soft-signal' ), data.received, data.expected ), true ); return; } say( sprintf( /* translators: %d: number of sections.
-#: assets/js/admin-import.js:5115
+#: assets/js/admin-import.js:5385
 msgid "Read %d sections. Review each one before keeping it."
 msgstr ""
 
 #. translators: 1: element name, 2: word count, 3: image count.
-#: assets/js/admin-import.js:5134
+#: assets/js/admin-import.js:5404
 msgid "<%1$s> · %2$d words · %3$d images"
 msgstr ""
 
-#: assets/js/admin-import.js:5149
+#: assets/js/admin-import.js:541
+msgid "Something went wrong."
+msgstr ""
+
+#: assets/js/admin-import.js:5419
 msgid "Convert this section"
 msgstr ""
 
-#: assets/js/admin-import.js:5156
+#: assets/js/admin-import.js:5426
 msgid "Converting…"
 msgstr ""
 
-#: assets/js/admin-import.js:5163 assets/js/admin-import.js:5190
+#: assets/js/admin-import.js:5433 assets/js/admin-import.js:5460
 msgid "Try again"
 msgstr ""
 
-#: assets/js/admin-import.js:5184
+#: assets/js/admin-import.js:5454
 msgid "This conversion was refused:"
 msgstr ""
 
-#: assets/js/admin-import.js:5201
+#: assets/js/admin-import.js:5471
 msgid "You will be able to edit:"
 msgstr ""
 
-#: assets/js/admin-import.js:5211
+#: assets/js/admin-import.js:5481
 msgid "Quality notes:"
 msgstr ""
 
-#: assets/js/admin-import.js:5229
+#: assets/js/admin-import.js:5499
 msgid "Kept."
 msgstr ""
 
-#: assets/js/admin-import.js:5242
+#: assets/js/admin-import.js:5512
 msgid "Keep as a reusable section"
 msgstr ""
 
-#: assets/js/admin-import.js:5250
+#: assets/js/admin-import.js:5520
 msgid "Keep as a draft page"
 msgstr ""
 
 #. translators: %d: how many sections the same note was made about.
-#: assets/js/admin-import.js:5327
+#: assets/js/admin-import.js:5597
 msgid "× %d sections"
 msgstr ""
 
-#: assets/js/admin-import.js:534
-msgid "Something went wrong."
-msgstr ""
-
-#: assets/js/admin-import.js:5343
+#: assets/js/admin-import.js:5613
 msgid "Add your Anthropic API key in the connection settings first."
 msgstr ""
 
 #. translators: %s: section name.
-#: assets/js/admin-import.js:5349
+#: assets/js/admin-import.js:5619
 msgid "Converting “%s”…"
 msgstr ""
 
+#: assets/js/admin-import.js:564
+msgid "Upload and read the design"
+msgstr ""
+
 #. translators: %s: section name.
-#: assets/js/admin-import.js:5376
+#: assets/js/admin-import.js:5646
 msgid "“%s” converted. Review it below."
 msgstr ""
 
 #. translators: %s: section name. */ __( '“%s” converted. Review it below.', 'qwerty-soft-signal' ), section.label ) : sprintf( /* translators: %s: section name.
-#: assets/js/admin-import.js:5377
+#: assets/js/admin-import.js:5647
 msgid "“%s” was refused — see the reason below."
 msgstr ""
 
-#: assets/js/admin-import.js:5411
+#: assets/js/admin-import.js:5681
 msgid "All sections converted. Review each one before keeping it."
 msgstr ""
 
-#: assets/js/admin-import.js:5439
+#: assets/js/admin-import.js:5709
 msgid "Convert at least one section first."
 msgstr ""
 
-#: assets/js/admin-import.js:5445
+#: assets/js/admin-import.js:5715
 msgid "Building the page…"
 msgstr ""
 
+#: assets/js/admin-import.js:573
+msgid "Choose a ZIP file first."
+msgstr ""
+
 #. translators: 1: sections kept, 2: sections left out.
-#: assets/js/admin-import.js:5468
+#: assets/js/admin-import.js:5738
 msgid "Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused."
 msgstr ""
 
 #. translators: 1: sections kept, 2: sections left out. */ __( 'Draft page created from %1$d sections. %2$d were left out because they are not converted or were refused.', 'qwerty-soft-signal' ), ordered.length, skipped ), true ); return; } say( sprintf( /* translators: %d: number of sections.
-#: assets/js/admin-import.js:5480
+#: assets/js/admin-import.js:5750
 msgid "Draft page created from all %d sections."
 msgstr ""
 
-#: assets/js/admin-import.js:5501
+#: assets/js/admin-import.js:5771
 msgid "Saved."
 msgstr ""
 
-#: assets/js/admin-import.js:557
-msgid "Upload and read the design"
-msgstr ""
-
-#: assets/js/admin-import.js:566
-msgid "Choose a ZIP file first."
-msgstr ""
-
-#: assets/js/admin-import.js:574
+#: assets/js/admin-import.js:581
 msgid "Unpacking and reading the design…"
 msgstr ""
 
 #. translators: 1: number of files, 2: number of pages.
-#: assets/js/admin-import.js:582
+#: assets/js/admin-import.js:589
 msgid "Read %1$d files and found %2$d pages."
 msgstr ""
 
-#: assets/js/admin-import.js:596
+#: assets/js/admin-import.js:603
 msgid "Design archive (.zip)"
 msgstr ""
 
-#: assets/js/admin-import.js:602
+#: assets/js/admin-import.js:609
 msgid "1. Upload the design"
 msgstr ""
 
 #. translators: 1: number of pages, 2: number of images.
-#: assets/js/admin-import.js:639
+#: assets/js/admin-import.js:646
 msgid "%1$d pages · %2$d images"
 msgstr ""
 
-#: assets/js/admin-import.js:647
+#: assets/js/admin-import.js:654
 msgid "JavaScript app — no markup to convert"
 msgstr ""
 
-#: assets/js/admin-import.js:656
+#: assets/js/admin-import.js:663
 msgid "Already uploaded"
 msgstr ""
 
-#: assets/js/admin-import.js:924
+#: assets/js/admin-import.js:932
 msgid "Saved. These instructions lead every brief for this design."
 msgstr ""
 
-#: assets/js/admin-import.js:942
+#: assets/js/admin-import.js:950
 msgid "For example: the real home page is index-v2.html · keep the English copy, ignore the German folder · the prices are placeholders, leave them out · use the dark header everywhere"
 msgstr ""
 
-#: assets/js/admin-import.js:953
+#: assets/js/admin-import.js:961
 msgid "Save instructions"
 msgstr ""
 
-#: assets/js/admin-import.js:953
+#: assets/js/admin-import.js:961
 msgid "Saved"
 msgstr ""
 
-#: assets/js/admin-import.js:960
+#: assets/js/admin-import.js:968
 msgid "Your instructions for this design"
 msgstr ""
 
-#: assets/js/admin-import.js:963
+#: assets/js/admin-import.js:971
 msgid "Anything you write here is put at the top of every brief Claude works from, above the design's own documentation, and it stays with this design. Plain sentences are enough."
 msgstr ""
-
-#. translators: %d: number of pages the build made.
-#: assets/js/admin-import.js:995
-msgid "The last build is finished — %d page is on the site."
-msgid_plural "The last build is finished — %d pages are on the site."
-msgstr[0] ""
-msgstr[1] ""
 
 #: blocks/colophon/block.json
 msgctxt "block title"
@@ -1683,35 +1733,35 @@ msgstr ""
 msgid "Read more"
 msgstr ""
 
-#: inc/Modules/Blocks.php:133
+#: inc/Modules/Blocks.php:226
 msgid "Qwerty Soft blocks"
 msgstr ""
 
-#: inc/Modules/Blocks.php:176 inc/Support/BrandKit.php:178
+#: inc/Modules/Blocks.php:269 inc/Support/BrandKit.php:178
 msgid "Card"
 msgstr ""
 
-#: inc/Modules/Blocks.php:182
+#: inc/Modules/Blocks.php:275
 msgid "Glass panel"
 msgstr ""
 
-#: inc/Modules/Blocks.php:188
+#: inc/Modules/Blocks.php:281
 msgid "Card columns"
 msgstr ""
 
-#: inc/Modules/Blocks.php:194 inc/Support/BrandKit.php:185
+#: inc/Modules/Blocks.php:287 inc/Support/BrandKit.php:185
 msgid "Signal glow"
 msgstr ""
 
-#: inc/Modules/Blocks.php:200
+#: inc/Modules/Blocks.php:293
 msgid "Aurora gradient"
 msgstr ""
 
-#: inc/Modules/Blocks.php:212
+#: inc/Modules/Blocks.php:305
 msgid "Check list"
 msgstr ""
 
-#: inc/Modules/Blocks.php:225
+#: inc/Modules/Blocks.php:318
 msgid "Signal line"
 msgstr ""
 
@@ -1812,224 +1862,481 @@ msgstr ""
 msgid "Site content saved. Every page showing the header or footer now says this."
 msgstr ""
 
+#: inc/Modules/Handbook.php:100
+msgid "For developers"
+msgstr ""
+
+#: inc/Modules/Handbook.php:119
+msgid "What this theme does"
+msgstr ""
+
+#: inc/Modules/Handbook.php:120
+msgid "A designer hands over a ZIP file. This theme turns it into a working website — the pages, the menu, the header and footer, the pictures — usually within the hour, looking the way the designer drew it. Nothing about it is a mock-up: every page is real, editable, and yours."
+msgstr ""
+
+#: inc/Modules/Handbook.php:122
+msgid "Why it matters to the company"
+msgstr ""
+
+#: inc/Modules/Handbook.php:124
+msgid "Speed: a delivered design becomes a reviewable site the same day, not after weeks of hand work."
+msgstr ""
+
+#: inc/Modules/Handbook.php:125
+msgid "Faithfulness you can check: after every build the theme measures each page against the design and says what share of the design’s content it renders. A weak page is flagged, not discovered by a client."
+msgstr ""
+
+#: inc/Modules/Handbook.php:126
+msgid "Anyone can edit: texts on the pages, the words in the header and footer, the menu — all through normal WordPress screens. No developer needed for day-to-day changes."
+msgstr ""
+
+#: inc/Modules/Handbook.php:127
+msgid "No lock-in: it runs on any ordinary hosting. One plugin is required (ACF); WooCommerce is added only when the design has a product catalogue."
+msgstr ""
+
+#: inc/Modules/Handbook.php:128
+msgid "Reversible: one button removes everything an import created and touches nothing else."
+msgstr ""
+
+#: inc/Modules/Handbook.php:129
+msgid "It learns: every import is written into a journal — what the archive was, what went wrong, how faithful the result measured — and the next import starts from that knowledge."
+msgstr ""
+
+#: inc/Modules/Handbook.php:134
+msgid "How an import goes, in four steps"
+msgstr ""
+
+#: inc/Modules/Handbook.php:137
+msgid "Upload the design ZIP on Appearance → Design import. A design already uploaded appears as a card — click it to continue with it."
+msgstr ""
+
+#: inc/Modules/Handbook.php:139
+msgid "The upload form with an already-uploaded design below it"
+msgstr ""
+
+#: inc/Modules/Handbook.php:140
+msgid "Step 1 — the upload form, with designs already on the server listed under it."
+msgstr ""
+
+#: inc/Modules/Handbook.php:144
+msgid "Choose. The screen lists every page the build will make, the language, and — when the archive carries more than one site — a box per site. Untick what you do not want; nothing here is one-way."
+msgstr ""
+
+#: inc/Modules/Handbook.php:146
+msgid "The build panel: conversion mode, language picker, the archive’s sites, and the list of pages the build will make"
+msgstr ""
+
+#: inc/Modules/Handbook.php:147
+msgid "Step 2 — mode, language, which of the archive’s sites, and exactly which pages."
+msgstr ""
+
+#: inc/Modules/Handbook.php:150
+msgid "Build. It runs on the server; the tab can be closed. The screen narrates every step, shows a progress bar, and flags anything worth checking."
+msgstr ""
+
+#: inc/Modules/Handbook.php:152
+msgid "Review and publish. The pages arrive as drafts with View and Edit beside each; publishing sets the front page and the menu for you. The list below the table says what the build measured and what deserves a look."
+msgstr ""
+
+#: inc/Modules/Handbook.php:154
+msgid "The Pages built table with View and Edit actions and the Worth checking list"
+msgstr ""
+
+#: inc/Modules/Handbook.php:155
+msgid "Step 4 — every page the build made, its status, and what the build suggests checking."
+msgstr ""
+
+#: inc/Modules/Handbook.php:160
+msgid "Languages and translations"
+msgstr ""
+
+#: inc/Modules/Handbook.php:161
+msgid "A design that ships in several languages (en, ru, zh…) is imported one language at a time — or all at once. To add a language later: open Design import, click the design, set Language to the one you want (or to “All”), and press Build again. The new pages are created beside the existing ones, and the language switcher in the header connects to them by itself. The pages already built are left exactly as they are."
+msgstr ""
+
+#: inc/Modules/Handbook.php:162
+msgid "Translating what YOU wrote (an edited heading, a new paragraph) is ordinary page editing: open the page in the other language and change its text. The theme’s own admin screens are translation-ready too — a translation file per language under languages/ is all they need."
+msgstr ""
+
+#: inc/Modules/Handbook.php:164
+msgid "Where to change what"
+msgstr ""
+
+#: inc/Modules/Handbook.php:166
+msgid "Open the page in the editor; every section is a block with its texts in the sidebar."
+msgstr ""
+
+#: inc/Modules/Handbook.php:166
+msgid "Text on a page"
+msgstr ""
+
+#: inc/Modules/Handbook.php:167
+msgid "Appearance → Site content. One edit reaches every page."
+msgstr ""
+
+#: inc/Modules/Handbook.php:167
+msgid "Header and footer words"
+msgstr ""
+
+#: inc/Modules/Handbook.php:168
+msgid "Appearance → Editor → Navigation."
+msgstr ""
+
+#: inc/Modules/Handbook.php:168
+msgid "The menu"
+msgstr ""
+
+#: inc/Modules/Handbook.php:169
+msgid "Products"
+msgstr ""
+
+#: inc/Modules/Handbook.php:169
+msgid "The Products menu (WooCommerce), when the site has a catalogue."
+msgstr ""
+
+#: inc/Modules/Handbook.php:173
+msgid "The Site content screen with the footer’s texts and links as plain form fields"
+msgstr ""
+
+#: inc/Modules/Handbook.php:174
+msgid "Appearance → Site content: the header’s and footer’s words as ordinary form fields."
+msgstr ""
+
+#: inc/Modules/Handbook.php:179
+msgid "What this site has learned so far"
+msgstr ""
+
+#: inc/Modules/Handbook.php:192
+msgid "The pipeline, in one paragraph"
+msgstr ""
+
+#: inc/Modules/Handbook.php:193
+msgid "DesignArchive unpacks and indexes the ZIP. A JavaScript application first gets its pages read out of the router (SourceProject finds the routes, SourceRenderer has the model render each into a static page). SectionSplitter cuts every page into sections; SectionPlan reads each section structurally and, on a smart build, PlanReview asks the model only what code cannot know — field names and whether a repeat is the site’s records. BlockWriter then writes each section as its own block under blocks/design/: render.php holds the archive’s markup verbatim with fields planted into it, fields.json one ACF field per editable thing, and every block names the canonical stylesheet of ITS source — a handoff carrying several sites gets one canonical file per source, loaded only where its pages stand. SiteAssembler makes the pages, the chrome and the menu; BuildRunner drives it in bursts on WP-Cron; finish() rewrites every link to the built pages, measures each page against the design, and writes the Lessons journal entry."
+msgstr ""
+
+#: inc/Modules/Handbook.php:195
+msgid "The rules that keep it faithful"
+msgstr ""
+
+#: inc/Modules/Handbook.php:197
+msgid "Markup is copied, never translated; classes are never renamed. The stylesheet stays whole per source — slicing it per block re-runs the cascade in block order."
+msgstr ""
+
+#: inc/Modules/Handbook.php:198
+msgid "A listing that cannot name its record is a repeater; repeated rows whose unplanned text differs become one verbatim block; a listing shows as many records as the design drew cards, and its cards link to their records’ permalinks."
+msgstr ""
+
+#: inc/Modules/Handbook.php:199
+msgid "Chrome and menu come from the first page that actually has a body — never an application shell. Directory links resolve to that language’s home, inside the site."
+msgstr ""
+
+#: inc/Modules/Handbook.php:200
+msgid "A record type never claims a URL base another post type already owns; it takes its qs- prefixed slug instead."
+msgstr ""
+
+#: inc/Modules/Handbook.php:201
+msgid "Blocks are written once and never regenerated (bumping BlockWriter::VERSION regenerates all of them) — editing a generated render.php by hand is expected and survives."
+msgstr ""
+
+#: inc/Modules/Handbook.php:204
+msgid "When it misbehaves"
+msgstr ""
+
+#: inc/Modules/Handbook.php:207
+msgid "The build goes quiet"
+msgstr ""
+
+#: inc/Modules/Handbook.php:208
+msgid "WP-Cron lost the hand-off between ticks. Any visit to the site revives it (a patrol runs on every request; after 15 quiet minutes the screen offers to continue in-request). Check: is there a qwerty_soft_build_tick booking in the cron option?"
+msgstr ""
+
+#: inc/Modules/Handbook.php:211
+msgid "A page measures thin"
+msgstr ""
+
+#: inc/Modules/Handbook.php:212
+msgid "Read the build’s concerns — the fidelity check names the page and the likely section kind. Usually a repeat/listing judgement: delete that one block’s folder and rebuild the page; the fresh plan applies the current rules."
+msgstr ""
+
+#: inc/Modules/Handbook.php:215
+msgid "Pages render unstyled"
+msgstr ""
+
+#: inc/Modules/Handbook.php:216
+msgid "The pages being built must link their stylesheet — everything downstream reads a page’s styling from its own link tags. For an application, the compiled build CSS (dist/) is the stylesheet of record."
+msgstr ""
+
+#: inc/Modules/Handbook.php:219
+msgid "Record URLs 404"
+msgstr ""
+
+#: inc/Modules/Handbook.php:220
+msgid "A rewrite-slug collision with a plugin (WooCommerce owns product/). The guard prefixes new types automatically; for an old one, remove the block’s type.json and flush permalinks."
+msgstr ""
+
+#: inc/Modules/Handbook.php:223
+msgid "Everything else"
+msgstr ""
+
+#: inc/Modules/Handbook.php:224
+msgid "The import log narrates every step (Appearance → Design import); the Lessons journal holds the last twenty builds’ measurements. Start there, not in the database."
+msgstr ""
+
+#: inc/Modules/Handbook.php:228
+msgid "The gates"
+msgstr ""
+
+#: inc/Modules/Handbook.php:229
+msgid "contrast, block markup, PHPCS (WordPress-Extra, zero tolerance) and the unit suite. Run it after touching anything; the build’s own fidelity measure covers what the gates cannot."
+msgstr ""
+
+#: inc/Modules/Handbook.php:230
+msgid "renders every built page and its design file in the same browser and reports the share of pixels that differ, with a red-overlay image per page (artifacts/pixels/report.html). Words and structure are measured by the build itself; this is the last mile — colour, spacing, fonts. It reads artifacts/pixel-manifest.json: name, live URL, absolute origin path per page."
+msgstr ""
+
+#: inc/Modules/Handbook.php:57
+msgid "Handbook — Qwerty Soft — Signal"
+msgstr ""
+
+#: inc/Modules/Handbook.php:58
+msgid "Handbook"
+msgstr ""
+
+#: inc/Modules/Handbook.php:96
+msgid "Qwerty Soft — Signal, explained"
+msgstr ""
+
+#: inc/Modules/Handbook.php:99
+msgid "For the team"
+msgstr ""
+
 #: inc/Modules/Importer.php:124 inc/Modules/Importer.php:125 inc/Modules/Importer.php:413
 msgid "Design import"
 msgstr ""
 
-#: inc/Modules/Importer.php:1366
+#: inc/Modules/Importer.php:1392
 msgid "Colours, type and spacing read from the design"
 msgstr ""
 
-#: inc/Modules/Importer.php:1370
+#: inc/Modules/Importer.php:1396
 msgid "Fonts and pictures imported"
 msgstr ""
 
-#: inc/Modules/Importer.php:1396
+#: inc/Modules/Importer.php:1422
 msgid "This build needs ACF Pro, which is not active. Every section becomes a block with editable fields, and ACF Pro is what provides those fields — without it the pages would be built correctly and could not be edited afterwards. Install and activate ACF Pro, then build."
 msgstr ""
 
 #. translators: 1: number of pages, 2: number of images.
-#: inc/Modules/Importer.php:1480
+#: inc/Modules/Importer.php:1506
 msgid "Build started: %1$d pages to make, %2$d images already imported."
 msgstr ""
 
-#: inc/Modules/Importer.php:1487
+#: inc/Modules/Importer.php:1525
 msgid "This build runs on the server. You can close this tab; it will keep going."
 msgstr ""
 
-#: inc/Modules/Importer.php:1679
+#: inc/Modules/Importer.php:1717
 msgid "There is no unfinished build on this site to continue."
 msgstr ""
 
-#: inc/Modules/Importer.php:1689
+#: inc/Modules/Importer.php:1727
 msgid "Continued by hand from the import screen."
 msgstr ""
 
-#: inc/Modules/Importer.php:1715
+#: inc/Modules/Importer.php:1753
 msgid "The design these pages were built from is no longer unpacked, so the blocks cannot be rebuilt from it. Upload the archive again and build."
 msgstr ""
 
-#: inc/Modules/Importer.php:1744
+#: inc/Modules/Importer.php:1782
 msgid "There is no build running to stop."
 msgstr ""
 
-#: inc/Modules/Importer.php:1772
+#: inc/Modules/Importer.php:1810
 msgid "That build is no longer running. Start it again."
 msgstr ""
 
-#: inc/Modules/Importer.php:1808 inc/Modules/Importer.php:3069 inc/Modules/Importer.php:3075 inc/Modules/Importer.php:3079
+#: inc/Modules/Importer.php:1846 inc/Modules/Importer.php:3190 inc/Modules/Importer.php:3196 inc/Modules/Importer.php:3200
 msgid "That page is not in this design."
 msgstr ""
 
 #. translators: 1: page file, 2: step number, 3: steps in total.
 #. translators: 1: page file, 2: step, 3: steps in total.
-#: inc/Modules/Importer.php:1815 inc/Support/BuildRunner.php:732
+#: inc/Modules/Importer.php:1853 inc/Support/BuildRunner.php:754
 msgid "Building %1$s — step %2$d of %3$d…"
 msgstr ""
 
 #. translators: 1: page file, 2: the reason.
-#: inc/Modules/Importer.php:1835 inc/Support/BuildRunner.php:752
+#: inc/Modules/Importer.php:1873 inc/Support/BuildRunner.php:774
 msgid "%1$s was not built: %2$s"
 msgstr ""
 
 #. translators: 1: page title, 2: number of sections, 3: seconds taken.
 #. translators: 1: page file, 2: the reason. */ __( '%1$s was not built: %2$s', 'qwerty-soft-signal' ), $file, $result->get_error_message() ) : sprintf( /* translators: 1: page title, 2: sections, 3: seconds.
-#: inc/Modules/Importer.php:1850 inc/Support/BuildRunner.php:758
+#: inc/Modules/Importer.php:1888 inc/Support/BuildRunner.php:780
 msgid "Built “%1$s” — %2$d sections, %3$ds."
 msgstr ""
 
-#: inc/Modules/Importer.php:1862 inc/Support/BuildRunner.php:769
+#: inc/Modules/Importer.php:1900 inc/Support/BuildRunner.php:791
 msgid "Building the menu, the header and the footer…"
 msgstr ""
 
 #. translators: %d: number of pages.
 #. translators: %s: the reason. */ __( 'The build could not be finished: %s', 'qwerty-soft-signal' ), $report->get_error_message() ) ); return false; } if ( empty( $job['keep_archive'] ) ) { DesignArchive::remove( $root ); } ImportLog::add( 'build', sprintf( /* translators: %d: number of pages.
-#: inc/Modules/Importer.php:1903 inc/Support/BuildRunner.php:809
+#: inc/Modules/Importer.php:1941 inc/Support/BuildRunner.php:831
 msgid "The build is done: %d page is on the site."
 msgid_plural "The build is done: %d pages are on the site."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: section number on the page.
-#: inc/Modules/Importer.php:2107 inc/Support/SectionSplitter.php:1540
+#: inc/Modules/Importer.php:2145 inc/Support/SectionSplitter.php:1540
 msgid "Section %d"
-msgstr ""
-
-#: inc/Modules/Importer.php:2320
-msgid "The build had stopped without finishing a step; it was picked up again from where it stood."
 msgstr ""
 
 #: inc/Modules/Importer.php:233
 msgid "There is no file at that path, so it was not saved. Leave the field empty to let the theme look for the claude command itself."
 msgstr ""
 
-#: inc/Modules/Importer.php:2446
+#: inc/Modules/Importer.php:2359
+msgid "The build had stopped without finishing a step; it was picked up again from where it stood."
+msgstr ""
+
+#: inc/Modules/Importer.php:2485
 msgid "The instructions could not be written into the design folder."
 msgstr ""
 
-#: inc/Modules/Importer.php:2454
+#: inc/Modules/Importer.php:2493
 msgid "Your instructions for this design were cleared."
 msgstr ""
 
-#: inc/Modules/Importer.php:2455
+#: inc/Modules/Importer.php:2494
 msgid "Your instructions for this design were saved and will lead every brief."
 msgstr ""
 
-#: inc/Modules/Importer.php:2578
+#: inc/Modules/Importer.php:2617
 msgid "There is no application source in this design to read."
 msgstr ""
 
-#: inc/Modules/Importer.php:2607
+#: inc/Modules/Importer.php:2646
 msgid "That route is not one this application serves."
 msgstr ""
 
 #. translators: 1: route path, 2: component name.
-#: inc/Modules/Importer.php:2632
+#: inc/Modules/Importer.php:2671
 msgid "Reading %1$s out of its components (%2$s)…"
 msgstr ""
 
 #. translators: 1: route path, 2: the reason.
-#: inc/Modules/Importer.php:2648
+#: inc/Modules/Importer.php:2687
 msgid "Could not read %1$s: %2$s"
 msgstr ""
 
 #. translators: 1: route path, 2: the reason. */ __( 'Could not read %1$s: %2$s', 'qwerty-soft-signal' ), (string) $route['path'], $result->get_error_message() ) ); } else { ImportLog::add( 'render', sprintf( /* translators: 1: route, 2: sections, 3: words, 4: seconds taken.
-#: inc/Modules/Importer.php:2658
+#: inc/Modules/Importer.php:2697
 msgid "Read %1$s — %2$d sections, %3$d words, %4$ds."
 msgstr ""
 
+#: inc/Modules/Importer.php:2753
+msgid "That is not a plugin this screen offers."
+msgstr ""
+
+#. translators: %s: what the installer said.
+#: inc/Modules/Importer.php:2773
+msgid "The install did not finish: %s"
+msgstr ""
+
 #. translators: %d: number of component source files found.
-#: inc/Modules/Importer.php:2717
-msgid "This archive is a JavaScript application, not a static design: its HTML holds an empty root element and the pages are assembled in the browser. The markup to convert does not exist on disk — %d component file does, but reading components is not something the structural converter can do. Open the site in a browser, save each finished page as HTML, and upload those."
-msgid_plural "This archive is a JavaScript application, not a static design: its HTML holds an empty root element and the pages are assembled in the browser. The markup to convert does not exist on disk — %d component files do, but reading components is not something the structural converter can do. Open the site in a browser, save each finished page as HTML, and upload those."
+#: inc/Modules/Importer.php:2837
+msgid "This archive is a JavaScript application, not a static design: its HTML holds an empty root element and the pages are assembled in the browser. The markup to convert does not exist on disk — %d component file does, but reading components is not something the structural converter can do. When the application names its pages in a router, they are listed below and Claude reads each one into an ordinary page; failing that, open the site in a browser, save each finished page as HTML, and upload those."
+msgid_plural "This archive is a JavaScript application, not a static design: its HTML holds an empty root element and the pages are assembled in the browser. The markup to convert does not exist on disk — %d component files do, but reading components is not something the structural converter can do. When the application names its pages in a router, they are listed below and Claude reads each one into an ordinary page; failing that, open the site in a browser, save each finished page as HTML, and upload those."
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Modules/Importer.php:2727
+#: inc/Modules/Importer.php:2847
 msgid "No HTML page was found in that archive. A design the importer can read is a folder of .html files with their stylesheets and images beside them."
 msgstr ""
 
-#: inc/Modules/Importer.php:2769
+#: inc/Modules/Importer.php:2889
 msgid "No file was received."
 msgstr ""
 
 #. translators: %s: the server's upload size limit, e.g. "128 MB".
-#: inc/Modules/Importer.php:2779
+#: inc/Modules/Importer.php:2899
 msgid "The upload did not complete. This server accepts files up to %s; a larger archive needs upload_max_filesize and post_max_size raised in php.ini."
 msgstr ""
 
-#: inc/Modules/Importer.php:2800
+#: inc/Modules/Importer.php:2920
 msgid "That file did not arrive as an upload."
 msgstr ""
 
-#: inc/Modules/Importer.php:2806
+#: inc/Modules/Importer.php:2926
 msgid "Please upload a .zip archive."
 msgstr ""
 
 #. translators: 1: file count, 2: size on disk.
-#: inc/Modules/Importer.php:2829
+#: inc/Modules/Importer.php:2949
 msgid "Unpacked %1$d files, %2$s."
 msgstr ""
 
 #. translators: %d: number of archives.
-#: inc/Modules/Importer.php:2844
+#: inc/Modules/Importer.php:2964
 msgid "Opened %d archive found inside the design."
 msgid_plural "Opened %d archives found inside the design."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: how many more entries were skipped.
-#: inc/Modules/Importer.php:2871
+#: inc/Modules/Importer.php:2991
 msgid "And %d more entry was skipped."
 msgid_plural "And %d more entries were skipped."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: how many more entries were skipped. */ _n( 'And %d more entry was skipped.', 'And %d more entries were skipped.', $qsoft_more, 'qwerty-soft-signal' ), $qsoft_more ) ); } if ( array() !== $docs['files'] ) { ImportLog::add( 'read', sprintf( /* translators: 1: number of documents, 2: the first one's name.
-#: inc/Modules/Importer.php:2882
+#: inc/Modules/Importer.php:3002
 msgid "Read %1$d document that came with the design, starting with %2$s."
 msgid_plural "Read %1$d documents that came with the design, starting with %2$s."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: pages found, 2: images found.
-#: inc/Modules/Importer.php:2894
+#: inc/Modules/Importer.php:3014
 msgid "Indexed the design: %1$d pages, %2$d images."
 msgstr ""
 
-#: inc/Modules/Importer.php:2928 inc/Modules/Importer.php:2941 inc/Modules/Importer.php:2945 inc/Support/DesignFonts.php:111 inc/Support/SiteBuilder.php:130
+#: inc/Modules/Importer.php:3049 inc/Modules/Importer.php:3062 inc/Modules/Importer.php:3066 inc/Support/DesignFonts.php:111 inc/Support/SiteBuilder.php:130
 msgid "That design is not on this site."
 msgstr ""
 
-#: inc/Modules/Importer.php:3085
+#: inc/Modules/Importer.php:3206
 msgid "That is not an HTML page."
 msgstr ""
 
-#: inc/Modules/Importer.php:3123
+#: inc/Modules/Importer.php:3244
 msgid "That section is no longer in the page."
 msgstr ""
 
 #. translators: %s: why no model could be reached.
-#: inc/Modules/Importer.php:3189
+#: inc/Modules/Importer.php:3310
 msgid "This is the structural conversion — no model was asked, because none can be reached from here. %s"
 msgstr ""
 
 #. translators: %s: the reason the model could not be reached.
-#: inc/Modules/Importer.php:3214
+#: inc/Modules/Importer.php:3335
 msgid "The model could not be reached, so this is the structural conversion: %s"
 msgstr ""
 
 #. translators: %s: model ID.
-#: inc/Modules/Importer.php:3239
+#: inc/Modules/Importer.php:3360
 msgid "This reply came from %s, which has no known price — its cost is recorded as zero."
 msgstr ""
 
 #. translators: %d: number of conversions allowed per hour.
-#: inc/Modules/Importer.php:3352
+#: inc/Modules/Importer.php:3473
 msgid "That is %d conversions in an hour, which is the limit. Wait a little before continuing."
 msgstr ""
 
-#: inc/Modules/Importer.php:3463
+#: inc/Modules/Importer.php:3584
 msgid "Imported section"
 msgstr ""
 
@@ -2602,6 +2909,30 @@ msgstr ""
 msgid "Qwerty Soft — Signal: outbound HTTPS for the design importer"
 msgstr ""
 
+#: inc/Modules/Translations.php:132
+msgid "Every language"
+msgstr ""
+
+#: inc/Modules/Translations.php:182
+msgid "Translations"
+msgstr ""
+
+#: inc/Modules/Translations.php:206
+msgid "this page"
+msgstr ""
+
+#: inc/Modules/Translations.php:210
+msgid "not built yet"
+msgstr ""
+
+#: inc/Modules/Translations.php:219
+msgid "Build a missing language from Design import."
+msgstr ""
+
+#: inc/Modules/Translations.php:76 assets/js/admin-import.js:2275 assets/js/admin-import.js:3242
+msgid "Language"
+msgstr ""
+
 #. translators: 1: new theme version, 2: required PHP version, 3: current PHP version.
 #: inc/Modules/Updates.php:222
 msgid "Qwerty Soft — Signal %1$s is available but needs PHP %2$s; this server runs PHP %3$s. Ask your host to upgrade PHP, then check for updates again."
@@ -2891,116 +3222,120 @@ msgstr ""
 msgid "The heading levels skip a step, which is confusing for screen reader users."
 msgstr ""
 
-#: inc/Support/BlockRepair.php:186 inc/Support/SiteAssembler.php:1377
+#: inc/Support/BlockRepair.php:218 inc/Support/SiteAssembler.php:1541
 msgid "Site footer"
 msgstr ""
 
-#: inc/Support/BlockRepair.php:186 inc/Support/SiteAssembler.php:1377
+#: inc/Support/BlockRepair.php:218 inc/Support/SiteAssembler.php:1541
 msgid "Site header"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:1046
+#: inc/Support/BlockWriter.php:1018
+msgid "A short paragraph of text, shown in this position."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:1021
+msgid "Choose a page, or paste a web address, and the text shown for it."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:1024
+msgid "The picture shown in this position."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:1027
+msgid "A whole number."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:1030
+msgid "A web address, including https://."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:1033
+msgid "An email address."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:1036
+msgid "A short line of text, shown in this position."
+msgstr ""
+
+#: inc/Support/BlockWriter.php:1301
 msgid "%d piece of text"
 msgid_plural "%d pieces of text"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Support/BlockWriter.php:1051
+#: inc/Support/BlockWriter.php:1306
 msgid "%d picture"
 msgid_plural "%d pictures"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Support/BlockWriter.php:1056
+#: inc/Support/BlockWriter.php:1311
 msgid "%d link"
 msgid_plural "%d links"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Support/BlockWriter.php:1061
+#: inc/Support/BlockWriter.php:1316
 msgid "%d repeating item"
 msgid_plural "%d repeating items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Support/BlockWriter.php:1070
-msgid "A section from the design: %s."
+#: inc/Support/BlockWriter.php:1332
+msgid "Its text is edited in the Block tab of the sidebar."
 msgstr ""
 
-#: inc/Support/BlockWriter.php:1072
-msgid "%1$s, from %2$s in the design."
+#: inc/Support/BlockWriter.php:1337
+msgid "A section from the design: %1$s. %2$s"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:1079
-msgid "%1$s — %2$s."
+#: inc/Support/BlockWriter.php:1339
+msgid "%1$s, from %2$s in the design. %3$s"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:1081
-msgid "%1$s — %2$s. From %3$s in the design."
+#: inc/Support/BlockWriter.php:1346
+msgid "%1$s — %2$s. %3$s"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:1092
+#: inc/Support/BlockWriter.php:1348
+msgid "%1$s — %2$s. From %3$s in the design. %4$s"
+msgstr ""
+
+#: inc/Support/BlockWriter.php:1359
 msgid "design"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:1092
+#: inc/Support/BlockWriter.php:1359
 msgid "section"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:619
+#: inc/Support/BlockWriter.php:839
 msgid "Items"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:623
+#: inc/Support/BlockWriter.php:843
 msgid "Add item"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:624
+#: inc/Support/BlockWriter.php:844
 msgid "One row per repeated entry. Add, remove or reorder rows as needed."
 msgstr ""
 
-#: inc/Support/BlockWriter.php:639
+#: inc/Support/BlockWriter.php:867
 msgid "Show"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:650
+#: inc/Support/BlockWriter.php:878
 msgid "Leave empty to show the most recent automatically."
 msgstr ""
 
-#: inc/Support/BlockWriter.php:655
+#: inc/Support/BlockWriter.php:883
 msgid "How many"
 msgstr ""
 
-#: inc/Support/BlockWriter.php:660
+#: inc/Support/BlockWriter.php:888
 msgid "The most this position will display at once."
-msgstr ""
-
-#: inc/Support/BlockWriter.php:780
-msgid "A short paragraph of text, shown in this position."
-msgstr ""
-
-#: inc/Support/BlockWriter.php:783
-msgid "Choose a page, or paste a web address, and the text shown for it."
-msgstr ""
-
-#: inc/Support/BlockWriter.php:786
-msgid "The picture shown in this position."
-msgstr ""
-
-#: inc/Support/BlockWriter.php:789
-msgid "A whole number."
-msgstr ""
-
-#: inc/Support/BlockWriter.php:792
-msgid "A web address, including https://."
-msgstr ""
-
-#: inc/Support/BlockWriter.php:795
-msgid "An email address."
-msgstr ""
-
-#: inc/Support/BlockWriter.php:798
-msgid "A short line of text, shown in this position."
 msgstr ""
 
 #: inc/Support/BrandKit.php:127
@@ -3027,11 +3362,11 @@ msgstr ""
 msgid "Build stopped. What it has made so far is on the site, and it can be continued."
 msgstr ""
 
-#: inc/Support/BuildRunner.php:492 assets/js/admin-import.js:3940
+#: inc/Support/BuildRunner.php:492 assets/js/admin-import.js:4210
 msgid "the menu, header and footer"
 msgstr ""
 
-#: inc/Support/BuildRunner.php:496 assets/js/admin-import.js:3944
+#: inc/Support/BuildRunner.php:496 assets/js/admin-import.js:4214
 msgid "the front page and links"
 msgstr ""
 
@@ -3040,31 +3375,31 @@ msgid "the build"
 msgstr ""
 
 #. translators: %s: the error.
-#: inc/Support/BuildRunner.php:546
+#: inc/Support/BuildRunner.php:557
 msgid "The background build stopped on an error: %s"
 msgstr ""
 
-#: inc/Support/BuildRunner.php:588
+#: inc/Support/BuildRunner.php:599
 msgid "The design this build was reading is no longer in uploads, so the build stopped."
 msgstr ""
 
 #. translators: 1: what was being built, 2: how many attempts.
-#: inc/Support/BuildRunner.php:696
+#: inc/Support/BuildRunner.php:718
 msgid "%1$s stopped the build %2$d times. Moving on for now; it gets another go once the rest is done."
 msgstr ""
 
 #. translators: 1: what was being built, 2: how many attempts. */ __( '%1$s stopped the build %2$d times. Moving on for now; it gets another go once the rest is done.', 'qwerty-soft-signal' ), '' === $next['file'] ? $next['key'] : $next['file'], self::MAX_ATTEMPTS ) : sprintf( /* translators: %s: what was being built.
-#: inc/Support/BuildRunner.php:702
+#: inc/Support/BuildRunner.php:724
 msgid "%s could not be built on the second pass either, so the build finished without it."
 msgstr ""
 
 #. translators: %s: the reason.
-#: inc/Support/BuildRunner.php:793
+#: inc/Support/BuildRunner.php:815
 msgid "The build could not be finished: %s"
 msgstr ""
 
 #. translators: %d: how many pages are being tried again.
-#: inc/Support/BuildRunner.php:917
+#: inc/Support/BuildRunner.php:939
 msgid "Everything else is built; trying the %d page that was set aside."
 msgid_plural "Everything else is built; trying the %d pages that were set aside."
 msgstr[0] ""
@@ -3299,6 +3634,11 @@ msgstr ""
 msgid "%s could not be written."
 msgstr ""
 
+#. translators: 1: number of catalogue records, 2: the data file they sit in.
+#: inc/Support/DesignNeeds.php:65
+msgid "The archive carries a product catalogue: %1$d records in %2$s. With WooCommerce installed, the build imports them as products — pictures matched by code — and the design’s product listings draw from them."
+msgstr ""
+
 #: inc/Support/DesignTokens.php:256
 msgctxt "Palette colour name"
 msgid "Base"
@@ -3364,12 +3704,57 @@ msgctxt "Palette colour name"
 msgid "Warning"
 msgstr ""
 
-#: inc/Support/DesignType.php:154
+#: inc/Support/DesignType.php:186
 msgid "Add %s"
 msgstr ""
 
-#: inc/Support/DesignType.php:156
+#: inc/Support/DesignType.php:188
 msgid "Edit %s"
+msgstr ""
+
+#. translators: 1: page title, 2: percentage of the design's words the page renders.
+#: inc/Support/Fidelity.php:148
+msgid "\"%1$s\" renders %2$d%% of the words the design wrote on it. A repeated section, a listing, or a table may have lost its rows — compare the page against the design."
+msgstr ""
+
+#. translators: 1: page title, 2: percentage of the design's words the page renders.
+#: inc/Support/Fidelity.php:157
+msgid "\"%1$s\" renders %2$d%% of the design's words — more than the design wrote. A repeated section is probably stamping one row's content onto every row."
+msgstr ""
+
+#. translators: 1: number of earlier imports, 2: what kinds they were.
+#: inc/Support/Lessons.php:161
+msgid "This site has imported %1$d design archives before (%2$s)."
+msgstr ""
+
+#: inc/Support/Lessons.php:167
+msgid "empty application shells listed among the pages"
+msgstr ""
+
+#: inc/Support/Lessons.php:168
+msgid "sections that looked like record listings but could not name their record"
+msgstr ""
+
+#: inc/Support/Lessons.php:169
+msgid "repeated cards whose rows carried different unplanned text"
+msgstr ""
+
+#: inc/Support/Lessons.php:170
+msgid "record types whose URL base another plugin already owned"
+msgstr ""
+
+#: inc/Support/Lessons.php:171
+msgid "archives carrying more than one site, each with its own stylesheet"
+msgstr ""
+
+#. translators: 1: how many times, 2: what was encountered.
+#: inc/Support/Lessons.php:178
+msgid "Earlier archives held %1$d× %2$s."
+msgstr ""
+
+#. translators: 1: how many times, 2: what was encountered. */ __( 'Earlier archives held %1$d× %2$s.', 'qwerty-soft-signal' ), $times, $named[ $what ] ); } } if ( $thin > 0 ) { $sentences .= ' ' . sprintf( /* translators: %d: how many imports measured below the fidelity floor.
+#: inc/Support/Lessons.php:188
+msgid "%d earlier build(s) measured below 80%% of the design's copy on at least one page, always in a repeated or listing section — treat those with extra care."
 msgstr ""
 
 #: inc/Support/ModelGateway.php:135
@@ -3405,31 +3790,36 @@ msgstr ""
 msgid "A JS-rendered visual (%1$s) was replaced with the design's screenshot %2$s. Swap it for a real image or embed when the site is live."
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:1047
+#. translators: 1: what the pair is used for, 2: measured ratio, 3: required ratio.
+#: inc/Support/SiteAssembler.php:1013
+msgid "The design's colours give %1$s a contrast of %2$s:1, below the %3$s:1 that WCAG 2.2 AA asks for. Adjust it in Appearance → Editor → Styles before launch."
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:1211
 msgid "Nothing on this page could be converted."
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:1068
+#: inc/Support/SiteAssembler.php:1232
 msgid "This page had no heading of its own, so its title was added as the top heading."
 msgstr ""
 
 #. translators: %s: section label.
-#: inc/Support/SiteAssembler.php:1242
+#: inc/Support/SiteAssembler.php:1406
 msgid "Section \"%s\" could not be made into a block of its own, so it was converted instead."
 msgstr ""
 
 #. translators: %s: section label. */ __( 'Section "%s" could not be made into a block of its own, so it was converted instead.', 'qwerty-soft-signal' ), (string) $section['label'] ) ); $row['concerns'][] = sprintf( /* translators: %s: section label.
-#: inc/Support/SiteAssembler.php:1249
+#: inc/Support/SiteAssembler.php:1413
 msgid "Section \"%s\" could not be kept as the design wrote it and was converted into theme blocks instead."
 msgstr ""
 
 #. translators: 1: section number, 2: sections on the page, 3: section label.
-#: inc/Support/SiteAssembler.php:1269
+#: inc/Support/SiteAssembler.php:1433
 msgid "Section %1$d of %2$d — %3$s"
 msgstr ""
 
 #. translators: 1: section label, 2: reason.
-#: inc/Support/SiteAssembler.php:1303
+#: inc/Support/SiteAssembler.php:1467
 msgid "Section \"%1$s\" was left out: %2$s"
 msgstr ""
 
@@ -3437,76 +3827,85 @@ msgstr ""
 msgid "No pages were found in that language."
 msgstr ""
 
+#: inc/Support/SiteAssembler.php:1961
+msgid "Main navigation (%s)"
+msgstr ""
+
 #. translators: %s: comma-separated list of "visual → screenshot" pairs.
-#: inc/Support/SiteAssembler.php:2097
+#: inc/Support/SiteAssembler.php:2438
 msgid "JS-rendered visuals were stood in for by screenshots from the design: %s"
 msgstr ""
 
 #. translators: 1: number of lists, 2: number of items.
-#: inc/Support/SiteAssembler.php:2110
+#: inc/Support/SiteAssembler.php:2451
 msgid "%1$d list was filled from the design’s own data (%2$d items)."
 msgid_plural "%1$d lists were filled from the design’s own data (%2$d items)."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: comma-separated list of template variable names.
-#: inc/Support/SiteAssembler.php:2126
+#: inc/Support/SiteAssembler.php:2467
 msgid "The design left placeholders to fill in: %s"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:269
-msgid "That page is not part of this build."
-msgstr ""
-
-#: inc/Support/SiteAssembler.php:2811 inc/Support/SiteAssembler.php:3721
+#: inc/Support/SiteAssembler.php:3160 inc/Support/SiteAssembler.php:4130
 msgid "Footer"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:2811 inc/Support/SiteAssembler.php:3721
+#: inc/Support/SiteAssembler.php:3160 inc/Support/SiteAssembler.php:4130
 msgid "Header"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:3027 assets/js/admin-import.js:4206
+#: inc/Support/SiteAssembler.php:3413 assets/js/admin-import.js:4476
 msgid "Main navigation"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:479
+#: inc/Support/SiteAssembler.php:350
+msgid "That page is not part of this build."
+msgstr ""
+
+#: inc/Support/SiteAssembler.php:565
 msgid "None of the pages could be converted."
 msgstr ""
 
 #. translators: 1: link target, 2: how many links point at it.
-#: inc/Support/SiteAssembler.php:518
+#: inc/Support/SiteAssembler.php:604
 msgid "%2$d link points at \"%1$s\", which is not a page on this site. Check the design or remove the link."
 msgid_plural "%2$d links point at \"%1$s\", which is not a page on this site. Check the design or remove the links."
 msgstr[0] ""
 msgstr[1] ""
 
+#. translators: 1: products created, 2: products updated, 3: how many got a picture.
+#: inc/Support/SiteAssembler.php:672
+msgid "Imported the product catalogue: %1$d products made, %2$d updated, %3$d with a picture."
+msgstr ""
+
+#. translators: 1: lowest page percentage, 2: highest page percentage.
+#: inc/Support/SiteAssembler.php:717
+msgid "Measured against the design: the pages render %1$d–%2$d%% of its copy."
+msgstr ""
+
 #. translators: 1: how many attempts failed, 2: the reason given for the first of them.
-#: inc/Support/SiteAssembler.php:582
+#: inc/Support/SiteAssembler.php:746
 msgid "%1$d section could not be sent to the model and was converted structurally instead: %2$s"
 msgid_plural "%1$d sections could not be sent to the model and were converted structurally instead: %2$s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/Support/SiteAssembler.php:826
+#: inc/Support/SiteAssembler.php:990
 msgid "body text on the page background"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:827
+#: inc/Support/SiteAssembler.php:991
 msgid "secondary text on the page background"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:828
+#: inc/Support/SiteAssembler.php:992
 msgid "text on cards"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:829
+#: inc/Support/SiteAssembler.php:993
 msgid "form field borders"
-msgstr ""
-
-#. translators: 1: what the pair is used for, 2: measured ratio, 3: required ratio.
-#: inc/Support/SiteAssembler.php:849
-msgid "The design's colours give %1$s a contrast of %2$s:1, below the %3$s:1 that WCAG 2.2 AA asks for. Adjust it in Appearance → Editor → Styles before launch."
 msgstr ""
 
 #: inc/Support/SmartConverter.php:435 inc/Support/SmartConverter.php:518
@@ -3563,7 +3962,7 @@ msgstr ""
 msgid "Could not create a folder for the rendered pages inside the design."
 msgstr ""
 
-#: inc/Support/SourceRenderer.php:359
+#: inc/Support/SourceRenderer.php:384
 msgid "The page was rendered but could not be written into the design folder."
 msgstr ""
 

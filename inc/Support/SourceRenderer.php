@@ -343,13 +343,38 @@ final class SourceRenderer {
 
 		$relative = self::RENDER_DIR . '/' . SourceProject::slug( (string) $route['path'] ) . '.html';
 
+		/*
+		 * The model names pictures the way the components do: from the root of
+		 * the archive (`…/public/product-media/x.png`). The page lives one
+		 * folder down in qs-rendered/, and everything that later resolves the
+		 * src — the media relink, the browser in a preview — resolves it
+		 * against the page. One `../` reconciles the two; checked against the
+		 * disk first, so a path that was never root-relative is left alone.
+		 */
+		$root = $this->root;
+		$body = (string) preg_replace_callback(
+			'#(\bsrc\s*=\s*["\'])([^"\':]+)(["\'])#i',
+			static function ( array $found ) use ( $root ): string {
+				$src = ltrim( $found[2] );
+
+				if ( '' === $src || str_starts_with( $src, '../' ) || str_starts_with( $src, '/' ) || ! is_file( $root . '/' . $src ) ) {
+					return $found[0];
+				}
+
+				return $found[1] . '../' . $src . $found[3];
+			},
+			$body
+		);
+
 		$document = "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>"
 			. esc_html( $title )
 			. "</title>\n<meta name=\"qs-rendered-from\" content=\""
 			. esc_attr( (string) $route['component'] . ' — ' . (string) $route['file'] )
 			. "\">\n<meta name=\"qs-route\" content=\""
 			. esc_attr( (string) $route['path'] )
-			. "\">\n</head>\n<body>\n"
+			. "\">\n"
+			. $this->stylesheet_links()
+			. "</head>\n<body>\n"
 			. $body
 			. "\n</body>\n</html>\n";
 
@@ -362,5 +387,73 @@ final class SourceRenderer {
 		}
 
 		return $relative;
+	}
+
+	/**
+	 * The `<link>` lines that put the application's own stylesheet behind the page.
+	 *
+	 * A rendered page is markup written in the application's class names —
+	 * Tailwind utilities, mostly — and everything downstream reads a page's
+	 * styling from the stylesheets it links: the preview frames them, the
+	 * build compiles one canonical file per source out of them. A head with
+	 * no `<link>` therefore previewed, and would have built, as an unstyled
+	 * column of text.
+	 *
+	 * The compiled build output is the stylesheet of record. The `.css`
+	 * beside the components is regularly a Tailwind source file — `@tailwind`
+	 * lines, or v4's `@import "tailwindcss"` — that a browser can do nothing
+	 * with, and whatever real rules it holds are bundled into the build
+	 * output anyway. So build folders are linked when the handoff ships any,
+	 * and plain source files only when nothing compiled came.
+	 *
+	 * @return string Zero or more link elements, newline-terminated.
+	 */
+	private function stylesheet_links(): string {
+		$compiled = array();
+		$plain    = array();
+
+		try {
+			$iterator = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $this->root, \FilesystemIterator::SKIP_DOTS )
+			);
+
+			foreach ( $iterator as $file ) {
+				if ( ! $file->isFile() || 'css' !== strtolower( $file->getExtension() ) || $file->getSize() > 2 * MB_IN_BYTES ) {
+					continue;
+				}
+
+				$path = str_replace( '\\', '/', $file->getPathname() );
+
+				if ( str_contains( $path, '/node_modules/' ) || str_contains( $path, '/' . self::RENDER_DIR . '/' ) ) {
+					continue;
+				}
+
+				$relative = ltrim( substr( $path, strlen( $this->root ) ), '/' );
+
+				if ( 1 === preg_match( '#(^|/)(dist|build|out|_site)(/|$)#i', $relative ) ) {
+					$compiled[] = $relative;
+					continue;
+				}
+
+				$head = (string) file_get_contents( $path, false, null, 0, 4096 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+
+				if ( 1 !== preg_match( '#@tailwind\b|@import\s+["\']tailwindcss#', $head ) ) {
+					$plain[] = $relative;
+				}
+			}
+		} catch ( \Throwable $error ) {
+			unset( $error );
+		}
+
+		sort( $compiled );
+		sort( $plain );
+
+		$links = '';
+
+		foreach ( array() === $compiled ? $plain : $compiled as $relative ) {
+			$links .= '<link rel="stylesheet" href="' . esc_attr( '../' . $relative ) . "\">\n"; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Written into a static HTML file inside the design archive, not into a WordPress page.
+		}
+
+		return $links;
 	}
 }

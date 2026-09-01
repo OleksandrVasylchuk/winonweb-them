@@ -72,6 +72,8 @@
 		utility: false,
 		// Which file wins an address two pages both want: slug => file.
 		pick: {},
+		// Sub-sites of the archive the build leaves out: tree => false.
+		trees: {},
 		// Whether a stalled build is being carried on by hand right now.
 		resuming: false,
 		// The running account of what the importer is doing.
@@ -168,7 +170,7 @@
 		}
 
 		if ( ! state.language ) {
-			return design.pages;
+			return design.pages.filter( treeOn );
 		}
 
 		var prefix = state.language + '/';
@@ -189,8 +191,13 @@
 			return state.utility && isUtility( page ) && ! languageOf( page );
 		} );
 
-		// A design whose files are not filed by language is one site, not none.
-		return dedupeBySlug( dropUtility( inLanguage.length ? inLanguage : design.pages ) );
+		/*
+		 * A design whose files are not filed by language is one site, not
+		 * none; and a sub-site that was unticked is out before addresses are
+		 * settled, so an address its page was holding falls back to the
+		 * version another sub-site ships.
+		 */
+		return dedupeBySlug( dropUtility( ( inLanguage.length ? inLanguage : design.pages ).filter( treeOn ) ) );
 	}
 
 	/*
@@ -665,6 +672,7 @@
 		state.results = {};
 		state.preview = null;
 		state.includes = {};
+		state.trees = {};
 		state.savedPage = null;
 
 		/*
@@ -1415,6 +1423,175 @@
 	}
 
 	/*
+	 * What the archive needs from the site, one button per need.
+	 *
+	 * The advisor read the archive when it was unpacked — a product
+	 * catalogue means WooCommerce, and with it installed the build imports
+	 * the records itself. The button is the whole flow: install, activate,
+	 * set up; the next build does the rest.
+	 */
+	function renderNeeds() {
+		var needs = ( state.design && state.design.needs ) || [];
+
+		if ( ! needs.length ) {
+			return null;
+		}
+
+		var rows = needs.map( function ( need ) {
+			var body = [
+				el( 'strong', { class: 'qs-import__need-name', text: need.name } ),
+				el( 'p', { class: 'qs-import__need-why', text: need.why } ),
+			];
+
+			if ( need.active ) {
+				body.push( el( 'span', { class: 'qs-import__tag is-done', text: __( 'Installed and active — the build will import the catalogue.', 'qwerty-soft-signal' ) } ) );
+			} else {
+				body.push(
+					el( 'button', {
+						type: 'button',
+						class: 'button button-primary',
+						disabled: state.installing ? 'disabled' : null,
+						text: state.installing
+							? __( 'Installing…', 'qwerty-soft-signal' )
+							: sprintf(
+								/* translators: %s: plugin name. */
+								need.installed ? __( 'Activate %s', 'qwerty-soft-signal' ) : __( 'Install %s', 'qwerty-soft-signal' ),
+								need.name
+							),
+						onClick: function () {
+							state.installing = true;
+							render();
+
+							apiFetch( { path: '/qwerty-soft-signal/v1/plugins/install', method: 'POST', data: { key: need.key } } )
+								.then( function () {
+									need.installed = true;
+									need.active = true;
+
+									/* translators: %s: plugin name. */
+									say( sprintf( __( '%s is installed and active.', 'qwerty-soft-signal' ), need.name ) );
+								} )
+								.catch( function ( error ) {
+									say( errorText( error ), true );
+								} )
+								.then( function () {
+									state.installing = false;
+									render();
+								} );
+						},
+					} )
+				);
+			}
+
+			return el( 'li', { class: 'qs-import__need' }, body );
+		} );
+
+		return el( 'div', { class: 'qs-import__needs' }, [
+			el( 'h3', { text: __( 'What this design needs', 'qwerty-soft-signal' ) } ),
+			el( 'ul', { class: 'qs-import__need-list' }, rows ),
+		] );
+	}
+
+	/*
+	 * Which sub-sites of the archive to build, when it holds more than one.
+	 *
+	 * The v17.2 handoff carried the website baseline and an older robert-ai
+	 * prototype side by side, and the build took both without asking. The
+	 * stylesheets no longer fight — each source loads only on its own pages —
+	 * but whether the prototype belongs on the site at all is a decision, and
+	 * this is where it is made. An unticked tree is out entirely: its pages
+	 * go to the build's exclude list, and everything else — stylesheet,
+	 * script, pictures — follows the pages out on its own.
+	 */
+	function renderTreeChoice() {
+		var trees = archiveTrees();
+
+		if ( trees.length < 2 ) {
+			return null;
+		}
+
+		/*
+		 * The folders every tree shares say nothing about the choice, so the
+		 * labels start where the paths part ways.
+		 */
+		var split = trees.map( function ( entry ) {
+			return entry.tree.split( '/' );
+		} );
+
+		var shared = 0;
+
+		while (
+			split.every( function ( parts ) {
+				return parts.length > shared + 1 && parts[ shared ] === split[ 0 ][ shared ];
+			} )
+		) {
+			shared++;
+		}
+
+		var kept = trees.filter( function ( entry ) {
+			return false !== state.trees[ entry.tree ];
+		} ).length;
+
+		var rows = trees.map( function ( entry, index ) {
+			var on = false !== state.trees[ entry.tree ];
+
+			var label = entry.tree
+				.split( '/' )
+				.slice( shared )
+				.filter( function ( part ) {
+					// Export hashes — `z-519e3094` — name nothing a person chose.
+					return part && ! /^z-[0-9a-f]{6,}$/i.test( part );
+				} )
+				.join( ' / ' ) || __( 'The archive root', 'qwerty-soft-signal' );
+
+			var box = el( 'input', {
+				type: 'checkbox',
+				onChange: function ( event ) {
+					if ( ! event.target.checked && kept < 2 ) {
+						// A build of nothing is not a build; the last site stays.
+						event.target.checked = true;
+						return;
+					}
+
+					state.trees[ entry.tree ] = event.target.checked;
+					render();
+				},
+			} );
+
+			box.checked = on;
+
+			return el( 'li', { class: 'qs-import__tree-row' + ( on ? '' : ' is-excluded' ) }, [
+				el( 'label', { class: 'qs-import__tree-label' }, [
+					box,
+					el( 'span', { class: 'qs-import__tree-name', text: label } ),
+					el( 'span', {
+						class: 'qs-import__tree-facts',
+						text: sprintf(
+							/* translators: %d: pages this sub-site holds in the chosen language. */
+							_n( '%d page', '%d pages', entry.pages, 'qwerty-soft-signal' ),
+							entry.pages
+						),
+					} ),
+					0 === index
+						? el( 'span', {
+								class: 'qs-import__tree-main',
+								text: __( 'the biggest — likely the site itself', 'qwerty-soft-signal' ),
+						  } )
+						: null,
+				] ),
+			] );
+		} );
+
+		return el( 'div', { class: 'qs-import__trees' }, [
+			el( 'h4', { text: __( 'This archive holds more than one site', 'qwerty-soft-signal' ) } ),
+			el( 'p', {
+				class: 'description',
+				text: __( 'Each is a complete tree with a stylesheet of its own. Untick one and the build leaves it out entirely — an address its page was holding falls back to the version another site ships.', 'qwerty-soft-signal' ),
+			} ),
+			el( 'ul', { class: 'qs-import__tree-list' }, rows ),
+		] );
+	}
+
+	/*
 	 * Which application in the archive, when the archive holds more than one.
 	 *
 	 * A handoff package is regularly three projects in a trench coat: the
@@ -1797,6 +1974,44 @@
 	}
 
 	/**
+	 * The sub-sites of the archive, for the chosen language, biggest first.
+	 *
+	 * A handoff is regularly the site plus an older prototype or a feature
+	 * blueprint, each a complete tree with a stylesheet of its own. Which of
+	 * them belongs on this WordPress site is a product decision, so each tree
+	 * gets a box on the screen — see renderTreeChoice() — and an unticked one
+	 * is left out of the build entirely.
+	 */
+	function archiveTrees() {
+		var counts = {};
+		var order = [];
+
+		dropUtility( pagesInLanguage() ).forEach( function ( page ) {
+			var tree = treeOf( page );
+
+			if ( undefined === counts[ tree ] ) {
+				counts[ tree ] = 0;
+				order.push( tree );
+			}
+
+			counts[ tree ] += 1;
+		} );
+
+		return order
+			.map( function ( tree ) {
+				return { tree: tree, pages: counts[ tree ] };
+			} )
+			.sort( function ( a, b ) {
+				return b.pages - a.pages;
+			} );
+	}
+
+	/** Whether a page's sub-site is staying in the build. */
+	function treeOn( page ) {
+		return false !== state.trees[ treeOf( page ) ];
+	}
+
+	/**
 	 * One page per address, with the others kept as alternatives.
 	 *
 	 * Two files heading for `/reports/` is not a mistake in the archive; it is
@@ -1892,7 +2107,7 @@
 			}
 		} );
 
-		return design.pages
+		var files = design.pages
 			.filter( function ( page ) {
 				var slug = page.slug || '';
 
@@ -1901,6 +2116,19 @@
 			.map( function ( page ) {
 				return page.file;
 			} );
+
+		/*
+		 * And every page of a sub-site that was unticked, in every language —
+		 * an unticked tree is not an alternative, it is not being built, and
+		 * with its pages go its stylesheet, its script and its pictures.
+		 */
+		design.pages.forEach( function ( page ) {
+			if ( ! treeOn( page ) && -1 === files.indexOf( page.file ) ) {
+				files.push( page.file );
+			}
+		} );
+
+		return files;
 	}
 
 	/** Whether a page belongs to the site or to the tooling around it. */
@@ -2098,9 +2326,45 @@
 		 * What the archive turned out to be, when it is not a static design.
 		 * Said once, here, rather than as "nothing on this page could be
 		 * converted" repeated for every page after a build has run.
+		 *
+		 * The server's sentence ends with "save each page by hand", which is
+		 * the truth only when no router was found. When the application's own
+		 * router has named its pages, the reading panel below does that work —
+		 * telling somebody to save pages from a browser while a button that
+		 * reads them sits one scroll further down was how that advice got
+		 * followed.
 		 */
 		if ( design.diagnosis ) {
-			children.push( el( 'p', { class: 'qs-import__verdict', text: design.diagnosis } ) );
+			var readable =
+				state.source &&
+				state.source.found &&
+				( state.source.routes || [] ).filter( function ( route ) {
+					return ! route.dynamic;
+				} ).length;
+
+			children.push(
+				el( 'p', {
+					class: 'qs-import__verdict',
+					text: readable
+						? sprintf(
+							/* translators: %d: pages the application's router names. */
+							_n(
+								'This archive is a JavaScript application: its markup only exists once a browser has run it. Its router names %d page, though — read it below and it becomes an ordinary page here.',
+								'This archive is a JavaScript application: its markup only exists once a browser has run it. Its router names %d pages, though — read them below and each becomes an ordinary page here.',
+								readable,
+								'qwerty-soft-signal'
+							),
+							readable
+						)
+						: design.diagnosis,
+				} )
+			);
+		}
+
+		var needs = renderNeeds();
+
+		if ( needs ) {
+			children.push( needs );
 		}
 
 		var notes = renderNotes();
@@ -3134,6 +3398,12 @@
 		 * only way anybody found out which three was to spend the hour and
 		 * read the result. This is that hour, moved to before the press.
 		 */
+		var treeChoice = renderTreeChoice();
+
+		if ( treeChoice ) {
+			body.push( treeChoice );
+		}
+
 		var manifest = renderPlanned();
 
 		if ( manifest ) {

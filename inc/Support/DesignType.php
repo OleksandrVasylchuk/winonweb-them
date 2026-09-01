@@ -37,6 +37,27 @@ final class DesignType {
 	public const DIR = '/blocks/design';
 
 	/**
+	 * The post type a listing's records should live in, all things considered.
+	 *
+	 * Usually the design's own type — see key(). Except products: when the
+	 * shop plugin is active, a section listing "products" means WooCommerce's
+	 * products, not a parallel catalogue of the theme's own. Registering
+	 * qs_product beside it once hijacked the shop's permalinks and split the
+	 * records across two admin screens.
+	 *
+	 * @param string $singular What one record is called.
+	 * @return string A post type key, or '' when there is nothing to call it.
+	 */
+	public static function for_singular( string $singular ): string {
+		if ( function_exists( 'post_type_exists' ) && post_type_exists( 'product' )
+			&& 1 === preg_match( '/^(products?|items?|товары?|товар|продукты?|продукт|产品|商品)$/iu', trim( $singular ) ) ) {
+			return 'product';
+		}
+
+		return self::key( $singular );
+	}
+
+	/**
 	 * The post type key for a thing the model named.
 	 *
 	 * Deliberately derived from the word rather than from the section, so that
@@ -51,6 +72,17 @@ final class DesignType {
 		$slug = strtolower( trim( $singular ) );
 		$slug = (string) preg_replace( '/[^a-z0-9]+/', '_', $slug );
 		$slug = trim( $slug, '_' );
+
+		/*
+		 * A singular in another script — «отчёт», 报告 — sanitised to nothing,
+		 * and a listing keyed to '' fell back to querying blog posts while
+		 * its records had nowhere to go: the Chinese store page rendered an
+		 * empty grid. The word still names the type on screen; only the key
+		 * has to be ASCII, and a digest of the word is exactly as stable.
+		 */
+		if ( '' === $slug && '' !== trim( $singular ) ) {
+			$slug = 'x' . substr( md5( strtolower( trim( $singular ) ) ), 0, 10 );
+		}
 
 		if ( '' === $slug ) {
 			return '';
@@ -170,9 +202,38 @@ final class DesignType {
 				 */
 				'supports'     => array( 'title', 'editor', 'excerpt', 'thumbnail', 'revisions' ),
 				'has_archive'  => false,
-				'rewrite'      => array( 'slug' => str_replace( '_', '-', substr( $key, 3 ) ) ),
+				'rewrite'      => array( 'slug' => self::slug_for( $key ) ),
 			)
 		);
+	}
+
+	/**
+	 * The URL slug one record type answers at.
+	 *
+	 * The pretty word first — `qs_product` reads as `/product/…`. Except when
+	 * something on the site already owns that address: WooCommerce's products
+	 * live under `product/`, and a design type claiming the same base won its
+	 * rewrite rules, so every shop permalink resolved to a design record that
+	 * did not exist and the whole catalogue 404ed. A taken base keeps the
+	 * `qs-` prefix instead.
+	 *
+	 * @param string $key Post type key, `qs_` prefixed.
+	 * @return string
+	 */
+	private static function slug_for( string $key ): string {
+		$plain = str_replace( '_', '-', substr( $key, 3 ) );
+
+		foreach ( get_post_types( array(), 'objects' ) as $existing ) {
+			$rewrite = is_object( $existing ) && is_array( $existing->rewrite ?? null ) ? (string) ( $existing->rewrite['slug'] ?? '' ) : '';
+
+			if ( $rewrite === $plain && $existing->name !== $key ) {
+				Lessons::note( 'slug_collision' );
+
+				return str_replace( '_', '-', $key );
+			}
+		}
+
+		return $plain;
 	}
 
 	/**

@@ -90,8 +90,16 @@ final class BlockWriter {
 	 * no posts of a type nobody made. Field groups also lacked instructions,
 	 * repeated same-type fields had no side-by-side widths, and duplicate
 	 * labels ("Link", "Link") had nothing telling them apart.
+	 *
+	 * 8: a block used to enqueue a per-section slice of the design's CSS,
+	 * which re-ran the stylesheet's cascade in block order and let another
+	 * page's duplicate rules win — and left `_canonical.css` written but
+	 * loaded by nothing. A block now names the canonical handle for the
+	 * stylesheet its page actually links (`style` and `viewScript` both), a
+	 * handoff carrying several sites gets a canonical file per source, and no
+	 * slice is written at all.
 	 */
-	public const VERSION = 7;
+	public const VERSION = 8;
 
 	/**
 	 * Where a block's values are kept: with the block, or with the site.
@@ -218,7 +226,7 @@ final class BlockWriter {
 	 * @param array<string, mixed> $plan   What SectionPlan made of it.
 	 * @param string               $slug   Block slug, without the `qs/design-` prefix.
 	 * @param string               $title  What the block is called in the inserter.
-	 * @param string               $css    The rules this section needs, lifted unchanged.
+	 * @param string               $css    Unused since version 8; the block wears the canonical stylesheet instead of a slice.
 	 * @param string               $dir    Directory to write into.
 	 * @param string               $origin Page of the archive this came from.
 	 * @param string               $scope  block to keep values with the block, option to keep them with the site.
@@ -235,7 +243,7 @@ final class BlockWriter {
 		// Site-wide fields share one namespace, so their names carry the block's.
 		self::$prefix = 'option' === self::$scope ? str_replace( '-', '_', $slug ) : '';
 		self::$menu   = $menu;
-		self::$type   = '' !== trim( $singular ) ? DesignType::key( $singular ) : '';
+		self::$type   = '' !== trim( $singular ) ? DesignType::for_singular( $singular ) : '';
 
 		if ( '' === $slug ) {
 			return null;
@@ -247,24 +255,29 @@ final class BlockWriter {
 			return null;
 		}
 
-		$styled = '' !== trim( $css );
+		/*
+		 * No per-section stylesheet. The design's CSS is written against a
+		 * whole page, so a block wears the canonical sheet for the page it
+		 * came from — see `write_canonical()` — and a slice of extracted
+		 * rules is exactly the thing that re-ran the cascade in block order
+		 * and let another page's duplicates win. `$css` still decides
+		 * nothing here; a section with no extracted rules of its own stands
+		 * on the same page the sheet styles.
+		 */
+		unset( $css );
 
 		$files = array(
-			'block.json'  => self::block_json( $slug, $title, $styled, $origin, $plan, self::$says ),
+			'block.json'  => self::block_json( $slug, $title, true, $origin, $plan, self::$says ),
 			'fields.json' => self::fields_json( $slug, $title, $plan, $html ),
 			'render.php'  => $render,
 		);
-
-		if ( $styled ) {
-			$files['style.css'] = self::style_css( $title, $css );
-		}
 
 		/*
 		 * A listing needs somewhere for its records to live. Described beside
 		 * the block that reads them, so that the type goes when the import
 		 * does and a theme update never touches it.
 		 */
-		if ( 'listing' === ( $plan['kind'] ?? '' ) && '' !== trim( $singular ) ) {
+		if ( 'listing' === ( $plan['kind'] ?? '' ) && '' !== trim( $singular ) && 'product' !== self::$type ) {
 			$type = DesignType::describe( $singular, (array) ( $plan['item']['fields'] ?? array() ) );
 
 			if ( null !== $type ) {
@@ -282,7 +295,44 @@ final class BlockWriter {
 			}
 		}
 
+		// A block rewritten from version 7 leaves its slice behind; nothing names it any more.
+		if ( is_file( trailingslashit( $dir ) . 'style.css' ) ) {
+			unlink( trailingslashit( $dir ) . 'style.css' );
+		}
+
 		return $files;
+	}
+
+	/**
+	 * Which canonical source each origin page belongs to, for the current run.
+	 *
+	 * Keyed the way `write()` receives its `$origin`: the page's
+	 * archive-relative file. Set from the job before blocks are written; an
+	 * empty map routes everything to the primary handle, which is also right
+	 * for a design that is one site.
+	 *
+	 * @var array<string, string>
+	 */
+	private static array $sheet_routes = array();
+
+	/**
+	 * Tell the writer which canonical source each page belongs to.
+	 *
+	 * @param array<string, string> $routes Origin file to source key; '' is the primary.
+	 * @return void
+	 */
+	public static function route_styles( array $routes ): void {
+		self::$sheet_routes = $routes;
+	}
+
+	/**
+	 * The registered handle for one canonical source.
+	 *
+	 * @param string $key Source key from `DesignStylesheet::routes()`; '' for the primary.
+	 * @return string
+	 */
+	public static function canonical_handle( string $key = '' ): string {
+		return '' === $key ? self::CANONICAL_HANDLE : self::CANONICAL_HANDLE . '-' . $key;
 	}
 
 	/**
@@ -290,7 +340,7 @@ final class BlockWriter {
 	 *
 	 * @param string               $slug   Block slug.
 	 * @param string               $title  Inserter title.
-	 * @param bool                 $styled Whether a stylesheet was written beside it.
+	 * @param bool                 $styled Whether the block names the design's canonical stylesheet and script.
 	 * @param string               $origin Page of the archive this came from.
 	 * @param array<string, mixed> $plan   What SectionPlan made of it.
 	 * @param array<string, mixed> $says   What the design's markup said, by field name.
@@ -392,7 +442,16 @@ final class BlockWriter {
 		);
 
 		if ( $styled ) {
-			$json['style'] = 'file:./style.css';
+			/*
+			 * The design's stylesheet and script, whole, from the source this
+			 * block's page links — never a per-section slice, and never
+			 * another site's sheet out of the same handoff. The same handle
+			 * names both; WordPress keeps style and script handles apart.
+			 */
+			$handle = self::canonical_handle( (string) ( self::$sheet_routes[ $origin ] ?? '' ) );
+
+			$json['style']      = $handle;
+			$json['viewScript'] = $handle;
 		}
 
 		/*
@@ -433,6 +492,29 @@ final class BlockWriter {
 		$json = json_decode( $raw, true );
 
 		return is_array( $json ) && (int) ( $json['qsDesignVersion'] ?? 0 ) >= self::VERSION;
+	}
+
+	/**
+	 * What one record of a block's listing is called, read back off the disk.
+	 *
+	 * The singular is the model's answer, given once, on the build that
+	 * wrote the block. Re-runs skip the model, arrived with '' and so could
+	 * never seed a record again — a rebuilt page's listing had a type and no
+	 * way to fill it. The answer was sitting in type.json the whole time.
+	 *
+	 * @param string $dir The block's directory.
+	 * @return string The singular, or '' when the block keeps no records.
+	 */
+	public static function singular_of( string $dir ): string {
+		$manifest = trailingslashit( $dir ) . 'type.json';
+
+		if ( ! is_file( $manifest ) ) {
+			return '';
+		}
+
+		$json = json_decode( (string) file_get_contents( $manifest ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- A file inside the theme, written by this class.
+
+		return is_array( $json ) ? (string) ( $json['singular'] ?? '' ) : '';
 	}
 
 	/**
@@ -498,9 +580,42 @@ final class BlockWriter {
 		if ( is_array( $item ) ) {
 			$item['fields'] = self::relabelled( (array) ( $item['fields'] ?? array() ), $rows );
 			$plan['item']   = $item;
+
+			/*
+			 * The kind comes from the block too, not only the names. A fresh
+			 * structural plan judges six uniform cards a listing; the block on
+			 * disk knows what was actually decided when it was written — a
+			 * repeater field means the rows live in the block, `source` and
+			 * `limit` mean they are the site's records. Guessing again on a
+			 * rebuild made values() skip the rows of a section whose template
+			 * was standing there reading them, and every card on the page
+			 * disappeared.
+			 */
+			if ( array() !== $rows ) {
+				$plan['kind'] = 'repeat';
+			} elseif ( self::group_has( $group, 'source' ) && self::group_has( $group, 'limit' ) ) {
+				$plan['kind'] = 'listing';
+			}
 		}
 
 		return $plan;
+	}
+
+	/**
+	 * Whether a stored field group holds a field of one name.
+	 *
+	 * @param array<string, mixed> $group Field group, decoded.
+	 * @param string               $name  Field name.
+	 * @return bool
+	 */
+	private static function group_has( array $group, string $name ): bool {
+		foreach ( (array) ( $group['fields'] ?? array() ) as $field ) {
+			if ( is_array( $field ) && (string) ( $field['name'] ?? '' ) === $name ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -584,22 +699,27 @@ final class BlockWriter {
 	public const CANONICAL_HANDLE = 'qs-design-canonical';
 
 	/**
-	 * Write the design's stylesheet and script once, beside the blocks.
+	 * Write the design's stylesheets and scripts, whole, beside the blocks.
 	 *
-	 * A design ships one stylesheet and one script, written against a whole
-	 * page. Slicing either per section re-runs it in whatever order a page's
-	 * blocks happen to load — for CSS that lets a duplicate rule from another
-	 * page of the archive win the cascade, and for JS it means a handler
-	 * querying for a button that lives in a different block and silently
-	 * finding nothing. So both are kept whole and named by every generated
-	 * `block.json`, which leaves per-block loading intact: a page with no
-	 * imported section on it still fetches neither.
+	 * A design's stylesheet is written against a whole page. Slicing it per
+	 * section re-runs it in whatever order a page's blocks happen to load —
+	 * a duplicate rule from another page wins the cascade, and a script split
+	 * the same way queries for a button that lives in a different block and
+	 * silently finds nothing. So each source is kept whole and named by the
+	 * blocks that came from its pages, which leaves per-block loading intact:
+	 * a page with no imported section on it still fetches nothing.
 	 *
-	 * @param string $css The design's stylesheet, already rewritten.
-	 * @param string $js  The design's scripts, concatenated.
+	 * One file per source, not one file altogether: a handoff carrying two
+	 * sites has two stylesheets that redefine the same classes, and
+	 * concatenating them dressed every page in whichever sorted last. The
+	 * primary source is `_canonical.css`/`.js`; every other becomes
+	 * `_canonical-{key}.css`/`.js` under the matching handle — see
+	 * `canonical_handle()`.
+	 *
+	 * @param array<int, array{key:string, css:string, js:string}> $sources From `DesignStylesheet::compile_sources()`.
 	 * @return array{css:int,js:int} Bytes written.
 	 */
-	public static function write_canonical( string $css, string $js ): array {
+	public static function write_canonical( array $sources ): array {
 		$dir     = self::dir();
 		$written = array(
 			'css' => 0,
@@ -610,35 +730,60 @@ final class BlockWriter {
 			return $written;
 		}
 
-		$css = trim( $css );
+		$kept = array();
 
-		if ( '' !== $css ) {
-			$sheet = $css . "\n\n"
-				. "/*\n"
-				. " * The theme sets `h1,h2,h3,h4,h5,h6{color:var(--wp--preset--color--contrast)}`\n"
-				. " * globally (theme.json's `elements.heading`) and loads it after this\n"
-				. " * stylesheet, so a heading above that leans on inheritance for its\n"
-				. " * colour instead of stating one loses the cascade to the theme's rule.\n"
-				. " * One class more specific than the theme's bare tag selector settles\n"
-				. " * it in the section's favour, on `render.php`'s own root — see\n"
-				. " * `BlockWriter::mark_root()`.\n"
-				. " */\n"
-				. '.' . self::ROOT_CLASS . " h1,\n"
-				. '.' . self::ROOT_CLASS . " h2,\n"
-				. '.' . self::ROOT_CLASS . " h3,\n"
-				. '.' . self::ROOT_CLASS . " h4,\n"
-				. '.' . self::ROOT_CLASS . " h5,\n"
-				. '.' . self::ROOT_CLASS . " h6 {\n"
-				. "\tcolor: inherit;\n"
-				. "}\n";
+		foreach ( $sources as $source ) {
+			$key    = (string) ( $source['key'] ?? '' );
+			$suffix = '' === $key ? '' : '-' . $key;
+			$css    = trim( (string) ( $source['css'] ?? '' ) );
+			$js     = trim( (string) ( $source['js'] ?? '' ) );
 
-			$written['css'] = (int) file_put_contents( $dir . '/_canonical.css', $sheet );
+			if ( '' !== $css ) {
+				$sheet = $css . "\n\n"
+					. "/*\n"
+					. " * The theme sets `h1,h2,h3,h4,h5,h6{color:var(--wp--preset--color--contrast)}`\n"
+					. " * globally (theme.json's `elements.heading`) and loads it after this\n"
+					. " * stylesheet, so a heading above that leans on inheritance for its\n"
+					. " * colour instead of stating one loses the cascade to the theme's rule.\n"
+					. " * One class more specific than the theme's bare tag selector settles\n"
+					. " * it in the section's favour, on `render.php`'s own root — see\n"
+					. " * `BlockWriter::mark_root()`.\n"
+					. " */\n"
+					. '.' . self::ROOT_CLASS . " h1,\n"
+					. '.' . self::ROOT_CLASS . " h2,\n"
+					. '.' . self::ROOT_CLASS . " h3,\n"
+					. '.' . self::ROOT_CLASS . " h4,\n"
+					. '.' . self::ROOT_CLASS . " h5,\n"
+					. '.' . self::ROOT_CLASS . " h6 {\n"
+					. "\tcolor: inherit;\n"
+					. "}\n";
+
+				$name = '_canonical' . $suffix . '.css';
+
+				$written['css'] += (int) file_put_contents( $dir . '/' . $name, $sheet );
+
+				$kept[ $name ] = true;
+			}
+
+			if ( '' !== $js ) {
+				$name = '_canonical' . $suffix . '.js';
+
+				$written['js'] += (int) file_put_contents( $dir . '/' . $name, $js . "\n" );
+
+				$kept[ $name ] = true;
+			}
 		}
 
-		$js = trim( $js );
-
-		if ( '' !== $js ) {
-			$written['js'] = (int) file_put_contents( $dir . '/_canonical.js', $js . "\n" );
+		/*
+		 * A rebuild from a different archive leaves the old archive's source
+		 * files behind under keys nothing routes to any more. Registered by
+		 * glob, they would keep loading for blocks that still name them —
+		 * stale by definition, so they go.
+		 */
+		foreach ( (array) glob( $dir . '/_canonical*.*' ) as $file ) {
+			if ( ! isset( $kept[ basename( (string) $file ) ] ) ) {
+				unlink( (string) $file );
+			}
 		}
 
 		return $written;
@@ -1262,38 +1407,6 @@ final class BlockWriter {
 	}
 
 	/**
-	 * The stylesheet, with a line saying where it came from.
-	 *
-	 * @param string $title What the section is.
-	 * @param string $css   The rules, unchanged.
-	 * @return string CSS.
-	 */
-	public static function style_css( string $title, string $css ): string {
-		return "/*\n * " . str_replace( '*/', '', $title ) . "\n *\n"
-			. " * Lifted from the design's own stylesheet, unchanged. The selectors\n"
-			. " * match the class names on render.php because both came out of the\n"
-			. " * same archive; do not rename either without renaming the other.\n */\n\n"
-			. trim( $css ) . "\n\n"
-			. "/*\n"
-			. " * The theme sets `h1,h2,h3,h4,h5,h6{color:var(--wp--preset--color--contrast)}`\n"
-			. " * globally (theme.json's `elements.heading`) and loads it after this\n"
-			. " * stylesheet, so a heading above that leans on inheritance for its\n"
-			. " * colour instead of stating one loses the cascade to the theme's rule.\n"
-			. " * One class more specific than the theme's bare tag selector settles\n"
-			. " * it in the section's favour, on `render.php`'s own root — see\n"
-			. " * `BlockWriter::mark_root()`.\n"
-			. " */\n"
-			. '.' . self::ROOT_CLASS . " h1,\n"
-			. '.' . self::ROOT_CLASS . " h2,\n"
-			. '.' . self::ROOT_CLASS . " h3,\n"
-			. '.' . self::ROOT_CLASS . " h4,\n"
-			. '.' . self::ROOT_CLASS . " h5,\n"
-			. '.' . self::ROOT_CLASS . " h6 {\n"
-			. "\tcolor: inherit;\n"
-			. "}\n";
-	}
-
-	/**
 	 * The render template: the design's markup with the fields echoed into it.
 	 *
 	 * @param string               $html  Section markup.
@@ -1357,6 +1470,17 @@ final class BlockWriter {
 			if ( $row instanceof DOMElement ) {
 				foreach ( (array) ( $item['fields'] ?? array() ) as $field ) {
 					self::plant( $row, (array) $field, 'row' );
+				}
+
+				/*
+				 * A listing card links to its record. Left alone, the template
+				 * kept the example card's own address — the first record's,
+				 * root-absolute — and every card on the site pointed there,
+				 * which on a subdirectory install is a 404. The row hands its
+				 * permalink over; see DesignListing::row().
+				 */
+				if ( 'listing' === $kind && 'a' === strtolower( $row->tagName ) && '' !== $row->getAttribute( 'href' ) ) {
+					$row->setAttribute( 'href', self::token( 'row.url.permalink' ) );
 				}
 
 				self::wrap_row( $row, $kind, (array) ( $item['fields'] ?? array() ) );
@@ -1928,6 +2052,18 @@ final class BlockWriter {
 		$rows = isset( $values['items'] ) && is_array( $values['items'] ) ? $values['items'] : array();
 		$item = $plan['item'] ?? null;
 
+		/*
+		 * A listing shows as many records as the design showed cards. The
+		 * field's default says the same number, but a default only reaches
+		 * the page when ACF is asked in a context that loads it — rendered
+		 * without, `limit` came back empty, fell to the runtime fallback of
+		 * three, and a twelve-card catalogue drew a quarter of itself.
+		 */
+		if ( is_array( $item ) && 'listing' === ( $plan['kind'] ?? 'single' ) && (int) ( $item['count'] ?? 0 ) > 0 ) {
+			$data['limit']  = (int) $item['count'];
+			$data['_limit'] = 'field_qs_' . $scope . '_limit';
+		}
+
 		if ( is_array( $item ) && 'listing' !== ( $plan['kind'] ?? 'single' ) ) {
 			$data['items']  = count( $rows );
 			$data['_items'] = 'field_qs_' . $scope . '_items';
@@ -2066,8 +2202,8 @@ final class BlockWriter {
 	 * after a block's own stylesheet — so on every heading that leans on
 	 * inheritance instead of stating its own colour, the theme's rule wins the
 	 * cascade and the design's colour never renders. This mark gives
-	 * `style_css()` a selector one class more specific than the theme's, so a
-	 * section's own headings answer to the section, not to the theme.
+	 * `write_canonical()` a selector one class more specific than the theme's,
+	 * so a section's own headings answer to the section, not to the theme.
 	 *
 	 * @param DOMNode $body The parsed section's containing body.
 	 * @return void

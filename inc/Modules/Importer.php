@@ -1107,6 +1107,24 @@ final class Importer implements Module {
 		 */
 		register_rest_route(
 			self::NAMESPACE,
+			'/plugins/install',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'install_plugin' ),
+				'permission_callback' => static function (): bool {
+					return current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' );
+				},
+				'args'                => array(
+					'key' => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/blocks/repair',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -1490,6 +1508,18 @@ final class Importer implements Module {
 				(int) ( $job['report']['media'] ?? 0 )
 			)
 		);
+
+		/*
+		 * The journal earlier imports left behind — see Lessons. Said once at
+		 * the start so the person watching knows the build is not starting
+		 * from a cold start, and the same paragraph reaches the model that
+		 * reviews each section.
+		 */
+		$learned = \Qwerty\Soft\Support\Lessons::brief();
+
+		if ( '' !== $learned ) {
+			ImportLog::add( 'build', $learned );
+		}
 
 		if ( $unattended ) {
 			ImportLog::add( 'build', __( 'This build runs on the server. You can close this tab; it will keep going.', 'qwerty-soft-signal' ) );
@@ -2224,6 +2254,7 @@ final class Importer implements Module {
 				'readable'   => $index['readable'],
 				'kind'       => $index['kind'],
 				'diagnosis'  => $this->diagnosis( $index ),
+				'needs'      => \Qwerty\Soft\Support\DesignNeeds::scan( $dir ),
 			);
 		}
 
@@ -2701,6 +2732,87 @@ final class Importer implements Module {
 	}
 
 	/**
+	 * Install and activate one plugin the advisor recommended.
+	 *
+	 * The list is closed on purpose: this endpoint installs what
+	 * DesignNeeds recommends and nothing else, always from wordpress.org's
+	 * own package address. It is one button on the screen, not a package
+	 * manager.
+	 *
+	 * @param WP_REST_Request $request key: which recommendation to act on.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function install_plugin( WP_REST_Request $request ) {
+		$known = array(
+			'woocommerce' => 'woocommerce/woocommerce.php',
+		);
+
+		$key = (string) $request->get_param( 'key' );
+
+		if ( ! isset( $known[ $key ] ) ) {
+			return new WP_Error( 'qwerty_soft_unknown_plugin', __( 'That is not a plugin this screen offers.', 'qwerty-soft-signal' ), array( 'status' => 400 ) );
+		}
+
+		$plugin = $known[ $key ];
+
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		if ( ! is_file( WP_PLUGIN_DIR . '/' . $plugin ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/misc.php';
+			require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+			$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
+			$done     = $upgrader->install( 'https://downloads.wordpress.org/plugin/' . $key . '.latest-stable.zip' );
+
+			if ( true !== $done ) {
+				return new WP_Error(
+					'qwerty_soft_install_failed',
+					sprintf(
+						/* translators: %s: what the installer said. */
+						__( 'The install did not finish: %s', 'qwerty-soft-signal' ),
+						is_wp_error( $done ) ? $done->get_error_message() : implode( ' ', (array) $upgrader->skin->get_upgrade_messages() )
+					),
+					array( 'status' => 500 )
+				);
+			}
+		}
+
+		if ( ! is_plugin_active( $plugin ) ) {
+			$activated = activate_plugin( $plugin );
+
+			if ( is_wp_error( $activated ) ) {
+				$activated->add_data( array( 'status' => 500 ) );
+
+				return $activated;
+			}
+		}
+
+		/*
+		 * WooCommerce leaves its tables and pages for the next admin load and
+		 * launches in coming-soon mode. The next admin load is now, and a
+		 * shop the importer is about to fill should not greet the studio with
+		 * a countdown page.
+		 */
+		if ( 'woocommerce' === $key ) {
+			if ( class_exists( '\WC_Install' ) ) {
+				\WC_Install::install();
+			}
+
+			update_option( 'woocommerce_coming_soon', 'no' );
+			flush_rewrite_rules();
+		}
+
+		return rest_ensure_response(
+			array(
+				'key'       => $key,
+				'installed' => true,
+				'active'    => is_plugin_active( $plugin ),
+			)
+		);
+	}
+
+	/**
 	 * Say in one sentence what this design is, when it is not what was expected.
 	 *
 	 * Returns an empty string for an ordinary static design — there is nothing
@@ -2723,8 +2835,8 @@ final class Importer implements Module {
 			return sprintf(
 				/* translators: %d: number of component source files found. */
 				_n(
-					'This archive is a JavaScript application, not a static design: its HTML holds an empty root element and the pages are assembled in the browser. The markup to convert does not exist on disk — %d component file does, but reading components is not something the structural converter can do. Open the site in a browser, save each finished page as HTML, and upload those.',
-					'This archive is a JavaScript application, not a static design: its HTML holds an empty root element and the pages are assembled in the browser. The markup to convert does not exist on disk — %d component files do, but reading components is not something the structural converter can do. Open the site in a browser, save each finished page as HTML, and upload those.',
+					'This archive is a JavaScript application, not a static design: its HTML holds an empty root element and the pages are assembled in the browser. The markup to convert does not exist on disk — %d component file does, but reading components is not something the structural converter can do. When the application names its pages in a router, they are listed below and Claude reads each one into an ordinary page; failing that, open the site in a browser, save each finished page as HTML, and upload those.',
+					'This archive is a JavaScript application, not a static design: its HTML holds an empty root element and the pages are assembled in the browser. The markup to convert does not exist on disk — %d component files do, but reading components is not something the structural converter can do. When the application names its pages in a router, they are listed below and Claude reads each one into an ordinary page; failing that, open the site in a browser, save each finished page as HTML, and upload those.',
 					$components,
 					'qwerty-soft-signal'
 				),
@@ -2919,6 +3031,7 @@ final class Importer implements Module {
 				'readable'   => $index['readable'],
 				'kind'       => $index['kind'],
 				'diagnosis'  => $this->diagnosis( $index ),
+				'needs'      => \Qwerty\Soft\Support\DesignNeeds::scan( $result['path'] ),
 				'palette'    => CssIndex::from_directory( $result['path'] )->palette_proposal(),
 			)
 		);

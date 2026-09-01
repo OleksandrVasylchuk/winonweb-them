@@ -88,15 +88,38 @@ final class DesignListing {
 		 * it should still draw something: an empty grid reads as a broken
 		 * import rather than as an unconfigured one.
 		 */
-		$query = new WP_Query(
-			array(
-				'post_type'           => '' !== $type && post_type_exists( $type ) ? $type : 'post',
-				'posts_per_page'      => $limit,
-				'post_status'         => 'publish',
-				'ignore_sticky_posts' => true,
-				'no_found_rows'       => true,
-			)
+		$asked = array(
+			'post_type'           => '' !== $type && post_type_exists( $type ) ? $type : 'post',
+			'posts_per_page'      => $limit,
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => true,
 		);
+
+		/*
+		 * The page's own language, and only it. A multilingual import seeds
+		 * each language's cards as records of the one type, and "the latest
+		 * three" across all of them put Chinese reports on the Russian page.
+		 * Records from before languages were stamped still show everywhere —
+		 * an empty grid on an old site would be the worse failure.
+		 */
+		$language = (string) get_post_meta( get_the_ID(), SiteAssembler::LANG_META, true );
+
+		if ( '' !== $language ) {
+			$asked['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The language IS the query; the meta is indexed by key.
+				'relation' => 'OR',
+				array(
+					'key'   => SiteAssembler::LANG_META,
+					'value' => $language,
+				),
+				array(
+					'key'     => SiteAssembler::LANG_META,
+					'compare' => 'NOT EXISTS',
+				),
+			);
+		}
+
+		$query = new WP_Query( $asked );
 
 		return $query->posts;
 	}
@@ -117,6 +140,22 @@ final class DesignListing {
 			'link'     => false,
 		);
 
+		/*
+		 * Every row knows the record it came from. The design's example card
+		 * links somewhere — the wrap plants that href as this field, because
+		 * the frozen address of the first record is where every card on the
+		 * site used to point.
+		 */
+		if ( ! isset( $shape['permalink'] ) ) {
+			$row['permalink'] = array(
+				'url'   => (string) get_permalink( $post ),
+				'title' => get_the_title( $post ),
+			);
+		}
+
+		$fields = self::design_fields( $post->post_type );
+		$used   = array();
+
 		foreach ( $shape as $name => $type ) {
 			$row[ $name ] = '';
 
@@ -134,9 +173,36 @@ final class DesignListing {
 
 			if ( null !== $own ) {
 				$row[ $name ]   = $own;
+				$used[ $name ]  = true;
 				$taken[ $type ] = true;
 
 				continue;
+			}
+
+			/*
+			 * Second answer: the same kind of field, in order, from the
+			 * record's own set. Two sections listing the same record type name
+			 * the card's parts in their own words — the home page's report
+			 * card asks for `reference` and `summary`, the store page seeded
+			 * its reports as `report_type` and `description` — and matching
+			 * by name alone rendered half of every borrowed card empty. A
+			 * record keeps the shape either card draws: its n-th text answers
+			 * the card's n-th unanswered text.
+			 */
+			foreach ( $fields as $theirs => $kind ) {
+				if ( $kind !== $type || isset( $used[ $theirs ] ) ) {
+					continue;
+				}
+
+				$said = self::own_field( $post, $theirs );
+
+				if ( null !== $said ) {
+					$row[ $name ]    = $said;
+					$used[ $theirs ] = true;
+					$taken[ $type ]  = true;
+
+					continue 2;
+				}
 			}
 
 			if ( 'text' === $type && ! $taken['text'] ) {
@@ -181,6 +247,40 @@ final class DesignListing {
 		}
 
 		return $row;
+	}
+
+	/**
+	 * The fields a record type carries, in the order its design section drew them.
+	 *
+	 * Read from the ACF group DesignType registered for the type, because that
+	 * group is the type's shape: one field per part of the card, in card
+	 * order. Without ACF there is nothing to read and matching stays by name.
+	 *
+	 * @param string $type Post type key.
+	 * @return array<string, string> Field name => field type.
+	 */
+	private static function design_fields( string $type ): array {
+		static $known = array();
+
+		if ( isset( $known[ $type ] ) ) {
+			return $known[ $type ];
+		}
+
+		$fields = array();
+
+		if ( function_exists( 'acf_get_field_groups' ) && function_exists( 'acf_get_fields' ) ) {
+			foreach ( (array) acf_get_field_groups( array( 'post_type' => $type ) ) as $group ) {
+				foreach ( (array) acf_get_fields( $group ) as $field ) {
+					if ( is_array( $field ) && isset( $field['name'], $field['type'] ) ) {
+						$fields[ (string) $field['name'] ] = (string) $field['type'];
+					}
+				}
+			}
+		}
+
+		$known[ $type ] = $fields;
+
+		return $fields;
 	}
 
 	/**

@@ -90,6 +90,38 @@ final class BlockRepair {
 		$left           = array_fill_keys( $wanted, true );
 
 		/*
+		 * Which canonical source each page wears, learned again from the
+		 * archive, so a rebuilt block names the same handle the build gave
+		 * it — a handoff carrying two sites has two, and a repair that
+		 * routed everything to the primary would dress the prototype's
+		 * blocks in the baseline's stylesheet.
+		 */
+		$files  = self::files();
+		$origin = (string) get_option( SiteOptions::ORIGIN, '' );
+
+		if ( '' !== $origin && ! in_array( $origin, $files, true ) ) {
+			$files[] = $origin;
+		}
+
+		$absolute = array();
+
+		foreach ( $files as $file ) {
+			$path = realpath( trailingslashit( $root ) . ltrim( $file, '/' ) );
+
+			if ( false !== $path ) {
+				$absolute[ str_replace( '\\', '/', $path ) ] = $file;
+			}
+		}
+
+		$routes = array();
+
+		foreach ( DesignStylesheet::routes( $root, array_keys( $absolute ) ) as $path => $key ) {
+			$routes[ (string) $absolute[ $path ] ] = (string) $key;
+		}
+
+		BlockWriter::route_styles( $routes );
+
+		/*
 		 * The chrome first, and whether or not anything is reported missing.
 		 *
 		 * It is what a visitor sees before anything else, it is the one part
