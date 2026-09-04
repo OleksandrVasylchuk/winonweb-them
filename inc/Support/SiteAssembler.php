@@ -4157,18 +4157,20 @@ final class SiteAssembler {
 	 * back, a second attempt lands on top of the first and the site becomes a
 	 * pile nobody can unpick.
 	 *
-	 * @return array{pages:int,parts:int,menus:int,media:int,fonts:int}
+	 * @return array{pages:int,parts:int,menus:int,media:int,fonts:int,products:int,terms:int}
 	 */
 	public static function reset(): array {
 		$counts = array(
-			'pages'   => 0,
-			'parts'   => 0,
-			'menus'   => 0,
-			'media'   => 0,
-			'fonts'   => 0,
-			'blocks'  => 0,
-			'options' => 0,
-			'records' => 0,
+			'pages'    => 0,
+			'parts'    => 0,
+			'menus'    => 0,
+			'media'    => 0,
+			'fonts'    => 0,
+			'blocks'   => 0,
+			'options'  => 0,
+			'records'  => 0,
+			'products' => 0,
+			'terms'    => 0,
 		);
 
 		$owned = self::owned_posts();
@@ -4191,6 +4193,9 @@ final class SiteAssembler {
 				case 'wp_navigation':
 					++$counts['menus'];
 					break;
+				case 'product':
+					++$counts['products'];
+					break;
 				default:
 					++$counts['records'];
 					break;
@@ -4198,6 +4203,8 @@ final class SiteAssembler {
 
 			wp_delete_post( $post->ID, true );
 		}
+
+		$counts['terms'] = self::remove_terms();
 
 		foreach ( self::owned_media() as $id ) {
 			wp_delete_attachment( $id, true );
@@ -4274,11 +4281,11 @@ final class SiteAssembler {
 		$blocks = glob( BlockWriter::dir() . '/*/block.json' );
 
 		$counts = array(
-			'pages'   => 0,
-			'parts'   => 0,
-			'menus'   => 0,
-			'media'   => count( self::owned_media() ),
-			'fonts'   => class_exists( DesignFonts::class ) ? (int) DesignFonts::count() : 0,
+			'pages'    => 0,
+			'parts'    => 0,
+			'menus'    => 0,
+			'media'    => count( self::owned_media() ),
+			'fonts'    => class_exists( DesignFonts::class ) ? (int) DesignFonts::count() : 0,
 
 			/*
 			 * Counted so that "delete everything this import added" can be
@@ -4286,15 +4293,24 @@ final class SiteAssembler {
 			 * and a person deciding whether to press that button should know
 			 * that theme code goes with the pages.
 			 */
-			'blocks'  => is_array( $blocks ) ? count( $blocks ) : 0,
+			'blocks'   => is_array( $blocks ) ? count( $blocks ) : 0,
 
 			/*
 			 * Counted the same way reset() removes them: from the register the
 			 * import wrote, so the two numbers cannot drift apart and a person
 			 * pressing delete is told what will actually go.
 			 */
-			'options' => count( (array) get_option( SiteOptions::REGISTER, array() ) ),
-			'records' => 0,
+			'options'  => count( (array) get_option( SiteOptions::REGISTER, array() ) ),
+			'records'  => 0,
+
+			/*
+			 * Products the catalogue import made, and the categories it made
+			 * for them. Both are counted here for the same reason as the
+			 * blocks: the panel says what the button will delete, and a
+			 * catalogue is the largest thing an import ever leaves behind.
+			 */
+			'products' => 0,
+			'terms'    => count( self::owned_terms() ),
 		);
 
 		foreach ( self::owned_posts() as $post ) {
@@ -4308,6 +4324,9 @@ final class SiteAssembler {
 				case 'wp_navigation':
 					++$counts['menus'];
 					break;
+				case 'product':
+					++$counts['products'];
+					break;
 				default:
 					++$counts['records'];
 					break;
@@ -4315,6 +4334,55 @@ final class SiteAssembler {
 		}
 
 		return $counts;
+	}
+
+	/**
+	 * Terms the catalogue import created.
+	 *
+	 * Stamped when they are made, so a category the client had before the
+	 * import is never a candidate for deletion — only the ones this import
+	 * invented for its own products.
+	 *
+	 * @return array<int, \WP_Term>
+	 */
+	private static function owned_terms(): array {
+		if ( ! taxonomy_exists( 'product_cat' ) ) {
+			return array();
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => false,
+				'meta_key'   => self::OWNED_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Import bookkeeping, not a front-end query.
+			)
+		);
+
+		return is_array( $terms ) ? $terms : array();
+	}
+
+	/**
+	 * Remove the categories the catalogue import invented.
+	 *
+	 * Called after the products themselves are gone, so a term that somehow
+	 * still holds something — a product the client wrote by hand into one of
+	 * our categories — is left alone with what it holds.
+	 *
+	 * @return int How many went.
+	 */
+	private static function remove_terms(): int {
+		$gone = 0;
+
+		foreach ( self::owned_terms() as $term ) {
+			if ( (int) $term->count > 0 ) {
+				continue;
+			}
+
+			wp_delete_term( (int) $term->term_id, 'product_cat' );
+			++$gone;
+		}
+
+		return $gone;
 	}
 
 	/**
@@ -4333,6 +4401,23 @@ final class SiteAssembler {
 			array( 'page', 'wp_template_part', 'wp_navigation', 'wp_block' ),
 			array_keys( DesignType::all() )
 		);
+
+		/*
+		 * And the products, which are not an invented type but are just as
+		 * much the build's doing: CatalogImport stamps every one of them with
+		 * the same meta. They were missing from this list, so "delete
+		 * everything this import added" deleted the pages, the menus and the
+		 * pictures and left three hundred products behind — the one kind of
+		 * leftover that is hardest to clear by hand.
+		 *
+		 * Asked for only when the type is registered. A query for a post type
+		 * WordPress does not know returns nothing, so with WooCommerce
+		 * deactivated the products wait for a cleanup run with it back on
+		 * rather than being reported as gone.
+		 */
+		if ( post_type_exists( 'product' ) ) {
+			$default[] = 'product';
+		}
 
 		return (array) get_posts(
 			array(

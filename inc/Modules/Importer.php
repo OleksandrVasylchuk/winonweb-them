@@ -2737,7 +2737,12 @@ final class Importer implements Module {
 	 * The list is closed on purpose: this endpoint installs what
 	 * DesignNeeds recommends and nothing else, always from wordpress.org's
 	 * own package address. It is one button on the screen, not a package
-	 * manager.
+	 * manager. A recommendation with no plugin behind it — the form row,
+	 * which the theme answers itself — is not in the list and cannot be
+	 * asked for.
+	 *
+	 * WooCommerce also brings the theme's shop half with it: see
+	 * Support\ShopKit, and the folded shop-kit/ folder it copies from.
 	 *
 	 * @param WP_REST_Request $request key: which recommendation to act on.
 	 * @return WP_REST_Response|WP_Error
@@ -2794,12 +2799,31 @@ final class Importer implements Module {
 		 * shop the importer is about to fill should not greet the studio with
 		 * a countdown page.
 		 */
+		$kit = false;
+
 		if ( 'woocommerce' === $key ) {
 			if ( class_exists( '\WC_Install' ) ) {
 				\WC_Install::install();
 			}
 
 			update_option( 'woocommerce_coming_soon', 'no' );
+
+			/*
+			 * The theme's own shop half, which ships folded under shop-kit/ so
+			 * that a site with nothing to sell never carries seven templates
+			 * about carts. The plugin without it is a shop whose product page
+			 * falls back to a blog post's template, so the two go together and
+			 * this is the click that asked for both.
+			 */
+			$unfolded = \Qwerty\Soft\Support\ShopKit::install();
+
+			if ( is_wp_error( $unfolded ) ) {
+				return $unfolded;
+			}
+
+			$kit = true;
+
+			// The new templates are files WordPress has not looked for yet.
 			flush_rewrite_rules();
 		}
 
@@ -2808,6 +2832,7 @@ final class Importer implements Module {
 				'key'       => $key,
 				'installed' => true,
 				'active'    => is_plugin_active( $plugin ),
+				'kit'       => $kit,
 			)
 		);
 	}

@@ -21,3 +21,10 @@ Thumbs.db
 
 # Reference design handed over for pixel-matching — not part of the theme
 /design-reference/
+
+# Blocks the importer generated from a client's design, and the canonical
+# stylesheets they share. They belong to the site they were built for, not to
+# the theme: build-zip.mjs and phpcs.xml.dist already treat them that way, and
+# a client's markup committed here ships to the next client. Committed once by
+# accident in 65fae82 and untracked again.
+/blocks/design/

@@ -91,6 +91,42 @@ if ( ! function_exists( '_n' ) ) {
 
 $qsoft_root = dirname( __DIR__ );
 
+// Where the theme is, for the classes that read their own directory.
+define( 'WP_PLUGIN_DIR', $qsoft_root . '/tests/fixtures/no-plugins-here' );
+
+if ( ! function_exists( 'get_template_directory' ) ) {
+	/**
+	 * Stand-in: the theme under test is this checkout.
+	 *
+	 * @return string
+	 */
+	function get_template_directory(): string { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Test harness stand-in for the real function.
+		return dirname( __DIR__ );
+	}
+
+	/**
+	 * Stand-in for WordPress's path normaliser.
+	 *
+	 * @param string $path A path.
+	 * @return string
+	 */
+	function wp_normalize_path( string $path ): string { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Test harness stand-in for the real function.
+		return str_replace( '\\', '/', $path );
+	}
+
+	/**
+	 * Stand-in: no plugins are active in a test run.
+	 *
+	 * @param string $plugin Plugin basename.
+	 * @return bool
+	 */
+	function is_plugin_active( string $plugin ): bool { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Test harness stand-in for the real function.
+		unset( $plugin );
+
+		return false;
+	}
+}
+
 require $qsoft_root . '/inc/Support/DesignTokens.php';
 require $qsoft_root . '/inc/Support/BrandKit.php';
 require $qsoft_root . '/inc/Support/Spend.php';
@@ -100,6 +136,8 @@ require $qsoft_root . '/inc/Support/SectionPlan.php';
 require $qsoft_root . '/inc/Support/BlockWriter.php';
 require $qsoft_root . '/inc/Support/DesignField.php';
 require $qsoft_root . '/inc/Support/DesignType.php';
+require $qsoft_root . '/inc/Support/ShopKit.php';
+require $qsoft_root . '/inc/Support/DesignNeeds.php';
 
 use Qwerty\Soft\Support\BrandKit;
 use Qwerty\Soft\Support\DesignTokens;
@@ -1531,6 +1569,155 @@ foreach ( array( $qsoft_type_dir, $qsoft_unnamed_dir ) as $qsoft_dir ) {
 	rmdir( $qsoft_dir );
 }
 
+
+// ------------------------------------------- forms, shops, and the shop kit
+
+/*
+ * The two halves of "the theme ships from zero". A design that needs a shop
+ * has to be recognised as needing one — and the shop half it needs has to be
+ * somewhere to be added from. A design that needs a form needs nothing
+ * installed at all, which is the finding this checks does not regress into a
+ * plugin recommendation.
+ */
+echo "\n=== DesignNeeds, ShopKit, DesignForm — what an archive asks the site for ===\n";
+
+$qsoft_form_html = '<section class="contact-section"><h2>Talk to us</h2>'
+	. '<form class="contact-form" action="#" method="get">'
+	. '<label for="n">Name</label><input id="n" name="name" type="text">'
+	. '<label for="e">Email</label><input id="e" name="email" type="email">'
+	. '<label for="m">Message</label><textarea id="m" name="message" rows="5"></textarea>'
+	. '<button type="submit" class="btn btn-primary">Send</button>'
+	. '</form></section>';
+
+$qsoft_form_plan   = Qwerty\Soft\Support\SectionPlan::of( $qsoft_form_html );
+$qsoft_form_render = (string) Qwerty\Soft\Support\BlockWriter::render_php( $qsoft_form_html, $qsoft_form_plan );
+
+qsoft_assert(
+	false !== strpos( $qsoft_form_render, 'DesignForm::fields()' ),
+	'an imported form gets the hidden half the handler reads'
+);
+
+qsoft_assert(
+	false !== strpos( $qsoft_form_render, 'DesignForm::action()' ),
+	'and posts where the handler is listening'
+);
+
+qsoft_assert(
+	false !== strpos( $qsoft_form_render, 'method="post"' ),
+	'by POST, whatever the design had it set to'
+);
+
+foreach ( array( 'qsoft_name', 'qsoft_email', 'qsoft_message' ) as $qsoft_field ) {
+	qsoft_assert(
+		false !== strpos( $qsoft_form_render, 'name="' . $qsoft_field . '"' ),
+		sprintf( 'the control the handler reads as %s is named for it', $qsoft_field )
+	);
+}
+
+foreach ( array( 'contact-section', 'contact-form', 'btn-primary' ) as $qsoft_class ) {
+	qsoft_assert(
+		false !== strpos( $qsoft_form_render, $qsoft_class ),
+		sprintf( 'and the form keeps its own class "%s"', $qsoft_class )
+	);
+}
+
+/*
+ * The one form that must be left alone. Wiring a search box to the contact
+ * handler would email the studio every search anybody ever ran.
+ */
+$qsoft_search_html   = '<section class="find"><form role="search" class="search-form" action="/">'
+	. '<input type="search" name="s" placeholder="Search"><button type="submit">Go</button></form></section>';
+$qsoft_search_render = (string) Qwerty\Soft\Support\BlockWriter::render_php(
+	$qsoft_search_html,
+	Qwerty\Soft\Support\SectionPlan::of( $qsoft_search_html )
+);
+
+qsoft_assert(
+	false === strpos( $qsoft_search_render, 'DesignForm::' ),
+	'a search box is not a contact form and is left as it was drawn'
+);
+
+$qsoft_needs_dir = sys_get_temp_dir() . '/qsoft-needs-' . getmypid();
+
+qsoft_write_files(
+	$qsoft_needs_dir,
+	array(
+		'Shop.html'    => '<section class="products"><article class="card"><h3>A thing</h3>'
+			. '<button class="btn" data-sku="A-1">Add to cart</button></article></section>',
+		'Contact.html' => $qsoft_form_html,
+		'Search.html'  => $qsoft_search_html,
+		'app.min.js'   => 'var addToCart=1;/* minified, and skipped */',
+	)
+);
+
+$qsoft_needs = Qwerty\Soft\Support\DesignNeeds::scan( $qsoft_needs_dir );
+$qsoft_keys  = array_column( $qsoft_needs, 'key' );
+
+qsoft_assert(
+	in_array( 'woocommerce', $qsoft_keys, true ),
+	'an add-to-cart button in the markup asks for a shop, with no catalogue file in sight'
+);
+
+qsoft_assert(
+	in_array( 'contact-form', $qsoft_keys, true ),
+	'a form in the markup is reported as a finding'
+);
+
+$qsoft_shop_row = $qsoft_needs[ (int) array_search( 'woocommerce', $qsoft_keys, true ) ];
+$qsoft_form_row = $qsoft_needs[ (int) array_search( 'contact-form', $qsoft_keys, true ) ];
+
+qsoft_assert(
+	'' === (string) $qsoft_form_row['plugin'],
+	'and the form finding recommends no plugin — the theme answers that one itself'
+);
+
+qsoft_assert(
+	1 === (int) $qsoft_form_row['forms'],
+	'the search box is not counted as a form to wire up'
+);
+
+qsoft_assert(
+	false !== strpos( (string) $qsoft_shop_row['why'], 'Shop.html' ),
+	'the shop recommendation names the file that gave the shop away'
+);
+
+qsoft_assert(
+	false === $qsoft_shop_row['ready'] && '' !== (string) $qsoft_shop_row['button'],
+	'and offers the button that installs WooCommerce and the shop templates'
+);
+
+qsoft_remove_tree( $qsoft_needs_dir );
+
+/*
+ * The shop half itself. It ships folded, one directory to the side of where
+ * WordPress looks, and a clean checkout has none of it unfolded — which is
+ * the whole claim: the theme a client activates has no shop in it.
+ */
+$qsoft_kit = Qwerty\Soft\Support\ShopKit::files();
+
+qsoft_assert(
+	Qwerty\Soft\Support\ShopKit::available() && count( $qsoft_kit ) >= 8,
+	'the folded shop kit is in the theme, templates and module together'
+);
+
+qsoft_assert(
+	isset( $qsoft_kit['shop-kit/templates/cart.html'] )
+		&& 'templates/cart.html' === $qsoft_kit['shop-kit/templates/cart.html']
+		&& 'inc/Modules/WooCommerce.php' === ( $qsoft_kit['shop-kit/inc/Modules/WooCommerce.php'] ?? '' ),
+	'and every file in it knows where in the theme it belongs'
+);
+
+qsoft_assert(
+	! Qwerty\Soft\Support\ShopKit::installed(),
+	'a checkout with nothing to sell has no shop templates unfolded'
+);
+
+foreach ( array_values( $qsoft_kit ) as $qsoft_destination ) {
+	qsoft_assert(
+		! is_file( $qsoft_root . '/' . $qsoft_destination ),
+		sprintf( 'and %s is not in the theme until a design asks for it', $qsoft_destination )
+	);
+}
 
 printf( "\n%d checks, %d failure(s).\n", $qsoft_checks, $qsoft_failures );
 

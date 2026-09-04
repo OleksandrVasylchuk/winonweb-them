@@ -108,6 +108,17 @@ are not PHP globals, so they stay `qs`.
    value regardless — see `blocks/metric/view.js`.
 6. **A new block needs `*.asset.php`.** WordPress refuses to register a block
    script when the sibling asset file is missing. Copy an existing one.
+7. **The theme ships from zero — no shop, no forms plugin.** The seven shop
+   templates and `Modules\WooCommerce` live folded in `shop-kit/`, outside
+   where WordPress looks; `Support\ShopKit` copies them into place when an
+   import finds a shop, in the same click that installs WooCommerce. So
+   `Theme` asks `class_exists( Modules\WooCommerce::class )` before it boots
+   the module, and `build-zip.mjs` excludes the unfolded copies — a studio
+   machine that ran a shop import must not ship one client's cart to the next.
+   A form is answered the same way, by not installing anything:
+   `BlockWriter::wire_forms()` points the design's own markup — every class of
+   it — at `Modules\ContactForm`, and `Support\DesignForm` prints the hidden
+   half that handler reads.
 
 ## Adding a block
 
@@ -148,6 +159,7 @@ mathematically because axe reports it as "incomplete".
 theme.json · styles/light.json     tokens + style variation
 templates/ · parts/ · patterns/    the site, editable in the Site Editor
 blocks/{slug}/                     custom blocks, auto-discovered
+shop-kit/                          the shop half, folded until an import needs it
 inc/Modules/                       one concern per file
 tools/                             the quality gates
 artifacts/                         gate output, git-ignored

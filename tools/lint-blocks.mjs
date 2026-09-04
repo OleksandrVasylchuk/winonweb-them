@@ -185,6 +185,10 @@ const files = [
 	...walk( 'templates', '.html' ),
 	...walk( 'parts', '.html' ),
 	...walk( 'patterns', '.php' ),
+	// The shop half, folded. It is theme markup that becomes templates/ the
+	// moment a design turns out to have a shop in it, and a broken template
+	// discovered then is one discovered on a client's site.
+	...walk( 'shop-kit/templates', '.html' ),
 ];
 
 for ( const [ relativePath, source ] of files ) {

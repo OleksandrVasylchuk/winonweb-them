@@ -61,6 +61,21 @@ const EXCLUDE = [
 	// client's markup and copy into the next client's install, and a theme
 	// update would overwrite the very files an editor had been editing.
 	'blocks/design',
+
+	// The shop half of the theme, once some site unfolded it. It ships folded,
+	// as shop-kit/, and inc/Support/ShopKit.php copies it into place on the one
+	// site whose design turned out to have a shop in it. A studio machine that
+	// ran such an import has the copies sitting in templates/ and inc/Modules/,
+	// and packaging those would hand every next client seven shop templates
+	// they never asked for — the very thing the folding is for.
+	'templates/cart.html',
+	'templates/checkout.html',
+	'templates/single-product.html',
+	'templates/archive-product.html',
+	'templates/product-search-results.html',
+	'templates/taxonomy-product_cat.html',
+	'templates/taxonomy-product_tag.html',
+	'inc/Modules/WooCommerce.php',
 	// The fixture design and the integration tests: development only.
 	'tests',
 	// docs/ ships: GUIDE.md is the client manual and ACCESSIBILITY.md is the

@@ -124,7 +124,7 @@ final class Handbook implements Module {
 			<li><?php esc_html_e( 'Speed: a delivered design becomes a reviewable site the same day, not after weeks of hand work.', 'qwerty-soft-signal' ); ?></li>
 			<li><?php esc_html_e( 'Faithfulness you can check: after every build the theme measures each page against the design and says what share of the design’s content it renders. A weak page is flagged, not discovered by a client.', 'qwerty-soft-signal' ); ?></li>
 			<li><?php esc_html_e( 'Anyone can edit: texts on the pages, the words in the header and footer, the menu — all through normal WordPress screens. No developer needed for day-to-day changes.', 'qwerty-soft-signal' ); ?></li>
-			<li><?php esc_html_e( 'No lock-in: it runs on any ordinary hosting. One plugin is required (ACF); WooCommerce is added only when the design has a product catalogue.', 'qwerty-soft-signal' ); ?></li>
+			<li><?php esc_html_e( 'No lock-in: it runs on any ordinary hosting. One plugin is required (ACF); WooCommerce is added only when the design turns out to have a shop in it, and the theme’s own shop templates come with it in the same step. Contact forms need no plugin at all.', 'qwerty-soft-signal' ); ?></li>
 			<li><?php esc_html_e( 'Reversible: one button removes everything an import created and touches nothing else.', 'qwerty-soft-signal' ); ?></li>
 			<li><?php esc_html_e( 'It learns: every import is written into a journal — what the archive was, what went wrong, how faithful the result measured — and the next import starts from that knowledge.', 'qwerty-soft-signal' ); ?></li>
 		</ul>

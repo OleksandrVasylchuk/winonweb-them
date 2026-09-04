@@ -54,10 +54,12 @@ nothing in the theme switches locale on its own.
 ```
 theme.json            design tokens, element styles, critical CSS (inlined by WP)
 styles/*.json         6 style variations — light, midnight, ember, forest, sand, contrast
-templates/*.html      16 block templates, incl. WooCommerce
+templates/*.html      10 block templates
 parts/*.html          header, footer, post-meta
 patterns/*.php        17 patterns, incl. 3 whole-page layouts
 blocks/<slug>/        6 custom blocks — block.json, render.php, edit.js, style.css
+shop-kit/             the shop half, folded: templates + module, copied into place
+                      by inc/Support/ShopKit.php when an import finds a shop
 inc/                  PHP: Qwerty\Soft\* (PSR-4, autoloaded by functions.php)
   Contracts/          the Module interface
   Modules/            one concern per file, booted by inc/Theme.php

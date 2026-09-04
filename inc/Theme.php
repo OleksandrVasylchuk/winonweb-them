@@ -124,11 +124,20 @@ final class Theme {
 			Modules\Updates::class,
 		);
 
-		// WooCommerce support is inert unless the plugin is actually active.
-		if ( class_exists( 'WooCommerce' ) ) {
-			$classes[] = Modules\WooCommerce::class;
-		} else {
-			Modules\WooCommerce::hide_shop_templates();
+		/*
+		 * The shop half of the theme is folded away under shop-kit/ until an
+		 * import finds a shop in the design and unfolds it — see
+		 * Support\ShopKit. Until then neither the module nor the shop
+		 * templates are on the site at all, so this asks whether the class
+		 * exists before it asks whether the plugin does.
+		 */
+		if ( class_exists( Modules\WooCommerce::class ) ) {
+			// WooCommerce support is inert unless the plugin is actually active.
+			if ( class_exists( 'WooCommerce' ) ) {
+				$classes[] = Modules\WooCommerce::class;
+			} else {
+				Modules\WooCommerce::hide_shop_templates();
+			}
 		}
 
 		/**

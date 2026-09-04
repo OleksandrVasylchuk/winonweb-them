@@ -1426,9 +1426,15 @@
 	 * What the archive needs from the site, one button per need.
 	 *
 	 * The advisor read the archive when it was unpacked — a product
-	 * catalogue means WooCommerce, and with it installed the build imports
-	 * the records itself. The button is the whole flow: install, activate,
-	 * set up; the next build does the rest.
+	 * catalogue or a cart in the markup means WooCommerce, and with it
+	 * installed the build imports the records itself. The button is the whole
+	 * flow: install, activate, unfold the theme's shop half, set up; the next
+	 * build does the rest.
+	 *
+	 * Not every need is a plugin. A design with a form needs nothing
+	 * installed — the theme's own contact form answers it — so that row says
+	 * so and has no button to press. The server decides which is which: a row
+	 * with no `plugin` is a finding, not an offer.
 	 */
 	function renderNeeds() {
 		var needs = ( state.design && state.design.needs ) || [];
@@ -1443,8 +1449,15 @@
 				el( 'p', { class: 'qs-import__need-why', text: need.why } ),
 			];
 
-			if ( need.active ) {
-				body.push( el( 'span', { class: 'qs-import__tag is-done', text: __( 'Installed and active — the build will import the catalogue.', 'qwerty-soft-signal' ) } ) );
+			/*
+			 * Ready, not active. A site that already had WooCommerce before
+			 * the import has the plugin and none of the shop templates, and
+			 * reading the plugin alone hid the button that adds them.
+			 */
+			var ready = undefined === need.ready ? need.active : need.ready;
+
+			if ( ready || ! need.plugin ) {
+				body.push( el( 'span', { class: 'qs-import__tag is-done', text: need.done || __( 'Installed and active — the build will import the catalogue.', 'qwerty-soft-signal' ) } ) );
 			} else {
 				body.push(
 					el( 'button', {
@@ -1453,22 +1466,36 @@
 						disabled: state.installing ? 'disabled' : null,
 						text: state.installing
 							? __( 'Installing…', 'qwerty-soft-signal' )
-							: sprintf(
-								/* translators: %s: plugin name. */
-								need.installed ? __( 'Activate %s', 'qwerty-soft-signal' ) : __( 'Install %s', 'qwerty-soft-signal' ),
-								need.name
-							),
+							: need.button ||
+								sprintf(
+									/* translators: %s: plugin name. */
+									need.installed ? __( 'Activate %s', 'qwerty-soft-signal' ) : __( 'Install %s', 'qwerty-soft-signal' ),
+									need.name
+								),
 						onClick: function () {
 							state.installing = true;
 							render();
 
 							apiFetch( { path: '/qwerty-soft-signal/v1/plugins/install', method: 'POST', data: { key: need.key } } )
-								.then( function () {
+								.then( function ( answer ) {
 									need.installed = true;
 									need.active = true;
+									need.ready = true;
+									need.kit = !! ( answer && answer.kit );
 
-									/* translators: %s: plugin name. */
-									say( sprintf( __( '%s is installed and active.', 'qwerty-soft-signal' ), need.name ) );
+									say(
+										need.kit
+											? sprintf(
+												/* translators: %s: plugin name. */
+												__( '%s is installed and active, and the theme’s shop templates are in place.', 'qwerty-soft-signal' ),
+												need.name
+											)
+											: sprintf(
+												/* translators: %s: plugin name. */
+												__( '%s is installed and active.', 'qwerty-soft-signal' ),
+												need.name
+											)
+									);
 								} )
 								.catch( function ( error ) {
 									say( errorText( error ), true );
@@ -4727,7 +4754,9 @@
 					( counts.pages || 0 ) +
 					( counts.parts || 0 ) +
 					( counts.menus || 0 ) +
-					( counts.media || 0 );
+					( counts.media || 0 ) +
+					( counts.products || 0 ) +
+					( counts.records || 0 );
 
 				/*
 				 * Nothing removed is a finding, not a success. Undo deletes
@@ -4745,6 +4774,17 @@
 							'qwerty-soft-signal'
 						),
 						true
+					);
+				} else if ( counts.products ) {
+					say(
+						sprintf(
+							/* translators: 1: pages removed, 2: images removed, 3: products removed, 4: product categories removed. */
+							__( 'Removed %1$d pages, %2$d images, %3$d products and %4$d product categories. The site is back to how it was.', 'qwerty-soft-signal' ),
+							counts.pages,
+							counts.media,
+							counts.products,
+							counts.terms || 0
+						)
 					);
 				} else {
 					say(
@@ -4778,7 +4818,13 @@
 			return 0;
 		}
 
-		return [ 'pages', 'parts', 'menus', 'media', 'fonts' ].reduce( function ( total, key ) {
+		/*
+		 * Products count. They were left out, so a site whose import made
+		 * three hundred products and little else could show no clean-up panel
+		 * at all — and the button that did appear deleted everything except
+		 * the products, which is the leftover hardest to clear by hand.
+		 */
+		return [ 'pages', 'parts', 'menus', 'media', 'fonts', 'products', 'records' ].reduce( function ( total, key ) {
 			return total + ( parseInt( summary[ key ], 10 ) || 0 );
 		}, 0 );
 	}
@@ -4969,6 +5015,20 @@
 					),
 				} )
 			);
+			if ( summary.products || summary.terms || summary.records ) {
+				body.push(
+					el( 'p', {
+						text: sprintf(
+							/* translators: 1: products, 2: product categories, 3: other records. */
+							__( 'It also imported %1$d products, %2$d product categories and %3$d other records — those go too.', 'qwerty-soft-signal' ),
+							summary.products || 0,
+							summary.terms || 0,
+							summary.records || 0
+						),
+					} )
+				);
+			}
+
 			body.push(
 				el( 'p', {
 					class: 'qs-import__hint',

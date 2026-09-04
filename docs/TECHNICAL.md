@@ -33,10 +33,11 @@ customer's server.
 ```
 theme.json                 design tokens — the single source of every value
 styles/*.json              6 style variations
-templates/*.html           17 templates, including WooCommerce
+templates/*.html           10 templates — no shop; see shop-kit/
 parts/*.html               header, footer, post-meta
 patterns/*.php             17 patterns, PHP so copy can be translated
 blocks/{slug}/             6 custom blocks, auto-discovered
+shop-kit/                  the folded shop half — 7 templates + the module
 inc/Modules/               18 modules — one concern each, booted from functions.php
 inc/Support/               30 classes — the import pipeline and its parts
 tools/                     the quality gates
@@ -66,7 +67,7 @@ hooks. Adding a concern means adding a file and a line.
 | `Cleanup` | what core emits that this theme does not want |
 | `Branding` | logo, colours, the customiser surface that remains |
 | `ContactForm` | the POST handler behind `qs/contact-form` |
-| `WooCommerce` | templates and conditional shop assets |
+| `WooCommerce` | templates and conditional shop assets — ships folded in `shop-kit/`, so on a site with no shop the class does not exist and `Theme` asks before it boots it |
 | `SiteHealth` | the theme's own Site Health checks |
 | `Updates` | update checks, checksum verification |
 | `Credit` | the designer credit, filterable |

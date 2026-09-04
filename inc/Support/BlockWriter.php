@@ -13,6 +13,7 @@ namespace Qwerty\Soft\Support;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use DOMNodeList;
 use DOMXPath;
 
 defined( 'ABSPATH' ) || exit;
@@ -170,6 +171,36 @@ final class BlockWriter {
 	 * @var bool
 	 */
 	private static $menu = false;
+
+	/**
+	 * Where the hidden half of an imported form goes.
+	 *
+	 * A design's form is markup and nothing else: inputs, a button, and an
+	 * action that points at "#" because a script was going to catch the
+	 * submit. Wrapped as it stands, it looked finished and threw every
+	 * message away. So the form keeps every class the design gave it and
+	 * gains what the theme's own handler expects — a nonce, the action, the
+	 * time trap, the honeypot — printed here.
+	 *
+	 * A comment for the same reason MENU_MARK is one: it survives the DOM
+	 * round trip and cannot collide with a design's own text.
+	 */
+	public const FORM_MARK = '<!--qs:form-fields-->';
+
+	/**
+	 * What an imported form's `action` says until the template is written.
+	 *
+	 * A fragment, so the serialiser leaves it alone — every character in it
+	 * is one a URI may hold unencoded.
+	 */
+	public const FORM_ACTION = '#qs-form-action';
+
+	/**
+	 * Whether this section turned out to hold a form to wire up.
+	 *
+	 * @var bool
+	 */
+	private static $forms = false;
 
 	/**
 	 * The post type a listing block reads, when it has one.
@@ -1424,6 +1455,7 @@ final class BlockWriter {
 		 */
 		self::$scope = 'option' === $scope ? 'option' : 'block';
 		self::$says  = self::values( $html, $plan );
+		self::$forms = false;
 
 		// A block-scoped render has no namespace, and must not inherit one.
 		if ( 'block' === self::$scope ) {
@@ -1487,7 +1519,174 @@ final class BlockWriter {
 			}
 		}
 
+		/*
+		 * Last, because it adds a child to the form. Every field above is
+		 * found by a path counted through the tree, and inserting anything
+		 * before they are planted moves the thing the path was pointing at.
+		 */
+		self::wire_forms( $body );
+
 		return self::to_php( self::inner_html( $body ) );
+	}
+
+	/**
+	 * Point the design's own forms at the theme's handler.
+	 *
+	 * Nothing is replaced and nothing is renamed except what has to be: the
+	 * form's own markup, classes and layout are what the design drew, and the
+	 * only edits are the ones that decide where a submission goes — the
+	 * method, the action, and the four field names the handler reads.
+	 *
+	 * A search box is left alone. It is a form, it is nobody's contact form,
+	 * and wiring it up would mean emailing the studio every search.
+	 *
+	 * @param DOMNode $body The section.
+	 * @return void
+	 */
+	private static function wire_forms( DOMNode $body ): void {
+		$dom = $body->ownerDocument;
+
+		if ( ! $dom instanceof DOMDocument ) {
+			return;
+		}
+
+		$xpath = new DOMXPath( $dom );
+		$forms = $xpath->query( './/form', $body );
+
+		if ( false === $forms ) {
+			return;
+		}
+
+		foreach ( $forms as $form ) {
+			if ( ! $form instanceof DOMElement || self::is_search_form( $xpath, $form ) ) {
+				continue;
+			}
+
+			$controls = $xpath->query( './/input | .//textarea | .//select', $form );
+
+			// A form with nothing to type in is a button in disguise.
+			if ( false === $controls || 0 === $controls->length ) {
+				continue;
+			}
+
+			$form->setAttribute( 'method', 'post' );
+			$form->setAttribute( 'action', self::FORM_ACTION );
+
+			self::name_controls( $controls );
+
+			$mark = $dom->createComment( trim( self::FORM_MARK, '<!->' ) );
+
+			if ( $form->firstChild instanceof DOMNode ) {
+				$form->insertBefore( $mark, $form->firstChild );
+			} else {
+				$form->appendChild( $mark );
+			}
+
+			self::$forms = true;
+		}
+	}
+
+	/**
+	 * Give the design's controls the names the handler reads.
+	 *
+	 * The handler takes four: name, email, subject, message. They are matched
+	 * by what the control is before what it is called — a textarea is the
+	 * message whatever the design named it, `type="email"` is the address —
+	 * and only then by the words around it, so a form written in another
+	 * language still lands on the right field through its input types.
+	 *
+	 * Anything left over keeps its own name. A phone number the design asked
+	 * for is not something to silently drop, and the handler ignores what it
+	 * does not know.
+	 *
+	 * @param DOMNodeList $controls The form's inputs, textareas and selects.
+	 * @return void
+	 */
+	private static function name_controls( DOMNodeList $controls ): void {
+		$taken = array();
+		$spare = array();
+
+		foreach ( $controls as $control ) {
+			if ( ! $control instanceof DOMElement ) {
+				continue;
+			}
+
+			$tag  = strtolower( $control->tagName );
+			$type = strtolower( $control->getAttribute( 'type' ) );
+
+			// Hidden fields and buttons are the design's business, not ours.
+			if ( 'input' === $tag && in_array( $type, array( 'hidden', 'submit', 'button', 'image', 'reset' ), true ) ) {
+				continue;
+			}
+
+			$says = strtolower(
+				$control->getAttribute( 'name' ) . ' '
+				. $control->getAttribute( 'id' ) . ' '
+				. $control->getAttribute( 'placeholder' ) . ' '
+				. $control->getAttribute( 'aria-label' ) . ' '
+				. $control->getAttribute( 'autocomplete' )
+			);
+
+			$field = '';
+
+			if ( 'textarea' === $tag ) {
+				$field = 'message';
+			} elseif ( 'email' === $type || 1 === preg_match( '/\bmail\b|e-?mail/i', $says ) ) {
+				$field = 'email';
+			} elseif ( 1 === preg_match( '/subject|topic|regarding/i', $says ) ) {
+				$field = 'subject';
+			} elseif ( 1 === preg_match( '/\bname\b|full-?name|first-?name|your-?name/i', $says ) ) {
+				$field = 'name';
+			} elseif ( 1 === preg_match( '/message|comment|enquiry|inquiry|question/i', $says ) ) {
+				$field = 'message';
+			}
+
+			if ( '' === $field || isset( $taken[ $field ] ) ) {
+				// Held back: an unnamed text box is a name field if nothing else claims it.
+				if ( 'input' === $tag && in_array( $type, array( '', 'text' ), true ) ) {
+					$spare[] = $control;
+				}
+
+				continue;
+			}
+
+			$taken[ $field ] = true;
+			$control->setAttribute( 'name', 'qsoft_' . $field );
+		}
+
+		foreach ( array( 'name', 'subject' ) as $field ) {
+			if ( isset( $taken[ $field ] ) || array() === $spare ) {
+				continue;
+			}
+
+			$control = array_shift( $spare );
+
+			if ( $control instanceof DOMElement ) {
+				$taken[ $field ] = true;
+				$control->setAttribute( 'name', 'qsoft_' . $field );
+			}
+		}
+	}
+
+	/**
+	 * Whether one form is the site's search.
+	 *
+	 * @param DOMXPath   $xpath Document xpath.
+	 * @param DOMElement $form  The form.
+	 * @return bool
+	 */
+	private static function is_search_form( DOMXPath $xpath, DOMElement $form ): bool {
+		if ( 'search' === strtolower( $form->getAttribute( 'role' ) ) ) {
+			return true;
+		}
+
+		if ( 1 === preg_match( '/\bsearch\b/i', $form->getAttribute( 'class' ) . ' ' . $form->getAttribute( 'id' ) ) ) {
+			return true;
+		}
+
+		$search = $xpath->query( './/input[@type="search"]', $form );
+
+		return false !== $search && $search->length > 0;
 	}
 
 	/**
@@ -1756,6 +1955,26 @@ final class BlockWriter {
 			$body = str_replace(
 				self::MENU_MARK,
 				'<?php echo do_blocks( \\Qwerty\\Soft\\Support\\DesignField::menu() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered block markup. ?>',
+				(string) $body
+			);
+		}
+
+		/*
+		 * The other place a wrapped section holds something that is not its
+		 * own markup. The design's form keeps every class it was drawn with
+		 * and gains the half a form needs in order to send anything: where it
+		 * posts, and the hidden fields the handler reads.
+		 */
+		if ( self::$forms ) {
+			$body = str_replace(
+				self::FORM_MARK,
+				'<?php \\Qwerty\\Soft\\Support\\DesignForm::fields(); ?>',
+				(string) $body
+			);
+
+			$body = str_replace(
+				self::FORM_ACTION,
+				'<?php echo esc_url( \\Qwerty\\Soft\\Support\\DesignForm::action() ); ?>',
 				(string) $body
 			);
 		}

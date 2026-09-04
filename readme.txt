@@ -38,7 +38,7 @@ Seven palettes: the dark **Signal** default plus six style variations — **Sign
 
 = WooCommerce =
 
-Product, catalogue, cart and checkout templates are included and use WooCommerce's own block templates, so shop markup stays supported across plugin updates. Shop CSS and JavaScript are dequeued on pages with no shop content on them.
+The theme ships without a shop and grows one when a design turns out to need it. Product, catalogue, cart and checkout templates travel folded in shop-kit/, and the design import screen unfolds them in the same click that installs WooCommerce. So a site that sells nothing never carries seven templates about carts, and a site that sells something gets templates built on WooCommerce's own blocks, supported across plugin updates. Shop CSS and JavaScript are dequeued on pages with no shop content on them.
 
 == Installation ==
 
@@ -69,6 +69,9 @@ Appearance → Editor → Styles. Every pattern and block style reads its colour
 == Upgrade Notice ==
 
 = 1.4.0 =
+* The theme ships from zero: no shop in it. The product, catalogue, cart and checkout templates and the WooCommerce module now travel folded in shop-kit/, one directory to the side of where WordPress looks, so nothing about a cart appears in the Site Editor of a site that has nothing to sell.
+* Design import: a shop in the design is one button. A product catalogue in the archive, or an add-to-cart button in the markup, is reported on the import screen with the evidence for it; the button installs WooCommerce, unfolds the theme's own shop half and sets the shop up, in that order.
+* Design import: a form in the design needs no plugin. The section keeps the design's own markup, class for class, and is wired to the theme's contact handler — a plain POST with a honeypot, a time trap and a per-IP rate limit — so an imported contact page sends mail as soon as it is built.
 Adds a guided design import: Claude corrects each converted section, either through your Anthropic API key or through Claude Code on the machine, using its subscription. Off unless you turn it on, and the offline import is unchanged.
 
 = 1.3.0 =

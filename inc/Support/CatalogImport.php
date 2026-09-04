@@ -146,11 +146,47 @@ final class CatalogImport {
 			$category = trim( (string) ( $record['category'] ?? '' ) );
 
 			if ( '' !== $category && taxonomy_exists( 'product_cat' ) ) {
-				wp_set_object_terms( (int) $id, $category, 'product_cat', false );
+				self::categorise( (int) $id, $category );
 			}
 		}
 
 		return $report;
+	}
+
+	/**
+	 * Put one product in its category, making the category if it is new.
+	 *
+	 * A category this import invents is stamped with the import's own meta, so
+	 * the clean-up can take it away again and a category the client already
+	 * had is never a candidate. `wp_set_object_terms()` creates a missing term
+	 * too, and says nothing about whether it had to — which is how the site
+	 * ended up with empty categories nobody could tell from their own.
+	 *
+	 * @param int    $id       Product post ID.
+	 * @param string $category The category's name, as the catalogue writes it.
+	 * @return void
+	 */
+	private static function categorise( int $id, string $category ): void {
+		$term    = get_term_by( 'name', $category, 'product_cat' );
+		$term_id = $term instanceof \WP_Term ? (int) $term->term_id : 0;
+
+		if ( 0 === $term_id ) {
+			$made = wp_insert_term( $category, 'product_cat' );
+
+			if ( is_wp_error( $made ) ) {
+				return;
+			}
+
+			$term_id = (int) ( $made['term_id'] ?? 0 );
+
+			if ( $term_id > 0 ) {
+				update_term_meta( $term_id, SiteAssembler::OWNED_META, 'record:product' );
+			}
+		}
+
+		if ( $term_id > 0 ) {
+			wp_set_object_terms( $id, array( $term_id ), 'product_cat', false );
+		}
 	}
 
 	/**

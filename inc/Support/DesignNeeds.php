@@ -36,6 +36,13 @@ final class DesignNeeds {
 	private const MAX_FILE = 4194304;
 
 	/**
+	 * Most markup files read while looking for a shop or a form.
+	 *
+	 * @var int
+	 */
+	private const MAX_FILES = 400;
+
+	/**
 	 * What one archive needs, each row ready for the screen.
 	 *
 	 * @param string $root Design root directory.
@@ -49,27 +56,155 @@ final class DesignNeeds {
 			return $needs;
 		}
 
+		$files   = self::markup_files( $root );
 		$catalog = self::catalog( $root );
+		$shop    = self::shop_signs( $files );
 
-		if ( null !== $catalog ) {
-			$needs[] = array(
-				'key'       => 'woocommerce',
-				'name'      => 'WooCommerce',
-				'plugin'    => 'woocommerce/woocommerce.php',
-				'installed' => self::installed( 'woocommerce/woocommerce.php' ),
-				'active'    => self::active( 'woocommerce/woocommerce.php' ),
-				'catalog'   => (string) $catalog['file'],
-				'records'   => (int) $catalog['records'],
-				'why'       => sprintf(
-					/* translators: 1: number of catalogue records, 2: the data file they sit in. */
-					__( 'The archive carries a product catalogue: %1$d records in %2$s. With WooCommerce installed, the build imports them as products — pictures matched by code — and the design’s product listings draw from them.', 'qwerty-soft-signal' ),
-					(int) $catalog['records'],
-					basename( (string) $catalog['file'] )
-				),
-			);
+		if ( null !== $catalog || array() !== $shop ) {
+			$needs[] = self::shop_need( $catalog, $shop );
+		}
+
+		$forms = self::forms( $files );
+
+		if ( array() !== $forms ) {
+			$needs[] = self::form_need( $forms );
 		}
 
 		return $needs;
+	}
+
+	/**
+	 * The shop row: what was found, and what the button will do about it.
+	 *
+	 * Two things reach this. A catalogue is the archive saying it has stock;
+	 * a cart in the markup is the design saying it has a shop. Either one on
+	 * its own is enough — the handoff that started all this had the catalogue
+	 * and no cart, and the one after it had an add-to-cart button on every
+	 * card and no data file anywhere.
+	 *
+	 * @param array{file:string, records:int}|null        $catalog The catalogue, when there is one.
+	 * @param array<int, array{says:string, file:string}> $shop    What the markup gave away.
+	 * @return array<string, mixed>
+	 */
+	private static function shop_need( ?array $catalog, array $shop ): array {
+		$plugin = 'woocommerce/woocommerce.php';
+		$active = self::active( $plugin );
+		$kit    = ShopKit::installed();
+		$why    = array();
+
+		if ( null !== $catalog ) {
+			$why[] = sprintf(
+				/* translators: 1: number of catalogue records, 2: the data file they sit in. */
+				__( 'The archive carries a product catalogue: %1$d records in %2$s. With WooCommerce installed, the build imports them as products — pictures matched by code — and the design’s product listings draw from them.', 'qwerty-soft-signal' ),
+				(int) $catalog['records'],
+				basename( (string) $catalog['file'] )
+			);
+		}
+
+		if ( array() !== $shop ) {
+			$seen = array();
+
+			foreach ( $shop as $sign ) {
+				$seen[] = sprintf(
+					/* translators: 1: what was found, e.g. "an add-to-cart button", 2: the file it was found in. */
+					__( '%1$s in %2$s', 'qwerty-soft-signal' ),
+					$sign['says'],
+					$sign['file']
+				);
+			}
+
+			$why[] = sprintf(
+				/* translators: %s: a list of what the design draws and where. */
+				__( 'The design draws a shop: %s.', 'qwerty-soft-signal' ),
+				implode( ', ', $seen )
+			);
+		}
+
+		$why[] = $kit
+			? __( 'The theme’s shop half — cart, checkout, product and product-archive templates — is already in place.', 'qwerty-soft-signal' )
+			: __( 'One button does the rest: it installs WooCommerce and unfolds the theme’s own shop half with it — the cart, checkout, product and product-archive templates, which the theme ships folded away so that a site with nothing to sell never carries them.', 'qwerty-soft-signal' );
+
+		if ( ! $active ) {
+			$button = self::installed( $plugin )
+				? __( 'Activate WooCommerce and add the shop templates', 'qwerty-soft-signal' )
+				: __( 'Install WooCommerce and the shop templates', 'qwerty-soft-signal' );
+		} else {
+			$button = __( 'Add the shop templates', 'qwerty-soft-signal' );
+		}
+
+		return array(
+			'key'       => 'woocommerce',
+			'name'      => 'WooCommerce',
+			'plugin'    => $plugin,
+			'installed' => self::installed( $plugin ),
+			'active'    => $active,
+			'kit'       => $kit,
+
+			/*
+			 * Ready is not the same as active. A site that already had
+			 * WooCommerce on it before the import has the plugin and none of
+			 * the templates, and reading "installed and active" off the
+			 * plugin alone hid the button that would have added them.
+			 */
+			'ready'     => $active && $kit,
+			'button'    => $button,
+			'done'      => null === $catalog
+				? __( 'Installed and active — the shop templates are in place.', 'qwerty-soft-signal' )
+				: __( 'Installed and active — the shop templates are in place and the build will import the catalogue.', 'qwerty-soft-signal' ),
+			'catalog'   => null === $catalog ? '' : (string) $catalog['file'],
+			'records'   => null === $catalog ? 0 : (int) $catalog['records'],
+			'why'       => implode( ' ', $why ),
+		);
+	}
+
+	/**
+	 * The form row: found, and already answered.
+	 *
+	 * The only recommendation here is not to install anything. A design's
+	 * contact form is markup — a few inputs and a button — and the theme
+	 * already ships the server half it needs: `qs/contact-form`, a plain POST
+	 * with a honeypot, a time trap and a per-IP rate limit. BlockWriter wires
+	 * the design's own form to it, so the section keeps every class the
+	 * design gave it and starts working the moment the page is built.
+	 *
+	 * A forms plugin would put a second form, drawn by somebody else's
+	 * markup, where the design had drawn its own. That is the whole reason
+	 * this row has no button.
+	 *
+	 * @param array<int, array{file:string}> $forms The forms the archive draws.
+	 * @return array<string, mixed>
+	 */
+	private static function form_need( array $forms ): array {
+		$files = array();
+
+		foreach ( $forms as $form ) {
+			$files[ $form['file'] ] = true;
+		}
+
+		$where = array_slice( array_keys( $files ), 0, 3 );
+
+		return array(
+			'key'       => 'contact-form',
+			'name'      => __( 'The design’s forms', 'qwerty-soft-signal' ),
+			'plugin'    => '',
+			'installed' => true,
+			'active'    => true,
+			'ready'     => true,
+			'button'    => '',
+			'done'      => __( 'Nothing to install — the theme answers this one.', 'qwerty-soft-signal' ),
+			'forms'     => count( $forms ),
+			'why'       => sprintf(
+				/* translators: 1: how many forms, 2: the files they were drawn in. */
+				_n(
+					'The design draws %1$d form (%2$s). No plugin is needed: the build keeps the design’s own markup and wires it to the theme’s contact form, which emails the site address, drops bots on a honeypot and a time trap, and works with JavaScript switched off. Set who receives it under Settings → General, or filter qwerty_soft/contact_recipient.',
+					'The design draws %1$d forms (%2$s). No plugin is needed: the build keeps the design’s own markup and wires them to the theme’s contact form, which emails the site address, drops bots on a honeypot and a time trap, and works with JavaScript switched off. Set who receives it under Settings → General, or filter qwerty_soft/contact_recipient.',
+					count( $forms ),
+					'qwerty-soft-signal'
+				),
+				count( $forms ),
+				implode( ', ', $where )
+			),
+		);
 	}
 
 	/**
@@ -173,6 +308,180 @@ final class DesignNeeds {
 		$name  = isset( $first['name'] ) || isset( $first['title'] );
 
 		return $code && $name ? $data : array();
+	}
+
+	/**
+	 * The archive's markup, as a map of absolute path => archive-relative path.
+	 *
+	 * Markup rather than every file: what is being looked for is what the
+	 * design draws, and a design draws in HTML and in the component languages
+	 * that compile to it. Minified bundles are skipped — they say the same
+	 * thing the source next to them says, at a hundred times the cost.
+	 *
+	 * @param string $root Design root directory.
+	 * @return array<string, string>
+	 */
+	private static function markup_files( string $root ): array {
+		$files = array();
+
+		try {
+			$walk = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $root, \FilesystemIterator::SKIP_DOTS )
+			);
+
+			foreach ( $walk as $file ) {
+				if ( ! $file->isFile() || $file->getSize() > self::MAX_FILE ) {
+					continue;
+				}
+
+				$path = str_replace( '\\', '/', $file->getPathname() );
+				$name = strtolower( $file->getFilename() );
+
+				if ( str_contains( $path, '/node_modules/' ) || str_contains( $name, '.min.' ) ) {
+					continue;
+				}
+
+				if ( 1 !== preg_match( '/\.(html?|jsx|tsx|vue|svelte|js|ts)$/i', $name ) ) {
+					continue;
+				}
+
+				$files[ $path ] = ltrim( substr( $path, strlen( $root ) ), '/' );
+
+				// A handoff can hold thousands of modules; this is a hint, not an audit.
+				if ( count( $files ) >= self::MAX_FILES ) {
+					break;
+				}
+			}
+		} catch ( \Throwable $error ) {
+			unset( $error );
+		}
+
+		ksort( $files );
+
+		return $files;
+	}
+
+	/**
+	 * What the markup gives away about a shop, with the file that gave it.
+	 *
+	 * Each sign has to be something only a shop draws. "Price" is not on the
+	 * list and never will be: an agency site with a pricing table is not a
+	 * shop, and a screen that recommends WooCommerce to it teaches whoever
+	 * reads it to stop reading it.
+	 *
+	 * @param array<string, string> $files Markup files, absolute path => relative.
+	 * @return array<int, array{says:string, file:string}> At most three, one per kind.
+	 */
+	private static function shop_signs( array $files ): array {
+		$signs = array(
+			array(
+				'pattern' => '/add[\s_-]?to[\s_-]?(cart|bag|basket)/i',
+				'says'    => __( 'an add-to-cart button', 'qwerty-soft-signal' ),
+			),
+			array(
+				'pattern' => '/\bwoocommerce\b/i',
+				'says'    => __( 'WooCommerce markup', 'qwerty-soft-signal' ),
+			),
+			array(
+				'pattern' => '/href=["\'][^"\']*\/(cart|checkout|basket)(["\'\/?#]|$)/i',
+				'says'    => __( 'a link to a cart or a checkout', 'qwerty-soft-signal' ),
+			),
+			array(
+				'pattern' => '/\bshopping[\s-]?(cart|bag|basket)\b/i',
+				'says'    => __( 'a shopping cart', 'qwerty-soft-signal' ),
+			),
+			array(
+				'pattern' => '/class=["\'][^"\']*\b(mini-cart|cart-count|cart-drawer|cart-icon|checkout-button)\b/i',
+				'says'    => __( 'cart markup', 'qwerty-soft-signal' ),
+			),
+		);
+
+		$found = array();
+
+		foreach ( $files as $path => $rel ) {
+			$body = (string) file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+
+			foreach ( $signs as $index => $sign ) {
+				if ( isset( $found[ $index ] ) || 1 !== preg_match( $sign['pattern'], $body ) ) {
+					continue;
+				}
+
+				$found[ $index ] = array(
+					'says' => (string) $sign['says'],
+					'file' => $rel,
+				);
+			}
+
+			if ( count( $found ) === count( $signs ) ) {
+				break;
+			}
+		}
+
+		ksort( $found );
+
+		return array_slice( array_values( $found ), 0, 3 );
+	}
+
+	/**
+	 * Every form the design draws, minus the ones that are not forms to fill in.
+	 *
+	 * A search box is a form and is nobody's contact form: the theme's search
+	 * block already draws one, and offering to wire it to an inbox would be
+	 * an offer to email every search. Same for a form whose only control is a
+	 * button — a log-out link drawn as a POST, an add-to-cart.
+	 *
+	 * @param array<string, string> $files Markup files, absolute path => relative.
+	 * @return array<int, array{file:string}>
+	 */
+	private static function forms( array $files ): array {
+		$forms = array();
+
+		foreach ( $files as $path => $rel ) {
+			$body = (string) file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+
+			if ( ! str_contains( strtolower( $body ), '<form' ) ) {
+				continue;
+			}
+
+			$count = preg_match_all( '/<form\b[\s\S]*?<\/form\s*>/i', $body, $matches );
+
+			if ( ! $count ) {
+				continue;
+			}
+
+			foreach ( (array) $matches[0] as $chunk ) {
+				if ( self::is_search_form( (string) $chunk ) ) {
+					continue;
+				}
+
+				// A form with nothing to type in is a button in disguise.
+				if ( 1 !== preg_match( '/<(input|textarea|select)\b/i', (string) $chunk ) ) {
+					continue;
+				}
+
+				$forms[] = array( 'file' => $rel );
+			}
+		}
+
+		return $forms;
+	}
+
+	/**
+	 * Whether one form is the site's search.
+	 *
+	 * @param string $chunk The form's markup.
+	 * @return bool
+	 */
+	private static function is_search_form( string $chunk ): bool {
+		if ( 1 === preg_match( '/role=["\']search["\']/i', $chunk ) ) {
+			return true;
+		}
+
+		if ( 1 === preg_match( '/type=["\']search["\']/i', $chunk ) ) {
+			return true;
+		}
+
+		return 1 === preg_match( '/<form\b[^>]*\bclass=["\'][^"\']*\bsearch\b/i', $chunk );
 	}
 
 	/**
