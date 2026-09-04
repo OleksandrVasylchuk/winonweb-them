@@ -81,10 +81,12 @@ const EXCLUDE = [
 	// docs/ ships: GUIDE.md is the client manual and ACCESSIBILITY.md is the
 	// conformance report — both are handed over with the site. The rest stay
 	// inside the studio: BLOCK_SPEC.md for whoever writes a new block,
-	// TECHNICAL.md for whoever inherits the codebase, and MANAGEMENT.md, which
-	// carries our hours and our margins.
+	// TECHNICAL.md for whoever inherits the codebase, IMPORT_LESSONS.md, which is
+	// what earlier imports cost us to learn, and MANAGEMENT.md, which carries our
+	// hours and our margins.
 	'docs/BLOCK_SPEC.md',
 	'docs/IMPORT_SPEC.md',
+	'docs/IMPORT_LESSONS.md',
 	'docs/TECHNICAL.md',
 	'docs/MANAGEMENT.md',
 

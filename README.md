@@ -66,7 +66,7 @@ inc/                  PHP: Qwerty\Soft\* (PSR-4, autoloaded by functions.php)
   Support/            small helpers with no hooks
 assets/fonts/         Manrope, three self-hosted woff2 subsets
 docs/                 GUIDE.md + ACCESSIBILITY.md ship · TECHNICAL.md, MANAGEMENT.md,
-                      BLOCK_SPEC.md are internal
+                      BLOCK_SPEC.md, IMPORT_SPEC.md, IMPORT_LESSONS.md are internal
 tools/                the quality gates (see below)
 languages/            qwerty-soft-signal.pot and the Ukrainian translation
 artifacts/            gate output and packaged releases — git-ignored, safe to delete

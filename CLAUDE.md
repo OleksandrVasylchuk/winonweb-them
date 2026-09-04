@@ -35,9 +35,20 @@ npm run lint:blocks      # template/pattern markup parses, references resolve
 npm run lint:php         # WordPress-Extra, must be zero
 npm run lint:html        # validates artifacts/html/*.html
 npm run make:pot         # regenerate languages/qwerty-soft-signal.pot
+npm run test:wp          # integration tests against a real WordPress
+npm run audit:pixels     # Playwright screenshot diff, design vs built page
+npm run build:zip        # the release archive + update.json
 ```
 
-`npm run lint:php` needs `composer install` once.
+`npm run lint:php` needs `composer install` once; `npm install` covers the
+rest. `npm run test` is the gate that must be green and needs no WordPress —
+it is what CI runs. `npm run test:wp` finds the install through
+`QSOFT_WP_PATH`, or by looking for a `wp-load.php` above the theme, and skips
+rather than fails when there is none.
+
+PHP does not have to be on PATH: `tools/php.mjs` looks there first, then in
+the usual XAMPP and Laragon locations. Add a path to it rather than working
+around it — every gate asks that one file where PHP is.
 
 ## Naming — do not deviate
 
@@ -145,6 +156,27 @@ Section markup uses `core/group` with `tagName: "section"`. Do **not** add
 `aria-labelledby` to every section: turning each one into a landmark is an
 accessibility regression. Named regions belong to the interactive blocks.
 
+## Working on the importer
+
+**Read `docs/IMPORT_LESSONS.md` before changing anything in the import
+pipeline.** It is every rule an import taught this codebase the expensive way —
+why the design's stylesheet is kept whole, which cascade beats which, why a
+repeater sub-field must not carry the block prefix, why the ACF preview toggle
+must not be attempted again. Each one looks like an odd choice in the code and
+like an obvious mistake to repeat.
+
+Two of them decide how to work rather than what to write, so they are here too:
+
+- **A fix lands in the generator, not in what it generated.** A studio-wide fix
+  applied only to the blocks on disk was undone by the next import, which is
+  how it was found twice. After fixing a generated block, delete its folder and
+  rebuild the page: regeneration is the test.
+- **Verify against the site, not against `artifacts/`.** Those files are one-off
+  fetches from a past pass and go stale as soon as blocks are rebuilt. Refetch
+  the page. One theme checkout can also serve more than one local install, each
+  with its own database — confirm which one is being looked at before
+  concluding anything about content.
+
 ## Verifying against a real site
 
 The repo has no WordPress in it. To test, point a local WordPress at the theme,
@@ -152,6 +184,17 @@ then fetch pages into `artifacts/html/` and run `npm run lint:html`. Accessibili
 is checked with axe-core in a real browser — structure rules only tell half the
 story, and colour-contrast over the hero gradient has to be reasoned about
 mathematically because axe reports it as "incomplete".
+
+There is no WP-CLI entry point: the importer is a REST-backed wp-admin screen.
+To drive it from a terminal, run PHP against the install's `wp-load.php` with
+`WP_USE_THEMES` defined false and `$_SERVER['HTTP_HOST']`, `SERVER_NAME` and
+`REQUEST_URI` set. A PHP binary without mysqli cannot do this — use the one
+from the local server stack, with its own `php.ini`.
+
+One shell nuance, because it has eaten a namespace more than once: heredocs and
+`sed` in this environment swallow backslashes, so `Qwerty\Soft` comes out as
+`QwertySoft` and the file no longer parses. Write PHP through the Edit and
+Write tools, or through `perl -0pe`; check with `php -l` when unsure.
 
 ## Directory layout
 
