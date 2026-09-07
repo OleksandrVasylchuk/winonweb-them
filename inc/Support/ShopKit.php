@@ -102,6 +102,20 @@ final class ShopKit {
 	}
 
 	/**
+	 * Recorded when this site unfolds the kit.
+	 *
+	 * The filesystem says whether the shop half is here; only a record says
+	 * whether it is *supposed* to be. A theme update deletes the unfolded
+	 * copies along with everything else the release ZIP does not carry, and
+	 * without this a recovery could not tell a shop site that just lost its
+	 * templates from a site running WooCommerce that never imported a shop —
+	 * and would hand the second one seven templates it never asked for.
+	 *
+	 * @var string
+	 */
+	public const INSTALLED = 'qwerty_soft_shop_kit_installed';
+
+	/**
 	 * Whether the kit is already unfolded on this site.
 	 *
 	 * True only when every file of it is in place: a half-copied kit is a
@@ -195,6 +209,9 @@ final class ShopKit {
 		if ( array() !== $copied ) {
 			wp_clean_themes_cache();
 		}
+
+		// This site is a shop site now, whatever a later update does to the files.
+		update_option( self::INSTALLED, 1, true );
 
 		return array(
 			'copied' => count( $copied ),

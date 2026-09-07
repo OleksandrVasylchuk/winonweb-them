@@ -200,7 +200,7 @@ final class BlockRepair {
 			 */
 			$menu   = 'header' === $area;
 			$source = $menu ? SiteAssembler::hollow_nav( $html ) : $html;
-			$slug   = BlockWriter::slug( 'site-' . $area . '-' . substr( md5( $source ), 0, 6 ) );
+			$slug   = BlockWriter::chrome_slug( $area, $source );
 
 			if ( '' === $slug ) {
 				continue;
@@ -315,9 +315,7 @@ final class BlockRepair {
 				continue;
 			}
 
-			$slug = BlockWriter::slug(
-				basename( $file, '.html' ) . '-' . (string) $section['label'] . '-' . substr( md5( $html ), 0, 6 )
-			);
+			$slug = BlockWriter::section_slug( $file, (string) $section['label'], $html );
 
 			if ( '' === $slug || ! isset( $left[ $slug ] ) ) {
 				continue;

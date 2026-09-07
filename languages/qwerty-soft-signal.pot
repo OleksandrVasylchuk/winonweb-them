@@ -1826,6 +1826,44 @@ msgstr ""
 msgid "Read more"
 msgstr ""
 
+#: inc/Modules/BlockRecovery.php:221
+msgid "The design they were built from is no longer unpacked on this server, so they could not be rebuilt: upload the archive again and press Build."
+msgstr ""
+
+#: inc/Modules/BlockRecovery.php:222
+msgid "They could not all be rebuilt from the design that is on the server. Open Design import and press Build."
+msgstr ""
+
+#: inc/Modules/BlockRecovery.php:226
+msgid "This site’s own sections are missing."
+msgstr ""
+
+#. translators: %d: how many sections.
+#: inc/Modules/BlockRecovery.php:230
+msgid "Updating the theme removed %d section built for this site."
+msgid_plural "Updating the theme removed %d sections built for this site."
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/Modules/BlockRecovery.php:239
+msgid "The words themselves are still in the database."
+msgstr ""
+
+#: inc/Modules/BlockRecovery.php:241
+msgid "Open Design import"
+msgstr ""
+
+#. translators: %d: how many sections.
+#: inc/Modules/BlockRecovery.php:252
+msgid "Updating the theme removed %d section built for this site; it has been rebuilt."
+msgid_plural "Updating the theme removed %d sections built for this site; they have been rebuilt."
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/Modules/BlockRecovery.php:263
+msgid "The shop templates were put back too."
+msgstr ""
+
 #: inc/Modules/Blocks.php:226
 msgid "Qwerty Soft blocks"
 msgstr ""
@@ -4551,17 +4589,17 @@ msgstr ""
 msgid "A JS-rendered visual (%1$s) was replaced with the design's screenshot %2$s. Swap it for a real image or embed when the site is live."
 msgstr ""
 
-#: inc/Support/ShopKit.php:142
+#: inc/Support/ShopKit.php:156
 msgid "This copy of the theme has no shop-kit folder, so there is no shop half to add. Re-upload the theme ZIP and try again."
 msgstr ""
 
 #. translators: %s: a directory inside the theme.
-#: inc/Support/ShopKit.php:167
+#: inc/Support/ShopKit.php:181
 msgid "The shop half could not be added: %s cannot be created. The theme folder is not writable by the web server."
 msgstr ""
 
 #. translators: %s: a file inside the theme.
-#: inc/Support/ShopKit.php:180
+#: inc/Support/ShopKit.php:194
 msgid "The shop half could not be added: %s could not be written. The theme folder is not writable by the web server."
 msgstr ""
 
@@ -4623,31 +4661,31 @@ msgid "Main navigation (%s)"
 msgstr ""
 
 #. translators: %s: comma-separated list of "visual → screenshot" pairs.
-#: inc/Support/SiteAssembler.php:2631
+#: inc/Support/SiteAssembler.php:2627
 msgid "JS-rendered visuals were stood in for by screenshots from the design: %s"
 msgstr ""
 
 #. translators: 1: number of lists, 2: number of items.
-#: inc/Support/SiteAssembler.php:2644
+#: inc/Support/SiteAssembler.php:2640
 msgid "%1$d list was filled from the design’s own data (%2$d items)."
 msgid_plural "%1$d lists were filled from the design’s own data (%2$d items)."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: comma-separated list of template variable names.
-#: inc/Support/SiteAssembler.php:2660
+#: inc/Support/SiteAssembler.php:2656
 msgid "The design left placeholders to fill in: %s"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:3354 inc/Support/SiteAssembler.php:4324
+#: inc/Support/SiteAssembler.php:3350 inc/Support/SiteAssembler.php:4320
 msgid "Footer"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:3354 inc/Support/SiteAssembler.php:4324
+#: inc/Support/SiteAssembler.php:3350 inc/Support/SiteAssembler.php:4320
 msgid "Header"
 msgstr ""
 
-#: inc/Support/SiteAssembler.php:3607 assets/js/admin-import.js:4762
+#: inc/Support/SiteAssembler.php:3603 assets/js/admin-import.js:4762
 msgid "Main navigation"
 msgstr ""
 

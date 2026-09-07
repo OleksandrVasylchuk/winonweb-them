@@ -98,7 +98,18 @@ are not PHP globals, so they stay `qs`.
    Generated blocks are ordinary registered blocks in the **Qwerty Soft
    blocks** category, so a section can be reused on any page from the
    inserter, carrying its stylesheet with it. They are excluded from the
-   release ZIP and never touched by a theme update.
+   release ZIP, because they belong to one site.
+
+   **That exclusion is also why a theme update destroys them.** WordPress
+   updates a theme by deleting its folder and unpacking the new one
+   (`Theme_Upgrader::upgrade()` passes `clear_destination => true`), so
+   everything the new package does not carry goes — `blocks/design/` and the
+   unfolded `shop-kit` copies alike. `Support\BlockRepair` can rebuild the
+   blocks from the site that is using them, and `Modules\BlockRecovery`
+   catches the moment: an update or a theme switch raises a flag, the next
+   admin page rebuilds what it can and says so, and where the design is no
+   longer unpacked the notice stays up. Do not write anything a site owns
+   into the theme folder without giving it the same treatment.
 
    `BlockConverter::faithful()` still draws the line for the older structural
    path, and it now reaches the model as well: when it is on, the conversion

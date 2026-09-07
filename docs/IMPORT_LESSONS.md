@@ -173,6 +173,26 @@ that exists *only* as `.webp` is not saved by the strip above.
   matching found nothing, and the real header was discarded in favour of a nav
   file that did not exist.
 
+- **A theme update deletes `blocks/design/`, and that is by design.** WordPress
+  updates a theme by deleting its folder and unpacking the new package over it
+  (`Theme_Upgrader::upgrade()` passes `clear_destination => true`), so
+  everything the ZIP does not carry goes — the generated blocks and the
+  unfolded `shop-kit` copies alike, both excluded from the ZIP on purpose.
+  `Modules\BlockRecovery` catches the moment: `upgrader_process_complete` and
+  `after_switch_theme` raise a flag, the next admin page rebuilds what it can
+  and says so, and where it cannot the notice stays up. Never write anything a
+  site owns into the theme folder without giving it the same treatment.
+- **Two copies of the same arithmetic drifted, and the safety net stopped
+  catching.** The block's directory name is `{page}-{label}-{digest}`, and the
+  digest has to be added *after* the forty-character limit has had its say or
+  the truncation eats it. `SiteAssembler` learned that once, in two passes;
+  `BlockRepair` kept its own one-pass copy and so kept the bug. Measured on a
+  real site: of eleven sections, the repair recomputed a matching name for
+  **one**, and the other ten were silently never seen — a name that does not
+  match is a section the repair does not know is missing. It now lives once, in
+  `BlockWriter::section_slug()`, and both callers ask. `BlockRepair` had no
+  tests at all until this was found; `tests/wp/block-recovery.php` is the first.
+
 ## 8. Builds that look stalled
 
 - A build started from the screen **without "run on server"** is driven by the

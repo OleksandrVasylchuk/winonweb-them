@@ -3378,6 +3378,52 @@ final class BlockWriter {
 	}
 
 	/**
+	 * The name a section's block is filed under.
+	 *
+	 * The digest goes on LAST, after the length limit has had its say. Ridden
+	 * inside one long string it is the first thing the truncation cuts off: a
+	 * page whose file name alone filled the forty characters collapsed every
+	 * one of its sections into a single directory and rendered one of them
+	 * four times.
+	 *
+	 * That was learned once, in the builder. `BlockRepair` kept its own copy
+	 * of the arithmetic, in the older one-pass form, and so kept the bug —
+	 * which meant a site rebuilt after a theme update got one section back out
+	 * of eleven, silently, because a name that does not match is a section the
+	 * repair never sees. The arithmetic lives here now, and both callers ask.
+	 *
+	 * @param string $file  The design page the section came from.
+	 * @param string $label What the splitter called the section.
+	 * @param string $html  The section's markup, which the digest is of.
+	 * @return string The slug, or empty when there is nothing to name.
+	 */
+	public static function section_slug( string $file, string $label, string $html ): string {
+		$digest = substr( md5( $html ), 0, 6 );
+		$slug   = self::slug( basename( $file, '.html' ) . '-' . $label );
+
+		return self::slug( substr( $slug, 0, self::SLUG_LIMIT - strlen( $digest ) - 1 ) . '-' . $digest );
+	}
+
+	/**
+	 * The name the header's or the footer's block is filed under.
+	 *
+	 * Short enough that the length limit never reaches the digest, so it needs
+	 * none of {@see self::section_slug()}'s care — but it is still one rule,
+	 * and it was still written out twice, in the builder and in the repair.
+	 * Two copies of the section's naming is what once left a rebuilt site with
+	 * one section out of eleven; this one agreed by luck rather than by
+	 * construction. Now by construction.
+	 *
+	 * @param string $area  Either `header` or `footer`.
+	 * @param string $html  The chrome's markup as the block will hold it — for
+	 *                      a header, after the navigation has been hollowed out.
+	 * @return string The slug, or empty when there is nothing to name.
+	 */
+	public static function chrome_slug( string $area, string $html ): string {
+		return self::slug( 'site-' . $area . '-' . substr( md5( $html ), 0, 6 ) );
+	}
+
+	/**
 	 * A directory name that is safe on every filesystem and short enough for Windows.
 	 *
 	 * @param string $slug Proposed name.

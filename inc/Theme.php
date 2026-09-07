@@ -120,6 +120,7 @@ final class Theme {
 			Modules\Handbook::class,
 			Modules\Translations::class,
 			Modules\Importer::class,
+			Modules\BlockRecovery::class,
 			Modules\SiteHealth::class,
 			Modules\Updates::class,
 		);

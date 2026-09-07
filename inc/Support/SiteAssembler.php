@@ -1705,7 +1705,7 @@ final class SiteAssembler {
 		}
 
 		$plan = SectionPlan::of( $html );
-		$slug = BlockWriter::slug( 'site-' . $area . '-' . substr( md5( $html ), 0, 6 ) );
+		$slug = BlockWriter::chrome_slug( $area, $html );
 
 		if ( '' === $slug ) {
 			return '';
@@ -2370,16 +2370,12 @@ final class SiteAssembler {
 		 * directory. The digest is of the markup, so rebuilding an unchanged
 		 * design reuses the block rather than piling up near-duplicates.
 		 *
-		 * The digest goes on LAST, after the length limit has had its say. It
-		 * used to ride inside one long string that the slug then truncated —
-		 * and a page whose file name alone filled the forty characters
-		 * truncated the digest clean off, so every section of
-		 * `china-kazakhstan-frozen-potato-ranking-…` collapsed into a single
-		 * block directory and the page rendered one section four times.
+		 * How the digest is fitted in is {@see BlockWriter::section_slug()}'s
+		 * business, and the repair asks the same question there — two copies of
+		 * that arithmetic is what once left a rebuilt site with one section
+		 * out of eleven.
 		 */
-		$digest = substr( md5( $html ), 0, 6 );
-		$slug   = BlockWriter::slug( basename( $file, '.html' ) . '-' . (string) $section['label'] );
-		$slug   = BlockWriter::slug( substr( $slug, 0, 33 ) . '-' . $digest );
+		$slug = BlockWriter::section_slug( $file, (string) $section['label'], $html );
 
 		if ( '' === $slug ) {
 			return null;
