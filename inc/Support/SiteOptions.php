@@ -75,10 +75,10 @@ final class SiteOptions {
 	 * @return bool
 	 */
 	public static function has_fields(): bool {
-		$found = glob( BlockWriter::dir() . '/*/fields.json' );
+		$found = array();
 
-		if ( ! is_array( $found ) ) {
-			return false;
+		foreach ( BlockWriter::dirs() as $dir ) {
+			$found = array_merge( $found, (array) glob( $dir . '/*/fields.json' ) );
 		}
 
 		foreach ( $found as $file ) {

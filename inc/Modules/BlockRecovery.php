@@ -12,6 +12,7 @@ namespace Qwerty\Soft\Modules;
 
 use Qwerty\Soft\Contracts\Module;
 use Qwerty\Soft\Support\BlockRepair;
+use Qwerty\Soft\Support\BlockWriter;
 use Qwerty\Soft\Support\ShopKit;
 
 defined( 'ABSPATH' ) || exit;
@@ -78,8 +79,64 @@ final class BlockRecovery implements Module {
 	public function register(): void {
 		add_action( 'upgrader_process_complete', array( $this, 'after_upgrade' ), 10, 2 );
 		add_action( 'after_switch_theme', array( $this, 'flag' ) );
-		add_action( 'admin_init', array( $this, 'recover' ) );
+
+		// Out of the theme first, then look at what is missing from where they now live.
+		add_action( 'admin_init', array( $this, 'migrate' ), 5 );
+		add_action( 'admin_init', array( $this, 'recover' ), 10 );
 		add_action( 'admin_notices', array( $this, 'notice' ) );
+	}
+
+	/**
+	 * Move blocks written by an older version out of the theme folder.
+	 *
+	 * Until this runs the site still draws them — {@see BlockWriter::dirs()}
+	 * reads both homes for exactly that reason — but they are still where an
+	 * update can delete them, so the move is the point rather than a tidy-up.
+	 *
+	 * Done a folder at a time and never over anything already at the
+	 * destination: a half-finished move must leave a site that renders, and
+	 * the worst case here is a site that renders from both homes at once.
+	 *
+	 * @return void
+	 */
+	public function migrate(): void {
+		$legacy = BlockWriter::legacy_dir();
+		$home   = BlockWriter::dir();
+
+		if ( '' === $legacy || $legacy === $home ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'edit_theme_options' ) || wp_doing_ajax() ) {
+			return;
+		}
+
+		$moved = 0;
+
+		foreach ( (array) glob( $legacy . '/*' ) as $path ) {
+			$to = $home . '/' . basename( (string) $path );
+
+			if ( file_exists( $to ) ) {
+				continue;
+			}
+
+			if ( rename( (string) $path, $to ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- WP_Filesystem is not loaded on admin_init, and this must run before anything reads a block.
+				++$moved;
+			}
+		}
+
+		/*
+		 * Only when it is empty, and only then. A folder still holding
+		 * something is a folder holding something this did not understand,
+		 * and deleting it would be deleting a site's own sections.
+		 */
+		if ( array() === (array) glob( $legacy . '/*' ) ) {
+			rmdir( $legacy ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- See above.
+		}
+
+		if ( $moved > 0 ) {
+			BlockWriter::forget_home();
+		}
 	}
 
 	/**

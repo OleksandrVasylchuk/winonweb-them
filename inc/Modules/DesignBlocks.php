@@ -291,9 +291,13 @@ final class DesignBlocks implements Module {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function groups(): array {
-		$found = glob( \Qwerty\Soft\Support\BlockWriter::dir() . '/*/fields.json' );
+		$found = array();
 
-		if ( ! is_array( $found ) ) {
+		foreach ( \Qwerty\Soft\Support\BlockWriter::dirs() as $dir ) {
+			$found = array_merge( $found, (array) glob( $dir . '/*/fields.json' ) );
+		}
+
+		if ( array() === $found ) {
 			return array();
 		}
 

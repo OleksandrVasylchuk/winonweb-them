@@ -87,6 +87,20 @@ final class BlockWriter {
 	public const OPTIONS_PAGE = 'qs-design-content';
 
 	/**
+	 * The folder under uploads that generated blocks live in.
+	 *
+	 * @var string
+	 */
+	private const HOME_DIR = 'qwerty-soft-signal-blocks';
+
+	/**
+	 * The home, once worked out.
+	 *
+	 * @var string|null
+	 */
+	private static $home = null;
+
+	/**
 	 * What this writer produces, so an older block can be told apart.
 	 *
 	 * A generated block is never overwritten — editing one by hand is expected
@@ -308,6 +322,16 @@ final class BlockWriter {
 	 * @return array<string, string>|null The files written, or null when nothing could be.
 	 */
 	public static function write( string $html, array $plan, string $slug, string $title, string $css, string $dir, string $origin = '', string $scope = 'block', bool $menu = false, string $singular = '' ): ?array {
+		/*
+		 * The folder the blocks live in is made and guarded when something is
+		 * about to go into it, never when somebody merely asks where it is.
+		 */
+		$home = self::dir();
+
+		if ( '' !== $home && str_starts_with( str_replace( chr( 92 ), '/', $dir ), $home . '/' ) ) {
+			self::ensure();
+		}
+
 		self::$scope = 'option' === $scope ? 'option' : 'block';
 		self::$says  = self::values( $html, $plan );
 
@@ -761,7 +785,213 @@ final class BlockWriter {
 		 *
 		 * @param string $dir Absolute path, without a trailing slash.
 		 */
-		return (string) apply_filters( 'qwerty_soft/design_blocks_dir', QSOFT_DIR . '/blocks/design' );
+		return (string) apply_filters( 'qwerty_soft/design_blocks_dir', self::home() );
+	}
+
+	/**
+	 * Every folder a generated block may be read from, newest home first.
+	 *
+	 * One folder is written to; two may have to be read. A site built before
+	 * the blocks moved out of the theme still has them under
+	 * `blocks/design/`, and it must go on rendering between the version that
+	 * moved them and the admin request that actually moves its files — so
+	 * anything that has to find a block *to draw a page* asks here. Anything
+	 * that writes, repairs or measures asks {@see self::dir()}, which is the
+	 * one place new work goes.
+	 *
+	 * @return array<int, string> Absolute paths, without trailing slashes.
+	 */
+	public static function dirs(): array {
+		$dirs   = array( self::dir() );
+		$legacy = self::legacy_dir();
+
+		if ( '' !== $legacy && ! in_array( $legacy, $dirs, true ) ) {
+			$dirs[] = $legacy;
+		}
+
+		return $dirs;
+	}
+
+	/**
+	 * The folder inside the theme that blocks used to be written to.
+	 *
+	 * @return string Absolute path, or empty when nothing is there.
+	 */
+	public static function legacy_dir(): string {
+		$dir = self::theme_path( '/blocks/design' );
+
+		return '' !== $dir && is_dir( $dir ) ? $dir : '';
+	}
+
+	/**
+	 * A path inside the theme, or empty where the theme is not defined.
+	 *
+	 * The unit suite runs these classes with no WordPress under them, and a
+	 * class that names a constant only WordPress defines is a class that
+	 * suite cannot reach at all.
+	 *
+	 * @param string $under Path relative to the theme root, leading slash.
+	 * @return string
+	 */
+	private static function theme_path( string $under ): string {
+		return defined( 'QSOFT_DIR' ) ? str_replace( '\\', '/', (string) QSOFT_DIR . $under ) : '';
+	}
+
+	/**
+	 * Forget where the home is, so the next call works it out again.
+	 *
+	 * Only the migration needs this: it moves the folder out from under a
+	 * value this class has already cached for the request.
+	 *
+	 * @return void
+	 */
+	public static function forget_home(): void {
+		self::$home = null;
+	}
+
+	/**
+	 * Where generated blocks live when nothing says otherwise: outside the theme.
+	 *
+	 * They used to live in the theme, under `blocks/design/`, and that was one
+	 * decision too clever. The blocks belong to one site, so the release ZIP
+	 * leaves them out — and WordPress updates a theme by deleting its folder
+	 * and unpacking the new one over it (`Theme_Upgrader::upgrade()` passes
+	 * `clear_destination => true`). Everything the package does not carry goes
+	 * with it. An update therefore deleted the client's own sections, and
+	 * every page read "your site doesn't include support for this block".
+	 *
+	 * Under uploads they are simply not in the way: an update, a redeployed
+	 * theme directory, a fresh checkout, a rebuilt container — none of them
+	 * reaches this folder. `Modules\BlockRecovery` still watches, because a
+	 * site that pins the old location through the filter is still a site that
+	 * can lose them.
+	 *
+	 * Uploads rather than `wp-content/` because uploads is the one directory a
+	 * host guarantees is writable, and the designs these blocks are made from
+	 * are already there. If it cannot be had, the theme folder is still better
+	 * than nothing: a site that renders and might lose its blocks to an update
+	 * beats a site that cannot build at all.
+	 *
+	 * @return string Absolute path, without a trailing slash.
+	 */
+	private static function home(): string {
+		if ( is_string( self::$home ) ) {
+			return self::$home;
+		}
+
+		$fallback = self::theme_path( '/blocks/design' );
+
+		if ( ! function_exists( 'wp_upload_dir' ) ) {
+			return $fallback;
+		}
+
+		$uploads = wp_upload_dir();
+
+		if ( ! empty( $uploads['error'] ) || ! is_string( $uploads['basedir'] ?? null ) ) {
+			return $fallback;
+		}
+
+		self::$home = rtrim( str_replace( '\\', '/', (string) $uploads['basedir'] ), '/' ) . '/' . self::HOME_DIR;
+
+		return self::$home;
+	}
+
+	/**
+	 * The home, made to exist and guarded, ready to be written into.
+	 *
+	 * Asked for by whoever is about to write, never by whoever is only
+	 * asking where things are. {@see self::dir()} creating the folder meant
+	 * every run of the test suite reached into a real site's uploads to make
+	 * a directory and two guard files, and the suite's own tidy-up then
+	 * removed them again — churn in somebody's live folder as the price of
+	 * asking a question.
+	 *
+	 * @return string Absolute path, without a trailing slash.
+	 */
+	public static function ensure(): string {
+		$dir = self::dir();
+
+		if ( ! is_dir( $dir ) ) {
+			wp_mkdir_p( $dir );
+		}
+
+		self::protect( $dir );
+
+		return $dir;
+	}
+
+	/**
+	 * Keep the folder from serving anything it should not.
+	 *
+	 * Not the flat denial the designs folder gets: the design's own stylesheet
+	 * and script live here and a browser has to fetch them. What must never be
+	 * served is the PHP — though every generated `render.php` opens with
+	 * `defined( 'ABSPATH' ) || exit;` and answers nothing on its own, the same
+	 * as it did in the theme folder, which is just as public.
+	 *
+	 * nginx reads neither guard file; a site on nginx wanting the belt as well
+	 * as the braces denies `\.php$` under this directory in its server block.
+	 *
+	 * @param string $dir Absolute directory path.
+	 * @return void
+	 */
+	private static function protect( string $dir ): void {
+		$files = array(
+			'.htaccess' => "# The design's stylesheet is served from here; its PHP never is.\n"
+				. "<FilesMatch \"\\.php$\">\nRequire all denied\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n</FilesMatch>\n",
+			'index.php' => "<?php\n// Silence is golden.\n",
+		);
+
+		foreach ( $files as $name => $body ) {
+			$path = trailingslashit( $dir ) . $name;
+
+			if ( file_exists( $path ) ) {
+				continue;
+			}
+
+			file_put_contents( $path, $body ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- A guard file that must exist the moment the folder does, before WP_Filesystem is available in a build request.
+		}
+	}
+
+	/**
+	 * The address the blocks folder answers on, or empty when it has none.
+	 *
+	 * Only the canonical stylesheet and script need one — a generated block
+	 * names registered handles rather than files, so nothing else in the
+	 * folder is ever fetched. The folder can sit in the theme, in uploads or
+	 * wherever the filter puts it, and each of those has a different way of
+	 * becoming a URL; a path under none of them has no address, and the
+	 * caller is expected to skip rather than guess.
+	 *
+	 * @return string URL without a trailing slash, or empty.
+	 */
+	public static function dir_uri(): string {
+		$dir     = rtrim( str_replace( '\\', '/', self::dir() ), '/' );
+		$uploads = function_exists( 'wp_upload_dir' ) ? wp_upload_dir() : array();
+
+		$roots = array();
+
+		if ( defined( 'QSOFT_DIR' ) && defined( 'QSOFT_URI' ) ) {
+			$roots[] = array( str_replace( '\\', '/', (string) QSOFT_DIR ), (string) QSOFT_URI );
+		}
+
+		if ( empty( $uploads['error'] ) && is_string( $uploads['basedir'] ?? null ) && is_string( $uploads['baseurl'] ?? null ) ) {
+			$roots[] = array( str_replace( '\\', '/', (string) $uploads['basedir'] ), (string) $uploads['baseurl'] );
+		}
+
+		if ( defined( 'WP_CONTENT_DIR' ) && function_exists( 'content_url' ) ) {
+			$roots[] = array( str_replace( '\\', '/', (string) WP_CONTENT_DIR ), (string) content_url() );
+		}
+
+		foreach ( $roots as $root ) {
+			$path = rtrim( (string) $root[0], '/' );
+
+			if ( '' !== $path && str_starts_with( $dir . '/', $path . '/' ) ) {
+				return rtrim( (string) $root[1], '/' ) . substr( $dir, strlen( $path ) );
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -793,13 +1023,13 @@ final class BlockWriter {
 	 * @return array{css:int,js:int} Bytes written.
 	 */
 	public static function write_canonical( array $sources ): array {
-		$dir     = self::dir();
+		$dir     = self::ensure();
 		$written = array(
 			'css' => 0,
 			'js'  => 0,
 		);
 
-		if ( ! wp_mkdir_p( $dir ) ) {
+		if ( ! is_dir( $dir ) ) {
 			return $written;
 		}
 

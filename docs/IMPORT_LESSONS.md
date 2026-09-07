@@ -173,15 +173,30 @@ that exists *only* as `.webp` is not saved by the strip above.
   matching found nothing, and the real header was discarded in favour of a nav
   file that did not exist.
 
-- **A theme update deletes `blocks/design/`, and that is by design.** WordPress
-  updates a theme by deleting its folder and unpacking the new package over it
+- **Never write anything a site owns into the theme folder.** WordPress updates
+  a theme by deleting its folder and unpacking the new package over it
   (`Theme_Upgrader::upgrade()` passes `clear_destination => true`), so
-  everything the ZIP does not carry goes — the generated blocks and the
-  unfolded `shop-kit` copies alike, both excluded from the ZIP on purpose.
-  `Modules\BlockRecovery` catches the moment: `upgrader_process_complete` and
-  `after_switch_theme` raise a flag, the next admin page rebuilds what it can
-  and says so, and where it cannot the notice stays up. Never write anything a
-  site owns into the theme folder without giving it the same treatment.
+  everything the ZIP does not carry goes — and the generated blocks are left
+  out of the ZIP on purpose, because they belong to one site. Kept under
+  `blocks/design/`, they were deleted by every update, and every page read
+  "your site doesn't include support for this block". They live under
+  `uploads/qwerty-soft-signal-blocks/` now, which no update reaches.
+  `BlockWriter::dirs()` reads both homes so a site built before the move goes
+  on drawing, and `BlockRecovery::migrate()` moves its files out on the next
+  admin page. Two things to know if you touch this: `BlockWriter::dir()` is a
+  *question*, `BlockWriter::ensure()` is the one that creates and guards the
+  folder — a getter that made directories had every test run reaching into a
+  real site's uploads; and the folder is guarded by an `.htaccess` that denies
+  `.php` only, because the design's own stylesheet is served from there.
+- **The shop half is still in the theme, so it still goes.** `ShopKit::INSTALLED`
+  records that a site had it, so `BlockRecovery` can put it back — and only on
+  a site that has WooCommerce, because `SiteAssembler::reset()` empties a site
+  without folding the shop half back up, and the record alone would hand seven
+  shop templates to a design that has no shop in it.
+- **`Modules\BlockRecovery` is what watches.** `upgrader_process_complete` and
+  `after_switch_theme` raise a flag; the next admin page migrates, rebuilds
+  what it can, and says so; where it cannot, the notice stays up until somebody
+  acts on it.
 - **Two copies of the same arithmetic drifted, and the safety net stopped
   catching.** The block's directory name is `{page}-{label}-{digest}`, and the
   digest has to be added *after* the forty-character limit has had its say or

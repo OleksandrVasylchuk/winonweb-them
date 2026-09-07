@@ -79,11 +79,35 @@ final class Blocks implements Module {
 	 * @return void
 	 */
 	private function register_design_canonical(): void {
-		$dir = \Qwerty\Soft\Support\BlockWriter::dir();
+		/*
+		 * Both homes, because a site built before the blocks moved out of the
+		 * theme keeps its stylesheet there until the move runs — and a design
+		 * without its stylesheet is a page of unstyled markup, which is the one
+		 * failure this whole pipeline exists to avoid.
+		 */
+		foreach ( \Qwerty\Soft\Support\BlockWriter::dirs() as $dir ) {
+			$uri = \Qwerty\Soft\Support\BlockWriter::dir_uri( $dir );
 
-		if ( ! str_starts_with( $dir, QSOFT_DIR ) ) {
-			return;
+			/*
+			 * A folder with no address serves nothing. That is the filtered
+			 * case — somebody has pointed the blocks somewhere the web cannot
+			 * reach — and a handle whose URL would be a guess is worse than
+			 * none at all.
+			 */
+			if ( '' !== $uri ) {
+				$this->register_canonical_in( $dir, $uri );
+			}
 		}
+	}
+
+	/**
+	 * Register the canonical stylesheet and script that one folder holds.
+	 *
+	 * @param string $dir Absolute path of a folder holding generated blocks.
+	 * @param string $uri The address that folder answers on.
+	 * @return void
+	 */
+	private function register_canonical_in( string $dir, string $uri ): void {
 
 		foreach ( (array) glob( $dir . '/_canonical*.css' ) as $css ) {
 			$handle = $this->canonical_handle_of( (string) $css );
@@ -94,7 +118,7 @@ final class Blocks implements Module {
 
 			wp_register_style(
 				$handle,
-				QSOFT_URI . substr( (string) $css, strlen( QSOFT_DIR ) ),
+				$uri . substr( (string) $css, strlen( $dir ) ),
 				array(),
 				(string) filemtime( (string) $css )
 			);
@@ -109,7 +133,7 @@ final class Blocks implements Module {
 
 			wp_register_script(
 				$handle,
-				QSOFT_URI . substr( (string) $js, strlen( QSOFT_DIR ) ),
+				$uri . substr( (string) $js, strlen( $dir ) ),
 				array(),
 				(string) filemtime( (string) $js ),
 				array(
@@ -201,7 +225,13 @@ final class Blocks implements Module {
 		 * be moved: a test run is given a directory of its own so that it can
 		 * never write into, or tidy away, a real site's import.
 		 */
-		foreach ( array( QSOFT_DIR . self::BLOCKS_DIR . '/*/block.json', \Qwerty\Soft\Support\BlockWriter::dir() . '/*/block.json' ) as $pattern ) {
+		$patterns = array( QSOFT_DIR . self::BLOCKS_DIR . '/*/block.json' );
+
+		foreach ( \Qwerty\Soft\Support\BlockWriter::dirs() as $generated ) {
+			$patterns[] = $generated . '/*/block.json';
+		}
+
+		foreach ( $patterns as $pattern ) {
 			$matched = glob( $pattern );
 
 			if ( is_array( $matched ) ) {

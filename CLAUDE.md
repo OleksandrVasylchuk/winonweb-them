@@ -87,7 +87,8 @@ are not PHP globals, so they stay `qs`.
 
    **A section is wrapped, not translated.** `inc/Support/SectionPlan.php`
    reads a section and says what is editable in it; `inc/Support/BlockWriter.php`
-   writes that section out as a block of its own under `blocks/design/{slug}/`
+   writes that section out as a block of its own under
+   `uploads/qwerty-soft-signal-blocks/{slug}/`
    — `render.php` holding the archive's markup verbatim, `style.css` holding
    the rules that target it, `fields.json` holding one ACF field per editable
    thing. Markup that is copied cannot lose a class, which is the whole point:
@@ -100,16 +101,23 @@ are not PHP globals, so they stay `qs`.
    inserter, carrying its stylesheet with it. They are excluded from the
    release ZIP, because they belong to one site.
 
-   **That exclusion is also why a theme update destroys them.** WordPress
-   updates a theme by deleting its folder and unpacking the new one
-   (`Theme_Upgrader::upgrade()` passes `clear_destination => true`), so
-   everything the new package does not carry goes — `blocks/design/` and the
-   unfolded `shop-kit` copies alike. `Support\BlockRepair` can rebuild the
-   blocks from the site that is using them, and `Modules\BlockRecovery`
-   catches the moment: an update or a theme switch raises a flag, the next
-   admin page rebuilds what it can and says so, and where the design is no
-   longer unpacked the notice stays up. Do not write anything a site owns
-   into the theme folder without giving it the same treatment.
+   **They live outside the theme, and that is why.** WordPress updates a theme
+   by deleting its folder and unpacking the new one (`Theme_Upgrader::upgrade()`
+   passes `clear_destination => true`), so everything the package does not
+   carry goes with it — which, for blocks kept under `blocks/design/`, meant an
+   update deleting the client's own sections and every page reading "your site
+   doesn't include support for this block". `BlockWriter::dir()` now answers
+   `uploads/qwerty-soft-signal-blocks/`, where nothing an update does can reach
+   them; `BlockWriter::dirs()` still reads the old folder as well, so a site
+   built before this goes on drawing until `Modules\BlockRecovery::migrate()`
+   moves its files out on the next admin page.
+
+   The unfolded `shop-kit` copies are still in the theme and still go, which is
+   why `ShopKit::INSTALLED` records that a site had them. `BlockRecovery` is
+   what watches: an update or a theme switch raises a flag, the next admin page
+   rebuilds what it can through `Support\BlockRepair` and says so, and where
+   the design is no longer unpacked the notice stays up. **Do not write
+   anything a site owns into the theme folder.**
 
    `BlockConverter::faithful()` still draws the line for the older structural
    path, and it now reaches the model as well: when it is on, the conversion
@@ -229,6 +237,7 @@ Write tools, or through `perl -0pe`; check with `php -l` when unsure.
 theme.json · styles/light.json     tokens + style variation
 templates/ · parts/ · patterns/    the site, editable in the Site Editor
 blocks/{slug}/                     custom blocks, auto-discovered
+                                   (generated ones live in uploads, not here)
 shop-kit/                          the shop half, folded until an import needs it
 inc/Modules/                       one concern per file
 tools/                             the quality gates

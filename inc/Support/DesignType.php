@@ -303,10 +303,10 @@ final class DesignType {
 	 * @return array<string, array<string, mixed>> Keyed by post type.
 	 */
 	public static function all(): array {
-		$found = glob( BlockWriter::dir() . '/*/type.json' );
+		$found = array();
 
-		if ( ! is_array( $found ) ) {
-			return array();
+		foreach ( BlockWriter::dirs() as $dir ) {
+			$found = array_merge( $found, (array) glob( $dir . '/*/type.json' ) );
 		}
 
 		$types = array();

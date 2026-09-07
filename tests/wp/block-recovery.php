@@ -263,4 +263,72 @@ qsoft_test(
 	}
 );
 
+qsoft_test(
+	'the folder blocks live in is made when they are written, and the ones inside the theme move out',
+	static function (): void {
+		/*
+		 * The suite points the blocks at a folder of its own, so what can be
+		 * claimed here is what the writer does with whatever folder it is
+		 * given — not where the default is. That the default sits outside the
+		 * theme is {@see BlockWriter::home()}'s business and is asserted by
+		 * the one thing that would break if it did not: the move below.
+		 */
+		$home = BlockWriter::ensure();
+
+		qsoft_assert( is_dir( $home ), 'ensure() makes the folder it is about to be written into', $home );
+
+		foreach ( array( '.htaccess', 'index.php' ) as $guard ) {
+			qsoft_assert( is_file( $home . '/' . $guard ), 'and guards it with ' . $guard );
+		}
+
+		$uri = BlockWriter::dir_uri();
+
+		qsoft_assert(
+			'' !== $uri && str_starts_with( $uri, 'http' ),
+			'the folder has an address, because the design\'s stylesheet is served from it',
+			$uri
+		);
+
+		/*
+		 * A site built by an earlier version, imitated: a folder of blocks
+		 * inside the theme, where they used to be written.
+		 */
+		$legacy = str_replace( '\\', '/', QSOFT_DIR . '/blocks/design' );
+		$fake   = $legacy . '/qsoft-moving-test';
+
+		if ( ! qsoft_assert( ! is_dir( $legacy ), 'the theme has no blocks folder to start with', $legacy ) ) {
+			return;
+		}
+
+		wp_mkdir_p( $fake );
+		file_put_contents( $fake . '/block.json', '{"name":"qs/design-qsoft-moving-test"}' );
+		file_put_contents( $legacy . '/_canonical.css', '/* the design\'s own sheet */' );
+
+		qsoft_assert(
+			in_array( $legacy, BlockWriter::dirs(), true ),
+			'while they are in the theme they are still read, so the site goes on drawing',
+			BlockWriter::dirs()
+		);
+
+		( new BlockRecovery() )->migrate();
+
+		qsoft_assert( is_dir( $home . '/qsoft-moving-test' ), 'the move takes the block out of the theme' );
+		qsoft_assert( is_file( $home . '/_canonical.css' ), 'and the design\'s stylesheet with it' );
+		qsoft_assert( ! is_dir( $legacy ), 'and takes the empty folder away after it', $legacy );
+		qsoft_assert(
+			! in_array( $legacy, BlockWriter::dirs(), true ),
+			'after which there is one home again',
+			BlockWriter::dirs()
+		);
+
+		// Put this install's folder back the way it was found.
+		foreach ( (array) glob( $home . '/qsoft-moving-test/*' ) as $file ) {
+			unlink( (string) $file );
+		}
+
+		rmdir( $home . '/qsoft-moving-test' );
+		unlink( $home . '/_canonical.css' );
+	}
+);
+
 qsoft_finish();
