@@ -3,8 +3,11 @@
 Internal. The agreed model for turning a delivered design into a WordPress
 site. Written to be confirmed before the code follows it.
 
-**Status: awaiting confirmation.** Nothing in the importer has been rewritten
-to this yet.
+**Status: implemented, with one deliberate departure.** Sections are wrapped
+(§2, §3, §4a, §5, §8 are what the code does). §4 is where the code departs from
+the first draft: editing on the canvas is done on the section's own markup,
+not through `InnerBlocks` — see §4 for why. §10's questions are answered at
+the end.
 
 ---
 
@@ -77,32 +80,52 @@ Consequences, all deliberate:
 Every generated block is editable **two ways at once**. This is a requirement,
 not a preference.
 
-**In the block, on the canvas.** Everything in the flow of the section —
-headings, paragraphs, buttons, images — is a real core block placed by an
-`<InnerBlocks>` template inside the ACF render template, with
-`templateLock="all"` so the structure cannot drift from the design.
+**In the block, on the canvas.** The section is drawn as the design drew it,
+and its editable elements are editable where they stand. The writer marks
+every field's element in `render.php` — `data-qs-field="heading"` on the
+heading, `data-qs-row="items"` on each repeated row — and
+`assets/js/design-canvas.js` reads those marks after ACF renders the
+preview and makes the elements themselves editable: click the heading and
+type; click the picture and choose another from the Media Library; click a
+button to change its words, with its address in a small bar beneath it;
+hover a repeated row for "add a row" and "remove this row". What is typed is
+written to the same block data the sidebar edits. On the front end the marks
+are stripped (`DesignField::unmarked()`).
 
-```php
-<section class="section-dark hero">
-  <div class="hero-grid">
-    <div class="hero-copy"><InnerBlocks /></div>
-    <?php // the frame around it comes from fields ?>
-  </div>
-</section>
-```
+This is not `InnerBlocks`, and deliberately. The first draft put the flow of
+a section into core blocks placed by an `<InnerBlocks>` template. Two things
+ruled it out. ACF Pro allows one `<InnerBlocks />` per block, and a section's
+editable text is scattered through its tree — a heading in one column, a lead
+in another, a list of points inside each card — so one slot cannot hold it
+without moving the design's markup around. And a core heading is a
+`<h2 class="wp-block-heading">`, not the design's `<h2>` inside its own
+wrapper with its own classes; the stylesheet would have had nothing to
+target. Editing the design's own element keeps the markup verbatim, which is
+the whole point of wrapping.
 
-Click the heading and type. Click the photo and press Replace. Select the
-button and paste a URL.
+ACF's own form on the canvas is not available and cannot be made so from the
+theme: ACF Pro forces preview mode whenever the editor canvas is an iframe,
+which since WordPress 6.3 is every screen (`IMPORT_LESSONS.md` §5).
 
-**In the panel on the right.** Everything that is not in the flow is an ACF
-field: the section background image, the decorative SVG, the anchor, the
-variant, and every repeatable group — the four fact tiles, the six report
-cards, the five chips. ACF Pro's repeater gives those an "add row" interface
-with no editor JavaScript to write.
+**In the panel on the right.** Every field is also an ACF field in the Block
+tab of the sidebar: the words, the pictures, the links, and every repeatable
+group as a repeater with "add row". Structural changes made on the canvas
+reselect the block so the sidebar form is redrawn from the new data.
 
 Neither half is optional. A block that can only be edited from the sidebar is
 not accepted; neither is one whose repeatable parts can only be edited by
 duplicating markup.
+
+**What is a field.** Any element with words of its own — a heading, a
+paragraph, a list item, and equally an eyebrow in a `<div>`, a glyph in an
+icon box, a table cell, a button. Words with inline markup inside them (a
+highlighted `<span>`, a `<br>`) are one *rich* field that keeps the markup,
+reduced on both write and read to the tags in `SectionPlan::RICH_TAGS`.
+Words beside decoration (an icon before a bullet) are a plain field planted
+around the decoration. A link that is a whole card keeps its address as a
+field and leaves what it holds to become fields of their own. An element
+holding a block with words of its own — `<li>Plan<ul>…</ul></li>` — is a
+frame, not a field.
 
 ---
 
@@ -215,10 +238,11 @@ the promise that an import can be taken back out in one press, so:
 
 ---
 
-## 10. To confirm
+## 10. Confirmed
 
-1. ACF Pro everywhere, or only on imported sites?
-2. `blocks/design/` in the repository, or in `wp-content/uploads`? In the theme
-   is simpler and survives a deploy; in uploads keeps the theme clean.
-3. When a design section has no editable content at all — a divider, a
-   decorative band — generate a block anyway, or inline it as static markup?
+1. ACF Pro on every site the theme is installed on (§7). Without it a block
+   still draws from its own data; only the editing is missing.
+2. `blocks/design/` in the theme, excluded from the release ZIP and never
+   touched by an update (§8).
+3. A section with no editable content is still a block, so it can be placed
+   on another page from the inserter; it simply has no fields.

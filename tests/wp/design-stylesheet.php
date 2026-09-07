@@ -335,6 +335,31 @@ qsoft_test(
 			DesignStylesheet::reset();
 
 			/*
+			 * Wrapping is a different contract from Additional CSS. A wrapped
+			 * section's root carries `.qs-design`, so every rule aimed inside
+			 * a section is lifted by that one class to sit above theme.json's
+			 * element styles, the design owns html and body, a sticky header
+			 * stays sticky, and an @import that is in the archive is inlined
+			 * where the statement stood.
+			 */
+			file_put_contents( $dir . '/x.css', '.imported{color:teal}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Temporary fixture the test removes.
+			file_put_contents( $dir . '/page.html', '<!doctype html><html><head><link rel="stylesheet" href="site.css"></head><body><section class="card">x</section></body></html>' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Temporary fixture the test removes.
+
+			$compiled = DesignStylesheet::compile_sources( $dir, array(), array( $dir . '/page.html' ) );
+			$wrapped  = (string) ( $compiled['sources'][0]['css'] ?? '' );
+
+			qsoft_assert( str_contains( $wrapped, '.card:is(.qs-design, .qs-design *){padding:12px}' ), 'wrapped: a rule inside a section is lifted by exactly one class', $wrapped );
+			qsoft_assert( str_contains( $wrapped, '.quote:is(.qs-design, .qs-design *)::before{' ), 'wrapped: the lift goes before a pseudo-element', $wrapped );
+			qsoft_assert( str_contains( $wrapped, 'html, body:is(.qs-design-site, .editor-styles-wrapper){margin:0;--page-bg:#fff}' ), 'wrapped: the design owns html and body, and body is lifted above the theme\'s global styles', $wrapped );
+			qsoft_assert( str_contains( $wrapped, '.site-header:is(.qs-design, .qs-design *){position:sticky;top:0;background:#fff}' ), 'wrapped: a sticky header stays sticky', $wrapped );
+			qsoft_assert( str_contains( $wrapped, '.imported:is(.qs-design, .qs-design *){color:teal}' ), 'wrapped: an @import from the archive is inlined', $wrapped );
+			qsoft_assert( ! str_contains( $wrapped, '@import' ), 'wrapped: and the statement itself is gone', $wrapped );
+			qsoft_assert( 1 === preg_match( '/@media \(max-width:600px\)\{\.card:is\(\.qs-design, \.qs-design \*\)\{padding:12px\}\s*body:is\([^)]*\)\{font-size:14px\}\}/', $wrapped ), 'wrapped: @media keeps its body rule too', $wrapped );
+
+			unlink( $dir . '/x.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Temporary fixture the test made.
+			unlink( $dir . '/page.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Temporary fixture the test made.
+
+			/*
 			 * Theme mode is the other half of that promise: there the block
 			 * layout owns the content width, so a design container that also
 			 * sets one is two containers fighting.

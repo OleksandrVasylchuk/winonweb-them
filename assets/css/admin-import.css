@@ -26,6 +26,9 @@
 	--qs-admin-warn-ink: #8a4b05;
 	--qs-admin-warn-wash: #fdf5e7;
 	--qs-admin-danger: #b32d2e;
+	/* The review's own hue, kept apart from the accent so its lines stand out in the log. */
+	--qs-admin-review-ink: #5a2a86;
+	--qs-admin-review-wash: #f1e9fb;
 	--qs-admin-radius: 12px;
 	--qs-admin-radius-sm: 8px;
 	--qs-admin-shadow: 0 1px 2px rgba(10, 10, 24, 0.04), 0 8px 24px -18px rgba(10, 10, 24, 0.45);
@@ -811,6 +814,14 @@
 	font-variant-numeric: tabular-nums;
 }
 
+/* Why a mode cannot be chosen from here, on the card itself. */
+.qs-import__mode-why {
+	margin-top: 0.3rem;
+	color: var(--qs-admin-warn-ink);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
 .qs-import__mode.is-chosen {
 	background: var(--qs-admin-accent-wash);
 	border-color: var(--qs-admin-accent);
@@ -875,21 +886,33 @@
 	border-color: var(--qs-admin-danger);
 }
 
-/* --- clean up a previous import --- */
+/* --- the danger zone: remove what an import added --- */
 
 /*
- * Sits above the upload step because it is about the site, not about any
- * design: what a previous import left behind, and the way to take it out.
+ * Last on the screen and quieter than everything above it. It is about the
+ * site rather than any design — what a previous import left behind, and the
+ * way to take it out — and two red buttons are not what a page about
+ * building should open with. No shadow, a dashed line in the danger colour,
+ * and a heading that says what it is.
  */
 .qs-import__cleanup {
 	max-width: none;
-	margin: 0 0 1.5rem;
-	padding: 1.35rem 1.5rem;
+	margin: 2.5rem 0 1.5rem;
+	padding: 1.2rem 1.5rem;
 	color: var(--qs-admin-ink);
-	background: var(--qs-admin-paper);
-	border: 1px solid var(--qs-admin-line);
+	background: transparent;
+	border: 1px dashed rgba(179, 45, 46, 0.45);
 	border-radius: var(--qs-admin-radius);
-	box-shadow: var(--qs-admin-shadow);
+}
+
+.qs-import__cleanup > h2 {
+	margin: 0 0 0.35rem;
+	padding: 0;
+	color: var(--qs-admin-danger);
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
 .qs-import__cleanup > h3 {
@@ -1082,8 +1105,9 @@
 
 .qs-import__log-line {
 	display: flex;
+	align-items: flex-start;
 	gap: 0.6rem;
-	padding: 0.25rem 0;
+	padding: 0.35rem 0;
 	border-top: 1px solid var(--qs-admin-line);
 }
 
@@ -1091,25 +1115,86 @@
 	border-top: 0;
 }
 
+/*
+ * The stage as a chip, one hue per stage, so a glance down the column says
+ * where a build was without reading a word: unpack and read in grey, build
+ * in the accent, render in the accent's deep, review in a hue of its own —
+ * it is the one stage that writes paragraphs, and the one to find again.
+ */
 .qs-import__log-stage {
 	flex: 0 0 4.5rem;
+	margin-top: 0.2rem;
+	padding: 0.05rem 0.5rem;
 	color: var(--qs-admin-muted);
-	font-size: 11px;
+	background: var(--qs-admin-soft);
+	border-radius: 999px;
+	font-size: 10px;
 	font-weight: 700;
 	letter-spacing: 0.08em;
+	text-align: center;
 	text-transform: uppercase;
 	line-height: 1.7;
 }
 
-.qs-import__log-line.is-render .qs-import__log-stage,
-.qs-import__log-line.is-read .qs-import__log-stage {
+.qs-import__log-stage.is-build {
 	color: var(--qs-admin-accent-deep);
+	background: var(--qs-admin-accent-wash);
+}
+
+.qs-import__log-stage.is-render {
+	color: #fff;
+	background: var(--qs-admin-accent-deep);
+}
+
+.qs-import__log-stage.is-review {
+	color: var(--qs-admin-review-ink);
+	background: var(--qs-admin-review-wash);
 }
 
 .qs-import__log-text {
 	flex: 1 1 auto;
+	min-width: 0;
 	color: var(--qs-admin-ink);
 	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+
+/* A message breaks where it broke: one paragraph per line of it. */
+.qs-import__log-text > p {
+	margin: 0 0 0.35rem;
+}
+
+.qs-import__log-text > p:last-of-type {
+	margin-bottom: 0;
+}
+
+.qs-import__log-more {
+	display: inline-block;
+	margin-top: 0.15rem;
+	padding: 0;
+	color: var(--qs-admin-accent-deep);
+	font-size: 12px;
+	font-weight: 600;
+	text-decoration: underline;
+}
+
+.qs-import__log-more:hover,
+.qs-import__log-more:focus {
+	color: var(--qs-admin-accent);
+}
+
+/* How many times in a row the same line was written. */
+.qs-import__log-count {
+	flex: 0 0 auto;
+	margin-top: 0.2rem;
+	padding: 0.05rem 0.5rem;
+	color: var(--qs-admin-muted);
+	background: var(--qs-admin-soft);
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.7;
 }
 
 /* --- the owner's own instructions --- */
@@ -1519,6 +1604,56 @@
 .qs-import__section-meta {
 	color: var(--qs-admin-muted);
 	font-size: 12px;
+}
+
+/*
+ * What the build measured about a page, beside its title: the share of the
+ * design's copy it renders, how far its pixels were from the design before
+ * and after the review, and the report to look at.
+ */
+.qs-import__chips {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	margin-left: 0.5rem;
+	vertical-align: middle;
+}
+
+.qs-import__chip {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.1rem 0.55rem;
+	color: var(--qs-admin-muted);
+	background: var(--qs-admin-soft);
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.qs-import__chip.is-fidelity {
+	color: var(--qs-admin-accent-deep);
+	background: var(--qs-admin-accent-wash);
+}
+
+.qs-import__chip.is-pixels {
+	color: var(--qs-admin-review-ink);
+	background: var(--qs-admin-review-wash);
+}
+
+.qs-import__chip.is-link {
+	color: var(--qs-admin-accent-deep);
+	background: transparent;
+	border: 1px solid var(--qs-admin-line-strong);
+}
+
+.qs-import__chip.is-link:hover,
+.qs-import__chip.is-link:focus {
+	color: var(--qs-admin-paper);
+	background: var(--qs-admin-accent);
+	border-color: var(--qs-admin-accent);
 }
 
 .qs-import__excerpt {

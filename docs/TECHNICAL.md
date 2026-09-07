@@ -2,7 +2,8 @@
 
 For developers who will extend, maintain or hand off this theme.
 
-**Version 1.4.0 · WordPress 6.7+ · PHP 8.1+ · no required plugins**
+**Version 1.4.0 · WordPress 6.7+ · PHP 8.1+ · no required plugins for the
+theme itself; ACF Pro on any site built from a design import**
 
 For the day-to-day workflow — adding a block, adding a pattern, running the
 gates — see [`GUIDE.md`](GUIDE.md). This document is the map underneath it:
@@ -218,9 +219,14 @@ unavailable.
 
 | Mode | What it does | Cost |
 |---|---|---|
-| Straight through | Structural conversion only | Free, seconds |
-| Corrected by Claude | Each section converted, then read and fixed | One call per section |
-| Corrected and checked | The same, then rendered and compared with the design until they agree | Up to four calls per section |
+| Straight through | Sections wrapped, fields named by code | Free, seconds |
+| Corrected by Claude | Each fresh section's fields named and its kind judged by a model (`PlanReview`) | One small call per section |
+| Corrected and checked | The same, then every page photographed beside its design in headless Chromium and its blocks corrected as files by Claude Code until the two agree (`PixelReview`) | One agent turn per look, at most two looks per page |
+
+The third mode runs only where it can: the `claude` binary on this machine,
+Node and Playwright beside the theme. Anywhere else it is skipped with a line
+in the log. It writes `artifacts/pixel-manifest.json` on every build either
+way, so `npm run audit:pixels` compares the finished site with one command.
 
 ### Running a build unattended
 

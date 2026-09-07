@@ -122,6 +122,18 @@ final class DesignStylesheet {
 	private static bool $preview = false;
 
 	/**
+	 * Whether the compilation is for wrapped sections.
+	 *
+	 * Only `compile_sources()` sets this. A wrapped section's root carries
+	 * `.qs-design`, so its rules can be lifted by that class and the design
+	 * can own html and body; the translating path installs its copy into
+	 * Additional CSS, where neither would be right.
+	 *
+	 * @var bool
+	 */
+	private static bool $wrap = false;
+
+	/**
 	 * The design's stylesheets, gathered and rewritten, without installing them.
 	 *
 	 * Split out from import() for the preview, which has to show the design as
@@ -137,6 +149,7 @@ final class DesignStylesheet {
 	 */
 	public static function compile( string $root, array $media_map = array(), bool $for_preview = false, array $pages = array() ): string {
 		self::$preview = $for_preview;
+		self::$wrap    = false;
 		self::$counts  = array(
 			'rules'    => 0,
 			'dropped'  => 0,
@@ -518,6 +531,7 @@ final class DesignStylesheet {
 	 */
 	public static function compile_sources( string $root, array $media_map, array $pages ): array {
 		self::$preview = false;
+		self::$wrap    = true;
 		self::$counts  = array(
 			'rules'    => 0,
 			'dropped'  => 0,
@@ -538,6 +552,9 @@ final class DesignStylesheet {
 		foreach ( $members as $key => $group ) {
 			$pieces = array();
 			$seen   = array();
+
+			self::$hoisted = array();
+			self::$inlined = array();
 
 			foreach ( $group as $page ) {
 				foreach ( self::linked_sheets( $root, $page ) as $path ) {
@@ -563,6 +580,11 @@ final class DesignStylesheet {
 			}
 
 			$css = trim( implode( "\n", array_filter( $pieces ) ) );
+
+			// What could not be read in stays an @import, and an @import has to come first.
+			if ( array() !== self::$hoisted && '' !== $css ) {
+				$css = implode( "\n", array_values( self::$hoisted ) ) . "\n" . $css;
+			}
 
 			if ( strlen( $css ) > self::CAP ) {
 				$css = self::prune( $css, self::html_classes( $root ) );
@@ -795,8 +817,90 @@ final class DesignStylesheet {
 	private static function rewrite( string $css, string $dir, string $root, array $map ): string {
 		$css = (string) preg_replace( '#/\*.*?\*/#s', '', $css );
 		$css = str_replace( array( "\r\n", "\r" ), "\n", $css );
+		$css = self::inline_imports( $css, $dir, $root, 0 );
 
 		return self::emit( self::parse( $css ), $dir, $root, $map );
+	}
+
+	/**
+	 * `@import` statements the current compilation could not inline, to go first.
+	 *
+	 * @var array<string, string>
+	 */
+	private static array $hoisted = array();
+
+	/**
+	 * Files already inlined in the current compilation, so a cycle ends.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static array $inlined = array();
+
+	/**
+	 * Put each `@import` where it belongs: its file's rules in its place, or the
+	 * statement itself at the top of the sheet.
+	 *
+	 * A design split into files by `@import` used to lose everything but the
+	 * entry file: the statement was dropped and nothing followed it. A file
+	 * inside the archive is read and its rules take the statement's place,
+	 * as the browser would have done; a stylesheet from elsewhere on the
+	 * internet — a font service, most often — cannot be read here and is kept
+	 * as written, but hoisted, because an `@import` that is not at the very
+	 * top of a sheet is ignored by every browser.
+	 *
+	 * @param string $css   Stylesheet text.
+	 * @param string $dir   Archive-relative directory it resolves from.
+	 * @param string $root  Design root.
+	 * @param int    $depth How many imports deep this already is.
+	 * @return string
+	 */
+	private static function inline_imports( string $css, string $dir, string $root, int $depth ): string {
+		return (string) preg_replace_callback(
+			'/@import\s+(?:url\(\s*)?["\']?([^"\')\s;]+)["\']?\s*\)?([^;]*);/i',
+			static function ( array $found ) use ( $dir, $root, $depth ): string {
+				$target = trim( $found[1] );
+				$rest   = trim( $found[2] );
+
+				if ( 1 === preg_match( '#^(?:https?:)?//#i', $target ) ) {
+					self::$hoisted[ $found[0] ] = '@import url("' . str_replace( '"', '', $target ) . '")' . ( '' === $rest ? '' : ' ' . $rest ) . ';';
+
+					return '';
+				}
+
+				if ( $depth >= 3 || str_starts_with( $target, '/' ) || str_contains( $target, '..' ) ) {
+					++self::$counts['dropped'];
+
+					return '';
+				}
+
+				$path = rtrim( $root, '/' ) . '/' . ( '' === $dir ? '' : trim( $dir, '/' ) . '/' ) . ltrim( $target, './' );
+				$real = realpath( $path );
+
+				if ( false === $real || ! str_starts_with( str_replace( '\\', '/', $real ), rtrim( $root, '/' ) ) || ! is_file( $real ) || filesize( $real ) >= self::MAX_FILE ) {
+					++self::$counts['dropped'];
+
+					return '';
+				}
+
+				if ( isset( self::$inlined[ $real ] ) ) {
+					return '';
+				}
+
+				self::$inlined[ $real ] = true;
+
+				$inner = (string) file_get_contents( $real ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- Local file unpacked by DesignArchive.
+				$inner = (string) preg_replace( '#/\*.*?\*/#s', '', $inner );
+				$inner = self::inline_imports( $inner, self::relative_dir( $real, $root ), $root, $depth + 1 );
+
+				// `@import "x.css" screen;` — the condition wraps what was imported.
+				if ( '' !== $rest ) {
+					$inner = '@media ' . $rest . '{' . $inner . '}';
+				}
+
+				return "\n" . $inner . "\n";
+			},
+			$css
+		);
 	}
 
 	/**
@@ -876,10 +980,25 @@ final class DesignStylesheet {
 		}
 
 		$root_only = self::is_root_selector( $selector );
-		$chrome    = 1 === preg_match( '/(nav|header|topbar|masthead|menu)/i', $selector );
+		$faithful  = self::$wrap;
+		$chrome    = ! $faithful && 1 === preg_match( '/(nav|header|topbar|masthead|menu)/i', $selector );
 		$container = ! BlockConverter::faithful()
 			&& 1 === preg_match( '/\.(container|wrap|wrapper|inner|content)(?![\w-])/i', $selector );
 		$kept      = array();
+
+		/*
+		 * A wrapped section is the design's own markup, and a design's
+		 * stylesheet is written against a page. The theme's own element
+		 * styles — `h1{…}`, `:root :where(a){…}` — are written at the
+		 * specificity of a tag or one class and load after this sheet, so a
+		 * design's bare `h1{font-size:…}` lost to the theme's on every page.
+		 * Every rule that targets something inside a section is lifted by
+		 * exactly one class, uniformly, so the design's rules still resolve
+		 * among themselves as they did and now all sit above the theme's.
+		 */
+		if ( $faithful ) {
+			$selector = self::scoped( $selector );
+		}
 
 		foreach ( self::declarations( $body ) as $declaration ) {
 			list( $property, $value ) = $declaration;
@@ -897,7 +1016,15 @@ final class DesignStylesheet {
 				continue;
 			}
 
-			if ( ( $root_only && ! self::$preview ) || ! self::is_safe( $check ) ) {
+			/*
+			 * On html, body and :root the theme used to own everything but
+			 * the variables. Under wrapping the page *is* the design — its
+			 * body background, its type, its colour — and a dark design on
+			 * the theme's white body was the most visible thing wrong with
+			 * every import. The design's rules come through; the editor's
+			 * canvas is an iframe, so they paint the canvas and nothing else.
+			 */
+			if ( ( $root_only && ! self::$preview && ! $faithful ) || ! self::is_safe( $check ) ) {
 				continue;
 			}
 
@@ -940,6 +1067,63 @@ final class DesignStylesheet {
 		++self::$counts['rules'];
 
 		return $selector . '{' . implode( ';', $kept ) . '}';
+	}
+
+	/**
+	 * A selector list lifted by one class, uniformly.
+	 *
+	 * `:is(.qs-design, .qs-design *)` is appended to the subject of every
+	 * complex selector — before a pseudo-element, which has to stay last —
+	 * so `h1` becomes `h1:is(…)`, `.hero .card h3::before` becomes
+	 * `.hero .card h3:is(…)::before`, and each gains exactly 0-1-0. The
+	 * root of a wrapped section carries the class itself and everything
+	 * inside it is a descendant, so both halves of the `:is()` are needed
+	 * for a rule aimed at the root (`.hero{…}`) and one aimed inside it.
+	 *
+	 * @param string $selector Selector list, already trimmed.
+	 * @return string
+	 */
+	public static function scoped( string $selector ): string {
+		$scope = ':is(.' . BlockWriter::ROOT_CLASS . ', .' . BlockWriter::ROOT_CLASS . ' *)';
+		$out   = array();
+
+		foreach ( self::split_top( $selector, ',' ) as $part ) {
+			$part = trim( $part );
+
+			if ( '' === $part ) {
+				continue;
+			}
+
+			/*
+			 * The page-level selectors have no section to be inside. `body`
+			 * is lifted onto the class the site's body carries (and the
+			 * editor canvas's own class), so the design's body rule beats the
+			 * theme's global styles, which print later and used to win every
+			 * tie; html, :root and * are left as they are.
+			 */
+			if ( 1 === preg_match( '/^(?:html|body|\*|:root)(?:\s*[>~+]?\s*(?:html|body|\*|:root))*$/i', $part ) ) {
+				$out[] = (string) preg_replace( '/\bbody\b/i', BlockWriter::BODY_SCOPE, $part );
+
+				continue;
+			}
+
+			// Already lifted, or aimed at the editor's own chrome.
+			if ( str_contains( $part, $scope ) || str_starts_with( $part, '.' . BlockWriter::ROOT_CLASS ) ) {
+				$out[] = $part;
+
+				continue;
+			}
+
+			if ( 1 === preg_match( '/^(.*?)(::?(?:before|after|marker|placeholder|selection|first-line|first-letter|backdrop|file-selector-button)(?:\([^)]*\))?)$/i', $part, $found ) ) {
+				$out[] = $found[1] . $scope . $found[2];
+
+				continue;
+			}
+
+			$out[] = $part . $scope;
+		}
+
+		return implode( ', ', $out );
 	}
 
 	/**

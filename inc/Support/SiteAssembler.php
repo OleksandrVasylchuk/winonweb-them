@@ -321,6 +321,45 @@ final class SiteAssembler {
 	private static bool $catalog = false;
 
 	/**
+	 * Whether the running build asked for a model at all.
+	 *
+	 * Set per request from the job's `smart` option, the same way the
+	 * catalogue is. The review of each section's reading is a model call,
+	 * and a build the operator sent straight through — the free one — was
+	 * still making one per fresh section, because the review asked only
+	 * whether a model could be reached and never whether it was wanted.
+	 *
+	 * @var bool
+	 */
+	private static bool $smart = false;
+
+	/**
+	 * The review calls made so far in this step, for the report's tally.
+	 *
+	 * Collected here because the review runs several calls below the page
+	 * step, with no job in reach; page() drains them into the same tally the
+	 * converter's calls go to.
+	 *
+	 * @var array<int, array<string, mixed>>
+	 */
+	private static array $reviews = array();
+
+	/**
+	 * Learn what this step needs to know from the job.
+	 *
+	 * Each step is its own request, so anything the deep parts of a build
+	 * read from a static has to be set again at the top of every step.
+	 *
+	 * @param array<string, mixed> $job Job record.
+	 * @return void
+	 */
+	private static function remember( array $job ): void {
+		self::$catalog = ! empty( $job['catalog']['file'] );
+		self::$smart   = ! empty( $job['smart'] );
+		self::$reviews = array();
+	}
+
+	/**
 	 * Step two, once per page: convert one design file and create its page.
 	 *
 	 * Safe to repeat. A file that already produced a page in this job has that
@@ -335,7 +374,7 @@ final class SiteAssembler {
 		// Each step is its own request, so the writer relearns which canonical source each page wears.
 		BlockWriter::route_styles( (array) ( $job['sheets'] ?? array() ) );
 
-		self::$catalog = ! empty( $job['catalog']['file'] );
+		self::remember( $job );
 
 		$page = null;
 
@@ -390,6 +429,12 @@ final class SiteAssembler {
 			self::record_calls( $job, $smart->calls() );
 		}
 
+		// The model's other job on this page: checking each fresh section's reading.
+		if ( array() !== self::$reviews ) {
+			self::record_calls( $job, self::$reviews );
+			self::$reviews = array();
+		}
+
 		if ( is_wp_error( $made ) ) {
 			$job['report']['concerns'][] = $file . ' — ' . $made->get_error_message();
 
@@ -399,6 +444,42 @@ final class SiteAssembler {
 		$job['routes'][ $file ] = $made;
 
 		return $made;
+	}
+
+	/**
+	 * Write the pairs `npm run audit:pixels` compares: each built page and its design file.
+	 *
+	 * @param array<string, mixed>             $job   Job record.
+	 * @param array<int, array<string, mixed>> $pages The report's page rows.
+	 * @return void
+	 */
+	private static function write_pixel_manifest( array $job, array $pages ): void {
+		$root    = rtrim( str_replace( '\\', '/', (string) ( $job['root'] ?? '' ) ), '/' );
+		$entries = array();
+
+		foreach ( $pages as $row ) {
+			$id   = (int) ( $row['id'] ?? 0 );
+			$file = (string) ( $row['file'] ?? '' );
+
+			if ( $id <= 0 || '' === $file || ! is_file( $root . '/' . $file ) ) {
+				continue;
+			}
+
+			$entries[] = array(
+				'name'   => BlockWriter::slug( (string) ( $row['slug'] ?? basename( $file, '.html' ) ) ),
+				'live'   => (string) get_permalink( $id ),
+				'origin' => $root . '/' . ltrim( $file, '/' ),
+			);
+		}
+
+		if ( array() === $entries || ! wp_mkdir_p( QSOFT_DIR . '/artifacts' ) ) {
+			return;
+		}
+
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- The theme's own artifacts directory, git-ignored.
+			QSOFT_DIR . '/artifacts/pixel-manifest.json',
+			(string) wp_json_encode( $entries, JSON_PRETTY_PRINT ) . "\n"
+		);
 	}
 
 	/**
@@ -513,7 +594,7 @@ final class SiteAssembler {
 		// Same as page(): the writer needs the source map before it writes the header and footer blocks.
 		BlockWriter::route_styles( (array) ( $job['sheets'] ?? array() ) );
 
-		self::$catalog = ! empty( $job['catalog']['file'] );
+		self::remember( $job );
 
 		$empty = array(
 			'menu'         => 0,
@@ -721,6 +802,39 @@ final class SiteAssembler {
 			);
 		}
 
+		/*
+		 * The pixels, which words and elements cannot see. Written for
+		 * `npm run audit:pixels` on every build, so the comparison is one
+		 * command away; run here, page by page with the blocks corrected
+		 * between looks, when the build asked to be checked.
+		 */
+		self::write_pixel_manifest( $job, $report['pages'] );
+
+		if ( ! empty( $job['refine'] ) ) {
+			foreach ( $report['pages'] as $index => $row ) {
+				$looked = PixelReview::page( $job, $row );
+
+				if ( ! is_array( $looked ) ) {
+					break;
+				}
+
+				$report['pages'][ $index ]['pixels'] = array(
+					'before'  => $looked['before'],
+					'after'   => $looked['after'],
+					'changed' => $looked['changed'],
+				);
+
+				// The report the review just wrote, now that there is one to link to.
+				$pixel_report = self::pixel_report_url( (string) ( $row['slug'] ?? '' ) );
+
+				if ( '' !== $pixel_report ) {
+					$report['pages'][ $index ]['pixel_report'] = $pixel_report;
+				}
+
+				self::record_calls( $job, (array) $looked['calls'] );
+			}
+		}
+
 		Lessons::record(
 			array(
 				'design'       => (string) ( $job['slug'] ?? '' ),
@@ -888,24 +1002,95 @@ final class SiteAssembler {
 	 * @return array<string, mixed>
 	 */
 	private static function page_row( int $id, string $file, int $sections, array $concerns, int $improved = 0, array $changed = array(), int $wrapped = 0 ): array {
+		return self::refresh_row(
+			array(
+				'id'       => $id,
+				'file'     => $file,
+				'sections' => $sections,
+				'improved' => $improved,
+				'wrapped'  => $wrapped,
+				'changed'  => $changed,
+				'concerns' => $concerns,
+			)
+		);
+	}
+
+	/**
+	 * Read a report row's live facts back off the site: title, status, links.
+	 *
+	 * A row is written when a page is made and shown for as long as the
+	 * report is kept, during which the page is published, renamed or
+	 * reviewed. So everything about the row that the site can answer is
+	 * asked again each time it is shown, and only what the build alone knew
+	 * — how many sections it kept, what it worried about — is carried over.
+	 *
+	 * The title is text, not markup. `get_the_title()` hands back the stored
+	 * entities, the screen sets them as text, and "vCISO &amp;#038; AI" was
+	 * the result; decoding here is what puts one ampersand on the screen.
+	 *
+	 * @param array<string, mixed> $row A report row, or the beginnings of one.
+	 * @return array<string, mixed>
+	 */
+	public static function refresh_row( array $row ): array {
+		$id     = (int) ( $row['id'] ?? 0 );
 		$status = (string) get_post_status( $id );
 		$url    = (string) get_permalink( $id );
+		$slug   = (string) get_post_field( 'post_name', $id );
 
-		return array(
-			'id'        => $id,
-			'file'      => $file,
-			'title'     => (string) get_the_title( $id ),
-			'slug'      => (string) get_post_field( 'post_name', $id ),
-			'url'       => $url,
-			'sections'  => $sections,
-			'improved'  => $improved,
-			'wrapped'   => $wrapped,
-			'changed'   => $changed,
-			'concerns'  => $concerns,
-			'status'    => $status,
-			'link'      => 'publish' === $status ? $url : (string) get_preview_post_link( $id ),
-			'edit_link' => admin_url( 'post.php?post=' . $id . '&action=edit' ),
-		);
+		$row['id']        = $id;
+		$row['title']     = self::plain_title( (string) get_the_title( $id ) );
+		$row['slug']      = $slug;
+		$row['url']       = $url;
+		$row['status']    = $status;
+		$row['link']      = 'publish' === $status ? $url : (string) get_preview_post_link( $id );
+		$row['edit_link'] = admin_url( 'post.php?post=' . $id . '&action=edit' );
+
+		$report = self::pixel_report_url( $slug );
+
+		if ( '' !== $report ) {
+			$row['pixel_report'] = $report;
+		} else {
+			unset( $row['pixel_report'] );
+		}
+
+		return $row;
+	}
+
+	/**
+	 * A title as a person reads it: no tags, no entities.
+	 *
+	 * @param string $title A title as WordPress stores it or a design wrote it.
+	 * @return string
+	 */
+	public static function plain_title( string $title ): string {
+		return trim( html_entity_decode( wp_strip_all_tags( $title ), ENT_QUOTES, 'UTF-8' ) );
+	}
+
+	/**
+	 * Where the pixel review's report for a page can be opened, if it wrote one.
+	 *
+	 * The review photographs a page under `artifacts/pixels/review/{slug}`,
+	 * which the theme serves as files; the report beside the photographs is
+	 * the comparison a person can look at. Only offered when the file is
+	 * actually there — a link to a report that was never written is worse
+	 * than none.
+	 *
+	 * @param string $slug The page's slug.
+	 * @return string URL, or empty when no report exists.
+	 */
+	public static function pixel_report_url( string $slug ): string {
+		if ( '' === $slug ) {
+			return '';
+		}
+
+		$name = BlockWriter::slug( $slug );
+		$path = 'artifacts/pixels/review/' . $name . '/report.html';
+
+		if ( '' === $name || ! is_file( QSOFT_DIR . '/' . $path ) ) {
+			return '';
+		}
+
+		return QSOFT_URI . '/' . $path;
 	}
 
 	/**
@@ -2119,11 +2304,14 @@ final class SiteAssembler {
 	/**
 	 * Whether the model checks each reading before a block is made from it.
 	 *
-	 * On when a model can be reached, because the difference it makes is the
-	 * difference between a sidebar an editor can use and one full of
-	 * `label_2`. Off by filter for a build that must not touch the network,
-	 * and off automatically when there is no route to a model — in which case
-	 * the structural names stand and everything else is identical.
+	 * On when the build asked for a model and one can be reached, because
+	 * the difference it makes is the difference between a sidebar an editor
+	 * can use and one full of `label_2`. Off when the build was sent
+	 * straight through — that option is the promise of a build that costs
+	 * nothing, and a review per section is a bill — off by filter for a
+	 * build that must not touch the network, and off automatically when
+	 * there is no route to a model. In every off case the structural names
+	 * stand and everything else is identical.
 	 *
 	 * @return bool
 	 */
@@ -2133,7 +2321,7 @@ final class SiteAssembler {
 		 *
 		 * @param bool $reviewing True to ask the model what the fields should be called.
 		 */
-		return (bool) apply_filters( 'qwerty_soft/review_plans', ModelGateway::ready() );
+		return (bool) apply_filters( 'qwerty_soft/review_plans', self::$smart && ModelGateway::ready() );
 	}
 
 	/**
@@ -2224,6 +2412,11 @@ final class SiteAssembler {
 			$plan     = (array) $checked['plan'];
 			$title    = (string) $checked['title'];
 			$singular = (string) $checked['item'];
+
+			// A call is a call, answered or not; the report prices both.
+			if ( is_array( $checked['call'] ?? null ) ) {
+				self::$reviews[] = $checked['call'];
+			}
 		}
 
 		if ( ! $fresh ) {
@@ -2497,7 +2690,8 @@ final class SiteAssembler {
 		}
 
 		if ( 1 === preg_match( '#<h[12][^>]*>(.+?)</h[12]>#is', $content, $heading ) ) {
-			$text = trim( wp_strip_all_tags( $heading[1] ) );
+			// Text, not markup: a heading written as "Reports &amp; Store" names the page "Reports & Store".
+			$text = self::plain_title( $heading[1] );
 
 			if ( '' !== $text && mb_strlen( $text ) <= 90 ) {
 				return $text;

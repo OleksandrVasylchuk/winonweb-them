@@ -89,6 +89,15 @@ final class Fidelity {
 
 		$GLOBALS['post'] = $page; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restored below; the render must see the page it belongs to.
 
+		/*
+		 * From the block's own data, not through ACF. The field groups ACF
+		 * holds in this request were read from disk at init, before this
+		 * build rewrote them; read through those, a rewritten repeater lost
+		 * every field it had gained and a whole page measured 74%.
+		 */
+		$was_raw          = DesignField::$raw;
+		DesignField::$raw = true;
+
 		foreach ( parse_blocks( (string) $page->post_content ) as $block ) {
 			if ( ! is_string( $block['blockName'] ?? null ) || ! str_starts_with( (string) $block['blockName'], 'qs/design-' ) ) {
 				continue;
@@ -120,7 +129,22 @@ final class Fidelity {
 
 		$GLOBALS['post'] = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Putting back what was borrowed above.
 
-		$kept = count( $source_tokens ) - count( array_diff( $source_tokens, $rendered_tokens ) );
+		DesignField::$raw = $was_raw;
+
+		/*
+		 * Counted, not merely present. `array_diff()` asked whether each
+		 * token appeared at all, so one rendered `div.card` covered the nine
+		 * the design drew and a repeat that stamped a single row still
+		 * measured 100% — the exact fault this number exists to catch. Each
+		 * token now has to appear as many times as the design used it.
+		 */
+		$wanted = array_count_values( $source_tokens );
+		$got    = array_count_values( $rendered_tokens );
+		$kept   = 0;
+
+		foreach ( $wanted as $token => $count ) {
+			$kept += min( $count, (int) ( $got[ $token ] ?? 0 ) );
+		}
 
 		return array(
 			'words'     => $source_words,

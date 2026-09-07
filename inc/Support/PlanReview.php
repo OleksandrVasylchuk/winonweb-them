@@ -65,8 +65,10 @@ final class PlanReview {
 	 * fields point at nothing.
 	 */
 	private const SCHEMA = array(
-		'type'       => 'object',
-		'properties' => array(
+		'type'                 => 'object',
+		'additionalProperties' => false,
+		'required'             => array( 'title', 'kind', 'fields', 'item_name', 'item_fields' ),
+		'properties'           => array(
 			'title'       => array(
 				'type'        => 'string',
 				'description' => 'What this section is, in two or three words, for the block title.',
@@ -80,8 +82,10 @@ final class PlanReview {
 				'type'        => 'array',
 				'description' => 'One entry per field, in the order given. Same length, same order.',
 				'items'       => array(
-					'type'       => 'object',
-					'properties' => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'required'             => array( 'name', 'label' ),
+					'properties'           => array(
 						'name'  => array(
 							'type'        => 'string',
 							'description' => 'lower_snake_case, what the thing is, not what it is styled as.',
@@ -91,7 +95,6 @@ final class PlanReview {
 							'description' => 'What an editor sees above the box.',
 						),
 					),
-					'required'   => array( 'name', 'label' ),
 				),
 			),
 			'item_name'   => array(
@@ -100,27 +103,32 @@ final class PlanReview {
 			),
 			'item_fields' => array(
 				'type'        => 'array',
-				'description' => 'The same, for one row of a repeat. Empty when there is no repeat.',
+				'description' => 'The same, for one row of a repeat: one entry per row field, in the order given, same length. Empty when there is no repeat.',
 				'items'       => array(
-					'type'       => 'object',
-					'properties' => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'required'             => array( 'name', 'label' ),
+					'properties'           => array(
 						'name'  => array( 'type' => 'string' ),
 						'label' => array( 'type' => 'string' ),
 					),
-					'required'   => array( 'name', 'label' ),
 				),
 			),
 		),
-		'required'   => array( 'title', 'kind', 'fields' ),
 	);
 
 	/**
 	 * Ask the model to check one reading, and fold in what it says.
 	 *
+	 * The `call` is the model call as the build's tally records one — the
+	 * same row SmartConverter::calls() hands back — or null when no call was
+	 * made. A review is a small request, but it is a request, and a report
+	 * that priced the build without it was understating the bill.
+	 *
 	 * @param string               $html  Section markup.
 	 * @param array<string, mixed> $plan  What SectionPlan made of it.
 	 * @param string               $label What the splitter called the section.
-	 * @return array{plan:array<string,mixed>,title:string,item:string,reviewed:bool}
+	 * @return array{plan:array<string,mixed>,title:string,item:string,reviewed:bool,call:array<string,mixed>|null}
 	 */
 	public static function of( string $html, array $plan, string $label ): array {
 		$unchanged = array(
@@ -128,6 +136,7 @@ final class PlanReview {
 			'title'    => $label,
 			'item'     => '',
 			'reviewed' => false,
+			'call'     => null,
 		);
 
 		if ( ! ModelGateway::ready() ) {
@@ -141,6 +150,18 @@ final class PlanReview {
 			array( 'timeout' => self::TIMEOUT )
 		);
 
+		if ( is_wp_error( $reply ) ) {
+			$unchanged['call'] = array(
+				'ok'        => false,
+				'error'     => $reply->get_error_message(),
+				'usage'     => array(),
+				'model'     => AnthropicClient::DEFAULT_MODEL,
+				'transport' => ModelGateway::resolve(),
+			);
+
+			return $unchanged;
+		}
+
 		if ( ! is_array( $reply ) ) {
 			return $unchanged;
 		}
@@ -150,6 +171,14 @@ final class PlanReview {
 			'item'     => self::singular( $reply ),
 			'title'    => self::title( $reply, $label ),
 			'reviewed' => true,
+			'call'     => array(
+				'ok'        => true,
+				'error'     => '',
+				'usage'     => isset( $reply['_usage'] ) && is_array( $reply['_usage'] ) ? $reply['_usage'] : array(),
+				'model'     => isset( $reply['_model'] ) && '' !== (string) $reply['_model'] ? (string) $reply['_model'] : AnthropicClient::DEFAULT_MODEL,
+				'transport' => isset( $reply['_transport'] ) ? (string) $reply['_transport'] : 'api',
+				'notional'  => isset( $reply['_notional_cost'] ) ? (float) $reply['_notional_cost'] : 0.0,
+			),
 		);
 	}
 
@@ -306,11 +335,14 @@ final class PlanReview {
 	/**
 	 * Fold the reply into the plan, keeping every structural fact.
 	 *
+	 * Public because it is the judgement worth testing, and pure: what a
+	 * model's answer is allowed to change, and what a bad answer is refused.
+	 *
 	 * @param array<string, mixed> $plan  The reading.
 	 * @param array<string, mixed> $reply What the model said.
 	 * @return array<string, mixed>
 	 */
-	private static function apply( array $plan, array $reply ): array {
+	public static function apply( array $plan, array $reply ): array {
 		$plan['fields'] = self::renamed( (array) ( $plan['fields'] ?? array() ), (array) ( $reply['fields'] ?? array() ) );
 
 		$item = $plan['item'] ?? null;
@@ -337,12 +369,25 @@ final class PlanReview {
 	/**
 	 * Rename fields in place, one for one, keeping paths and types.
 	 *
+	 * One for one is the whole contract. The names are matched to the plan's
+	 * fields by position, so a list that came back one short — a model that
+	 * merged two fields, or skipped one it found dull — would put every
+	 * name after the gap on the wrong field: the lede called `heading`, the
+	 * button called `lede`. A list of the wrong length is refused whole and
+	 * the structural names stand, which is never wrong, only plain.
+	 *
 	 * @param array<int, array<string, mixed>> $fields What the plan found.
 	 * @param array<int, mixed>                $said   What the model returned.
 	 * @return array<int, array<string, mixed>>
 	 */
 	private static function renamed( array $fields, array $said ): array {
-		$taken = array();
+		if ( count( $said ) !== count( $fields ) ) {
+			return $fields;
+		}
+
+		$fields = array_values( $fields );
+		$said   = array_values( $said );
+		$taken  = array();
 
 		foreach ( $fields as $index => $field ) {
 			$one = $said[ $index ] ?? null;

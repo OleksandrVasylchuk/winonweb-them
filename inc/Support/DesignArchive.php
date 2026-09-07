@@ -105,6 +105,122 @@ final class DesignArchive {
 	private const PATH_BUDGET = 150;
 
 	/**
+	 * How long the whole path of one written file may be.
+	 *
+	 * The folder budget above keeps the tree short; this is the ceiling on
+	 * the file at the end of it. Windows stops at 260 characters, and a file
+	 * that ran past it used to fail at fopen() and be recorded as its bare
+	 * name, with no reason. Now the name is shortened to fit, keeping the
+	 * extension, and the rename is written down so the markup that still
+	 * uses the long name can be followed to the short one. Ten characters
+	 * under the limit, because the destination is a canonical path and the
+	 * one that opens it may be spelled slightly longer.
+	 *
+	 * @var int
+	 */
+	public const PATH_LIMIT = 250;
+
+	/**
+	 * Cyrillic spelled in Latin letters, for file names.
+	 *
+	 * WordPress's remove_accents() covers the Latin scripts and nothing of
+	 * Cyrillic, and the handoffs this studio receives are named in it more
+	 * often than not. A plain, reversible-enough spelling — `фото` becomes
+	 * `foto` — keeps the file recognisable on disk and in the log; the hash
+	 * fallback is for scripts this table does not reach.
+	 *
+	 * @var array<string, string>
+	 */
+	private const CYRILLIC = array(
+		'а' => 'a',
+		'б' => 'b',
+		'в' => 'v',
+		'г' => 'g',
+		'ґ' => 'g',
+		'д' => 'd',
+		'е' => 'e',
+		'ё' => 'yo',
+		'є' => 'ye',
+		'ж' => 'zh',
+		'з' => 'z',
+		'и' => 'i',
+		'і' => 'i',
+		'ї' => 'yi',
+		'й' => 'y',
+		'к' => 'k',
+		'л' => 'l',
+		'м' => 'm',
+		'н' => 'n',
+		'о' => 'o',
+		'п' => 'p',
+		'р' => 'r',
+		'с' => 's',
+		'т' => 't',
+		'у' => 'u',
+		'ў' => 'u',
+		'ф' => 'f',
+		'х' => 'kh',
+		'ц' => 'ts',
+		'ч' => 'ch',
+		'ш' => 'sh',
+		'щ' => 'shch',
+		'ъ' => '',
+		'ы' => 'y',
+		'ь' => '',
+		'э' => 'e',
+		'ю' => 'yu',
+		'я' => 'ya',
+		'А' => 'A',
+		'Б' => 'B',
+		'В' => 'V',
+		'Г' => 'G',
+		'Ґ' => 'G',
+		'Д' => 'D',
+		'Е' => 'E',
+		'Ё' => 'Yo',
+		'Є' => 'Ye',
+		'Ж' => 'Zh',
+		'З' => 'Z',
+		'И' => 'I',
+		'І' => 'I',
+		'Ї' => 'Yi',
+		'Й' => 'Y',
+		'К' => 'K',
+		'Л' => 'L',
+		'М' => 'M',
+		'Н' => 'N',
+		'О' => 'O',
+		'П' => 'P',
+		'Р' => 'R',
+		'С' => 'S',
+		'Т' => 'T',
+		'У' => 'U',
+		'Ў' => 'U',
+		'Ф' => 'F',
+		'Х' => 'Kh',
+		'Ц' => 'Ts',
+		'Ч' => 'Ch',
+		'Ш' => 'Sh',
+		'Щ' => 'Shch',
+		'Ъ' => '',
+		'Ы' => 'Y',
+		'Ь' => '',
+		'Э' => 'E',
+		'Ю' => 'Yu',
+		'Я' => 'Ya',
+	);
+
+	/**
+	 * Where the unpack writes down the names it had to change.
+	 *
+	 * A dot-file in the design root, so nothing that sweeps the design for
+	 * pages, pictures or documents counts it as one of them.
+	 *
+	 * @var string
+	 */
+	private const RENAMED_FILE = '.qsoft-renamed.json';
+
+	/**
 	 * File extensions that may be written to disk.
 	 *
 	 * Everything a design legitimately contains, and nothing a server can be
@@ -711,18 +827,29 @@ final class DesignArchive {
 		$inflated = 0;
 		$skipped  = array();
 		$dropped  = 0;
+		$renamed  = array();
 
-		self::extract_into( $zip, $real_root, $written, $inflated, $skipped, $dropped );
+		self::extract_into( $zip, $real_root, $written, $inflated, $skipped, $dropped, $renamed );
 		$zip->close();
 
 		// Archives inside the archive, opened in place until none are left.
-		$nested = self::expand_nested( $real_root, $written, $inflated, $skipped, $dropped );
+		$nested = self::expand_nested( $real_root, $written, $inflated, $skipped, $dropped, $renamed );
 
 		if ( 0 === $written ) {
 			return new WP_Error(
 				'qwerty_soft_empty',
 				__( 'Nothing usable was found in that archive. It should contain the design HTML or its components, its stylesheets and its images.', 'qwerty-soft-signal' )
 			);
+		}
+
+		/*
+		 * The names that had to change, kept beside the design. The build
+		 * happens in a later request than the unpack, and the markup still
+		 * says the names the archive used; this is how the media import
+		 * follows a picture from the name on the page to the file on disk.
+		 */
+		if ( array() !== $renamed ) {
+			file_put_contents( trailingslashit( $root ) . self::RENAMED_FILE, (string) wp_json_encode( $renamed ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- A manifest inside the folder this method just created.
 		}
 
 		return array(
@@ -733,7 +860,41 @@ final class DesignArchive {
 			'skipped' => $skipped,
 			'dropped' => $dropped,
 			'nested'  => $nested,
+			'renamed' => $renamed,
 		);
+	}
+
+	/**
+	 * The names an unpack had to change, as original => written.
+	 *
+	 * Both sides are paths relative to the design root, forward slashes, the
+	 * way the media map and the markup spell them.
+	 *
+	 * @param string $root Design root.
+	 * @return array<string, string>
+	 */
+	public static function renamed( string $root ): array {
+		$path = trailingslashit( $root ) . self::RENAMED_FILE;
+
+		if ( ! is_file( $path ) ) {
+			return array();
+		}
+
+		$decoded = json_decode( (string) file_get_contents( $path ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents -- The manifest this class wrote.
+
+		if ( ! is_array( $decoded ) ) {
+			return array();
+		}
+
+		$map = array();
+
+		foreach ( $decoded as $original => $written ) {
+			if ( is_string( $original ) && is_string( $written ) && '' !== $original && '' !== $written ) {
+				$map[ $original ] = $written;
+			}
+		}
+
+		return $map;
 	}
 
 	/**
@@ -745,14 +906,15 @@ final class DesignArchive {
 	 * outer one, counted against the same budget, and then deleted — what
 	 * stays on disk is the design, not the packaging.
 	 *
-	 * @param string             $root     Design root, canonical.
-	 * @param int                $written  Files written so far; updated.
-	 * @param int                $inflated Bytes written so far; updated.
-	 * @param array<int, string> $skipped  Skip reasons; appended to.
-	 * @param int                $dropped  Entries dropped; updated.
+	 * @param string                $root     Design root, canonical.
+	 * @param int                   $written  Files written so far; updated.
+	 * @param int                   $inflated Bytes written so far; updated.
+	 * @param array<int, string>    $skipped  Skip reasons; appended to.
+	 * @param int                   $dropped  Entries dropped; updated.
+	 * @param array<string, string> $renamed  Names changed on the way in; appended to.
 	 * @return int How many inner archives were opened.
 	 */
-	private static function expand_nested( string $root, int &$written, int &$inflated, array &$skipped, int &$dropped ): int {
+	private static function expand_nested( string $root, int &$written, int &$inflated, array &$skipped, int &$dropped, array &$renamed ): int {
 		$opened = 0;
 
 		for ( $round = 0; $round < self::NESTING_DEPTH; $round++ ) {
@@ -774,31 +936,7 @@ final class DesignArchive {
 				 * design that refers to `assets/photos/hero.png` still finds
 				 * it after `assets/photos.zip` has been opened.
 				 */
-				$target = preg_replace( '#\.zip$#i', '', $archive );
-				$target = is_string( $target ) && '' !== $target ? $target : $archive . '-unpacked';
-
-				/*
-				 * A folder named after the archive is the readable choice and
-				 * the wrong one when the name is sixty characters long and the
-				 * archive is already four folders deep. Windows stops at 260
-				 * characters for the whole path, and what stops there is not
-				 * this folder but the site inside it — silently, because an
-				 * archive that cannot be opened is an archive nobody sees.
-				 *
-				 * So the name is kept while it fits and swapped for a short
-				 * stable one when it does not. Same folder every time the same
-				 * archive is unpacked, which is what the links inside it need.
-				 */
-				if ( strlen( $target ) > self::PATH_BUDGET ) {
-					$target = dirname( $archive ) . '/z-' . substr( md5( basename( $archive ) ), 0, 8 );
-				}
-
-				$suffix = 2;
-
-				while ( is_dir( $target ) ) {
-					$target = $target . '-' . $suffix;
-					++$suffix;
-				}
+				$target = self::nested_folder( $archive, 'is_dir' );
 
 				if ( ! wp_mkdir_p( $target ) ) {
 					self::unlink_hard( $archive );
@@ -835,9 +973,15 @@ final class DesignArchive {
 				 * because what stays closed is invisible, a handoff whose
 				 * whole website sat in the last of three boxes was imported as
 				 * the two blueprints that happened to come first.
+				 *
+				 * Renames inside an inner archive are keyed from the design
+				 * root, like every other path the build reads, so the folder
+				 * the archive opened into is put in front of them.
 				 */
+				$prefix = ltrim( str_replace( '\\', '/', substr( $target, strlen( $root ) ) ), '/' ) . '/';
+
 				try {
-					self::extract_into( $inner, (string) realpath( $target ), $written, $inflated, $skipped, $dropped );
+					self::extract_into( $inner, (string) realpath( $target ), $written, $inflated, $skipped, $dropped, $renamed, $prefix );
 				} catch ( \Throwable $error ) {
 					++$dropped;
 
@@ -916,15 +1060,17 @@ final class DesignArchive {
 	 * inner ZIP is held to exactly the same rules as the outer one: the same
 	 * allow-list, the same zip-slip guard, the same budget, the same order.
 	 *
-	 * @param ZipArchive         $zip       Open archive.
-	 * @param string             $real_root Canonical destination.
-	 * @param int                $written   Files written; updated.
-	 * @param int                $inflated  Bytes written; updated.
-	 * @param array<int, string> $skipped   Skip reasons; appended to.
-	 * @param int                $dropped   Entries dropped; updated.
+	 * @param ZipArchive            $zip       Open archive.
+	 * @param string                $real_root Canonical destination.
+	 * @param int                   $written   Files written; updated.
+	 * @param int                   $inflated  Bytes written; updated.
+	 * @param array<int, string>    $skipped   Skip reasons; appended to.
+	 * @param int                   $dropped   Entries dropped; updated.
+	 * @param array<string, string> $renamed   Entries written under another name; appended to.
+	 * @param string                $prefix    Where this archive sits under the design root, with a trailing slash, or ''.
 	 * @return void
 	 */
-	private static function extract_into( ZipArchive $zip, string $real_root, int &$written, int &$inflated, array &$skipped, int &$dropped ): void {
+	private static function extract_into( ZipArchive $zip, string $real_root, int &$written, int &$inflated, array &$skipped, int &$dropped, array &$renamed = array(), string $prefix = '' ): void {
 		$count = $zip->numFiles;
 
 		/*
@@ -1003,11 +1149,44 @@ final class DesignArchive {
 					continue;
 				}
 
+				/*
+				 * The whole path, not only the folders, has to fit the system
+				 * it is written on. A file past the limit used to fail at
+				 * fopen() and be listed by its bare name, which reads as
+				 * "skipped for no reason"; now the name is shortened to fit
+				 * and the change is written down like any other rename.
+				 */
+				$fitted = self::fit_path( $target );
+
+				if ( null === $fitted ) {
+					++$dropped;
+
+					if ( count( $skipped ) < 60 ) {
+						$skipped[] = sprintf(
+							/* translators: %s: entry path inside the archive. */
+							__( '%s — skipped, its path is too long for this system even with the file name shortened', 'qwerty-soft-signal' ),
+							$name
+						);
+					}
+
+					continue;
+				}
+
+				$target = $fitted;
+
 				$dir = dirname( $target );
 
 				if ( ! is_dir( $dir ) && ! wp_mkdir_p( $dir ) ) {
 					++$dropped;
-					$skipped[] = $name;
+
+					if ( count( $skipped ) < 60 ) {
+						$skipped[] = sprintf(
+							/* translators: %s: entry path inside the archive. */
+							__( '%s — skipped, its folder could not be created', 'qwerty-soft-signal' ),
+							$name
+						);
+					}
+
 					continue;
 				}
 
@@ -1015,7 +1194,15 @@ final class DesignArchive {
 
 				if ( ! is_resource( $stream ) ) {
 					++$dropped;
-					$skipped[] = $name;
+
+					if ( count( $skipped ) < 60 ) {
+						$skipped[] = sprintf(
+							/* translators: %s: entry path inside the archive. */
+							__( '%s — skipped, the archive could not read it', 'qwerty-soft-signal' ),
+							$name
+						);
+					}
+
 					continue;
 				}
 
@@ -1024,7 +1211,15 @@ final class DesignArchive {
 				if ( false === $out ) {
 					fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Pairs with getStream().
 					++$dropped;
-					$skipped[] = $name;
+
+					if ( count( $skipped ) < 60 ) {
+						$skipped[] = sprintf(
+							/* translators: %s: entry path inside the archive. */
+							__( '%s — skipped, the file could not be created on disk', 'qwerty-soft-signal' ),
+							$name
+						);
+					}
+
 					continue;
 				}
 
@@ -1058,8 +1253,128 @@ final class DesignArchive {
 
 				$inflated += $copied;
 				++$written;
+
+				/*
+				 * Written under a different name than the archive used —
+				 * transliterated, shortened, or both. The markup still says
+				 * the old one, so the pair is kept for the media import.
+				 */
+				$original = self::entry_relative( $name );
+				$relative = ltrim( str_replace( '\\', '/', substr( $target, strlen( $real_root ) ) ), '/' );
+
+				if ( '' !== $original && $original !== $relative ) {
+					$renamed[ $prefix . $original ] = $prefix . $relative;
+				}
 			}
 		}
+	}
+
+	/**
+	 * Shorten a file name until the whole path fits the system's limit.
+	 *
+	 * The extension is kept, because the allow-list vetted it and the media
+	 * import reads it; the stem is cut and given a short hash of the original
+	 * name, so two long names that share a beginning still stay two files.
+	 * The same name shortens the same way every time.
+	 *
+	 * @param string $path  Full destination path.
+	 * @param int    $limit Longest path allowed.
+	 * @return string|null The path, shortened if it had to be; null when even a bare hash would not fit.
+	 */
+	public static function fit_path( string $path, int $limit = self::PATH_LIMIT ): ?string {
+		if ( strlen( $path ) <= $limit ) {
+			return $path;
+		}
+
+		$cut  = max( (int) strrpos( $path, '/' ), (int) strrpos( $path, '\\' ) );
+		$dir  = substr( $path, 0, $cut );
+		$name = substr( $path, $cut + 1 );
+
+		$extension = (string) pathinfo( $name, PATHINFO_EXTENSION );
+		$stem      = '' === $extension ? $name : substr( $name, 0, -( strlen( $extension ) + 1 ) );
+		$suffix    = '' === $extension ? '' : '.' . $extension;
+		$hash      = substr( md5( $name ), 0, 8 );
+
+		// The folders, a slash, the hash and the extension are the floor.
+		$room = $limit - strlen( $dir ) - 1 - strlen( $hash ) - strlen( $suffix );
+
+		if ( $room < 0 ) {
+			return null;
+		}
+
+		// Whatever is left goes to the readable part, with a dash before the hash.
+		$short = $room > 1 ? rtrim( substr( $stem, 0, $room - 1 ), '-. ' ) . '-' . $hash : $hash;
+
+		return $dir . '/' . $short . $suffix;
+	}
+
+	/**
+	 * Where an archive found inside the design is opened.
+	 *
+	 * Beside itself, under a folder named after it, so a design that refers
+	 * to `assets/photos/hero.png` still finds it after `assets/photos.zip`
+	 * has been opened.
+	 *
+	 * A folder named after the archive is the readable choice and the wrong
+	 * one when the name is sixty characters long and the archive is already
+	 * four folders deep. Windows stops at 260 characters for the whole path,
+	 * and what stops there is not this folder but the site inside it —
+	 * silently, because an archive that cannot be opened is an archive nobody
+	 * sees. So the name is kept while it fits and swapped for a short stable
+	 * one when it does not: the same folder every time the same archive is
+	 * unpacked, which is what the links inside it need.
+	 *
+	 * A folder that already exists gets a counter — `photos-2`, never
+	 * `photos-2-3-4`, which is what building each try on the last produced —
+	 * and the counter is checked against the budget too.
+	 *
+	 * @param string   $archive Absolute path of the .zip, forward slashes.
+	 * @param callable $exists  Whether a folder is already taken; is_dir() in use, injected for tests.
+	 * @return string Absolute path of the folder to open it into.
+	 */
+	public static function nested_folder( string $archive, callable $exists ): string {
+		$readable = preg_replace( '#\.zip$#i', '', $archive );
+		$readable = is_string( $readable ) && '' !== $readable ? $readable : $archive . '-unpacked';
+		$short    = dirname( $archive ) . '/z-' . substr( md5( basename( $archive ) ), 0, 8 );
+
+		$base   = strlen( $readable ) > self::PATH_BUDGET ? $short : $readable;
+		$target = $base;
+		$suffix = 2;
+
+		while ( $exists( $target ) ) {
+			$target = $base . '-' . $suffix;
+
+			if ( strlen( $target ) > self::PATH_BUDGET && $base !== $short ) {
+				$base   = $short;
+				$target = $base . '-' . $suffix;
+			}
+
+			++$suffix;
+		}
+
+		return $target;
+	}
+
+	/**
+	 * An archive entry's path as the design's own markup would spell it.
+	 *
+	 * Forward slashes, no leading slash, no empty or `.` segments — the same
+	 * normalisation safe_target() starts from, without the cleaning, so the
+	 * two can be compared to find out whether a name changed.
+	 *
+	 * @param string $name Entry path inside the archive.
+	 * @return string
+	 */
+	private static function entry_relative( string $name ): string {
+		$segments = array();
+
+		foreach ( explode( '/', str_replace( '\\', '/', $name ) ) as $segment ) {
+			if ( '' !== $segment && '.' !== $segment ) {
+				$segments[] = $segment;
+			}
+		}
+
+		return implode( '/', $segments );
 	}
 
 	/**
@@ -1238,12 +1553,14 @@ final class DesignArchive {
 	/**
 	 * Filter a directory name down to safe characters, preserving its meaning.
 	 *
+	 * Public because it is pure, and because what it does to a name that is
+	 * not ASCII is worth a test of its own.
+	 *
 	 * @param string $segment Raw directory name from the archive.
 	 * @return string Cleaned name, or '' when nothing usable is left.
 	 */
-	private static function clean_directory_name( string $segment ): string {
-		$clean = preg_replace( '#[^A-Za-z0-9 _.\-]#u', '-', $segment );
-		$clean = is_string( $clean ) ? $clean : '';
+	public static function clean_directory_name( string $segment ): string {
+		$clean = self::ascii_name( $segment );
 		$clean = trim( $clean, ". \t\n\r\0\x0B" );
 
 		// Reserved Windows device names would make the path unusable there.
@@ -1266,13 +1583,54 @@ final class DesignArchive {
 	 * @param string $segment Raw file name from the archive.
 	 * @return string Cleaned name, or '' when nothing usable is left.
 	 */
-	private static function clean_file_name( string $segment ): string {
-		$clean = preg_replace( '#[^A-Za-z0-9 _.\-]#u', '-', $segment );
-		$clean = is_string( $clean ) ? $clean : '';
+	public static function clean_file_name( string $segment ): string {
+		$extension = (string) pathinfo( $segment, PATHINFO_EXTENSION );
+		$stem      = '' === $extension ? $segment : substr( $segment, 0, -( strlen( $extension ) + 1 ) );
+
+		/*
+		 * The stem and the extension are cleaned apart, so a hash a foreign
+		 * stem earns lands before the dot and the extension the allow-list
+		 * vetted comes through as it was.
+		 */
+		$clean = self::ascii_name( $stem );
+		$clean = '' === $extension ? $clean : $clean . '.' . self::ascii_name( $extension );
 		$clean = ltrim( $clean, '.' );
 		$clean = trim( $clean );
 
 		return substr( self::neutralise( $clean ), 0, 180 );
+	}
+
+	/**
+	 * Spell one path segment in the characters every filesystem accepts.
+	 *
+	 * This used to map every character outside `[A-Za-z0-9 _.-]` to a dash,
+	 * which turned a Cyrillic picture name into `------.jpg` — six dashes for
+	 * six letters, the same six dashes for every other six-letter name, and
+	 * a page that still said the original. Now the name is transliterated
+	 * first — Cyrillic by the table above, the Latin scripts by WordPress —
+	 * and whatever no transliteration can spell is replaced by a short hash
+	 * of the original, so different names stay different and the same name
+	 * is always spelled the same way.
+	 *
+	 * @param string $segment One directory or file-name segment, raw.
+	 * @return string ASCII, possibly empty.
+	 */
+	private static function ascii_name( string $segment ): string {
+		$valid = 1 === preg_match( '//u', $segment );
+		$ascii = $valid ? strtr( $segment, self::CYRILLIC ) : $segment;
+		$ascii = $valid && function_exists( 'remove_accents' ) ? remove_accents( $ascii ) : $ascii;
+
+		$clean = preg_replace( $valid ? '#[^A-Za-z0-9 _.\-]+#u' : '#[^A-Za-z0-9 _.\-]+#', '-', $ascii );
+		$clean = is_string( $clean ) ? $clean : '';
+
+		if ( $clean === $ascii ) {
+			return $clean;
+		}
+
+		// Something was lost; keep what came through, and make the rest unmistakable.
+		$kept = trim( (string) preg_replace( '#-{2,}#', '-', $clean ), '- ' );
+
+		return ( '' === $kept ? '' : $kept . '-' ) . substr( md5( $segment ), 0, 8 );
 	}
 
 	/**

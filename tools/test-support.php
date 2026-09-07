@@ -87,6 +87,18 @@ if ( ! function_exists( '_n' ) ) {
 	function trailingslashit( string $path ): string { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Test harness stand-in for the real function.
 		return rtrim( $path, "/\\" ) . '/';
 	}
+
+	/**
+	 * The words without the tags around them.
+	 *
+	 * @param string $text Markup.
+	 * @return string
+	 */
+	function wp_strip_all_tags( string $text ): string { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Test harness stand-in for the real function.
+		$text = (string) preg_replace( '@<(script|style)[^>]*?>.*?</\1>@si', '', $text );
+
+		return trim( strip_tags( $text ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- This is the stand-in for that alternative.
+	}
 }
 
 $qsoft_root = dirname( __DIR__ );
@@ -138,9 +150,29 @@ require $qsoft_root . '/inc/Support/DesignField.php';
 require $qsoft_root . '/inc/Support/DesignType.php';
 require $qsoft_root . '/inc/Support/ShopKit.php';
 require $qsoft_root . '/inc/Support/DesignNeeds.php';
+require $qsoft_root . '/inc/Support/ImportLog.php';
+require $qsoft_root . '/inc/Support/DesignArchive.php';
 
+// Time constants WordPress defines; ClaudeCli names one in a class constant.
+if ( ! defined( 'MINUTE_IN_SECONDS' ) ) {
+	define( 'MINUTE_IN_SECONDS', 60 );
+}
+
+if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
+	define( 'HOUR_IN_SECONDS', 3600 );
+}
+
+require $qsoft_root . '/inc/Support/AnthropicClient.php';
+require $qsoft_root . '/inc/Support/ClaudeCli.php';
+require $qsoft_root . '/inc/Support/Lessons.php';
+require $qsoft_root . '/inc/Support/PlanReview.php';
+
+use Qwerty\Soft\Support\AnthropicClient;
 use Qwerty\Soft\Support\BrandKit;
+use Qwerty\Soft\Support\ClaudeCli;
 use Qwerty\Soft\Support\DesignTokens;
+use Qwerty\Soft\Support\Lessons;
+use Qwerty\Soft\Support\PlanReview;
 use Qwerty\Soft\Support\SourceProject;
 use Qwerty\Soft\Support\Spend;
 
@@ -413,6 +445,17 @@ qsoft_assert( $qsoft_small > 0.0, 'a small section has a non-zero estimate' );
 qsoft_assert( $qsoft_large > $qsoft_small, 'a larger section estimates higher' );
 qsoft_assert( Spend::estimate( 0, 'claude-opus-5' ) > 0.0, 'an empty section still costs its output' );
 qsoft_assert( Spend::estimate( -5, 'claude-opus-5' ) > 0.0, 'a negative size does not produce a negative price' );
+
+// 2,000 chars: 500 tokens in at $5, the typical 2,200 out at $25.
+qsoft_assert( abs( $qsoft_small - 0.0575 ) < 0.000001, 'a small section is priced at its input plus the typical output' );
+
+// 200,000 chars: 50,000 in, and the output grows with it — 30,000 out, not 2,200.
+qsoft_assert( abs( $qsoft_large - 1.0 ) < 0.000001, 'a large section\'s output estimate scales with its input' );
+
+qsoft_assert(
+	2200 === Spend::output_tokens( 0 ) && 2200 === Spend::output_tokens( 3000 ) && 3000 === Spend::output_tokens( 5000 ),
+	'the output estimate is the typical figure until the input outgrows it'
+);
 
 // ------------------------------------- SourceProject: reading an application
 
@@ -1138,6 +1181,285 @@ qsoft_assert(
 	'the design\'s own words are seeded as site content rather than left blank'
 );
 
+// ------------------------------------------- a long group is divided
+
+/*
+ * Nineteen fields in one list is a wall. "Link — Ongoing assurance" says what
+ * the link is and nothing about which of three columns it stands in, and the
+ * design already answers that: its columns are elements, and every field
+ * carries the address SectionPlan recorded. So the division is the markup's
+ * own, and each part is called what the design calls it.
+ */
+echo "\n=== BlockWriter — a long field group is divided the way the design divides the section ===\n";
+
+/*
+ * Three parts of a footer and its small print, each built differently so that
+ * nothing in it is a run of identical siblings: this is a wall of fields, not
+ * a list, and the divider is what is under test rather than SectionPlan's
+ * reading of a repeat.
+ */
+$qsoft_wall_html = '<footer class="site-footer"><div class="container"><div class="footer-grid">'
+	. '<div class="footer-brand">'
+	. '<a class="brand" href="index.html"><span>Fixture</span></a>'
+	. '<p>Everything a fixture needs, delivered by people who have done it before.</p>'
+	. '</div>'
+	. '<div>'
+	. '<div class="footer-title">Managed Program</div>'
+	. '<a class="lead" href="managed.html">Leadership and roadmap</a>'
+	. '<a class="rule" href="compliance.html">Compliance and privacy</a>'
+	. '</div>'
+	. '<div class="footer-address">'
+	. '<div class="footer-title">Where we are</div>'
+	. '<p>Nineteen Fixture Street, in the part of town with the good coffee.</p>'
+	. '<address>Open on the days the coffee shop is open, which is most of them.</address>'
+	. '</div>'
+	. '</div><div class="copyright">'
+	. '<span>© 2019 Fixture Co. All rights reserved.</span>'
+	. '<em>Managed security and compliance.</em>'
+	. '</div></div></footer>';
+
+$qsoft_wall_plan = Qwerty\Soft\Support\SectionPlan::of( $qsoft_wall_html );
+$qsoft_wall_dir  = sys_get_temp_dir() . '/qsoft-wall-' . getmypid();
+
+Qwerty\Soft\Support\BlockWriter::write(
+	$qsoft_wall_html,
+	$qsoft_wall_plan,
+	'site-footer-wall01',
+	'Site footer',
+	'',
+	$qsoft_wall_dir,
+	'index.html',
+	'option'
+);
+
+$qsoft_wall_group = json_decode( (string) file_get_contents( $qsoft_wall_dir . '/fields.json' ), true );
+$qsoft_wall_tabs  = array();
+
+foreach ( (array) ( $qsoft_wall_group['fields'] ?? array() ) as $qsoft_wall_field ) {
+	if ( 'tab' === ( $qsoft_wall_field['type'] ?? '' ) ) {
+		$qsoft_wall_tabs[] = (string) $qsoft_wall_field['label'];
+	}
+}
+
+qsoft_assert(
+	count( $qsoft_wall_tabs ) > 1,
+	'a group long enough to be a wall is divided',
+	$qsoft_wall_tabs
+);
+
+
+foreach ( array( 'Footer brand', 'Footer address' ) as $qsoft_wall_named ) {
+	qsoft_assert(
+		in_array( $qsoft_wall_named, $qsoft_wall_tabs, true ),
+		sprintf( 'a part the design named by its class is called "%s"', $qsoft_wall_named ),
+		$qsoft_wall_tabs
+	);
+}
+
+foreach ( array( 'Managed Program' ) as $qsoft_wall_column ) {
+	qsoft_assert(
+		in_array( $qsoft_wall_column, $qsoft_wall_tabs, true ),
+		sprintf( 'a column the design headed "%s" is the "%s" tab', $qsoft_wall_column, $qsoft_wall_column ),
+		$qsoft_wall_tabs
+	);
+}
+
+qsoft_assert(
+	in_array( 'Copyright', $qsoft_wall_tabs, true ),
+	'and the small print is its own part rather than the tail of the last column',
+	$qsoft_wall_tabs
+);
+
+/*
+ * Every field still there, in the order the design put them: a divider is a
+ * heading over the list, never a filter on it.
+ */
+$qsoft_wall_names = array();
+
+foreach ( (array) ( $qsoft_wall_group['fields'] ?? array() ) as $qsoft_wall_field ) {
+	if ( 'tab' !== ( $qsoft_wall_field['type'] ?? '' ) ) {
+		$qsoft_wall_names[] = (string) $qsoft_wall_field['name'];
+	}
+}
+
+qsoft_assert(
+	count( $qsoft_wall_names ) === count( (array) $qsoft_wall_plan['fields'] ),
+	'dividing the group loses no field',
+	array( count( $qsoft_wall_names ), count( (array) $qsoft_wall_plan['fields'] ) )
+);
+
+qsoft_assert(
+	0 === count( array_filter( $qsoft_wall_names, static fn( string $name ): bool => ! str_starts_with( $name, 'site_footer_wall01_' ) ) ),
+	'and every name still carries the block it belongs to',
+	$qsoft_wall_names
+);
+
+/*
+ * Eleven copies of "Choose a page, or paste a web address" is not eleven times
+ * the help — it is the eleven labels that do differ held apart by the sentence
+ * that does not. Said once where it is first met, and again in the next tab,
+ * which is a screen of its own.
+ */
+$qsoft_wall_said = array();
+$qsoft_wall_seen = array();
+
+foreach ( (array) ( $qsoft_wall_group['fields'] ?? array() ) as $qsoft_wall_field ) {
+	if ( 'tab' === ( $qsoft_wall_field['type'] ?? '' ) ) {
+		$qsoft_wall_seen = array();
+
+		continue;
+	}
+
+	$qsoft_wall_says = (string) ( $qsoft_wall_field['instructions'] ?? '' );
+
+	if ( '' === $qsoft_wall_says ) {
+		continue;
+	}
+
+	$qsoft_wall_said[] = isset( $qsoft_wall_seen[ $qsoft_wall_says ] );
+
+	$qsoft_wall_seen[ $qsoft_wall_says ] = true;
+}
+
+qsoft_assert(
+	! in_array( true, $qsoft_wall_said, true ),
+	'a field type is explained once in a tab, not under all four of its links'
+);
+
+qsoft_assert(
+	1 === ( $qsoft_wall_group['menu_order'] ?? 0 ),
+	'the footer sits under the header when the two share the options screen',
+	$qsoft_wall_group['menu_order'] ?? null
+);
+
+/*
+ * The copyright line is read as words rather than as markup, because the year
+ * is written into the words. Offered as a rich field it kept the design's own
+ * `<span id="year">`, which the page then escaped and printed — "© 2026 <span
+ * id="year"></span> Fixture Co." on every page.
+ */
+$qsoft_wall_dated = null;
+
+foreach ( (array) ( $qsoft_wall_group['fields'] ?? array() ) as $qsoft_wall_field ) {
+	$qsoft_wall_default = $qsoft_wall_field['default_value'] ?? '';
+
+	// A link's default is its address and its words, which is an array.
+	if ( is_string( $qsoft_wall_default ) && str_contains( $qsoft_wall_default, 'All rights reserved' ) ) {
+		$qsoft_wall_dated = $qsoft_wall_field;
+	}
+}
+
+qsoft_assert(
+	is_array( $qsoft_wall_dated ) && ! str_contains( (string) $qsoft_wall_dated['default_value'], '<' ),
+	'a copyright line is kept as words, so the year can be written into them',
+	$qsoft_wall_dated['default_value'] ?? null
+);
+
+/*
+ * And a group short enough to read at a glance is left alone: a row of tabs
+ * over five fields is one more thing between an editor and the field they came
+ * for.
+ */
+$qsoft_short_dir = sys_get_temp_dir() . '/qsoft-short-' . getmypid();
+
+Qwerty\Soft\Support\BlockWriter::write(
+	$qsoft_footer_html,
+	$qsoft_footer_plan,
+	'site-footer-short1',
+	'Site footer',
+	'',
+	$qsoft_short_dir,
+	'index.html',
+	'option'
+);
+
+$qsoft_short_group = json_decode( (string) file_get_contents( $qsoft_short_dir . '/fields.json' ), true );
+
+qsoft_assert(
+	0 === count( array_filter( (array) $qsoft_short_group['fields'], static fn( array $field ): bool => 'tab' === ( $field['type'] ?? '' ) ) ),
+	'a group short enough to read at a glance is not divided'
+);
+
+/*
+ * The same section, kept with the block instead of with the site: the sidebar
+ * is a column about 280 pixels across, where five tabs wrap into a stack of
+ * stubs and a field given a third of the width is 90 pixels of box under a
+ * two-line label. So the division is drawn down the page as accordions, and
+ * nothing is put side by side.
+ */
+$qsoft_side_dir = sys_get_temp_dir() . '/qsoft-side-' . getmypid();
+
+Qwerty\Soft\Support\BlockWriter::write(
+	$qsoft_wall_html,
+	$qsoft_wall_plan,
+	'design-wall01',
+	'A section',
+	'',
+	$qsoft_side_dir,
+	'index.html'
+);
+
+$qsoft_side_group = json_decode( (string) file_get_contents( $qsoft_side_dir . '/fields.json' ), true );
+$qsoft_side_kinds = array();
+$qsoft_side_wide  = 0;
+
+foreach ( (array) ( $qsoft_side_group['fields'] ?? array() ) as $qsoft_side_field ) {
+	$qsoft_side_kinds[] = (string) $qsoft_side_field['type'];
+
+	if ( isset( $qsoft_side_field['wrapper']['width'] ) ) {
+		++$qsoft_side_wide;
+	}
+}
+
+qsoft_assert(
+	in_array( 'accordion', $qsoft_side_kinds, true ) && ! in_array( 'tab', $qsoft_side_kinds, true ),
+	'a section kept with its block divides down the sidebar rather than across it',
+	$qsoft_side_kinds
+);
+
+qsoft_assert(
+	0 === $qsoft_side_wide,
+	'and nothing in the sidebar is put side by side',
+	$qsoft_side_wide
+);
+
+$qsoft_wall_wide = 0;
+
+foreach ( (array) ( $qsoft_wall_group['fields'] ?? array() ) as $qsoft_wall_field ) {
+	if ( isset( $qsoft_wall_field['wrapper']['width'] ) ) {
+		++$qsoft_wall_wide;
+	}
+}
+
+qsoft_assert(
+	$qsoft_wall_wide > 0,
+	'while the Site content screen, which is as wide as the page, still puts a run of links in a row',
+	$qsoft_wall_wide
+);
+
+/*
+ * A divider is a handle, not the sentence the design wrote on the heading it
+ * came from. "Complete AI agent go-live review" over a tab strip is a strip of
+ * one tab.
+ */
+foreach ( array( $qsoft_wall_group, $qsoft_side_group ) as $qsoft_hand_group ) {
+	foreach ( (array) ( $qsoft_hand_group['fields'] ?? array() ) as $qsoft_hand_field ) {
+		if ( ! in_array( (string) $qsoft_hand_field['type'], array( 'tab', 'accordion' ), true ) ) {
+			continue;
+		}
+
+		qsoft_assert(
+			mb_strlen( (string) $qsoft_hand_field['label'] ) <= 28,
+			sprintf( 'a divider called "%s" is short enough to be a handle', $qsoft_hand_field['label'] )
+		);
+	}
+}
+
+foreach ( array( $qsoft_wall_dir, $qsoft_short_dir, $qsoft_side_dir ) as $qsoft_wall_gone ) {
+	array_map( 'unlink', (array) glob( $qsoft_wall_gone . '/*' ) );
+	rmdir( $qsoft_wall_gone );
+}
+
 /*
  * The header is the one thing a visitor sees on every page, and it used to be
  * the one part of a design thrown away and rebuilt from the theme's own site
@@ -1718,6 +2040,707 @@ foreach ( array_values( $qsoft_kit ) as $qsoft_destination ) {
 		sprintf( 'and %s is not in the theme until a design asks for it', $qsoft_destination )
 	);
 }
+
+echo "\n=== BlockWriter — the section keeps what the designer drew, and says where each field is ===\n";
+
+/*
+ * A heading with a highlighted half and a deliberate line break is one
+ * heading. Flattened to words it read "Program,Built" on a live site, with
+ * the highlight's rule left targeting nothing.
+ */
+$qsoft_rich_html = '<section class="hero"><h1><span class="gradient-text">Your Program,</span><br />Built.</h1><p class="lead">Plain words.</p></section>';
+$qsoft_rich_plan = Qwerty\Soft\Support\SectionPlan::of( $qsoft_rich_html );
+$qsoft_rich_head = null;
+$qsoft_rich_lead = null;
+
+foreach ( $qsoft_rich_plan['fields'] as $qsoft_field ) {
+	if ( 'heading' === $qsoft_field['name'] ) {
+		$qsoft_rich_head = $qsoft_field;
+	}
+
+	if ( 'lead' === $qsoft_field['name'] ) {
+		$qsoft_rich_lead = $qsoft_field;
+	}
+}
+
+qsoft_assert(
+	is_array( $qsoft_rich_head ) && ! empty( $qsoft_rich_head['rich'] ),
+	'a heading holding inline markup is planned as a rich field'
+);
+
+qsoft_assert(
+	is_array( $qsoft_rich_lead ) && empty( $qsoft_rich_lead['rich'] ),
+	'and a paragraph of plain words is not'
+);
+
+$qsoft_rich_values = Qwerty\Soft\Support\BlockWriter::values( $qsoft_rich_html, $qsoft_rich_plan );
+
+qsoft_assert(
+	false !== strpos( (string) ( $qsoft_rich_values['heading'] ?? '' ), '<span class="gradient-text">Your Program,</span>' )
+		&& false !== strpos( (string) ( $qsoft_rich_values['heading'] ?? '' ), '<br>' ),
+	'its value keeps the span, its class and the line break'
+);
+
+$qsoft_rich_render = (string) Qwerty\Soft\Support\BlockWriter::render_php( $qsoft_rich_html, $qsoft_rich_plan );
+
+qsoft_assert(
+	false !== strpos( $qsoft_rich_render, 'DesignField::inline(' )
+		&& false !== strpos( $qsoft_rich_render, 'data-qs-field="heading" data-qs-type="rich"' ),
+	'the template echoes it through inline() and marks the element as that field'
+);
+
+qsoft_assert(
+	false !== strpos( $qsoft_rich_render, 'data-qs-field="lead" data-qs-type="textarea"' ),
+	'and a plain field is marked with its own type'
+);
+
+qsoft_assert(
+	false === strpos( Qwerty\Soft\Support\DesignField::unmarked( '<h1 data-qs-field="heading" data-qs-type="rich">A</h1><li data-qs-row="items" data-qs-index="2">b</li>' ), 'data-qs-' ),
+	'the marks come off for a visitor'
+);
+
+$qsoft_rich_fields = json_decode( Qwerty\Soft\Support\BlockWriter::fields_json( 'hero', 'Hero', $qsoft_rich_plan, $qsoft_rich_html ), true );
+$qsoft_rich_acf    = null;
+
+foreach ( (array) ( $qsoft_rich_fields['fields'] ?? array() ) as $qsoft_field ) {
+	if ( 'heading' === ( $qsoft_field['name'] ?? '' ) ) {
+		$qsoft_rich_acf = $qsoft_field;
+	}
+}
+
+qsoft_assert(
+	is_array( $qsoft_rich_acf ) && 'textarea' === $qsoft_rich_acf['type'] && false !== strpos( (string) $qsoft_rich_acf['instructions'], '<br>' ),
+	'the field group gives it a box tall enough for markup and says which tags it keeps'
+);
+
+/*
+ * The sanitiser is the escaping for that field, so it has to hold on both
+ * sides: keep the tags a design uses, drop everything that could carry script.
+ */
+$qsoft_dirty = '<span class="x" onclick="evil()">A</span><script>alert(1)</script><b>B</b><a href="javascript:evil()" class="l">c</a><div>d</div>';
+$qsoft_clean = Qwerty\Soft\Support\DesignField::inline( $qsoft_dirty );
+
+qsoft_assert(
+	false !== strpos( $qsoft_clean, '<span class="x">A</span>' )
+		&& false !== strpos( $qsoft_clean, '<b>B</b>' )
+		&& false === strpos( $qsoft_clean, 'onclick' )
+		&& false === strpos( $qsoft_clean, '<script' )
+		&& false === strpos( $qsoft_clean, 'javascript:' )
+		&& false === strpos( $qsoft_clean, '<div' ),
+	'inline() keeps the allowed tags and their class, and strips handlers, scripts, script URLs and block tags'
+);
+
+/*
+ * A button that is words plus an icon. The words used to stay frozen in the
+ * template while the field carried a title nothing read.
+ */
+$qsoft_icon_html   = '<section><a class="btn" href="contact.html">Talk to us <svg viewBox="0 0 1 1"><path d="M0 0"/></svg></a></section>';
+$qsoft_icon_plan   = Qwerty\Soft\Support\SectionPlan::of( $qsoft_icon_html );
+$qsoft_icon_render = (string) Qwerty\Soft\Support\BlockWriter::render_php( $qsoft_icon_html, $qsoft_icon_plan );
+
+qsoft_assert(
+	false !== strpos( $qsoft_icon_render, 'DesignField::link_text(' )
+		&& false !== strpos( $qsoft_icon_render, '?> <svg' )
+		&& false === strpos( $qsoft_icon_render, '>Talk to us <svg' ),
+	'a link with an icon in it gets its words from the field and keeps the icon'
+);
+
+$qsoft_brand_html   = '<section><a class="brand" href="/"><span class="mark"></span><span class="wordmark">Acme</span></a></section>';
+$qsoft_brand_plan   = Qwerty\Soft\Support\SectionPlan::of( $qsoft_brand_html );
+$qsoft_brand_render = (string) Qwerty\Soft\Support\BlockWriter::render_php( $qsoft_brand_html, $qsoft_brand_plan );
+
+qsoft_assert(
+	false !== strpos( $qsoft_brand_render, '<span class="mark"></span>' )
+		&& false !== strpos( $qsoft_brand_render, '<span class="wordmark" data-qs-field="wordmark"' )
+		&& false === strpos( $qsoft_brand_render, 'link_text(' ),
+	'while a link whose words live in its own elements keeps the structure and makes the wordmark its own field'
+);
+
+/*
+ * A `<picture>` shows its `<source>` before its `<img>`, so a replaced
+ * picture kept drawing the archive's own file.
+ */
+$qsoft_pic_html   = '<section><picture><source srcset="a.webp" type="image/webp"><img src="a.jpg" alt="A"></picture></section>';
+$qsoft_pic_plan   = Qwerty\Soft\Support\SectionPlan::of( $qsoft_pic_html );
+$qsoft_pic_render = (string) Qwerty\Soft\Support\BlockWriter::render_php( $qsoft_pic_html, $qsoft_pic_plan );
+
+qsoft_assert(
+	false === strpos( $qsoft_pic_render, '<source' ) && false !== strpos( $qsoft_pic_render, 'data-qs-type="image"' ),
+	'a picture that becomes a field loses its sources, so the field is what is shown'
+);
+
+/*
+ * The holder of a repeat is not always only rows. A grid's heading and its
+ * "view all" link used to be deleted along with the extra rows — or, when
+ * the cards came after the heading, the heading was kept as the row.
+ */
+$qsoft_grid_html = '<section class="cases"><div class="grid"><h2>Our work</h2>'
+	. '<article class="card"><h3>Alpha</h3></article><article class="card"><h3>Beta</h3></article><article class="card"><h3>Gamma</h3></article>'
+	. '<a class="all" href="cases.html">All cases</a></div></section>';
+$qsoft_grid_plan = Qwerty\Soft\Support\SectionPlan::of( $qsoft_grid_html );
+
+qsoft_assert(
+	'repeat' === $qsoft_grid_plan['kind'] && 'article.card' === ( $qsoft_grid_plan['item']['selector'] ?? '' ),
+	'three cards beside a heading and a link are still a repeat of cards'
+);
+
+$qsoft_grid_render = (string) Qwerty\Soft\Support\BlockWriter::render_php( $qsoft_grid_html, $qsoft_grid_plan );
+$qsoft_grid_values = Qwerty\Soft\Support\BlockWriter::values( $qsoft_grid_html, $qsoft_grid_plan );
+
+qsoft_assert(
+	false !== strpos( $qsoft_grid_render, '<h2' )
+		&& false !== strpos( $qsoft_grid_render, 'class="all"' )
+		&& 1 === substr_count( $qsoft_grid_render, 'class="card"' ),
+	'the template keeps the heading and the link and one card'
+);
+
+qsoft_assert(
+	3 === count( (array) ( $qsoft_grid_values['items'] ?? array() ) )
+		&& 'Gamma' === ( $qsoft_grid_values['items'][2]['heading'] ?? $qsoft_grid_values['items'][2]['subheading'] ?? '' ),
+	'and the values read three rows, none of them the heading'
+);
+
+qsoft_assert(
+	false !== strpos( $qsoft_grid_render, 'data-qs-row="items"' )
+		&& false !== strpos( $qsoft_grid_render, 'as $qsoft_i => $qsoft_row' )
+		&& false !== strpos( $qsoft_grid_render, '(int) ( $qsoft_i ?? 0 )' ),
+	'each rendered row is marked with which row it is'
+);
+
+/*
+ * The outermost list is the list. Three cards each holding four bullets used
+ * to lose to the first card's four bullets, so one card got a repeater and
+ * two got flat fields.
+ */
+$qsoft_cards = '';
+
+foreach ( array( 'One', 'Two', 'Three' ) as $qsoft_n ) {
+	$qsoft_cards .= '<article class="card"><h3>' . $qsoft_n . '</h3><ul>'
+		. '<li>' . $qsoft_n . ' a</li><li>' . $qsoft_n . ' b</li><li>' . $qsoft_n . ' c</li><li>' . $qsoft_n . ' d</li>'
+		. '</ul></article>';
+}
+
+$qsoft_nested_html = '<section><div class="grid">' . $qsoft_cards . '</div></section>';
+$qsoft_nested_plan = Qwerty\Soft\Support\SectionPlan::of( $qsoft_nested_html );
+
+qsoft_assert(
+	'repeat' === $qsoft_nested_plan['kind'] && 'article.card' === ( $qsoft_nested_plan['item']['selector'] ?? '' ),
+	'cards each holding a list of bullets are a repeat of the card, not of the first card\'s bullets'
+);
+
+qsoft_assert(
+	5 === count( (array) ( $qsoft_nested_plan['item']['fields'] ?? array() ) ),
+	'and a row holds the heading and every bullet, so no card is shaped differently from the others'
+);
+
+/*
+ * The same cards, each with a different icon glyph in an element that is
+ * not a field. Now the rows diverge, the section is kept whole — and every
+ * card gets the same flat treatment rather than the first one a repeater.
+ */
+$qsoft_iconed = '';
+
+foreach ( array( '◆|One', '⌁|Two', '↻|Three' ) as $qsoft_pair ) {
+	list( $qsoft_glyph, $qsoft_n ) = explode( '|', $qsoft_pair );
+
+	$qsoft_iconed .= '<article class="card"><div class="icon">' . $qsoft_glyph . '</div><h3>' . $qsoft_n . '</h3><ul>'
+		. '<li>' . $qsoft_n . ' a</li><li>' . $qsoft_n . ' b</li><li>' . $qsoft_n . ' c</li><li>' . $qsoft_n . ' d</li>'
+		. '</ul></article>';
+}
+
+$qsoft_iconed_html   = '<section><div class="grid">' . $qsoft_iconed . '</div></section>';
+$qsoft_iconed_plan   = Qwerty\Soft\Support\SectionPlan::of( $qsoft_iconed_html );
+$qsoft_iconed_render = (string) Qwerty\Soft\Support\BlockWriter::render_php( $qsoft_iconed_html, $qsoft_iconed_plan );
+
+qsoft_assert(
+	'repeat' === $qsoft_iconed_plan['kind']
+		&& 6 === count( (array) ( $qsoft_iconed_plan['item']['fields'] ?? array() ) )
+		&& false !== strpos( $qsoft_iconed_render, 'data-qs-field="icon"' ),
+	'a glyph in a box of its own is a field of the row, so the third card keeps its own icon'
+);
+
+/*
+ * Words that are not in a paragraph are still words: an eyebrow in a div, a
+ * bullet with an icon in front of it, a card that is one big link.
+ */
+$qsoft_misc_html = '<section><div class="eyebrow">Why us</div>'
+	. '<ul><li><svg class="tick" viewBox="0 0 1 1"><path d="M0 0"/></svg> Fast delivery</li><li><svg class="tick" viewBox="0 0 1 1"><path d="M0 0"/></svg> Fair prices</li></ul>'
+	. '<a class="card" href="alpha.html"><h3>Alpha</h3><p>The first.</p></a></section>';
+$qsoft_misc_plan   = Qwerty\Soft\Support\SectionPlan::of( $qsoft_misc_html );
+$qsoft_misc_render = (string) Qwerty\Soft\Support\BlockWriter::render_php( $qsoft_misc_html, $qsoft_misc_plan );
+$qsoft_misc_values = Qwerty\Soft\Support\BlockWriter::values( $qsoft_misc_html, $qsoft_misc_plan );
+$qsoft_misc_names  = array_map( static fn( array $f ): string => (string) $f['name'], $qsoft_misc_plan['fields'] );
+
+qsoft_assert(
+	in_array( 'eyebrow', $qsoft_misc_names, true ) && 'Why us' === ( $qsoft_misc_values['eyebrow'] ?? '' ),
+	'a div with words of its own is a field named after its class'
+);
+
+qsoft_assert(
+	2 === substr_count( $qsoft_misc_render, '<svg class="tick"' )
+		&& false !== strpos( $qsoft_misc_render, '</svg> <?php echo esc_html(' )
+		&& 'Fast delivery' === ( $qsoft_misc_values['text'] ?? '' ),
+	'a bullet with an icon keeps the icon and makes only its words the field'
+);
+
+qsoft_assert(
+	in_array( 'card', $qsoft_misc_names, true )
+		&& in_array( 'subheading', $qsoft_misc_names, true )
+		&& '' === ( $qsoft_misc_values['card']['title'] ?? 'x' )
+		&& 'Alpha' === ( $qsoft_misc_values['subheading'] ?? '' )
+		&& false !== strpos( $qsoft_misc_render, 'data-qs-field="card" data-qs-type="link"' ),
+	'a card that is one link keeps its address as a field and its heading as another'
+);
+
+$qsoft_same = '';
+
+foreach ( array( 'One', 'Two', 'Three' ) as $qsoft_n ) {
+	$qsoft_same .= '<article class="card"><h3>' . $qsoft_n . '</h3><ul><li>Fast</li><li>Safe</li><li>Cheap</li></ul></article>';
+}
+
+$qsoft_same_plan = Qwerty\Soft\Support\SectionPlan::of( '<section><div class="grid">' . $qsoft_same . '</div></section>' );
+
+qsoft_assert(
+	'repeat' === $qsoft_same_plan['kind'] && 'article.card' === ( $qsoft_same_plan['item']['selector'] ?? '' ),
+	'cards whose bullets are the same are a repeat of the card, with the bullets inside the row'
+);
+
+/*
+ * A row whose name is its own text and whose caption is inside it. Reading
+ * only what was under the row made the caption a field and froze every
+ * logo's name to the first row's: five logos all called BUYME.
+ */
+$qsoft_logos = '';
+
+foreach ( array( 'BUYME|Digital commerce', 'Magenta|Medical', 'CLEW|Health technology' ) as $qsoft_pair ) {
+	list( $qsoft_brand, $qsoft_sector ) = explode( '|', $qsoft_pair );
+
+	$qsoft_logos .= '<div class="logo-name">' . $qsoft_brand . '<small>' . $qsoft_sector . '</small></div>';
+}
+
+$qsoft_logos_html   = '<section class="logo-strip"><div class="logos">' . $qsoft_logos . '</div></section>';
+$qsoft_logos_plan   = Qwerty\Soft\Support\SectionPlan::of( $qsoft_logos_html );
+$qsoft_logos_values = Qwerty\Soft\Support\BlockWriter::values( $qsoft_logos_html, $qsoft_logos_plan );
+$qsoft_logos_render = (string) Qwerty\Soft\Support\BlockWriter::render_php( $qsoft_logos_html, $qsoft_logos_plan );
+
+qsoft_assert(
+	'repeat' === $qsoft_logos_plan['kind']
+		&& 1 === count( (array) ( $qsoft_logos_plan['item']['fields'] ?? array() ) )
+		&& ! empty( $qsoft_logos_plan['item']['fields'][0]['rich'] ),
+	'a row that is its own words plus a caption is one rich field of the row'
+);
+
+qsoft_assert(
+	'Magenta<small>Medical</small>' === ( $qsoft_logos_values['items'][1]['logo_name'] ?? '' )
+		&& false === strpos( $qsoft_logos_render, '>BUYME' ),
+	'each row keeps its own name and caption, and no name is frozen into the template'
+);
+
+/*
+ * A card numbered by an attribute the stylesheet draws has no text to be a
+ * field, and every card came out wearing the first card's number.
+ */
+$qsoft_numbered = '';
+
+foreach ( array( '01', '02', '03' ) as $qsoft_no ) {
+	$qsoft_numbered .= '<article class="card" data-no="' . $qsoft_no . '" data-kind="plain"><h3>Step ' . $qsoft_no . '</h3></article>';
+}
+
+$qsoft_numbered_html   = '<section><div class="grid">' . $qsoft_numbered . '</div></section>';
+$qsoft_numbered_plan   = Qwerty\Soft\Support\SectionPlan::of( $qsoft_numbered_html );
+$qsoft_numbered_render = (string) Qwerty\Soft\Support\BlockWriter::render_php( $qsoft_numbered_html, $qsoft_numbered_plan );
+$qsoft_numbered_values = Qwerty\Soft\Support\BlockWriter::values( $qsoft_numbered_html, $qsoft_numbered_plan );
+$qsoft_numbered_names  = array_map( static fn( array $f ): string => (string) $f['name'], (array) ( $qsoft_numbered_plan['item']['fields'] ?? array() ) );
+
+qsoft_assert(
+	in_array( 'no', $qsoft_numbered_names, true ) && ! in_array( 'kind', $qsoft_numbered_names, true ),
+	'an attribute that differs between rows is a field of the row; one that does not is not'
+);
+
+qsoft_assert(
+	false !== strpos( $qsoft_numbered_render, 'data-no="<?php echo esc_attr( (string) ( $qsoft_row[\'no\'] ?? \'\' ) ); ?>"' )
+		&& '03' === ( $qsoft_numbered_values['items'][2]['no'] ?? '' ),
+	'the attribute is written back from the row, and each row keeps its own value'
+);
+
+qsoft_group( 'ImportLog — a long build keeps the start of its account as well as the end' );
+
+/*
+ * The log used to keep its last two hundred lines and nothing else. A build
+ * writes a line per section, so the unpack's skip list — the one part worth
+ * reading when a page is missing — had gone before anybody looked.
+ */
+$qsoft_log_lines = array();
+
+for ( $qsoft_i = 1; $qsoft_i <= 40; $qsoft_i++ ) {
+	$qsoft_log_lines[] = array(
+		'seq'     => $qsoft_i,
+		'message' => 'line ' . $qsoft_i,
+	);
+}
+
+$qsoft_trimmed = Qwerty\Soft\Support\ImportLog::trim( $qsoft_log_lines, 20, 5 );
+
+qsoft_assert( 20 === count( $qsoft_trimmed ), 'an overflowing log is cut to the maximum' );
+qsoft_assert(
+	array( 1, 2, 3, 4, 5 ) === array_column( array_slice( $qsoft_trimmed, 0, 5 ), 'seq' ),
+	'the first lines survive the cut'
+);
+qsoft_assert(
+	26 === (int) $qsoft_trimmed[5]['seq'] && 40 === (int) end( $qsoft_trimmed )['seq'],
+	'and the most recent lines follow them, with the middle gone'
+);
+qsoft_assert(
+	$qsoft_log_lines === Qwerty\Soft\Support\ImportLog::trim( $qsoft_log_lines, 40, 5 ),
+	'a log within its limit is left exactly as it is'
+);
+qsoft_assert(
+	array( 1, 2, 3 ) === array_column( Qwerty\Soft\Support\ImportLog::trim( $qsoft_log_lines, 3, 10 ), 'seq' ),
+	'a head larger than the whole limit keeps only the head'
+);
+$qsoft_tail_only = Qwerty\Soft\Support\ImportLog::trim( $qsoft_log_lines, 10, 0 );
+
+qsoft_assert(
+	array( 31, 40 ) === array( (int) $qsoft_tail_only[0]['seq'], (int) end( $qsoft_tail_only )['seq'] ),
+	'no head at all is the old behaviour: the tail alone'
+);
+qsoft_assert(
+	Qwerty\Soft\Support\ImportLog::MAX_LINES >= 1500 && Qwerty\Soft\Support\ImportLog::HEAD_LINES >= 100,
+	'the shipped limits hold a real build and its unpack'
+);
+
+qsoft_group( 'DesignArchive — names the archive uses are names this system can hold' );
+
+/*
+ * ASCII names pass through untouched: the links between the design's own
+ * pages depend on it, and `page.dc.html` must not become `page.dc_.html`.
+ */
+qsoft_assert( 'Home.dc.html' === Qwerty\Soft\Support\DesignArchive::clean_file_name( 'Home.dc.html' ), 'a plain file name is kept as it is' );
+qsoft_assert( 'my images' === Qwerty\Soft\Support\DesignArchive::clean_directory_name( 'my images' ), 'a plain folder name is kept as it is' );
+qsoft_assert( 'index-php.txt' === Qwerty\Soft\Support\DesignArchive::clean_file_name( 'index.php' ), 'server source is still neutralised' );
+qsoft_assert( 'dir-con' === Qwerty\Soft\Support\DesignArchive::clean_directory_name( 'con' ), 'a reserved Windows device name is still renamed' );
+
+/*
+ * Cyrillic used to become dashes — `------.jpg`, the same dashes for every
+ * name of that length, and a page that still named the original. WordPress's
+ * remove_accents() knows nothing of it, so the archive carries its own table.
+ */
+qsoft_assert( 'foto.jpg' === Qwerty\Soft\Support\DesignArchive::clean_file_name( 'фото.jpg' ), 'a Cyrillic name is spelled in Latin letters, extension kept', Qwerty\Soft\Support\DesignArchive::clean_file_name( 'фото.jpg' ) );
+qsoft_assert( 'hero-kartinka.png' === Qwerty\Soft\Support\DesignArchive::clean_file_name( 'hero-картинка.png' ), 'mixed names come out whole', Qwerty\Soft\Support\DesignArchive::clean_file_name( 'hero-картинка.png' ) );
+qsoft_assert( 'izobrazheniya' === Qwerty\Soft\Support\DesignArchive::clean_directory_name( 'изображения' ), 'a folder name gets the same treatment', Qwerty\Soft\Support\DesignArchive::clean_directory_name( 'изображения' ) );
+qsoft_assert( 'Kiyiv-Shchuka' === Qwerty\Soft\Support\DesignArchive::clean_directory_name( 'Київ-Щука' ), 'Ukrainian letters and capitals are covered', Qwerty\Soft\Support\DesignArchive::clean_directory_name( 'Київ-Щука' ) );
+
+/*
+ * A name no transliteration reaches (there is no remove_accents() in this
+ * harness, and the table stops at Cyrillic) becomes a short stable hash
+ * rather than dashes, so different names stay different files.
+ */
+$qsoft_cjk = Qwerty\Soft\Support\DesignArchive::clean_file_name( '写真.jpg' );
+
+qsoft_assert( 1 === preg_match( '/^[a-f0-9]{8}\.jpg$/', $qsoft_cjk ), 'a name with nothing spellable in it becomes a hash, and keeps its extension', $qsoft_cjk );
+qsoft_assert( $qsoft_cjk === Qwerty\Soft\Support\DesignArchive::clean_file_name( '写真.jpg' ), 'the same name is spelled the same way every time' );
+qsoft_assert(
+	$qsoft_cjk !== Qwerty\Soft\Support\DesignArchive::clean_file_name( '画像.jpg' ),
+	'two different names of the same length stay two different files'
+);
+qsoft_assert(
+	1 === preg_match( '/^hero-[a-f0-9]{8}\.png$/', Qwerty\Soft\Support\DesignArchive::clean_file_name( 'hero-写真.png' ) ),
+	'what could be spelled is kept, and the hash marks what could not'
+);
+qsoft_assert(
+	1 === preg_match( '/^[a-f0-9]{8}$/', Qwerty\Soft\Support\DesignArchive::clean_directory_name( '写真' ) ),
+	'a folder name no table reaches is hashed too'
+);
+qsoft_assert(
+	'' !== Qwerty\Soft\Support\DesignArchive::clean_file_name( "\xE4\xF3\xF0.jpg" ) && str_ends_with( Qwerty\Soft\Support\DesignArchive::clean_file_name( "\xE4\xF3\xF0.jpg" ), '.jpg' ),
+	'a name that is not valid UTF-8 is still given a usable ASCII spelling'
+);
+
+/*
+ * The path budget on the file at the end of the tree. The rule is the same
+ * rule Windows enforces, applied before fopen() rather than found out from
+ * it, with the extension kept and a hash so the shortening is stable.
+ */
+$qsoft_long_dir  = '/uploads/designs/slug/' . str_repeat( 'folder/', 6 );
+$qsoft_long_name = str_repeat( 'a-very-long-photograph-name-', 5 ) . '.jpg';
+$qsoft_fitted    = Qwerty\Soft\Support\DesignArchive::fit_path( $qsoft_long_dir . $qsoft_long_name, 120 );
+
+qsoft_assert( is_string( $qsoft_fitted ) && strlen( $qsoft_fitted ) <= 120, 'a path past the limit is brought under it', $qsoft_fitted );
+qsoft_assert( is_string( $qsoft_fitted ) && str_ends_with( $qsoft_fitted, '.jpg' ), 'and keeps its extension', $qsoft_fitted );
+qsoft_assert( is_string( $qsoft_fitted ) && str_starts_with( $qsoft_fitted, $qsoft_long_dir ), 'and its folders', $qsoft_fitted );
+qsoft_assert( is_string( $qsoft_fitted ) && 1 === preg_match( '#/a-very-long[a-z-]*-[a-f0-9]{8}\.jpg$#', $qsoft_fitted ), 'the readable start of the name is kept, with a hash of the whole', $qsoft_fitted );
+qsoft_assert( $qsoft_fitted === Qwerty\Soft\Support\DesignArchive::fit_path( $qsoft_long_dir . $qsoft_long_name, 120 ), 'the same long name shortens the same way every time' );
+qsoft_assert(
+	$qsoft_long_dir . 'short.jpg' === Qwerty\Soft\Support\DesignArchive::fit_path( $qsoft_long_dir . 'short.jpg', 120 ),
+	'a path within the limit is not touched'
+);
+qsoft_assert(
+	null === Qwerty\Soft\Support\DesignArchive::fit_path( $qsoft_long_dir . $qsoft_long_name, 60 ),
+	'when the folders alone are past the limit, no file name can help, and the caller is told so'
+);
+qsoft_assert(
+	Qwerty\Soft\Support\DesignArchive::PATH_LIMIT <= 260,
+	'the shipped limit is the one Windows enforces, or under it'
+);
+
+/*
+ * Where an archive inside the design is opened. The counter for a folder
+ * already taken used to be built on the last try — `x-2-3-4` — and the
+ * short name for a long one was never checked again once a counter was on it.
+ */
+$qsoft_taken = static function ( string $path ): bool {
+	return in_array( basename( $path ), array( 'photos', 'photos-2', 'photos-3' ), true );
+};
+
+qsoft_assert(
+	'/designs/slug/assets/photos-4' === Qwerty\Soft\Support\DesignArchive::nested_folder( '/designs/slug/assets/photos.zip', $qsoft_taken ),
+	'a folder already taken gets one counter, not one per try',
+	Qwerty\Soft\Support\DesignArchive::nested_folder( '/designs/slug/assets/photos.zip', $qsoft_taken )
+);
+qsoft_assert(
+	'/designs/slug/assets/photos' === Qwerty\Soft\Support\DesignArchive::nested_folder( '/designs/slug/assets/photos.zip', static fn( string $p ): bool => false ),
+	'a free folder is named after the archive'
+);
+
+// Nine folders deep is 121 characters of parent; the readable name would run to 166.
+$qsoft_deep      = '/designs/slug/' . str_repeat( 'deep-folder/', 9 ) . 'a-very-long-archive-name-for-the-photos-2026.zip';
+$qsoft_deep_base = Qwerty\Soft\Support\DesignArchive::nested_folder( $qsoft_deep, static fn( string $p ): bool => false );
+
+qsoft_assert( strlen( $qsoft_deep_base ) <= 150 && 1 === preg_match( '#/z-[a-f0-9]{8}$#', $qsoft_deep_base ), 'a name that would not fit is swapped for a short stable one', $qsoft_deep_base );
+qsoft_assert( $qsoft_deep_base === Qwerty\Soft\Support\DesignArchive::nested_folder( $qsoft_deep, static fn( string $p ): bool => false ), 'the same archive always opens into the same folder' );
+
+// Exactly 149 characters readable: it fits until "-2" is put on it.
+$qsoft_edge      = '/designs/slug/' . str_repeat( 'x', 120 ) . '/archive-name-x.zip';
+$qsoft_edge_once = Qwerty\Soft\Support\DesignArchive::nested_folder( $qsoft_edge, static fn( string $p ): bool => str_ends_with( $p, '/archive-name-x' ) );
+
+qsoft_assert(
+	strlen( $qsoft_edge_once ) <= 150 && 1 === preg_match( '#/z-[a-f0-9]{8}-2$#', $qsoft_edge_once ),
+	'a readable name that fits until its counter is put on it is swapped for the short one, counter and all',
+	$qsoft_edge_once
+);
+
+// ------------------------------------------------------- AnthropicClient
+
+qsoft_group( 'AnthropicClient — the request, and what it caches' );
+
+$qsoft_brief = "Convert the section below.\n\n### The section markup\n\n```html\n<section><h2>Hello</h2></section>\n```";
+$qsoft_body  = AnthropicClient::request_body( 'system prompt', $qsoft_brief, array( 'type' => 'object' ) );
+
+qsoft_assert( 16000 === $qsoft_body['max_tokens'], 'the output ceiling starts at the default' );
+qsoft_assert( 4000 === AnthropicClient::request_body( 's', 'p', array(), array( 'max_tokens' => 4000 ) )['max_tokens'], 'and is the caller\'s when the caller names one' );
+qsoft_assert( array( 'type' => 'adaptive' ) === $qsoft_body['thinking'] && 'high' === $qsoft_body['output_config']['effort'] && 'default' === $qsoft_body['fallbacks'], 'the default model thinks adaptively at high effort, with server-side fallbacks' );
+qsoft_assert( array( 'type' => 'ephemeral' ) === ( $qsoft_body['system'][0]['cache_control'] ?? null ), 'the system prompt carries a cache breakpoint' );
+
+$qsoft_turn = $qsoft_body['messages'][0]['content'];
+
+qsoft_assert( is_array( $qsoft_turn ) && 1 === count( $qsoft_turn ) && $qsoft_brief === ( $qsoft_turn[0]['text'] ?? '' ), 'a first request sends the brief as one block' );
+qsoft_assert( array( 'type' => 'ephemeral' ) === ( $qsoft_turn[0]['cache_control'] ?? null ), 'with a breakpoint on it, so a retry can hit it' );
+
+$qsoft_retry = "Your last answer to this could not be used. Fix it and return the whole section again.\n\n### What was wrong\n\nA brace.\n\n---\n\n### The original task, unchanged\n\n" . $qsoft_brief;
+$qsoft_again = AnthropicClient::request_body( 'system prompt', $qsoft_retry, array( 'type' => 'object' ) )['messages'][0]['content'];
+
+qsoft_assert( 2 === count( $qsoft_again ) && $qsoft_brief === $qsoft_again[0]['text'], 'a correction sends the brief first, byte for byte the block already cached' );
+qsoft_assert( isset( $qsoft_again[0]['cache_control'] ) && ! isset( $qsoft_again[1]['cache_control'] ), 'the breakpoint stays on the brief, not on the complaint' );
+qsoft_assert(
+	str_starts_with( (string) $qsoft_again[1]['text'], 'Your last answer' )
+		&& str_contains( (string) $qsoft_again[1]['text'], 'A brace.' )
+		&& ! str_contains( (string) $qsoft_again[1]['text'], 'original task' ),
+	'and the complaint follows, without the heading that only marked the join'
+);
+qsoft_assert( array( $qsoft_brief, '' ) === AnthropicClient::split( $qsoft_brief ), 'a prompt with no resent brief is all stable' );
+
+$qsoft_haiku = AnthropicClient::request_body( 's', 'p', array(), array( 'model' => 'claude-haiku-4-5', 'effort' => 'xhigh' ) );
+
+qsoft_assert(
+	! isset( $qsoft_haiku['thinking'] ) && ! isset( $qsoft_haiku['fallbacks'] ) && ! isset( $qsoft_haiku['output_config']['effort'] ),
+	'Haiku 4.5 is spared the parameters it rejects'
+);
+qsoft_assert( 'claude-opus-5' === AnthropicClient::request_body( 's', 'p', array(), array( 'model' => 'claude-9' ) )['model'], 'an unknown model falls back to the default' );
+
+qsoft_assert(
+	32000 === AnthropicClient::raised( 16000 ) && 32000 === AnthropicClient::raised( 20000 ) && 8000 === AnthropicClient::raised( 4000 ),
+	'a cut-off reply is retried with twice the room, up to the cap'
+);
+qsoft_assert( 32000 === AnthropicClient::raised( 32000 ) && 40000 === AnthropicClient::raised( 40000 ), 'and at the cap there is no room left to retry with' );
+
+// ------------------------------------------------------------- ClaudeCli
+
+qsoft_group( 'ClaudeCli — a batch launcher is run through its interpreter' );
+
+$qsoft_argv = array( '--print', '--json-schema', '{"type":"object","properties":{"a b":{"type":"string"}}}', '--tools', '' );
+
+qsoft_assert(
+	array_merge( array( 'cmd.exe', '/c', 'C:/Users/me/AppData/Roaming/npm/claude.cmd' ), $qsoft_argv ) === ClaudeCli::command( 'C:/Users/me/AppData/Roaming/npm/claude.cmd', $qsoft_argv ),
+	'an npm claude.cmd is started by cmd.exe /c, arguments intact'
+);
+qsoft_assert( array( 'cmd.exe', '/c', 'D:/tools/CLAUDE.BAT', '--version' ) === ClaudeCli::command( 'D:/tools/CLAUDE.BAT', array( '--version' ) ), 'and so is a .bat, whatever its case' );
+qsoft_assert( array_merge( array( 'C:/Users/me/.local/bin/claude.exe' ), $qsoft_argv ) === ClaudeCli::command( 'C:/Users/me/.local/bin/claude.exe', $qsoft_argv ), 'a real program is started as itself' );
+qsoft_assert( array( '/usr/local/bin/claude', '--version' ) === ClaudeCli::command( '/usr/local/bin/claude', array( '--version' ) ), 'and so is a binary with no extension' );
+
+// ------------------------------------------------------------ PlanReview
+
+qsoft_group( 'PlanReview — what a reply may change' );
+
+$qsoft_reading = array(
+	'kind'   => 'repeat',
+	'fields' => array(
+		array(
+			'name' => 'label',
+			'type' => 'text',
+			'path' => '0/0',
+		),
+		array(
+			'name' => 'label_2',
+			'type' => 'text',
+			'path' => '0/1',
+		),
+		array(
+			'name' => 'btn',
+			'type' => 'link',
+			'path' => '0/2',
+		),
+	),
+	'item'   => array(
+		'selector' => 'article.card',
+		'count'    => 3,
+		'fields'   => array(
+			array(
+				'name' => 'subheading',
+				'type' => 'text',
+				'path' => '0',
+			),
+			array(
+				'name' => 'text',
+				'type' => 'richtext',
+				'path' => '1',
+			),
+		),
+	),
+);
+
+$qsoft_short = PlanReview::apply(
+	$qsoft_reading,
+	array(
+		'kind'        => 'repeat',
+		'fields'      => array(
+			array(
+				'name'  => 'eyebrow',
+				'label' => 'Eyebrow',
+			),
+			array(
+				'name'  => 'read_more',
+				'label' => 'Read more',
+			),
+		),
+		'item_fields' => array(
+			array(
+				'name'  => 'heading',
+				'label' => 'Heading',
+			),
+		),
+	)
+);
+
+qsoft_assert( array( 'label', 'label_2', 'btn' ) === array_column( $qsoft_short['fields'], 'name' ), 'a list one short is refused whole, so no name lands on the wrong field' );
+qsoft_assert( array( 'subheading', 'text' ) === array_column( $qsoft_short['item']['fields'], 'name' ), 'and so is a row list of the wrong length' );
+
+$qsoft_full = PlanReview::apply(
+	$qsoft_reading,
+	array(
+		'kind'        => 'listing',
+		'fields'      => array(
+			array(
+				'name'  => 'Eyebrow',
+				'label' => 'Eyebrow',
+			),
+			array(
+				'name'  => 'heading',
+				'label' => 'Section heading',
+			),
+			array(
+				'name'  => '2nd link!',
+				'label' => '',
+			),
+		),
+		'item_fields' => array(
+			array(
+				'name'  => 'heading',
+				'label' => 'Card heading',
+			),
+			array(
+				'name'  => 'heading',
+				'label' => 'Card text',
+			),
+		),
+	)
+);
+
+qsoft_assert( array( 'eyebrow', 'heading', 'f_2nd_link' ) === array_column( $qsoft_full['fields'], 'name' ), 'a list of the right length renames one for one, reduced to what ACF accepts' );
+qsoft_assert(
+	'Eyebrow' === ( $qsoft_full['fields'][0]['label'] ?? '' ) && 'Section heading' === ( $qsoft_full['fields'][1]['label'] ?? '' ) && ! isset( $qsoft_full['fields'][2]['label'] ),
+	'labels are taken when given and left alone when empty'
+);
+qsoft_assert( array( '0/0', '0/1', '0/2' ) === array_column( $qsoft_full['fields'], 'path' ) && 'link' === $qsoft_full['fields'][2]['type'], 'paths and types are never the model\'s to change' );
+qsoft_assert( array( 'heading', 'text' ) === array_column( $qsoft_full['item']['fields'], 'name' ), 'a second field claiming a taken name keeps its structural name' );
+qsoft_assert( 'listing' === $qsoft_full['kind'], 'the kind is taken when there is something to repeat' );
+
+$qsoft_solo = PlanReview::apply(
+	array(
+		'kind'   => 'single',
+		'fields' => array(),
+		'item'   => null,
+	),
+	array(
+		'kind'   => 'listing',
+		'fields' => array(),
+	)
+);
+
+qsoft_assert( 'single' === $qsoft_solo['kind'], 'but a one-off section is never made a listing' );
+
+// --------------------------------------------------------------- Lessons
+
+qsoft_group( 'Lessons — the brief weighs recent builds, not the whole journal' );
+
+qsoft_assert( '' === Lessons::summarise( array() ), 'an empty journal says nothing' );
+
+$qsoft_old = array_fill(
+	0,
+	5,
+	array(
+		'kind'         => 'static',
+		'notes'        => array( 'listing_downgraded' => 3 ),
+		'fidelity_min' => 40,
+	)
+);
+$qsoft_new = array_fill(
+	0,
+	10,
+	array(
+		'kind'         => 'react',
+		'notes'        => array(),
+		'fidelity_min' => 96,
+	)
+);
+
+$qsoft_said = Lessons::summarise( array_merge( $qsoft_old, $qsoft_new ) );
+
+qsoft_assert( str_starts_with( $qsoft_said, 'This site has imported 15 design archives before (5× static, 10× react).' ), 'the count and the kinds cover the whole journal' );
+qsoft_assert( ! str_contains( $qsoft_said, 'Earlier archives held' ), 'a counter from before the last ten builds no longer warns anyone' );
+qsoft_assert( ! str_contains( $qsoft_said, 'below 80%' ), 'nor does a thin build from back then' );
+
+$qsoft_new[0]['notes']        = array( 'listing_downgraded' => 1 );
+$qsoft_new[9]['notes']        = array( 'listing_downgraded' => 2 );
+$qsoft_new[9]['fidelity_min'] = 70;
+
+$qsoft_said = Lessons::summarise( array_merge( $qsoft_old, $qsoft_new ) );
+
+qsoft_assert( str_contains( $qsoft_said, 'Earlier archives held 3× sections that looked like record listings' ), 'recent counters are added up, and the older ones are not' );
+qsoft_assert( str_contains( $qsoft_said, '1 of the most recent builds measured below 80%' ), 'one recent thin build is one, not six' );
+
+$qsoft_said = Lessons::summarise( array_merge( $qsoft_old, array_slice( $qsoft_new, 0, 3 ) ) );
+
+qsoft_assert( str_contains( $qsoft_said, 'Earlier archives held 16× sections' ) && str_contains( $qsoft_said, '5 of the most recent builds' ), 'a journal of ten or fewer counts every entry' );
 
 printf( "\n%d checks, %d failure(s).\n", $qsoft_checks, $qsoft_failures );
 

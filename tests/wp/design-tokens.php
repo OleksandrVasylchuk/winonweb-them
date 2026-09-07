@@ -6,7 +6,7 @@
  * The extract() step is checked on the small fixture and, when it can be found,
  * on a real export; apply() and reset() run inside the rolled-back transaction
  * and are judged by what WordPress itself then reports through
- * wp_get_global_settings() and wp_get_global_stylesheet().
+ * wp_get_global_settings() and qsoft_global_stylesheet().
  *
  * @package Qwerty\Soft
  */
@@ -18,6 +18,22 @@ declare( strict_types = 1 );
 require __DIR__ . '/bootstrap.php';
 
 use Qwerty\Soft\Support\DesignTokens;
+
+/**
+ * The stylesheet a visitor actually receives.
+ *
+ * Since WordPress 6.7 the custom CSS — theme.json's `styles.css` and the
+ * user-level sheet that replaces it — is no longer part of what
+ * wp_get_global_stylesheet() returns by default; wp_enqueue_global_styles()
+ * appends it as its own `custom-css` slice. A test that asks only for the
+ * default types is looking at half the page.
+ *
+ * @return string
+ */
+function qsoft_global_stylesheet(): string {
+	return wp_get_global_stylesheet() . wp_get_global_stylesheet( array( 'custom-css' ) );
+}
+
 
 /**
  * The theme's own theme.json, decoded.
@@ -318,7 +334,7 @@ qsoft_test(
 
 		$settings_before   = wp_get_global_settings();
 		$styles_before     = wp_get_global_styles();
-		$stylesheet_before = wp_get_global_stylesheet();
+		$stylesheet_before = qsoft_global_stylesheet();
 
 		$theme_hexes = qsoft_theme_gradient_hexes( $qsoft_theme );
 
@@ -330,7 +346,7 @@ qsoft_test(
 
 		$settings = wp_get_global_settings();
 		$styles   = wp_get_global_styles();
-		$sheet    = wp_get_global_stylesheet();
+		$sheet    = qsoft_global_stylesheet();
 
 		// Font sizes.
 		$sizes = array();
@@ -430,7 +446,7 @@ qsoft_test(
 
 		$settings_after   = wp_get_global_settings();
 		$styles_after     = wp_get_global_styles();
-		$stylesheet_after = wp_get_global_stylesheet();
+		$stylesheet_after = qsoft_global_stylesheet();
 
 		qsoft_assert( $settings_after === $settings_before, 'reset(): wp_get_global_settings() is identical to before apply()', array_diff_key( $settings_after, $settings_before ) + array_diff_key( $settings_before, $settings_after ) );
 		qsoft_assert( $styles_after === $styles_before, 'reset(): wp_get_global_styles() is identical to before apply()' );

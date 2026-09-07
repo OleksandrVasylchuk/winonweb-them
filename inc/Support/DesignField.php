@@ -28,6 +28,21 @@ defined( 'ABSPATH' ) || exit;
 final class DesignField {
 
 	/**
+	 * Whether to read the block's own data and ignore ACF for the moment.
+	 *
+	 * A build measures the page it just wrote in the same request that wrote
+	 * it. ACF registered the blocks' field groups at init, from the files
+	 * that were on disk then, so `get_field()` in that request answers from
+	 * a group that may no longer match — a repeater read through last
+	 * version's sub-fields came back with every new field empty, and a good
+	 * page measured 74%. The block carries its own values, and while this is
+	 * on they are the only ones read. {@see Fidelity::of()} turns it on.
+	 *
+	 * @var bool
+	 */
+	public static $raw = false;
+
+	/**
 	 * A field's value, with or without ACF.
 	 *
 	 * This exists because of a failure worth naming. A generated block pointed
@@ -47,7 +62,7 @@ final class DesignField {
 	 * @return mixed
 	 */
 	public static function value( string $name, $block = null, $fallback = null ) {
-		if ( function_exists( 'get_field' ) ) {
+		if ( ! self::$raw && function_exists( 'get_field' ) ) {
 			$found = get_field( $name );
 
 			if ( null !== $found && '' !== $found && array() !== $found ) {
@@ -87,7 +102,7 @@ final class DesignField {
 	 * @return mixed
 	 */
 	public static function site( string $name, $fallback = null ) {
-		if ( function_exists( 'get_field' ) ) {
+		if ( ! self::$raw && function_exists( 'get_field' ) ) {
 			$found = get_field( $name, 'option' );
 
 			if ( null !== $found && '' !== $found && array() !== $found ) {
@@ -135,7 +150,7 @@ final class DesignField {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public static function rows( string $name, $block = null, bool $site = false ): array {
-		if ( function_exists( 'get_field' ) ) {
+		if ( ! self::$raw && function_exists( 'get_field' ) ) {
 			$found = $site ? get_field( $name, 'option' ) : get_field( $name );
 
 			if ( is_array( $found ) && array() !== $found ) {
@@ -412,5 +427,117 @@ final class DesignField {
 		}
 
 		return '';
+	}
+
+	/**
+	 * A line of copy that may hold the design's own inline markup, made safe.
+	 *
+	 * The tags are {@see SectionPlan::RICH_TAGS}; the attributes are the few
+	 * a stylesheet or a link needs. Everything else is stripped, whether it
+	 * came from the archive or was typed into the field later. Run at build
+	 * time on what the design said and again at render time on what is
+	 * stored, so the two can never disagree about what a field may hold.
+	 *
+	 * @param mixed $value Field value.
+	 * @return string Markup safe to echo inside the element that holds it.
+	 */
+	public static function inline( $value ): string {
+		$html = is_string( $value ) ? $value : '';
+
+		if ( '' === $html ) {
+			return '';
+		}
+
+		if ( function_exists( 'wp_kses' ) ) {
+			return wp_kses( $html, self::inline_tags() );
+		}
+
+		/*
+		 * The same allowance without WordPress. `strip_tags()` keeps the
+		 * tags it is told to and every attribute on them, so the attributes
+		 * are then cut back by hand to the list `inline_tags()` allows.
+		 */
+		$kept = '<' . implode( '><', SectionPlan::RICH_TAGS ) . '>';
+		$html = strip_tags( $html, $kept );
+
+		return (string) preg_replace_callback(
+			'/<([a-z][a-z0-9]*)\b([^>]*)>/i',
+			static function ( array $found ): string {
+				$allowed = self::inline_tags()[ strtolower( $found[1] ) ] ?? array();
+				$kept    = '';
+
+				preg_match_all( '/\s([a-z-]+)\s*=\s*("[^"]*"|\'[^\']*\')/i', $found[2], $pairs, PREG_SET_ORDER );
+
+				foreach ( (array) $pairs as $pair ) {
+					$name = strtolower( $pair[1] );
+
+					if ( isset( $allowed[ $name ] ) && 1 !== preg_match( '/^["\']\s*javascript:/i', $pair[2] ) ) {
+						$kept .= ' ' . $name . '=' . $pair[2];
+					}
+				}
+
+				return '<' . strtolower( $found[1] ) . $kept . '>';
+			},
+			$html
+		);
+	}
+
+	/**
+	 * What `wp_kses()` may keep in a rich text field.
+	 *
+	 * @return array<string, array<string, bool>>
+	 */
+	public static function inline_tags(): array {
+		$tags = array();
+
+		foreach ( SectionPlan::RICH_TAGS as $tag ) {
+			$tags[ $tag ] = array(
+				'class' => true,
+				'id'    => true,
+				'title' => true,
+				'lang'  => true,
+				'dir'   => true,
+			);
+		}
+
+		$tags['a']['href']        = true;
+		$tags['a']['target']      = true;
+		$tags['a']['rel']         = true;
+		$tags['time']['datetime'] = true;
+		$tags['abbr']['title']    = true;
+
+		return $tags;
+	}
+
+	/**
+	 * Whether the block is being drawn for somebody who may edit it.
+	 *
+	 * The generated markup carries `data-qs-*` marks saying which element is
+	 * which field, so the editor can offer them for editing on the canvas.
+	 * A visitor has no use for them, so on the front end they are stripped
+	 * — see {@see self::unmarked()}.
+	 *
+	 * @return bool
+	 */
+	public static function editing(): bool {
+		if ( ! function_exists( 'is_user_logged_in' ) || ! is_user_logged_in() ) {
+			return false;
+		}
+
+		$editor = ( function_exists( 'is_admin' ) && is_admin() )
+			|| ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() )
+			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST );
+
+		return $editor && current_user_can( 'edit_posts' );
+	}
+
+	/**
+	 * Rendered markup with the editor's marks taken out.
+	 *
+	 * @param string $html Rendered block.
+	 * @return string
+	 */
+	public static function unmarked( string $html ): string {
+		return (string) preg_replace( '/\s+data-qs-(?:field|type|row|index|rows)="[^"]*"/', '', $html );
 	}
 }

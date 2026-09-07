@@ -1,0 +1,372 @@
+/**
+ * The editor's marks on a generated design block, inside the canvas.
+ *
+ * Loaded only in the block editor, through `enqueue_block_assets`, which is
+ * the hook whose styles reach into the editor's iframe. Nothing here ships
+ * to the front end; the marks it targets are stripped there.
+ *
+ * Colours are the editor's own accent, not the theme's tokens: this is
+ * chrome drawn over somebody else's design, and it should look like the
+ * editor rather than like either the theme or the design.
+ */
+
+.acf-block-preview [data-qs-field] {
+	cursor: text;
+	outline: 1px dashed transparent;
+	outline-offset: 3px;
+	border-radius: 2px;
+	transition: outline-color 120ms ease, box-shadow 120ms ease;
+}
+
+.acf-block-preview [data-qs-field]:hover {
+	outline-color: rgba(0, 124, 186, 0.55);
+}
+
+.acf-block-preview [data-qs-field].qs-canvas-editing,
+.acf-block-preview [data-qs-field]:focus {
+	outline: 2px solid #007cba;
+	box-shadow: 0 0 0 5px rgba(0, 124, 186, 0.14);
+}
+
+.acf-block-preview [data-qs-field][contenteditable] {
+	-webkit-user-modify: read-write-plaintext-only;
+}
+
+.acf-block-preview [data-qs-field][data-qs-type="rich"][contenteditable] {
+	-webkit-user-modify: read-write;
+}
+
+.acf-block-preview [data-qs-type="image"] {
+	cursor: pointer;
+}
+
+.acf-block-preview [data-qs-type="image"]:hover {
+	outline: 2px dashed rgba(0, 124, 186, 0.7);
+	outline-offset: -2px;
+}
+
+.acf-block-preview [data-qs-row]:hover {
+	outline: 1px dotted rgba(0, 124, 186, 0.45);
+	outline-offset: 6px;
+}
+
+.qs-canvas-bar {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 6px;
+	background: #1e1e1e;
+	color: #fff;
+	border-radius: 4px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+	font: 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.qs-canvas-bar input[type="url"] {
+	width: 280px;
+	max-width: 60vw;
+	padding: 4px 6px;
+	border: 1px solid #555;
+	border-radius: 3px;
+	background: #2b2b2b;
+	color: #fff;
+	font: inherit;
+}
+
+.qs-canvas-bar input[type="checkbox"] {
+	margin: 0 2px 0 0;
+	vertical-align: middle;
+}
+
+.qs-canvas-bar label {
+	white-space: nowrap;
+	color: #ddd;
+}
+
+.qs-canvas-bar button {
+	padding: 3px 9px;
+	border: 0;
+	border-radius: 3px;
+	background: #007cba;
+	color: #fff;
+	font: inherit;
+	line-height: 1.6;
+	cursor: pointer;
+}
+
+.qs-canvas-bar button:hover {
+	background: #006ba1;
+}
+
+.qs-canvas-bar--row {
+	padding: 2px 3px;
+}
+
+/* The button on a section that opens its fields, and the panel it opens. */
+
+.qs-canvas-open {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 20;
+	padding: 5px 10px;
+	border: 0;
+	border-radius: 999px;
+	background: #007cba;
+	color: #fff;
+	font: 600 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	cursor: pointer;
+	opacity: 0.85;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.qs-canvas-open:hover,
+.qs-canvas-open:focus {
+	opacity: 1;
+	outline: 2px solid #fff;
+}
+
+/*
+ * Half the canvas, not a strip down the side of it.
+ *
+ * At 340px the panel was narrower than the sidebar it exists to replace, and
+ * a section of twenty fields was a column of twenty rows to scroll through
+ * one at a time. Half the width is enough for two columns of fields and for
+ * a heading to be read without wrapping; the whole width is one press away
+ * for a section with a repeat in it, and which of the two you left it on is
+ * remembered.
+ *
+ * `resize` as well, because no two sections want the same width and the
+ * browser already knows how to drag a corner. It needs a scroll container to
+ * work on, which the body is.
+ */
+.qs-canvas-panel {
+	position: fixed;
+	top: 16px;
+	right: 16px;
+	z-index: 99998;
+	width: 50vw;
+	min-width: 320px;
+	max-width: calc(100vw - 32px);
+	max-height: calc(100vh - 32px);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	resize: horizontal;
+	direction: rtl;
+	background: #fff;
+	color: #1e1e1e;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+	font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	text-align: left;
+}
+
+/*
+ * `direction: rtl` on the panel is what puts the resize grip on the left,
+ * where a panel anchored to the right edge can be dragged wider. Everything
+ * inside reads the way it was written.
+ */
+.qs-canvas-panel > * {
+	direction: ltr;
+}
+
+.qs-canvas-panel--wide {
+	width: calc(100vw - 32px);
+}
+
+.qs-canvas-panel--narrow {
+	width: 380px;
+}
+
+@media (max-width: 900px) {
+	.qs-canvas-panel,
+	.qs-canvas-panel--narrow {
+		width: calc(100vw - 32px);
+	}
+}
+
+.qs-canvas-panel header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 12px;
+	border-bottom: 1px solid #e5e5e5;
+	background: #f6f7f7;
+	border-radius: 8px 8px 0 0;
+}
+
+.qs-canvas-panel header strong {
+	font-size: 13px;
+}
+
+.qs-canvas-panel header button {
+	border: 0;
+	background: transparent;
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+	color: #555;
+}
+
+.qs-canvas-panel header button:hover,
+.qs-canvas-panel header button:focus-visible {
+	color: #1e1e1e;
+}
+
+.qs-canvas-panel__tools {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.qs-canvas-panel__size {
+	font-size: 15px;
+}
+
+/*
+ * Two columns where there is room for two, one where there is not, and the
+ * repeated rows across the whole of it — a fieldset of three fields squeezed
+ * into half a panel is the narrow panel again, inside the wide one.
+ */
+.qs-canvas-panel__body {
+	flex: 1;
+	overflow: auto;
+	padding: 10px 12px 12px;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 0 16px;
+	align-content: start;
+}
+
+.qs-canvas-panel__rows,
+.qs-canvas-panel__hint,
+.qs-canvas-panel__body > p {
+	grid-column: 1 / -1;
+}
+
+.qs-canvas-panel__rows {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 0 16px;
+	align-content: start;
+}
+
+.qs-canvas-panel__rows h4,
+.qs-canvas-panel__add {
+	grid-column: 1 / -1;
+}
+
+.qs-canvas-panel__field {
+	margin: 0 0 10px;
+}
+
+.qs-canvas-panel__field > label {
+	display: block;
+	margin: 0 0 3px;
+	font-weight: 600;
+	color: #1e1e1e;
+}
+
+.qs-canvas-panel__field input[type="text"],
+.qs-canvas-panel__field input[type="url"],
+.qs-canvas-panel__field textarea {
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0 0 4px;
+	padding: 6px 8px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	background: #fff;
+	color: #1e1e1e;
+	font: inherit;
+}
+
+.qs-canvas-panel__field textarea {
+	resize: vertical;
+}
+
+.qs-canvas-panel__check {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-weight: 400;
+	color: #444;
+}
+
+.qs-canvas-panel__check input[type="checkbox"] {
+	appearance: auto;
+	width: 16px;
+	height: 16px;
+	margin: 0;
+	padding: 0;
+}
+
+.qs-canvas-panel__thumb {
+	display: block;
+	max-width: 100%;
+	max-height: 120px;
+	margin: 0 0 6px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #f0f0f0;
+}
+
+.qs-canvas-panel__field button,
+.qs-canvas-panel__add {
+	padding: 5px 10px;
+	border: 1px solid #007cba;
+	border-radius: 4px;
+	background: #fff;
+	color: #007cba;
+	font: inherit;
+	cursor: pointer;
+}
+
+.qs-canvas-panel__rows h4 {
+	margin: 12px 0 6px;
+	font-size: 13px;
+}
+
+.qs-canvas-panel__rows fieldset {
+	margin: 0 0 10px;
+	padding: 8px 10px 4px;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+}
+
+.qs-canvas-panel__rows legend {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 4px;
+	font-weight: 600;
+}
+
+.qs-canvas-panel__rows legend button {
+	border: 0;
+	background: transparent;
+	color: #b32d2e;
+	font-size: 16px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.qs-canvas-panel__add {
+	width: 100%;
+	margin: 4px 0 8px;
+}
+
+.qs-canvas-panel__hint {
+	margin: 8px 0 0;
+	color: #666;
+	font-size: 12px;
+}
+
+.qs-canvas-bar--row button {
+	min-width: 24px;
+	padding: 2px 6px;
+	font-size: 14px;
+	font-weight: 700;
+}

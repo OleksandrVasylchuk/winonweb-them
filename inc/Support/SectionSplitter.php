@@ -32,7 +32,20 @@ final class SectionSplitter {
 	/**
 	 * Elements that are never part of a section's content.
 	 */
-	private const STRIPPED_TAGS = array( 'script', 'noscript', 'template', 'iframe', 'object', 'embed', 'style', 'link', 'meta' );
+	private const STRIPPED_TAGS = array( 'script', 'noscript', 'template', 'object', 'embed', 'style', 'link', 'meta' );
+
+	/**
+	 * What an `<iframe>` may keep. Everything else on it is removed.
+	 *
+	 * A map, a video, a booking widget: a design embeds them in an iframe,
+	 * and stripping the element with the scripts lost all three with no
+	 * word in the log. The frame stays when it points at a real address over
+	 * https; `srcdoc`, event handlers and anything else that could carry
+	 * script into the page do not.
+	 *
+	 * @var array<int, string>
+	 */
+	private const IFRAME_ATTRIBUTES = array( 'src', 'title', 'width', 'height', 'allow', 'allowfullscreen', 'loading', 'referrerpolicy', 'frameborder', 'class', 'id', 'style', 'sandbox' );
 
 	/**
 	 * Wrapper elements design tools add that carry no meaning.
@@ -204,6 +217,31 @@ final class SectionSplitter {
 				if ( $node->parentNode instanceof DOMNode ) {
 					$node->parentNode->removeChild( $node );
 				}
+			}
+		}
+
+		foreach ( iterator_to_array( $xpath->query( '//iframe' ) ) as $frame ) {
+			if ( ! $frame instanceof DOMElement || ! $frame->parentNode instanceof DOMNode ) {
+				continue;
+			}
+
+			$src = trim( $frame->getAttribute( 'src' ) );
+
+			if ( 1 !== preg_match( '#^(?:https:)?//[^\s"\'<>]+$#i', $src ) ) {
+				$frame->parentNode->removeChild( $frame );
+
+				continue;
+			}
+
+			foreach ( iterator_to_array( $frame->attributes ) as $attribute ) {
+				if ( ! in_array( strtolower( $attribute->name ), self::IFRAME_ATTRIBUTES, true ) ) {
+					$frame->removeAttribute( $attribute->name );
+				}
+			}
+
+			// A frame's content is its own page; nothing written between the tags is wanted.
+			while ( $frame->firstChild ) {
+				$frame->removeChild( $frame->firstChild );
 			}
 		}
 	}

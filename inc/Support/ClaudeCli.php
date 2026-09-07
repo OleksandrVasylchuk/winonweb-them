@@ -337,15 +337,20 @@ final class ClaudeCli {
 			 * hold, so the reader is given the folder it was quoted from and
 			 * can open the part of a file the brief had to cut.
 			 */
-			$args[] = '--tools';
-			$args[] = 'Read';
-			$args[] = '--allowed-tools';
-			$args[] = 'Read';
-
 			foreach ( self::image_dirs( $images, $dirs ) as $dir ) {
 				$args[] = '--add-dir';
 				$args[] = $dir;
 			}
+
+			/*
+			 * Last on purpose, after the directories: the final argument is
+			 * the one a batch launcher hands over unquoted — see command() —
+			 * so it is a plain word here and never a path.
+			 */
+			$args[] = '--tools';
+			$args[] = 'Read';
+			$args[] = '--allowed-tools';
+			$args[] = 'Read';
 		}
 
 		$stdin = self::compose( $system, $prompt, $images );
@@ -357,6 +362,82 @@ final class ClaudeCli {
 		 * the admin request open until PHP gives up.
 		 */
 		$timeout = isset( $options['timeout'] ) ? (int) $options['timeout'] : 300;
+
+		$run = self::run( $status['binary'], $args, $stdin, $timeout );
+
+		if ( is_wp_error( $run ) ) {
+			return $run;
+		}
+
+		return self::read_reply( $run, $model );
+	}
+
+	/**
+	 * Let the model work on files, inside named directories, and report back.
+	 *
+	 * `generate()` asks for one answer and lets the model read at most. This
+	 * is the other thing Claude Code can do: take a task, open the files it
+	 * names, edit them, and say what it changed. It is what a review of a
+	 * built page needs — the design's screenshot, the built page's
+	 * screenshot, the block that drew it — and it is what no HTTP route can
+	 * offer, because the block is a file on this machine.
+	 *
+	 * Reading, editing and writing are allowed only under the directories in
+	 * `$options['dirs']`; no shell, no web. The reply still has to satisfy a
+	 * schema, so a caller learns what happened rather than parsing prose.
+	 *
+	 * @param string               $system  System prompt.
+	 * @param string               $prompt  The task.
+	 * @param array<string, mixed> $schema  JSON Schema the final reply must satisfy.
+	 * @param array<string, mixed> $options model, effort, timeout, images, dirs.
+	 * @return array<string, mixed>|WP_Error
+	 */
+	public static function agent( string $system, string $prompt, array $schema, array $options = array() ) {
+		$status = self::status();
+
+		if ( ! $status['ready'] ) {
+			return new WP_Error( 'qwerty_soft_cli_unavailable', $status['reason'] );
+		}
+
+		$model  = isset( $options['model'] ) ? (string) $options['model'] : AnthropicClient::DEFAULT_MODEL;
+		$effort = isset( $options['effort'] ) ? (string) $options['effort'] : 'high';
+		$images = isset( $options['images'] ) && is_array( $options['images'] ) ? array_map( 'strval', $options['images'] ) : array();
+		$dirs   = isset( $options['dirs'] ) && is_array( $options['dirs'] ) ? array_map( 'strval', $options['dirs'] ) : array();
+
+		if ( ! array_key_exists( $effort, AnthropicClient::effort_levels() ) ) {
+			$effort = 'high';
+		}
+
+		$args = array(
+			'--print',
+			'--output-format',
+			'json',
+			'--model',
+			$model,
+			'--safe-mode',
+			'--no-session-persistence',
+			'--json-schema',
+			(string) wp_json_encode( $schema ),
+		);
+
+		if ( ! AnthropicClient::is_legacy_model( $model ) ) {
+			$args[] = '--effort';
+			$args[] = $effort;
+		}
+
+		foreach ( self::image_dirs( $images, $dirs ) as $dir ) {
+			$args[] = '--add-dir';
+			$args[] = $dir;
+		}
+
+		// Last on purpose: the final argument is the one a batch launcher hands over unquoted.
+		$args[] = '--tools';
+		$args[] = 'Read,Edit,Write,Glob,Grep';
+		$args[] = '--allowed-tools';
+		$args[] = 'Read,Edit,Write,Glob,Grep';
+
+		$stdin   = self::compose( $system, $prompt, $images );
+		$timeout = isset( $options['timeout'] ) ? (int) $options['timeout'] : 900;
 
 		$run = self::run( $status['binary'], $args, $stdin, $timeout );
 
@@ -648,7 +729,7 @@ final class ClaudeCli {
 		 */
 		$command = (array) apply_filters(
 			'qwerty_soft/claude_cli_command',
-			array_merge( array( $binary ), $args ),
+			self::command( $binary, $args ),
 			$binary,
 			$args
 		);
@@ -724,6 +805,38 @@ final class ClaudeCli {
 			'stdout' => $stdout,
 			'stderr' => $stderr,
 		);
+	}
+
+	/**
+	 * The argv that runs the binary with these arguments.
+	 *
+	 * A `.cmd` or `.bat` — what an npm install of Claude Code puts on a
+	 * Windows PATH — is not a program but a script for cmd.exe, and
+	 * proc_open() in array mode starts the program directly, with no shell in
+	 * between. What CreateProcess then does with a batch file has changed
+	 * between PHP releases (the fix for CVE-2024-1874 rewrote it), so the
+	 * interpreter is named here rather than left to be implied.
+	 *
+	 * One quirk of cmd.exe is worth knowing about. PHP quotes every argument,
+	 * and cmd /c, handed a line that opens with a quote, strips that quote
+	 * and the last one on the line — the closing quote of the final
+	 * argument. The program still receives that argument whole, because an
+	 * unterminated quote runs to the end of the line, but anything cmd.exe
+	 * itself reads in an unquoted tail — `&`, `|`, `%NAME%` — would be read.
+	 * So generate() keeps a plain word in last place.
+	 *
+	 * @param string             $binary Resolved path to the binary.
+	 * @param array<int, string> $args   Arguments the theme built.
+	 * @return array<int, string> Full argv, program first.
+	 */
+	public static function command( string $binary, array $args ): array {
+		$argv = array_merge( array( $binary ), array_values( array_map( 'strval', $args ) ) );
+
+		if ( 1 === preg_match( '/\.(cmd|bat)$/i', $binary ) ) {
+			return array_merge( array( 'cmd.exe', '/c' ), $argv );
+		}
+
+		return $argv;
 	}
 
 	/**

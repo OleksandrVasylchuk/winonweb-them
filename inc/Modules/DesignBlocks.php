@@ -48,6 +48,226 @@ final class DesignBlocks implements Module {
 		 */
 		add_action( 'acf/init', array( $this, 'register_fields' ) );
 		add_filter( 'debug_information', array( $this, 'report' ) );
+
+		/*
+		 * Editing on the canvas. ACF Pro draws a generated block as its
+		 * preview and forces that whenever the editor canvas is an iframe —
+		 * which, since WordPress 6.3, is every screen — so its own form never
+		 * appears on the canvas and the fields sit in the sidebar alone. The
+		 * writer marks every field's element in the markup; this script reads
+		 * the marks and lets the words, pictures and links be edited where
+		 * they are drawn, writing back to the same block data the sidebar
+		 * edits. Both stay; neither is the only way in.
+		 */
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_canvas' ), 20 );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_canvas_styles' ) );
+		add_filter( 'render_block', array( $this, 'unmark' ), 10, 2 );
+
+		/*
+		 * A class on the body of a site built from a design. The design's own
+		 * `body{…}` rules are lifted onto it (`DesignStylesheet::scoped()`), so
+		 * they sit one class above the theme's global styles, which print
+		 * after the design's stylesheet and used to win every tie — a design
+		 * silent on font-size took the theme's 17px and grew 156px down the
+		 * page. The editor's canvas carries `.editor-styles-wrapper` on its
+		 * body and is matched by the same selector.
+		 */
+		add_filter( 'body_class', array( $this, 'body_class' ) );
+	}
+
+	/**
+	 * Mark the body of a site that carries generated design blocks.
+	 *
+	 * @param array<int, string> $classes Body classes.
+	 * @return array<int, string>
+	 */
+	public function body_class( array $classes ): array {
+		if ( array() !== $this->groups() ) {
+			$classes[] = \Qwerty\Soft\Support\BlockWriter::SITE_CLASS;
+		}
+
+		return $classes;
+	}
+
+	/**
+	 * The script that makes a design block editable where it is drawn.
+	 *
+	 * @return void
+	 */
+	public function enqueue_canvas(): void {
+		if ( ! function_exists( 'acf_register_block_type' ) || array() === $this->groups() ) {
+			return;
+		}
+
+		$file = QSOFT_DIR . '/assets/js/design-canvas.js';
+
+		if ( ! is_readable( $file ) ) {
+			return;
+		}
+
+		wp_enqueue_media();
+
+		wp_enqueue_script(
+			'qs-design-canvas',
+			QSOFT_URI . '/assets/js/design-canvas.js',
+			array( 'acf-blocks', 'wp-data', 'wp-i18n', 'wp-blocks', 'wp-element', 'jquery', 'media-editor' ),
+			(string) filemtime( $file ),
+			true
+		);
+
+		wp_localize_script(
+			'qs-design-canvas',
+			'qsDesignCanvas',
+			array(
+				'tags'   => \Qwerty\Soft\Support\SectionPlan::RICH_TAGS,
+				'blocks' => $this->field_labels(),
+				'i18n'   => array(
+					'edit'      => __( 'Click to edit', 'qwerty-soft-signal' ),
+					'image'     => __( 'Click to replace the picture', 'qwerty-soft-signal' ),
+					'link'      => __( 'Link address', 'qwerty-soft-signal' ),
+					'linkText'  => __( 'Link text', 'qwerty-soft-signal' ),
+					'newTab'    => __( 'Open in a new tab', 'qwerty-soft-signal' ),
+					'apply'     => __( 'Apply', 'qwerty-soft-signal' ),
+					'addRow'    => __( 'Add a row after this one', 'qwerty-soft-signal' ),
+					'removeRow' => __( 'Remove this row', 'qwerty-soft-signal' ),
+					'choose'    => __( 'Choose a picture', 'qwerty-soft-signal' ),
+					'use'       => __( 'Use this picture', 'qwerty-soft-signal' ),
+					'fields'    => __( 'Fields', 'qwerty-soft-signal' ),
+					'close'     => __( 'Close', 'qwerty-soft-signal' ),
+					'wider'     => __( 'Widen the panel', 'qwerty-soft-signal' ),
+					'narrower'  => __( 'Narrow the panel', 'qwerty-soft-signal' ),
+					'row'       => __( 'Row', 'qwerty-soft-signal' ),
+					'addRowEnd' => __( 'Add row', 'qwerty-soft-signal' ),
+					'replace'   => __( 'Replace', 'qwerty-soft-signal' ),
+					'noFields'  => __( 'This section has no editable fields.', 'qwerty-soft-signal' ),
+					'hint'      => __( 'Or click any text, picture or link in the section to edit it there.', 'qwerty-soft-signal' ),
+				),
+			)
+		);
+	}
+
+	/**
+	 * What each generated block's fields are called, for the panel on the canvas.
+	 *
+	 * The labels live in fields.json, which ACF reads and the canvas script
+	 * cannot. Read once here into `{ block name: { fields, rows, items } }`.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function field_labels(): array {
+		$labels = array();
+
+		foreach ( $this->groups() as $group ) {
+			$block = '';
+
+			foreach ( (array) ( $group['location'] ?? array() ) as $rules ) {
+				foreach ( (array) $rules as $rule ) {
+					if ( 'block' === ( $rule['param'] ?? '' ) ) {
+						$block = (string) ( $rule['value'] ?? '' );
+					}
+				}
+			}
+
+			if ( '' === $block ) {
+				continue;
+			}
+
+			$fields    = array();
+			$rows      = array();
+			$items     = '';
+			$items_key = '';
+
+			/*
+			 * Keys as well as labels. In the editor ACF rewrites a block's
+			 * data from field names to field keys — `heading` becomes
+			 * `field_qs_…_heading`, a repeater becomes `{ "row-0": { key:
+			 * value } }` — so the canvas has to address values by key to be
+			 * heard at all.
+			 */
+			foreach ( (array) ( $group['fields'] ?? array() ) as $field ) {
+				$name = (string) ( $field['name'] ?? '' );
+				$type = (string) ( $field['type'] ?? 'text' );
+
+				// A divider holds no value and has no name to address one by.
+				if ( in_array( $type, array( 'tab', 'accordion' ), true ) ) {
+					continue;
+				}
+
+				if ( 'repeater' === $type ) {
+					$items     = (string) ( $field['label'] ?? '' );
+					$items_key = (string) ( $field['key'] ?? '' );
+
+					foreach ( (array) ( $field['sub_fields'] ?? array() ) as $sub ) {
+						$rows[ (string) ( $sub['name'] ?? '' ) ] = array(
+							'label' => (string) ( $sub['label'] ?? '' ),
+							'type'  => (string) ( $sub['type'] ?? 'text' ),
+							'key'   => (string) ( $sub['key'] ?? '' ),
+						);
+					}
+
+					continue;
+				}
+
+				$fields[ $name ] = array(
+					'label' => (string) ( $field['label'] ?? '' ),
+					'type'  => $type,
+					'key'   => (string) ( $field['key'] ?? '' ),
+				);
+			}
+
+			$labels[ $block ] = array(
+				'fields'   => $fields,
+				'rows'     => $rows,
+				'items'    => $items,
+				'itemsKey' => $items_key,
+			);
+		}
+
+		return $labels;
+	}
+
+	/**
+	 * The outlines and controls the canvas draws around editable elements.
+	 *
+	 * `enqueue_block_assets` is the hook whose styles reach inside the
+	 * editor's iframe, which is where the preview is drawn; it also fires on
+	 * the front end, where none of this belongs.
+	 *
+	 * @return void
+	 */
+	public function enqueue_canvas_styles(): void {
+		if ( ! is_admin() || array() === $this->groups() ) {
+			return;
+		}
+
+		$file = QSOFT_DIR . '/assets/css/design-canvas.css';
+
+		if ( ! is_readable( $file ) ) {
+			return;
+		}
+
+		wp_enqueue_style( 'qs-design-canvas', QSOFT_URI . '/assets/css/design-canvas.css', array(), (string) filemtime( $file ) );
+	}
+
+	/**
+	 * Take the editor's marks off a block a visitor is looking at.
+	 *
+	 * @param string               $content Rendered block.
+	 * @param array<string, mixed> $block   The parsed block.
+	 * @return string
+	 */
+	public function unmark( string $content, array $block ): string {
+		$name = (string) ( $block['blockName'] ?? '' );
+
+		if ( ! str_starts_with( $name, 'qs/design-' ) || false === strpos( $content, 'data-qs-' ) ) {
+			return $content;
+		}
+
+		if ( \Qwerty\Soft\Support\DesignField::editing() ) {
+			return $content;
+		}
+
+		return \Qwerty\Soft\Support\DesignField::unmarked( $content );
 	}
 
 	/**

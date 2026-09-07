@@ -49,6 +49,21 @@ final class Lessons {
 	private const MAX = 20;
 
 	/**
+	 * Entries the brief counts from; the older ones are history, not advice.
+	 *
+	 * The journal keeps twenty so a person can read back that far. The model
+	 * is told about the last ten. Counters that ran over the whole journal
+	 * never forgot anything: one bad archive from a year ago went on
+	 * warning every review about listings until it fell off the end, and
+	 * the fixes that had since gone into code counted for nothing against
+	 * it. What the last ten builds ran into is what the next one is likely
+	 * to run into.
+	 *
+	 * @var int
+	 */
+	private const RECENT = 10;
+
+	/**
 	 * Option the running build's counters are kept in.
 	 *
 	 * An option rather than a static, because a build is many requests — the
@@ -124,7 +139,22 @@ final class Lessons {
 	 * @return string Empty when nothing has been learned yet.
 	 */
 	public static function brief(): string {
-		$entries = self::all();
+		return self::summarise( self::all() );
+	}
+
+	/**
+	 * The paragraph, from a given journal.
+	 *
+	 * The first sentence counts the whole journal — how many archives, of
+	 * what kinds — because that is a fact about the site. The counters and
+	 * the fidelity warning come from the recent entries only, because those
+	 * are advice, and advice goes stale: see {@see self::RECENT}.
+	 *
+	 * @param array<int, array<string, mixed>> $entries Journal entries, oldest first.
+	 * @return string Empty when the journal is empty.
+	 */
+	public static function summarise( array $entries ): string {
+		$entries = array_values( $entries );
 
 		if ( array() === $entries ) {
 			return '';
@@ -140,7 +170,9 @@ final class Lessons {
 			if ( '' !== $kind ) {
 				$kinds[ $kind ] = ( $kinds[ $kind ] ?? 0 ) + 1;
 			}
+		}
 
+		foreach ( array_slice( $entries, -self::RECENT ) as $entry ) {
 			foreach ( (array) ( $entry['notes'] ?? array() ) as $what => $times ) {
 				$counts[ (string) $what ] = ( $counts[ (string) $what ] ?? 0 ) + (int) $times;
 			}
@@ -184,8 +216,8 @@ final class Lessons {
 
 		if ( $thin > 0 ) {
 			$sentences .= ' ' . sprintf(
-				/* translators: %d: how many imports measured below the fidelity floor. */
-				__( '%d earlier build(s) measured below 80%% of the design\'s copy on at least one page, always in a repeated or listing section — treat those with extra care.', 'qwerty-soft-signal' ),
+				/* translators: %d: how many recent imports measured below the fidelity floor. */
+				__( '%d of the most recent builds measured below 80%% of the design\'s copy on at least one page, always in a repeated or listing section — treat those with extra care.', 'qwerty-soft-signal' ),
 				$thin
 			);
 		}

@@ -93,7 +93,38 @@ final class SiteOptions {
 	}
 
 	/**
+	 * A print of what the importer last wrote to a row.
+	 *
+	 * Held as name => hash, beside the register. Hashed rather than stored
+	 * whole because the footer's paragraph is the value, and keeping a second
+	 * copy of every one of them to compare against would double the rows this
+	 * screen costs for nothing a hash does not settle.
+	 *
+	 * @var string
+	 */
+	public const SEEDED = 'qwerty_soft_design_options_seeded';
+
+	/**
 	 * Write the values an import read out of the design, and remember them.
+	 *
+	 * A row already holding words is not overwritten — rebuilding the same
+	 * design must not undo the afternoon somebody spent rewriting the footer.
+	 * "Already holding words" used to mean "exists", and that was too coarse,
+	 * because a field's name is positional: SectionPlan calls the footer's
+	 * labels `label`, `label_2`, `label_3` in the order it meets them, and the
+	 * option key `options_{block}_{name}` is the whole of a row's identity.
+	 * So the generator learning to see one more element — BlockWriter 8 to 9
+	 * made the word inside `<a class="brand">` a field of its own — shifted
+	 * every later label down a place. The rows stayed where they were, under
+	 * names that now meant something else, and the footer of a live site read
+	 * its brand as "© Chalir. All rights reserved." while the copyright line
+	 * showed the tagline twice.
+	 *
+	 * So what is protected is a person's words, not the importer's own. A row
+	 * still holding exactly what the last build put in it is the design
+	 * talking to itself and is refreshed; a row holding anything else was
+	 * edited by somebody and is left alone. A row seeded before this record
+	 * existed cannot be told apart either way, and is left alone.
 	 *
 	 * @param array<string, mixed> $rows Option name => value.
 	 * @return void
@@ -104,25 +135,53 @@ final class SiteOptions {
 		}
 
 		$written = (array) get_option( self::REGISTER, array() );
+		$seeded  = (array) get_option( self::SEEDED, array() );
 
 		foreach ( $rows as $name => $value ) {
-			$name = (string) $name;
+			$name    = (string) $name;
+			$current = get_option( $name, null );
 
-			/*
-			 * An option that is already there is left alone. Rebuilding the
-			 * same design should not undo the afternoon somebody spent
-			 * rewriting the footer.
-			 */
-			if ( null !== get_option( $name, null ) ) {
+			if ( null !== $current && ! self::ours( $name, $current, $seeded ) ) {
 				continue;
 			}
 
 			update_option( $name, $value, false );
 
-			$written[] = $name;
+			$seeded[ $name ] = self::print_of( $value );
+			$written[]       = $name;
 		}
 
 		update_option( self::REGISTER, array_values( array_unique( $written ) ), false );
+		update_option( self::SEEDED, $seeded, false );
+	}
+
+	/**
+	 * Whether a row still holds exactly what the importer last wrote to it.
+	 *
+	 * @param string               $name    Option name.
+	 * @param mixed                $current What it holds now.
+	 * @param array<string, mixed> $seeded  The prints, by name.
+	 * @return bool
+	 */
+	private static function ours( string $name, $current, array $seeded ): bool {
+		if ( ! isset( $seeded[ $name ] ) || ! is_string( $seeded[ $name ] ) ) {
+			return false;
+		}
+
+		return hash_equals( $seeded[ $name ], self::print_of( $current ) );
+	}
+
+	/**
+	 * The print of one value.
+	 *
+	 * A link is an array and a paragraph is a string, so the value is
+	 * serialised before it is hashed rather than cast.
+	 *
+	 * @param mixed $value Whatever was written.
+	 * @return string
+	 */
+	private static function print_of( $value ): string {
+		return md5( (string) maybe_serialize( $value ) );
 	}
 
 	/**
@@ -202,6 +261,7 @@ final class SiteOptions {
 		}
 
 		delete_option( self::REGISTER );
+		delete_option( self::SEEDED );
 
 		return $removed;
 	}

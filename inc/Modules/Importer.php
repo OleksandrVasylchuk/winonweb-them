@@ -22,6 +22,7 @@ use Qwerty\Soft\Support\BlockRepair;
 use Qwerty\Soft\Support\ClaudeCli;
 use Qwerty\Soft\Support\ConversionPrompt;
 use Qwerty\Soft\Support\BuildRunner;
+use Qwerty\Soft\Support\BuildStep;
 use Qwerty\Soft\Support\CssIndex;
 use Qwerty\Soft\Support\DesignArchive;
 use Qwerty\Soft\Support\DesignDocs;
@@ -30,6 +31,7 @@ use Qwerty\Soft\Support\DesignTokens;
 use Qwerty\Soft\Support\ImportLog;
 use Qwerty\Soft\Support\ImportSession;
 use Qwerty\Soft\Support\ModelGateway;
+use Qwerty\Soft\Support\PixelReview;
 use Qwerty\Soft\Support\SectionSplitter;
 use Qwerty\Soft\Support\SiteAssembler;
 use Qwerty\Soft\Support\SiteBuilder;
@@ -103,6 +105,9 @@ final class Importer implements Module {
 		BuildRunner::boot();
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+
+		// The review's own browser, let in to see a draft: one key, one minute, loopback only.
+		add_action( 'init', array( \Qwerty\Soft\Support\PixelReview::class, 'admit' ) );
 	}
 
 	/**
@@ -1055,6 +1060,18 @@ final class Importer implements Module {
 						'type'    => 'boolean',
 						'default' => false,
 					),
+
+					/*
+					 * Whether to stop a build that is still running and start
+					 * this one in its place. Off by default: a second start
+					 * used to overwrite the running job's record while its
+					 * ticks were still booked, and the two then built over
+					 * each other.
+					 */
+					'force'        => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
 				),
 			)
 		);
@@ -1444,6 +1461,32 @@ final class Importer implements Module {
 			return $root;
 		}
 
+		/*
+		 * One build at a time. Starting another used to overwrite the running
+		 * job's record silently while its cron ticks were still booked, so the
+		 * old build's next tick carried on with the new build's record and two
+		 * workers wrote the same pages. A build that is finished or stopped is
+		 * not in the way; a running one is, unless the caller says to stop it.
+		 */
+		$running = ImportSession::running();
+
+		if ( null !== $running && empty( $running['completed']['finish'] ) && empty( $running['stopped'] ) ) {
+			if ( ! (bool) $request->get_param( 'force' ) ) {
+				return new WP_Error(
+					'qwerty_soft_build_running',
+					__( 'A build is already running on this site. Stop it first, or start again with force to replace it.', 'qwerty-soft-signal' ),
+					array(
+						'status' => 409,
+						'job'    => (string) ( $running['id'] ?? '' ),
+						'done'   => (int) ( $running['done'] ?? 0 ),
+						'total'  => (int) ( $running['total'] ?? 0 ),
+					)
+				);
+			}
+
+			BuildRunner::stop( get_current_user_id() );
+		}
+
 		if ( function_exists( 'set_time_limit' ) ) {
 			set_time_limit( 120 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Fonts and media for a whole design, bounded.
 		}
@@ -1466,7 +1509,14 @@ final class Importer implements Module {
 				// The versions of a page the screen decided against.
 				'exclude'  => (array) $request->get_param( 'exclude' ),
 				'smart'    => $smart,
-				'refine'   => $smart && (bool) $request->get_param( 'refine' ),
+
+				/*
+				 * Checking the pixels no longer needs the guided conversion:
+				 * a wrapped build is photographed beside the design and its
+				 * blocks corrected as files, which is a different loop from
+				 * the one `smart` runs (see PixelReview).
+				 */
+				'refine'   => (bool) $request->get_param( 'refine' ),
 				'model'    => (string) get_option( self::OPTION_MODEL, AnthropicClient::DEFAULT_MODEL ),
 				'effort'   => (string) get_option( self::OPTION_EFFORT, 'high' ),
 			)
@@ -1583,6 +1633,15 @@ final class Importer implements Module {
 		 */
 		$status['missing_blocks'] = count( BlockRepair::missing() );
 
+		/*
+		 * Whether a build can be checked against the design from here, and
+		 * if not, why. The review needs more than a model: Claude Code to
+		 * edit the generated blocks as files, Node and Playwright to
+		 * photograph both pages. The screen offers the mode disabled with
+		 * this sentence rather than letting it be chosen and then fail.
+		 */
+		$status['review'] = PixelReview::unavailable();
+
 		return rest_ensure_response( $status );
 	}
 
@@ -1677,8 +1736,12 @@ final class Importer implements Module {
 				continue;
 			}
 
-			$page['status'] = $status;
-			$pages[]        = $page;
+			/*
+			 * The whole row, not just its status. A page published since the
+			 * report was written still carried its preview link, and a pixel
+			 * review run afterwards had a report the row did not know about.
+			 */
+			$pages[] = SiteAssembler::refresh_row( $page );
 		}
 
 		if ( array() === $pages ) {
@@ -1821,138 +1884,109 @@ final class Importer implements Module {
 			return $root;
 		}
 
-		if ( function_exists( 'set_time_limit' ) ) {
-			/*
-			 * A structural page is milliseconds. A guided one is a model call
-			 * per section, each of which can take a minute at high effort, so
-			 * the ceiling has to be the length of the slowest page rather than
-			 * of the fastest.
-			 */
-			set_time_limit( empty( $job['smart'] ) ? 60 : 900 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- One page, bounded.
-		}
-
 		$key  = (string) $request->get_param( 'key' );
 		$file = (string) $request->get_param( 'file' );
 
-		$progress = static function ( array $job ): array {
-			return array(
-				'done'  => (int) $job['done'],
-				'total' => (int) $job['total'],
-			);
-		};
-
-		if ( 'page' === $key ) {
-			if ( ! $this->validate_file( $file ) ) {
-				return new WP_Error( 'qwerty_soft_no_page', __( 'That page is not in this design.', 'qwerty-soft-signal' ), array( 'status' => 404 ) );
-			}
-
-			ImportLog::add(
-				'build',
-				sprintf(
-					/* translators: 1: page file, 2: step number, 3: steps in total. */
-					__( 'Building %1$s — step %2$d of %3$d…', 'qwerty-soft-signal' ),
-					$file,
-					(int) $job['done'] + 1,
-					(int) $job['total']
-				)
-			);
-
-			$started = microtime( true );
-			$result  = SiteAssembler::page( $job, $file );
-
-			$job['completed'][ 'page:' . $file ] = true;
-			$job['done']                         = 2 + count( $job['completed'] );
-
-			ImportSession::update_job( $job );
-
-			if ( is_wp_error( $result ) ) {
-				ImportLog::add(
-					'build',
-					sprintf(
-						/* translators: 1: page file, 2: the reason. */
-						__( '%1$s was not built: %2$s', 'qwerty-soft-signal' ),
-						$file,
-						$result->get_error_message()
-					)
-				);
-
-				$result->add_data( array_merge( array( 'status' => 400 ), $progress( $job ) ) );
-
-				return $result;
-			}
-
-			ImportLog::add(
-				'build',
-				sprintf(
-					/* translators: 1: page title, 2: number of sections, 3: seconds taken. */
-					__( 'Built “%1$s” — %2$d sections, %3$ds.', 'qwerty-soft-signal' ),
-					(string) ( $result['title'] ?? $file ),
-					(int) ( $result['sections'] ?? 0 ),
-					(int) round( microtime( true ) - $started )
-				),
-				array( 'id' => (int) ( $result['id'] ?? 0 ) )
-			);
-
-			return rest_ensure_response( array_merge( $progress( $job ), array( 'result' => $result ) ) );
-		}
-
-		if ( 'chrome' === $key ) {
-			ImportLog::add( 'build', __( 'Building the menu, the header and the footer…', 'qwerty-soft-signal' ) );
-
-			$result = SiteAssembler::chrome( $job );
-
-			$job['completed']['chrome'] = true;
-			$job['done']                = 2 + count( $job['completed'] );
-
-			ImportSession::update_job( $job );
-
-			return rest_ensure_response( array_merge( $progress( $job ), array( 'result' => $result ) ) );
-		}
-
-		$report = SiteAssembler::finish( $job );
-
-		$job['completed']['finish'] = true;
-		$job['done']                = (int) $job['total'];
-
-		if ( is_wp_error( $report ) ) {
-			ImportSession::update_job( $job );
-			$report->add_data( array_merge( array( 'status' => 400 ), $progress( $job ) ) );
-
-			return $report;
+		if ( 'page' === $key && ! $this->validate_file( $file ) ) {
+			return new WP_Error( 'qwerty_soft_no_page', __( 'That page is not in this design.', 'qwerty-soft-signal' ), array( 'status' => 404 ) );
 		}
 
 		/*
-		 * The design has done its job. Unless asked to keep it for another
-		 * run, the unpacked copy goes — it is the largest thing an import
-		 * leaves in uploads and nothing on the site refers to it.
+		 * The step itself is the same one a cron tick runs — the claim, the
+		 * attempts, the log lines, the bookkeeping — so a request and a tick
+		 * cannot disagree about a build, and two requests cannot run the same
+		 * page side by side. What is left here is turning its outcome into a
+		 * reply the screen understands.
 		 */
-		$archive_removed = false;
+		$outcome = BuildStep::run( get_current_user_id(), $job, $key, $file );
 
-		if ( empty( $job['keep_archive'] ) ) {
-			$archive_removed = DesignArchive::remove( $root );
+		$progress = array(
+			'done'  => (int) ( $job['done'] ?? 0 ),
+			'total' => (int) ( $job['total'] ?? 0 ),
+		);
+
+		switch ( $outcome['state'] ) {
+			case BuildStep::FINISHED:
+				return new WP_Error(
+					'qwerty_soft_finished',
+					__( 'This build has already finished.', 'qwerty-soft-signal' ),
+					array_merge( array( 'status' => 409 ), $progress )
+				);
+
+			case BuildStep::STOPPED:
+				return new WP_Error(
+					'qwerty_soft_stopped',
+					__( 'This build was stopped. Continue it from the import screen, or start it again.', 'qwerty-soft-signal' ),
+					array_merge( array( 'status' => 409 ), $progress )
+				);
+
+			case BuildStep::GONE:
+				return new WP_Error(
+					'qwerty_soft_unknown_design',
+					__( 'The design this build was reading is no longer in uploads, so the build stopped.', 'qwerty-soft-signal' ),
+					array_merge( array( 'status' => 404 ), $progress )
+				);
+
+			case BuildStep::BUSY:
+				return new WP_Error(
+					'qwerty_soft_busy',
+					__( 'Another request is already building this step. Wait for it rather than starting the same page twice.', 'qwerty-soft-signal' ),
+					array_merge( array( 'status' => 409 ), $progress )
+				);
+
+			case BuildStep::RETRYING:
+				/*
+				 * Reported as an error on purpose: the screen's list of steps
+				 * ends with this one, and the pages put back are not on it.
+				 * The server carries them; the log the screen polls says so.
+				 */
+				return new WP_Error(
+					'qwerty_soft_retrying',
+					sprintf(
+						/* translators: %d: how many pages are being tried again. */
+						_n(
+							'Everything else is built; the %d page that was set aside is being tried again on the server.',
+							'Everything else is built; the %d pages that were set aside are being tried again on the server.',
+							count( $outcome['retry'] ),
+							'qwerty-soft-signal'
+						),
+						count( $outcome['retry'] )
+					),
+					array_merge( array( 'status' => 409 ), $progress, array( 'retry' => $outcome['retry'] ) )
+				);
+
+			case BuildStep::SET_ASIDE:
+				return rest_ensure_response(
+					array_merge(
+						$progress,
+						array(
+							'result'    => null,
+							'set_aside' => true,
+						)
+					)
+				);
+
+			case BuildStep::FAILED:
+			case BuildStep::UNFINISHED:
+				$error = $outcome['result'];
+				$error->add_data( array_merge( array( 'status' => 400 ), $progress ) );
+
+				return $error;
+
+			case BuildStep::ENDED:
+				return rest_ensure_response(
+					array_merge(
+						$progress,
+						array(
+							'result'          => $outcome['result'],
+							'archive_removed' => (bool) $outcome['archive_removed'],
+							'summary'         => $this->import_summary(),
+						)
+					)
+				);
 		}
 
-		ImportSession::end_job();
-
-		ImportLog::add(
-			'build',
-			sprintf(
-				/* translators: %d: number of pages. */
-				_n( 'The build is done: %d page is on the site.', 'The build is done: %d pages are on the site.', count( (array) ( $report['pages'] ?? array() ) ), 'qwerty-soft-signal' ),
-				count( (array) ( $report['pages'] ?? array() ) )
-			)
-		);
-
-		return rest_ensure_response(
-			array_merge(
-				$progress( $job ),
-				array(
-					'result'          => $report,
-					'archive_removed' => $archive_removed,
-					'summary'         => $this->import_summary(),
-				)
-			)
-		);
+		return rest_ensure_response( array_merge( $progress, array( 'result' => $outcome['result'] ) ) );
 	}
 
 	/**
@@ -2247,7 +2281,7 @@ final class Importer implements Module {
 				 * of it — a total for the whole archive would be three times
 				 * the truth.
 				 */
-				'pages'      => $this->priced( $index['pages'] ),
+				'pages'      => $this->priced( $this->counted( $dir, $index['pages'] ) ),
 				'languages'  => $index['languages'],
 				'images'     => $index['images'],
 				'components' => $index['components'],
@@ -2873,6 +2907,60 @@ final class Importer implements Module {
 	}
 
 	/**
+	 * The same page rows, each counting the sections a build would make.
+	 *
+	 * The index counts every `<section>`, `<article>`, `<header>` and so on in
+	 * a page, nested ones included — a quick regex, meant for sorting pages
+	 * and telling an app shell from a real one. A build does not wrap those:
+	 * it wraps what `SectionSplitter::split()` returns, which is the page's
+	 * top-level sections with the chrome taken out. The screen said "34
+	 * sections" of a page the build made eleven blocks from, so the estimate
+	 * and the plan were both wrong by a factor of three.
+	 *
+	 * Splitting is a DOM parse per page, so the answer is kept per design and
+	 * a page is read again only when its file changes.
+	 *
+	 * @param string                           $root  Design root.
+	 * @param array<int, array<string, mixed>> $pages Page rows from the index.
+	 * @return array<int, array<string, mixed>> The rows, with `sections` as the build would count them.
+	 */
+	private function counted( string $root, array $pages ): array {
+		$key    = 'qwerty_soft_sections_' . md5( $root . '|' . QSOFT_VERSION );
+		$cached = get_transient( $key );
+		$counts = is_array( $cached ) ? $cached : array();
+		$dirty  = false;
+
+		foreach ( $pages as $index => $page ) {
+			$file = (string) ( $page['file'] ?? '' );
+			$path = trailingslashit( $root ) . $file;
+
+			if ( '' === $file || ! is_file( $path ) ) {
+				continue;
+			}
+
+			$stamp = (int) filemtime( $path ) . ':' . (int) filesize( $path );
+
+			if ( ! isset( $counts[ $file ] ) || ( $counts[ $file ]['stamp'] ?? '' ) !== $stamp ) {
+				// The same call the build makes, so the two cannot disagree.
+				$counts[ $file ] = array(
+					'stamp' => $stamp,
+					'count' => count( (array) SectionSplitter::split( $path )['sections'] ),
+				);
+
+				$dirty = true;
+			}
+
+			$pages[ $index ]['sections'] = (int) $counts[ $file ]['count'];
+		}
+
+		if ( $dirty ) {
+			set_transient( $key, $counts, DAY_IN_SECONDS );
+		}
+
+		return $pages;
+	}
+
+	/**
 	 * The same page rows, each carrying what a guided pass over it would cost.
 	 *
 	 * @param array<int, array<string, mixed>> $pages Page rows from the index.
@@ -3016,6 +3104,33 @@ final class Importer implements Module {
 					_n( 'And %d more entry was skipped.', 'And %d more entries were skipped.', $qsoft_more, 'qwerty-soft-signal' ),
 					$qsoft_more
 				)
+			);
+		}
+
+		/*
+		 * Names that had to change on the way in — transliterated, or
+		 * shortened to fit the system. Said once, with an example, because a
+		 * picture the page names one way and the disk another is the kind of
+		 * thing that is otherwise found by a broken image and a shrug.
+		 */
+		$qsoft_renamed = is_array( $result['renamed'] ?? null ) ? $result['renamed'] : array();
+
+		if ( array() !== $qsoft_renamed ) {
+			ImportLog::add(
+				'unpack',
+				sprintf(
+					/* translators: 1: how many files, 2: one original name, 3: what it was written as. */
+					_n(
+						'%1$d file was written under a name this system can hold — %2$s became %3$s. Pages that name the original are followed to it.',
+						'%1$d files were written under names this system can hold — for example %2$s became %3$s. Pages that name the originals are followed to them.',
+						count( $qsoft_renamed ),
+						'qwerty-soft-signal'
+					),
+					count( $qsoft_renamed ),
+					(string) array_key_first( $qsoft_renamed ),
+					(string) reset( $qsoft_renamed )
+				),
+				array( 'renamed' => count( $qsoft_renamed ) )
 			);
 		}
 

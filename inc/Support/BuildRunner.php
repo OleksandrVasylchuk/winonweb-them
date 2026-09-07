@@ -87,14 +87,12 @@ final class BuildRunner {
 	/**
 	 * How many times one step may be started before it is given up on.
 	 *
-	 * A step is booked with cron before it runs, so a step that kills the
-	 * process still leaves a tick behind and gets another go. Without a
-	 * ceiling that is an endless loop; with one, a step that cannot survive
-	 * three attempts is reported and the build moves on to the next page.
+	 * The ceiling belongs to the step, which is shared with the browser-driven
+	 * build; it is named here because this class reports it.
 	 *
 	 * @var int
 	 */
-	private const MAX_ATTEMPTS = 3;
+	private const MAX_ATTEMPTS = BuildStep::MAX_ATTEMPTS;
 
 	/**
 	 * How long one tick keeps working before handing back to cron.
@@ -426,12 +424,16 @@ final class BuildRunner {
 	 * kept here, so a page that is still converting sections cannot be robbed
 	 * of its claim halfway through.
 	 *
+	 * Public because the claim is the same for a tick and for a request: the
+	 * browser-driven build takes it too, so two tabs — or one double-click —
+	 * cannot run the same page side by side.
+	 *
 	 * @param int                  $user Whose build it is.
 	 * @param string               $mark Step being claimed.
 	 * @param array<string, mixed> $job  Job record as this tick read it.
 	 * @return bool Whether this caller may do the work.
 	 */
-	private static function claim( int $user, string $mark, array $job ): bool {
+	public static function claim( int $user, string $mark, array $job ): bool {
 		$name = self::LOCK . '_' . $user;
 		$now  = time();
 
@@ -477,7 +479,7 @@ final class BuildRunner {
 	 * @param int $user Whose build it is.
 	 * @return void
 	 */
-	private static function release( int $user ): void {
+	public static function release( int $user ): void {
 		delete_option( self::LOCK . '_' . $user );
 	}
 
@@ -570,6 +572,11 @@ final class BuildRunner {
 	/**
 	 * One step of the build, with a user already in context.
 	 *
+	 * The step itself — the claim, the attempts, the log lines, the
+	 * bookkeeping — lives in BuildStep, shared with the browser-driven build.
+	 * What is left here is what only a tick decides: whose job it will touch,
+	 * which step is next, and what to do when somebody else already has it.
+	 *
 	 * @param int $user Whose build it is.
 	 * @return bool Whether there is more to do.
 	 */
@@ -580,30 +587,8 @@ final class BuildRunner {
 			return false;
 		}
 
-		if ( ! empty( $job['completed']['finish'] ) ) {
+		if ( ! empty( $job['completed']['finish'] ) || ! empty( $job['stopped'] ) ) {
 			return false;
-		}
-
-		/*
-		 * Read at the top of every step rather than only when a tick begins,
-		 * so a build stopped in the middle of a long page stops at the end of
-		 * that page instead of running to the end of its burst.
-		 */
-		if ( ! empty( $job['stopped'] ) ) {
-			return false;
-		}
-
-		$root = self::root_of( $job );
-
-		if ( '' === $root ) {
-			ImportLog::add( 'build', __( 'The design this build was reading is no longer in uploads, so the build stopped.', 'qwerty-soft-signal' ) );
-			ImportSession::end_job();
-
-			return false;
-		}
-
-		if ( function_exists( 'set_time_limit' ) ) {
-			set_time_limit( empty( $job['smart'] ) ? 120 : 1800 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- One step, bounded by the transport's own timeouts.
 		}
 
 		$next = self::next_step( $job );
@@ -612,42 +597,9 @@ final class BuildRunner {
 			return false;
 		}
 
-		// Before calling it finished: anything set aside earlier gets its second pass now.
-		if ( 'finish' === $next['key'] && self::retry_deferred( $job ) ) {
-			ImportSession::update_job( $job );
-			self::schedule( $user );
+		$outcome = BuildStep::run( $user, $job, (string) $next['key'], (string) $next['file'] );
 
-			return true;
-		}
-
-		/*
-		 * Booked before the work, not after.
-		 *
-		 * WP-Cron deletes an event when it fires and this used to ask for the
-		 * next one only once the step had returned. So any step that never
-		 * returned — a worker recycled, a model call the server cut off, a
-		 * process killed — left an empty queue and a build frozen at "2 of 7"
-		 * with nothing scheduled to move it. Every step is idempotent, a page
-		 * built twice updates rather than duplicates, so the safe order is:
-		 * book the retry, then do the work.
-		 */
-		$mark = ( 'page' === $next['key'] ? 'page:' . $next['file'] : (string) $next['key'] );
-
-		/*
-		 * Somebody else may already be on this step.
-		 *
-		 * This used to be a read of the job record — "is `working` this mark,
-		 * and has it beaten recently?" — and a read is not a claim. Two ticks
-		 * that both read before either wrote both passed it, and WP-Cron hands
-		 * out a second run of the same hook sixty seconds after the first when
-		 * the first has not returned. The result was three processes
-		 * converting one page through one model, three pages built over each
-		 * other, and a build that took three hours to produce duplicates.
-		 *
-		 * add_option() is an INSERT against a unique key: exactly one caller
-		 * can win it, whatever the timing. That is the claim.
-		 */
-		if ( ! self::claim( $user, $mark, $job ) ) {
+		if ( BuildStep::BUSY === $outcome['state'] ) {
 			/*
 			 * Losing the claim consumed a real cron event — the one the
 			 * working tick booked before its step, counting on it as the
@@ -662,180 +614,7 @@ final class BuildRunner {
 			return false;
 		}
 
-		try {
-			return self::perform( $user, $job, $next, $mark );
-		} finally {
-			// Whatever happened — a result, an error, a killed process mid-write.
-			self::release( $user );
-		}
-	}
-
-	/**
-	 * Do the work of one claimed step.
-	 *
-	 * Split out from step() only so the claim can be released on every way
-	 * out of it, including the ones that throw.
-	 *
-	 * @param int                           $user Whose build it is.
-	 * @param array<string, mixed>          $job  Job record.
-	 * @param array{key:string,file:string} $next Step to run.
-	 * @param string                        $mark Step mark.
-	 * @return bool Whether there is more to do.
-	 */
-	private static function perform( int $user, array $job, array $next, string $mark ): bool {
-		$root = self::root_of( $job );
-
-		$attempts          = is_array( $job['attempts'] ?? null ) ? $job['attempts'] : array();
-		$attempts[ $mark ] = (int) ( $attempts[ $mark ] ?? 0 ) + 1;
-		$job['attempts']   = $attempts;
-		$job['working']    = $mark;
-		$job['heartbeat']  = time();
-
-		/*
-		 * When this step was claimed, so a screen that was not here when it
-		 * started can still show a clock running on the right row. Without it
-		 * a tab rejoining an unattended build has a bar, a number, and no way
-		 * to tell a step that is working from one that is not.
-		 */
-		$job['started'] = time();
-
-		if ( $attempts[ $mark ] > self::MAX_ATTEMPTS ) {
-			/*
-			 * Set aside, not thrown away. Whatever stopped this step three
-			 * times may well have been the machine being busy rather than the
-			 * page being impossible, so the build carries on and comes back
-			 * to it once everything else is done — see next_step(). Only a
-			 * page that fails that second pass too is left out, and the build
-			 * says so rather than quietly producing a site with a hole in it.
-			 */
-			$again = empty( $job['retried'] );
-
-			ImportLog::add(
-				'build',
-				$again
-					? sprintf(
-						/* translators: 1: what was being built, 2: how many attempts. */
-						__( '%1$s stopped the build %2$d times. Moving on for now; it gets another go once the rest is done.', 'qwerty-soft-signal' ),
-						'' === $next['file'] ? $next['key'] : $next['file'],
-						self::MAX_ATTEMPTS
-					)
-					: sprintf(
-						/* translators: %s: what was being built. */
-						__( '%s could not be built on the second pass either, so the build finished without it.', 'qwerty-soft-signal' ),
-						'' === $next['file'] ? $next['key'] : $next['file']
-					)
-			);
-
-			$job['completed'][ $mark ] = true;
-			$job['done']               = 2 + count( $job['completed'] );
-
-			if ( $again ) {
-				$deferred        = is_array( $job['deferred'] ?? null ) ? $job['deferred'] : array();
-				$deferred[]      = $mark;
-				$job['deferred'] = array_values( array_unique( $deferred ) );
-			}
-
-			ImportSession::update_job( $job );
-			self::schedule( $user );
-
-			return true;
-		}
-
-		ImportSession::update_job( $job );
-		self::schedule( $user );
-
-		if ( 'page' === $next['key'] ) {
-			$file = (string) $next['file'];
-
-			ImportLog::add(
-				'build',
-				sprintf(
-					/* translators: 1: page file, 2: step, 3: steps in total. */
-					__( 'Building %1$s — step %2$d of %3$d…', 'qwerty-soft-signal' ),
-					$file,
-					(int) $job['done'] + 1,
-					(int) $job['total']
-				)
-			);
-
-			$started = microtime( true );
-			$result  = SiteAssembler::page( $job, $file );
-
-			$job['completed'][ 'page:' . $file ] = true;
-			$job['done']                         = 2 + count( $job['completed'] );
-
-			ImportSession::update_job( $job );
-
-			ImportLog::add(
-				'build',
-				is_wp_error( $result )
-					? sprintf(
-						/* translators: 1: page file, 2: the reason. */
-						__( '%1$s was not built: %2$s', 'qwerty-soft-signal' ),
-						$file,
-						$result->get_error_message()
-					)
-					: sprintf(
-						/* translators: 1: page title, 2: sections, 3: seconds. */
-						__( 'Built “%1$s” — %2$d sections, %3$ds.', 'qwerty-soft-signal' ),
-						(string) ( $result['title'] ?? $file ),
-						(int) ( $result['sections'] ?? 0 ),
-						(int) round( microtime( true ) - $started )
-					)
-			);
-
-			return true;
-		}
-
-		if ( 'chrome' === $next['key'] ) {
-			ImportLog::add( 'build', __( 'Building the menu, the header and the footer…', 'qwerty-soft-signal' ) );
-
-			SiteAssembler::chrome( $job );
-
-			$job['completed']['chrome'] = true;
-			$job['done']                = 2 + count( $job['completed'] );
-
-			ImportSession::update_job( $job );
-
-			return true;
-		}
-
-		$report = SiteAssembler::finish( $job );
-
-		$job['completed']['finish'] = true;
-		$job['done']                = (int) $job['total'];
-
-		ImportSession::update_job( $job );
-
-		if ( is_wp_error( $report ) ) {
-			ImportLog::add(
-				'build',
-				sprintf(
-					/* translators: %s: the reason. */
-					__( 'The build could not be finished: %s', 'qwerty-soft-signal' ),
-					$report->get_error_message()
-				)
-			);
-
-			return false;
-		}
-
-		if ( empty( $job['keep_archive'] ) ) {
-			DesignArchive::remove( $root );
-		}
-
-		ImportLog::add(
-			'build',
-			sprintf(
-				/* translators: %d: number of pages. */
-				_n( 'The build is done: %d page is on the site.', 'The build is done: %d pages are on the site.', count( (array) ( $report['pages'] ?? array() ) ), 'qwerty-soft-signal' ),
-				count( (array) ( $report['pages'] ?? array() ) )
-			)
-		);
-
-		ImportSession::end_job();
-
-		return false;
+		return $outcome['more'];
 	}
 
 	/**
@@ -899,65 +678,5 @@ final class BuildRunner {
 	 */
 	public static function last_sign_of_life( array $job ): int {
 		return max( (int) ( $job['heartbeat'] ?? 0 ), (int) ( $job['updated'] ?? 0 ) );
-	}
-
-	/**
-	 * Put the pages that were set aside back in the queue, once, at the end.
-	 *
-	 * A step is given up on after three goes so one bad page cannot hold a
-	 * build for ever. That is a safety valve, not a verdict: most of what
-	 * stops a step is the moment rather than the page — a machine busy with
-	 * the section before it, a model call the server cut off. So when
-	 * everything else is built, whatever was set aside is queued again with a
-	 * clean count, and this time the machine has nothing else to do.
-	 *
-	 * @param array<string, mixed> $job Job record, updated in place.
-	 * @return bool Whether anything was put back.
-	 */
-	private static function retry_deferred( array &$job ): bool {
-		$deferred = is_array( $job['deferred'] ?? null ) ? $job['deferred'] : array();
-
-		if ( array() === $deferred || ! empty( $job['retried'] ) ) {
-			return false;
-		}
-
-		$attempts = is_array( $job['attempts'] ?? null ) ? $job['attempts'] : array();
-
-		foreach ( $deferred as $mark ) {
-			unset( $job['completed'][ $mark ], $attempts[ $mark ] );
-		}
-
-		$job['attempts'] = $attempts;
-		$job['retried']  = true;
-		$job['deferred'] = array();
-		$job['done']     = 2 + count( $job['completed'] );
-
-		ImportLog::add(
-			'build',
-			sprintf(
-				/* translators: %d: how many pages are being tried again. */
-				_n(
-					'Everything else is built; trying the %d page that was set aside.',
-					'Everything else is built; trying the %d pages that were set aside.',
-					count( $deferred ),
-					'qwerty-soft-signal'
-				),
-				count( $deferred )
-			)
-		);
-
-		return true;
-	}
-
-	/**
-	 * Where the design this job is reading still is, or an empty string.
-	 *
-	 * @param array<string, mixed> $job Job record.
-	 * @return string
-	 */
-	private static function root_of( array $job ): string {
-		$root = (string) ( $job['root'] ?? '' );
-
-		return '' !== $root && is_dir( $root ) ? $root : '';
 	}
 }

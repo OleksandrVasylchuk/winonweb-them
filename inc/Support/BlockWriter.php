@@ -65,7 +65,21 @@ final class BlockWriter {
 	 *
 	 * @see mark_root()
 	 */
-	private const ROOT_CLASS = 'qs-design';
+	public const ROOT_CLASS = 'qs-design';
+
+	/**
+	 * The class the body of a site built from a design carries.
+	 *
+	 * The editor's canvas body carries `.editor-styles-wrapper` instead;
+	 * `BODY_SCOPE` matches either, and is what a design's own `body{…}` rule
+	 * is lifted onto so it can beat the theme's global styles.
+	 */
+	public const SITE_CLASS = 'qs-design-site';
+
+	/**
+	 * The selector a design's `body` rule is written against.
+	 */
+	public const BODY_SCOPE = 'body:is(.qs-design-site, .editor-styles-wrapper)';
 
 	/**
 	 * The ACF options page the site-wide fields live on.
@@ -99,8 +113,25 @@ final class BlockWriter {
 	 * stylesheet its page actually links (`style` and `viewScript` both), a
 	 * handoff carrying several sites gets a canonical file per source, and no
 	 * slice is written at all.
+	 *
+	 * 9: a text field keeps the inline markup the designer put inside it — a
+	 * highlighted span, a deliberate `<br>` — instead of flattening it to
+	 * words (the hero read "Program,Built" live). Every planted element
+	 * carries a `data-qs-field` mark and every repeated row a `data-qs-row`
+	 * one, which is what lets the editor offer the section for editing on
+	 * the canvas rather than only from the sidebar. A `<picture>` loses its
+	 * `<source>`s when its `<img>` becomes a field, so replacing the picture
+	 * replaces what is shown; a link built of elements keeps them and still
+	 * gets its words as a field; and the holder of a repeat keeps whatever it
+	 * held besides the rows.
+	 *
+	 * 10: a field group long enough to be a wall is divided the way the design
+	 * divides the section — the footer's three link columns become three tabs
+	 * named by the design's own headings — and a type's one explanatory
+	 * sentence is printed once per division rather than under all eleven of
+	 * its links.
 	 */
-	public const VERSION = 8;
+	public const VERSION = 10;
 
 	/**
 	 * Where a block's values are kept: with the block, or with the site.
@@ -213,6 +244,17 @@ final class BlockWriter {
 	 * @var string
 	 */
 	private static $type = '';
+
+	/**
+	 * What kind of section is being written: single, repeat or listing.
+	 *
+	 * A listing's rows are records, edited where records are edited, so the
+	 * row markup gets no canvas marks; a repeat's rows are the block's own
+	 * and do.
+	 *
+	 * @var string
+	 */
+	private static $kind = 'single';
 
 	/**
 	 * One token, in the marker this section is using.
@@ -770,24 +812,83 @@ final class BlockWriter {
 			$js     = trim( (string) ( $source['js'] ?? '' ) );
 
 			if ( '' !== $css ) {
-				$sheet = $css . "\n\n"
+				/*
+				 * First, so the design's own rules below win every tie.
+				 *
+				 * theme.json's `elements` set colour, size, weight, spacing
+				 * and decoration on headings, links and buttons for the whole
+				 * site, at the specificity of a bare tag, and load after the
+				 * design's stylesheet. Where the design states its own value,
+				 * `DesignStylesheet::scoped()` has already lifted its rule one
+				 * class above the theme's. Where it states nothing and leans on
+				 * the browser's defaults — an `h1` at 2em, a link underlined —
+				 * the theme's value would leak in; `revert` sends each of those
+				 * back to the browser, which is what the design's own page had.
+				 */
+				$reset = ':is(h1, h2, h3, h4, h5, h6)';
+
+				// An @import the compiler could only hoist has to stay first, even ahead of the resets.
+				$imports = '';
+
+				if ( preg_match( '/^(?:\s*@import\b[^;]*;\s*)+/i', $css, $lead ) ) {
+					$imports = trim( $lead[0] ) . "\n\n";
+					$css     = (string) substr( $css, strlen( $lead[0] ) );
+				}
+
+				$sheet = $imports
 					. "/*\n"
-					. " * The theme sets `h1,h2,h3,h4,h5,h6{color:var(--wp--preset--color--contrast)}`\n"
-					. " * globally (theme.json's `elements.heading`) and loads it after this\n"
-					. " * stylesheet, so a heading above that leans on inheritance for its\n"
-					. " * colour instead of stating one loses the cascade to the theme's rule.\n"
-					. " * One class more specific than the theme's bare tag selector settles\n"
-					. " * it in the section's favour, on `render.php`'s own root — see\n"
-					. " * `BlockWriter::mark_root()`.\n"
+					. " * Resets, before the design's own rules, so the theme's element styles\n"
+					. " * (theme.json `elements.heading`, `elements.link`, `elements.button`,\n"
+					. " * `styles.typography` on body, and the `:where()` rules in `styles.css`)\n"
+					. " * do not reach inside a wrapped section. See BlockWriter::write_canonical().\n"
 					. " */\n"
-					. '.' . self::ROOT_CLASS . " h1,\n"
-					. '.' . self::ROOT_CLASS . " h2,\n"
-					. '.' . self::ROOT_CLASS . " h3,\n"
-					. '.' . self::ROOT_CLASS . " h4,\n"
-					. '.' . self::ROOT_CLASS . " h5,\n"
-					. '.' . self::ROOT_CLASS . " h6 {\n"
+					. self::BODY_SCOPE . " {\n"
+					. "\tfont: revert;\n"
+					. "\tletter-spacing: revert;\n"
+					. "\ttext-transform: revert;\n"
+					. "\tcolor: revert;\n"
+					. "\tbackground: revert;\n"
+					. "}\n"
+					. '.' . self::ROOT_CLASS . ' ' . $reset . ",\n"
+					. '.' . self::ROOT_CLASS . $reset . " {\n"
 					. "\tcolor: inherit;\n"
-					. "}\n";
+					. "\tfont-size: revert;\n"
+					. "\tfont-weight: revert;\n"
+					. "\tline-height: revert;\n"
+					. "\tletter-spacing: revert;\n"
+					. "\ttext-transform: revert;\n"
+					. "\ttext-wrap: revert;\n"
+					. "\tmargin: revert;\n"
+					. "}\n"
+					. '.' . self::ROOT_CLASS . " :is(p, li) {\n"
+					. "\ttext-wrap: revert;\n"
+					. "}\n"
+					. "/* The theme's block gap: 12px between every pair of blocks, which a design's sections never had. */\n"
+					. ':is(.' . self::SITE_CLASS . ', .editor-styles-wrapper) :is(.wp-site-blocks, .is-layout-flow, .is-layout-constrained) > :is(.' . self::ROOT_CLASS . ', :has(.' . self::ROOT_CLASS . ")) {\n"
+					. "\tmargin-block-start: 0;\n"
+					. "\tmargin-block-end: 0;\n"
+					. "}\n"
+					. '.' . self::ROOT_CLASS . " :is(img, svg, video, canvas) {\n"
+					. "\tmax-width: revert;\n"
+					. "\theight: revert;\n"
+					. "}\n"
+					. '.' . self::ROOT_CLASS . " a,\n"
+					. '.' . self::ROOT_CLASS . " a:hover,\n"
+					. '.' . self::ROOT_CLASS . " a:focus {\n"
+					. "\tcolor: revert;\n"
+					. "\ttext-decoration: revert;\n"
+					. "}\n"
+					. '.' . self::ROOT_CLASS . " :is(button, input, select, textarea) {\n"
+					. "\tfont: revert;\n"
+					. "\tcolor: revert;\n"
+					. "\tbackground: revert;\n"
+					. "\tborder: revert;\n"
+					. "\tborder-radius: revert;\n"
+					. "\tpadding: revert;\n"
+					. "\tmin-height: revert;\n"
+					. "\twidth: revert;\n"
+					. "}\n\n"
+					. $css . "\n";
 
 				$name = '_canonical' . $suffix . '.css';
 
@@ -851,19 +952,53 @@ final class BlockWriter {
 		}
 
 		$fields = self::disambiguate_labels( $fields );
-		$fields = self::side_by_side( $fields );
+		$fields = self::tabbed( $slug, $fields, (array) ( $plan['fields'] ?? array() ), $says, $html );
+
+		/*
+		 * Three fields to a row is right on the Site content screen, which is
+		 * the width of the page. It is wrong in the block sidebar, which is
+		 * about 280 pixels: a third of that is 90, and "Approve
+		 * privileged-access remediation plan" was being typed into it.
+		 */
+		if ( 'option' === self::$scope ) {
+			$fields = self::side_by_side( $fields );
+		}
 
 		$item = $plan['item'] ?? null;
 
 		if ( is_array( $item ) && 'listing' !== ( $plan['kind'] ?? 'single' ) ) {
 			$rows = array();
 
+			/*
+			 * The repeat gets a division of its own once the section has any.
+			 * Left to fall after the last tab it would join whichever part of
+			 * the design happened to come last, and a repeat is not part of
+			 * that part — it is the list.
+			 */
+			if ( self::divided( $fields ) ) {
+				$fields[] = self::divider( $slug, 'tab_items', __( 'Items', 'qwerty-soft-signal' ), false );
+			}
+
 			foreach ( (array) ( $item['fields'] ?? array() ) as $field ) {
 				$rows[] = self::acf_field( $slug . '_row', (array) $field, $rows_say, true );
 			}
 
 			$rows = self::disambiguate_labels( $rows );
-			$rows = self::side_by_side( $rows );
+
+			if ( 'option' === self::$scope ) {
+				$rows = self::side_by_side( $rows );
+			}
+
+			/*
+			 * ACF draws a row's fields once per row, so an explanation on one
+			 * of them is printed as many times as there are rows — seven
+			 * copies of "Choose a page, or paste a web address" down a
+			 * seven-item navigation. Where the row is a single field the
+			 * repeat's own instruction already covers it and the label says
+			 * the rest; a row of several keeps them, because there the
+			 * sentence is telling one field from another.
+			 */
+			$rows = count( $rows ) > 1 ? self::instructions_once( $rows ) : self::unexplained( $rows );
 
 			$fields[] = array(
 				'key'          => 'field_qs_' . str_replace( '-', '_', $slug ) . '_items',
@@ -953,12 +1088,22 @@ final class BlockWriter {
 				),
 			);
 
+		/*
+		 * Which box comes first when two field groups share a screen.
+		 *
+		 * Only the chrome does: the header's group and the footer's are both
+		 * on the Site content page, and with both at ACF's default the footer
+		 * came out on top — the site read bottom-up, and the first thing an
+		 * editor met was its own small print. A section's group is alone on
+		 * the block it belongs to and stays where it is.
+		 */
 		$group = array(
-			'key'      => $key,
-			'title'    => '' !== trim( $title ) ? $title : $slug,
-			'fields'   => $fields,
-			'location' => $location,
-			'active'   => true,
+			'key'        => $key,
+			'title'      => '' !== trim( $title ) ? $title : $slug,
+			'fields'     => self::instructions_once( $fields ),
+			'location'   => $location,
+			'menu_order' => str_starts_with( $slug, 'site-footer-' ) ? 1 : 0,
+			'active'     => true,
 		);
 
 		return (string) wp_json_encode( $group, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . "\n";
@@ -1006,6 +1151,25 @@ final class BlockWriter {
 			$acf['rows'] = 3;
 		}
 
+		/*
+		 * Words that carry their own markup get a box tall enough to see it
+		 * in, and a note saying which tags are kept — the rest is stripped on
+		 * the way out, which the person typing a `<script>` into it should
+		 * know before they wonder where it went.
+		 *
+		 * Rich as the design left it, though, not as the plan hoped: a line
+		 * planned to keep its markup whose words turn out to have none — a
+		 * copyright line, rendered as words so the year can be written into it
+		 * — is an ordinary field, and promising an editor it keeps `<strong>`
+		 * when the page will escape it is worse than saying nothing.
+		 */
+		$rich = ! empty( $field['rich'] ) && is_string( $says[ $name ] ?? null ) && str_contains( (string) $says[ $name ], '<' );
+
+		if ( $rich && in_array( $type, array( 'text', 'textarea' ), true ) ) {
+			$acf['type'] = 'textarea';
+			$acf['rows'] = 'text' === $type ? 2 : 3;
+		}
+
 		if ( 'image' === $type ) {
 			$acf['type']          = 'image';
 			$acf['return_format'] = 'array';
@@ -1033,6 +1197,10 @@ final class BlockWriter {
 		 * field usable by someone who never saw the original.
 		 */
 		$acf['instructions'] = self::field_instructions( $acf['type'] );
+
+		if ( $rich && in_array( $type, array( 'text', 'textarea' ), true ) ) {
+			$acf['instructions'] = __( 'Text with the design\'s own formatting. Keeps <br>, <strong>, <em> and <span class="…">; any other tag is removed.', 'qwerty-soft-signal' );
+		}
 
 		return $acf;
 	}
@@ -1225,6 +1393,13 @@ final class BlockWriter {
 			$type = (string) ( $fields[ $index ]['type'] ?? '' );
 			$run  = 1;
 
+			// A run of three ends where the design's own division does.
+			if ( self::is_divider( (array) $fields[ $index ] ) ) {
+				++$index;
+
+				continue;
+			}
+
 			while ( $index + $run < $count && (string) ( $fields[ $index + $run ]['type'] ?? '' ) === $type ) {
 				++$run;
 			}
@@ -1252,6 +1427,516 @@ final class BlockWriter {
 		}
 
 		return $fields;
+	}
+
+	/**
+	 * How many fields a group holds before dividing it is worth the tabs.
+	 *
+	 * Under this a person reads the whole group at a glance, and a row of tabs
+	 * is one more thing between them and the field they came for.
+	 *
+	 * @var int
+	 */
+	private const TAB_MIN = 10;
+
+	/**
+	 * The most fields one division holds before the divider looks deeper.
+	 *
+	 * @var int
+	 */
+	private const TAB_MAX = 6;
+
+	/**
+	 * The most divisions worth making. A wall of tabs is the wall again.
+	 *
+	 * @var int
+	 */
+	private const TAB_LIMIT = 8;
+
+	/**
+	 * How far into the markup the divider will look for a division.
+	 *
+	 * @var int
+	 */
+	private const TAB_DEPTH = 10;
+
+	/**
+	 * Divide a long field group the way the design divides the section.
+	 *
+	 * A footer of nineteen fields is a wall: "Link — Ongoing assurance" says
+	 * what the link is and nothing about which of three columns it stands in,
+	 * so an editor changing one address reads eleven labels to find it. The
+	 * design already answers that — its three columns are three elements — and
+	 * every field carries the address SectionPlan recorded, so the division is
+	 * the markup's own rather than one invented here.
+	 *
+	 * The tab is named for what the design calls that part: the holder's class
+	 * where it reads as a name (`.footer-brand` is "Footer brand"), else the
+	 * words in it (a column headed "AI Security" is the AI Security tab), else
+	 * the first field's label. Nothing is called "Group 2".
+	 *
+	 * @param string                           $slug   Block slug, for the keys.
+	 * @param array<int, array<string, mixed>> $fields The ACF fields, in order.
+	 * @param array<int, array<string, mixed>> $plan   The same fields as SectionPlan found them.
+	 * @param array<string, mixed>             $says   What the design said, by field name.
+	 * @param string                           $html   The section's markup.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function tabbed( string $slug, array $fields, array $plan, array $says, string $html ): array {
+		$fields = array_values( $fields );
+		$plan   = array_values( $plan );
+
+		if ( count( $fields ) < self::TAB_MIN || count( $fields ) !== count( $plan ) ) {
+			return $fields;
+		}
+
+		$paths = array();
+
+		foreach ( $plan as $index => $field ) {
+			$path = (string) ( $field['path'] ?? '' );
+
+			/*
+			 * A plan without addresses cannot be divided by them. That is the
+			 * repaired-by-hand case rather than a generated one, and leaving
+			 * the group flat is the honest answer to it.
+			 */
+			if ( '' === $path ) {
+				return $fields;
+			}
+
+			$paths[ $index ] = $path;
+		}
+
+		$buckets = self::split_by_path( $paths, array_keys( $paths ), 0 );
+
+		if ( count( $buckets ) < 2 || count( $buckets ) > self::TAB_LIMIT ) {
+			return $fields;
+		}
+
+		$body    = self::body_of( $html );
+		$holders = array();
+
+		foreach ( $buckets as $at => $bucket ) {
+			$holders[ $at ] = self::holder_name( $bucket, $paths, $body );
+		}
+
+		/*
+		 * A class that names every one of them names none of them. Three cards
+		 * all held by a `.task` are three tabs called "Task", and what tells
+		 * them apart is what each one says rather than what they are all built
+		 * from — so a repeated holder is dropped in favour of the words.
+		 */
+		$times = array_count_values( array_filter( $holders ) );
+		$out   = array();
+		$taken = array();
+
+		foreach ( $buckets as $at => $bucket ) {
+			$holder = (string) $holders[ $at ];
+			$label  = '' !== $holder && 1 === ( $times[ $holder ] ?? 0 )
+				? $holder
+				: self::tab_words( $bucket, $fields, $plan, $says );
+
+			/*
+			 * Two columns of a design can be headed the same word. A tab is
+			 * what a person navigates by, so two of them reading alike is
+			 * worse here than in a label — the second says which one it is.
+			 */
+			$taken[ $label ] = ( $taken[ $label ] ?? 0 ) + 1;
+
+			if ( $taken[ $label ] > 1 ) {
+				$label .= ' ' . $taken[ $label ];
+			}
+
+			$out[] = self::divider( $slug, 'tab_' . ( (int) $at + 1 ), $label, 0 === (int) $at );
+
+			foreach ( $bucket as $index ) {
+				$out[] = $fields[ $index ];
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * The fewest fields a division holds before it stops being one.
+	 *
+	 * A tab holding a single field is not a part of a page, it is that field
+	 * behind a click — and a section divided into seven of them reads worse
+	 * than the list it replaced. Where the markup cannot offer parts of at
+	 * least two, it is offering the layout's structure rather than the page's,
+	 * and the group stays flat.
+	 *
+	 * @var int
+	 */
+	private const TAB_LEAST = 2;
+
+	/**
+	 * Where the markup itself divides a list of fields.
+	 *
+	 * Descends the addresses a step at a time. A level every field passes
+	 * through together is not a division and is stepped over; the first level
+	 * that branches is one, and a branch still holding more fields than a tab
+	 * should is divided again inside itself.
+	 *
+	 * A branch that is refused — too many parts, or a part of one field — ends
+	 * the search rather than sending it deeper. Past a real branch the
+	 * addresses no longer line up: the next step of a field under one holder
+	 * and of a field under another are both "the first child", and dividing by
+	 * it would sort fields from different parts of the page into one tab.
+	 *
+	 * @param array<int, string> $paths   Address by field index.
+	 * @param array<int, int>    $indices The field indices to divide.
+	 * @param int                $depth   How many steps in to look.
+	 * @return array<int, array<int, int>> Field indices, grouped, in source order.
+	 */
+	private static function split_by_path( array $paths, array $indices, int $depth ): array {
+		if ( $depth > self::TAB_DEPTH || count( $indices ) < self::TAB_LEAST * 2 ) {
+			return array( $indices );
+		}
+
+		$buckets = array();
+
+		foreach ( $indices as $index ) {
+			$steps = explode( '/', (string) ( $paths[ $index ] ?? '' ) );
+
+			/*
+			 * A field that is the holder of the others — a link whose own
+			 * words are a field too — has no step at this depth. Dividing here
+			 * would put the parent in one tab and its children in the next, so
+			 * this level is not a division.
+			 */
+			if ( ! isset( $steps[ $depth ] ) ) {
+				return array( $indices );
+			}
+
+			$buckets[ $steps[ $depth ] ][] = $index;
+		}
+
+		if ( count( $buckets ) < 2 ) {
+			return self::split_by_path( $paths, $indices, $depth + 1 );
+		}
+
+		if ( count( $buckets ) > self::TAB_LIMIT ) {
+			return array( $indices );
+		}
+
+		foreach ( $buckets as $bucket ) {
+			if ( count( $bucket ) < self::TAB_LEAST ) {
+				return array( $indices );
+			}
+		}
+
+		$out = array();
+
+		foreach ( $buckets as $bucket ) {
+			if ( count( $bucket ) > self::TAB_MAX ) {
+				foreach ( self::split_by_path( $paths, $bucket, $depth + 1 ) as $deeper ) {
+					$out[] = $deeper;
+				}
+
+				continue;
+			}
+
+			$out[] = $bucket;
+		}
+
+		return $out;
+	}
+
+	/**
+	 * What one division of a field group calls itself, in the design's words.
+	 *
+	 * @param array<int, int>                  $bucket Field indices in this division.
+	 * @param array<int, array<string, mixed>> $fields The ACF fields.
+	 * @param array<int, array<string, mixed>> $plan   The same fields as SectionPlan found them.
+	 * @param array<string, mixed>             $says   What the design said, by field name.
+	 * @return string
+	 */
+	private static function tab_words( array $bucket, array $fields, array $plan, array $says ): string {
+		/*
+		 * The words the column is headed with. A design writes them for a
+		 * reader, which is what a tab wants; the length test is what keeps a
+		 * paragraph from becoming one.
+		 */
+		foreach ( $bucket as $index ) {
+			$field = (array) ( $plan[ $index ] ?? array() );
+			$words = $says[ (string) ( $field['name'] ?? '' ) ] ?? null;
+
+			if ( 'text' !== (string) ( $field['type'] ?? '' ) || ! is_string( $words ) ) {
+				continue;
+			}
+
+			$words = trim( (string) wp_strip_all_tags( $words ) );
+
+			if ( '' !== $words && mb_strlen( $words ) <= 40 ) {
+				return $words;
+			}
+		}
+
+		$label = (string) ( $fields[ $bucket[0] ]['label'] ?? '' );
+
+		// Without the hint disambiguate_labels() added: a tab is not that long.
+		$label = trim( (string) preg_replace( '/\s+—.*$/u', '', $label ) );
+
+		return '' === $label ? __( 'More', 'qwerty-soft-signal' ) : $label;
+	}
+
+	/**
+	 * The design's own name for the element a division of fields sits in.
+	 *
+	 * @param array<int, int>    $bucket Field indices in this division.
+	 * @param array<int, string> $paths  Address by field index.
+	 * @param DOMNode|null       $body   The section, parsed, or null.
+	 * @return string Empty when the markup offers no name.
+	 */
+	private static function holder_name( array $bucket, array $paths, ?DOMNode $body ): string {
+		/*
+		 * One field is not a part of the page with a name of its own — its
+		 * address resolves to itself, and the tab would be named after the
+		 * field standing in it. Its own label says more.
+		 */
+		if ( ! $body instanceof DOMNode || count( $bucket ) < 2 ) {
+			return '';
+		}
+
+		$common = null;
+
+		foreach ( $bucket as $index ) {
+			$steps = explode( '/', (string) ( $paths[ $index ] ?? '' ) );
+
+			if ( null === $common ) {
+				$common = $steps;
+
+				continue;
+			}
+
+			$keep = array();
+
+			foreach ( $common as $at => $step ) {
+				if ( ( $steps[ $at ] ?? null ) !== $step ) {
+					break;
+				}
+
+				$keep[] = $step;
+			}
+
+			$common = $keep;
+		}
+
+		if ( null === $common || array() === $common ) {
+			return '';
+		}
+
+		$node = SectionPlan::at( $body, implode( '/', $common ) );
+
+		if ( ! $node instanceof DOMElement ) {
+			return '';
+		}
+
+		foreach ( explode( ' ', (string) $node->getAttribute( 'class' ) ) as $token ) {
+			$name = self::readable_class( $token );
+
+			if ( '' !== $name ) {
+				return $name;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * A class an editor could read as the name of a part of the page.
+	 *
+	 * The design's own class is the best name a divider can carry — a
+	 * `.footer-brand` is "Footer brand" and needs nothing invented. But half of
+	 * them belong to the grid rather than to the page, and "Col 4" names
+	 * nothing: a class with a digit in it, or built from one of the words a
+	 * layout is made of, is refused, so the words inside the column can be
+	 * used instead.
+	 *
+	 * @param string $token One token of a class attribute.
+	 * @return string The name, or empty.
+	 */
+	private static function readable_class( string $token ): string {
+		$token = trim( $token );
+
+		if ( '' === $token || 1 === preg_match( '/\d/', $token ) ) {
+			return '';
+		}
+
+		$words = strtolower( trim( (string) preg_replace( '/[^A-Za-z]+/', ' ', $token ) ) );
+
+		if ( mb_strlen( $words ) < 4 ) {
+			return '';
+		}
+
+		$layout = array( 'col', 'cols', 'column', 'columns', 'row', 'rows', 'item', 'items', 'cell', 'inner', 'outer', 'wrap', 'wrapper', 'box', 'grid', 'flex', 'container', 'content', 'block', 'group', 'left', 'right', 'main', 'side', 'part', 'top', 'bottom', 'first', 'last' );
+
+		foreach ( explode( ' ', $words ) as $word ) {
+			if ( in_array( $word, $layout, true ) ) {
+				return '';
+			}
+		}
+
+		return ucfirst( $words );
+	}
+
+	/**
+	 * Say a field type's sentence once, not under every field that shares it.
+	 *
+	 * The footer has eleven links, and eleven copies of "Choose a page, or
+	 * paste a web address, and the text shown for it" is not eleven times the
+	 * help. It is a screen twice as long as it needs to be, with the eleven
+	 * labels that do differ held apart by the sentence that does not. The
+	 * first field of a kind keeps the explanation and the rest are read from
+	 * it; a divider starts the counting again, because a tab is a screen of
+	 * its own and the sentence may not have been seen on it.
+	 *
+	 * @param array<int, array<string, mixed>> $fields The ACF fields, in order.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function instructions_once( array $fields ): array {
+		$said = array();
+
+		foreach ( $fields as $index => $field ) {
+			if ( self::is_divider( (array) $field ) ) {
+				$said = array();
+
+				continue;
+			}
+
+			$says = (string) ( $field['instructions'] ?? '' );
+
+			if ( '' === $says ) {
+				continue;
+			}
+
+			if ( isset( $said[ $says ] ) ) {
+				$fields[ $index ]['instructions'] = '';
+
+				continue;
+			}
+
+			$said[ $says ] = true;
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * The longest a divider's name may be before it stops fitting.
+	 *
+	 * A tab strip is read sideways and a design's own heading can be a
+	 * sentence. The words are still under the divider, in the field they came
+	 * from; this is only what is written on the handle.
+	 *
+	 * @var int
+	 */
+	private const TAB_LABEL = 28;
+
+	/**
+	 * One divider, in the shape the screen it is drawn on wants.
+	 *
+	 * A tab strip suits the Site content screen, which is as wide as the page.
+	 * The block sidebar is a column about 280 pixels across, where five tabs
+	 * wrap into a stack of stubs and none of them can be read; an accordion is
+	 * the same division drawn down the page instead of across it, and it lets
+	 * two parts be open at once.
+	 *
+	 * @param string $slug  Block slug, for the key.
+	 * @param string $name  What makes this divider's key unique.
+	 * @param string $label What is written on it.
+	 * @param bool   $first Whether it is the first of the group.
+	 * @return array<string, mixed>
+	 */
+	private static function divider( string $slug, string $name, string $label, bool $first ): array {
+		if ( mb_strlen( $label ) > self::TAB_LABEL ) {
+			$label = rtrim( mb_substr( $label, 0, self::TAB_LABEL - 1 ) ) . '…';
+		}
+
+		$divider = array(
+			'key'   => 'field_qs_' . str_replace( '-', '_', $slug ) . '_' . $name,
+			'label' => $label,
+			'name'  => '',
+			'type'  => 'option' === self::$scope ? 'tab' : 'accordion',
+		);
+
+		if ( 'tab' === $divider['type'] ) {
+			$divider['placement'] = 'top';
+
+			return $divider;
+		}
+
+		/*
+		 * Open on the first, so a block selected in the editor shows its words
+		 * rather than a stack of closed headings; and more than one at a time,
+		 * because comparing two parts is most of what editing a section is.
+		 */
+		$divider['open']         = $first ? 1 : 0;
+		$divider['multi_expand'] = 1;
+		$divider['endpoint']     = 0;
+
+		return $divider;
+	}
+
+	/**
+	 * Whether a field is one of the dividers {@see self::divider()} writes.
+	 *
+	 * @param array<string, mixed> $field One ACF field.
+	 * @return bool
+	 */
+	private static function is_divider( array $field ): bool {
+		return in_array( (string) ( $field['type'] ?? '' ), array( 'tab', 'accordion' ), true );
+	}
+
+	/**
+	 * Whether a field group already carries dividers.
+	 *
+	 * @param array<int, array<string, mixed>> $fields The ACF fields.
+	 * @return bool
+	 */
+	private static function divided( array $fields ): bool {
+		foreach ( $fields as $field ) {
+			if ( self::is_divider( (array) $field ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Take the explanation off every field in a list.
+	 *
+	 * @param array<int, array<string, mixed>> $fields The ACF fields.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function unexplained( array $fields ): array {
+		foreach ( $fields as $index => $field ) {
+			if ( isset( $field['instructions'] ) ) {
+				$fields[ $index ]['instructions'] = '';
+			}
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * The body of a fragment, parsed.
+	 *
+	 * @param string $html Markup.
+	 * @return DOMNode|null
+	 */
+	private static function body_of( string $html ) {
+		$dom = self::parse( $html );
+
+		if ( null === $dom ) {
+			return null;
+		}
+
+		$body = ( new DOMXPath( $dom ) )->query( '//body' )->item( 0 );
+
+		return $body instanceof DOMNode ? $body : null;
 	}
 
 	/**
@@ -1487,9 +2172,11 @@ final class BlockWriter {
 		$item = $plan['item'] ?? null;
 		$kind = (string) ( $plan['kind'] ?? 'single' );
 
+		self::$kind = $kind;
+
 		// The rows the design drew are one row repeated; keep the first, drop the rest.
 		if ( is_array( $item ) && isset( $item['parent'], $item['path'] ) ) {
-			self::keep_first_row( $body, (string) $item['parent'] );
+			self::keep_first_row( $body, (string) $item['parent'], (string) ( $item['selector'] ?? '' ) );
 		}
 
 		foreach ( (array) ( $plan['fields'] ?? array() ) as $field ) {
@@ -1708,6 +2395,17 @@ final class BlockWriter {
 		$type = (string) ( $field['type'] ?? 'text' );
 
 		/*
+		 * A value that lives in an attribute — a card's `data-no`, drawn by
+		 * the stylesheet — is written back into that attribute, and the
+		 * element is otherwise left alone.
+		 */
+		if ( ! empty( $field['attr'] ) ) {
+			$node->setAttribute( (string) $field['attr'], self::token( ( '' !== $scope ? $scope . '.' : '' ) . 'attr.' . $name ) );
+
+			return;
+		}
+
+		/*
 		 * A copyright line is the one piece of copy that must not be frozen.
 		 * The design says "© 2026" as literal text; wrapped verbatim, every
 		 * site built from this archive is wrong from the next New Year and
@@ -1718,11 +2416,65 @@ final class BlockWriter {
 			$type = 'dated';
 		}
 
+		/*
+		 * Words with the designer's own markup still in them. The field type
+		 * stays what it was for ACF; only the reading changes, from escaping
+		 * the string to allowing the inline tags through.
+		 */
+		if ( in_array( $type, array( 'text', 'textarea' ), true ) && ! empty( $field['rich'] ) ) {
+			$type = 'rich';
+		}
+
 		$token = self::token( ( '' !== $scope ? $scope . '.' : '' ) . $type . '.' . $name );
+
+		/*
+		 * Where this field is on the canvas. The editor reads the marks to
+		 * offer the element itself for editing — click the heading, type —
+		 * and the front end strips them; see DesignField::unmarked().
+		 *
+		 * A listing's rows are records and their fields are not marked: what
+		 * the card shows is edited on the record, not on the page.
+		 */
+		if ( 'row' !== $scope || 'listing' !== self::$kind ) {
+			$node->setAttribute( 'data-qs-field', $name );
+			$node->setAttribute( 'data-qs-type', $type );
+		}
 
 		if ( 'image' === $type ) {
 			$node->setAttribute( 'src', $token );
 			$node->setAttribute( 'alt', self::token( ( '' !== $scope ? $scope . '.' : '' ) . 'alt.' . $name ) );
+
+			/*
+			 * A `<picture>` shows its `<source>` before its `<img>`, so with
+			 * the sources left in place a replaced picture changed the `src`
+			 * and the browser went on drawing the archive's own file. With
+			 * the image a field, the sources go: the field is the picture.
+			 */
+			$picture = null;
+
+			for ( $up = $node->parentNode; $up instanceof DOMElement; $up = $up->parentNode ) {
+				if ( 'picture' === strtolower( $up->tagName ) ) {
+					$picture = $up;
+
+					break;
+				}
+			}
+
+			if ( $picture instanceof DOMElement ) {
+				/*
+				 * libxml parses HTML 4, to which `<source>` is not a void
+				 * element, so the `<img>` arrives nested inside the last
+				 * `<source>` rather than beside it. It is lifted out first, or
+				 * removing the sources would remove the picture with them.
+				 */
+				$picture->appendChild( $node );
+
+				foreach ( iterator_to_array( $picture->getElementsByTagName( 'source' ) ) as $source ) {
+					if ( $source->parentNode instanceof DOMNode ) {
+						$source->parentNode->removeChild( $source );
+					}
+				}
+			}
 
 			return;
 		}
@@ -1740,12 +2492,46 @@ final class BlockWriter {
 			 * field took both away — the stylesheet still had rules for them
 			 * and nothing left to apply them to. The address stays editable;
 			 * the structure stays the designer's.
+			 *
+			 * The words it has of its own stay editable too. A button that is
+			 * "Discuss an assessment" followed by an arrow icon used to keep
+			 * its words frozen in the template while its field carried a
+			 * title nothing read; now the field's title goes where the words
+			 * were, and the icon stays where it was.
 			 */
+			$built = false;
+			$words = '' !== trim( self::own_words( $node ) );
+
 			foreach ( $node->childNodes as $child ) {
-				if ( $child instanceof DOMElement ) {
-					return;
+				if ( ! $child instanceof DOMElement ) {
+					continue;
+				}
+
+				$built = true;
+
+				// A child that says something is part of the words; the structure keeps them all.
+				if ( '' !== trim( $child->textContent ) ) {
+					$words = false;
 				}
 			}
+
+			if ( $built ) {
+				if ( $words ) {
+					self::plant_in_text( $node, $token );
+				}
+
+				return;
+			}
+		}
+
+		/*
+		 * Words beside decoration — an icon, a picture — keep the decoration
+		 * where it was and take the field where the words were.
+		 */
+		if ( ! empty( $field['words'] ) ) {
+			self::plant_in_text( $node, $token );
+
+			return;
 		}
 
 		/*
@@ -1759,6 +2545,69 @@ final class BlockWriter {
 		}
 
 		$node->appendChild( $node->ownerDocument->createTextNode( $token ) );
+	}
+
+	/**
+	 * The text an element holds directly, ignoring what its children say.
+	 *
+	 * @param DOMElement $node Element.
+	 * @return string
+	 */
+	private static function own_words( DOMElement $node ): string {
+		$text = '';
+
+		foreach ( $node->childNodes as $child ) {
+			if ( XML_TEXT_NODE === $child->nodeType ) {
+				$text .= (string) $child->nodeValue;
+			}
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Put a token where an element's own words are, leaving its children alone.
+	 *
+	 * The longest run of text the element holds directly is taken to be its
+	 * words; every other text node of its own is dropped, so the field is
+	 * the one place the words come from.
+	 *
+	 * @param DOMElement $node  Element.
+	 * @param string     $token What to write.
+	 * @return void
+	 */
+	private static function plant_in_text( DOMElement $node, string $token ): void {
+		$best = null;
+
+		foreach ( $node->childNodes as $child ) {
+			if ( XML_TEXT_NODE === $child->nodeType && '' !== trim( (string) $child->nodeValue ) ) {
+				if ( null === $best || strlen( trim( (string) $child->nodeValue ) ) > strlen( trim( (string) $best->nodeValue ) ) ) {
+					$best = $child;
+				}
+			}
+		}
+
+		if ( null === $best ) {
+			$node->appendChild( $node->ownerDocument->createTextNode( $token ) );
+
+			return;
+		}
+
+		foreach ( iterator_to_array( $node->childNodes ) as $child ) {
+			if ( XML_TEXT_NODE === $child->nodeType && $child !== $best && '' !== trim( (string) $child->nodeValue ) ) {
+				$node->removeChild( $child );
+			}
+		}
+
+		/*
+		 * The surrounding whitespace survives, so an icon that was set off by
+		 * a space stays set off by one.
+		 */
+		$text  = (string) $best->nodeValue;
+		$lead  = (string) substr( $text, 0, strlen( $text ) - strlen( ltrim( $text ) ) );
+		$trail = (string) substr( $text, strlen( rtrim( $text ) ) );
+
+		$best->nodeValue = $lead . $token . $trail;
 	}
 
 	/**
@@ -1821,11 +2670,12 @@ final class BlockWriter {
 	/**
 	 * Leave one row where the design drew several.
 	 *
-	 * @param DOMNode $body  Section root.
-	 * @param string  $holds  Path to whatever holds the rows.
+	 * @param DOMNode $body     Section root.
+	 * @param string  $holds    Path to whatever holds the rows.
+	 * @param string  $selector The rows' signature, so only rows are removed.
 	 * @return void
 	 */
-	private static function keep_first_row( DOMNode $body, string $holds ): void {
+	private static function keep_first_row( DOMNode $body, string $holds, string $selector = '' ): void {
 		$holder = SectionPlan::at( $body, $holds );
 
 		if ( ! $holder instanceof DOMElement ) {
@@ -1834,8 +2684,15 @@ final class BlockWriter {
 
 		$seen = false;
 
+		/*
+		 * Only the rows go. The holder is not always rows and nothing else —
+		 * a grid's heading or its "view all" link can sit beside the cards —
+		 * and deleting every element but the first took those with it, or,
+		 * when the cards came after them, took every card and kept the
+		 * heading as the "row".
+		 */
 		foreach ( iterator_to_array( $holder->childNodes ) as $child ) {
-			if ( ! $child instanceof DOMElement ) {
+			if ( ! $child instanceof DOMElement || ! SectionPlan::is_row( $child, $selector ) ) {
 				continue;
 			}
 
@@ -1881,6 +2738,16 @@ final class BlockWriter {
 
 		$close = self::token( 'endloop' );
 		$doc   = $row->ownerDocument;
+
+		/*
+		 * Which row this is, for the canvas. The editor reads the mark to
+		 * offer "add a row" and "remove this row" on the section itself, and
+		 * to know which row's fields a click landed in.
+		 */
+		if ( 'listing' !== $kind ) {
+			$row->setAttribute( 'data-qs-row', 'items' );
+			$row->setAttribute( 'data-qs-index', self::token( 'index.items' ) );
+		}
 
 		$row->parentNode->insertBefore( $doc->createTextNode( $open ), $row );
 
@@ -1998,7 +2865,11 @@ final class BlockWriter {
 		$site = 'option' === self::$scope ? 'true' : 'false';
 
 		if ( 'loop' === $kind && 'repeat' === $name ) {
-			return '<?php foreach ( \Qwerty\Soft\Support\DesignField::rows( ' . "'items'" . ', $block ?? null, ' . $site . ' ) as $qsoft_row ) : ?>';
+			return '<?php foreach ( \Qwerty\Soft\Support\DesignField::rows( ' . "'items'" . ', $block ?? null, ' . $site . ' ) as $qsoft_i => $qsoft_row ) : ?>';
+		}
+
+		if ( 'index' === $kind ) {
+			return '<?php echo (int) ( $qsoft_i ?? 0 ); ?>';
 		}
 
 		if ( 'loop' === $kind && 'listing' === $name ) {
@@ -2049,6 +2920,10 @@ final class BlockWriter {
 			return '<?php echo esc_attr( \\Qwerty\\Soft\\Support\\DesignField::image_alt( ' . $value . ' ) ); ?>';
 		}
 
+		if ( 'attr' === $kind ) {
+			return '<?php echo esc_attr( (string) ( ' . $value . ' ) ); ?>';
+		}
+
 		if ( 'url' === $kind ) {
 			return '<?php echo \\Qwerty\\Soft\\Support\\DesignField::url( ' . $value . ' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by url(), which leaves a relative link relative. ?>';
 		}
@@ -2064,6 +2939,16 @@ final class BlockWriter {
 		 */
 		if ( 'dated' === $kind ) {
 			return '<?php echo esc_html( \\Qwerty\\Soft\\Support\\DesignField::dated( ' . $value . ' ) ); ?>';
+		}
+
+		/*
+		 * The one field that holds markup, and only the inline tags the
+		 * designer used: a highlighted span, a line break, emphasis.
+		 * `inline()` is the escaping — `wp_kses()` over that short list — so
+		 * the echo is as safe as `esc_html()` while keeping what was drawn.
+		 */
+		if ( 'rich' === $kind ) {
+			return '<?php echo \\Qwerty\\Soft\\Support\\DesignField::inline( ' . $value . ' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by inline(), which is wp_kses() over the inline tags a field may hold. ?>';
 		}
 
 		return '<?php echo esc_html( (string) ( ' . $value . ' ) ); ?>';
@@ -2121,7 +3006,7 @@ final class BlockWriter {
 
 		if ( $holder instanceof DOMElement ) {
 			foreach ( $holder->childNodes as $child ) {
-				if ( ! $child instanceof DOMElement ) {
+				if ( ! $child instanceof DOMElement || ! SectionPlan::is_row( $child, (string) ( $item['selector'] ?? '' ) ) ) {
 					continue;
 				}
 
@@ -2186,7 +3071,7 @@ final class BlockWriter {
 		$rows = array();
 
 		foreach ( $holder->childNodes as $child ) {
-			if ( ! $child instanceof DOMElement ) {
+			if ( ! $child instanceof DOMElement || ! SectionPlan::is_row( $child, (string) ( $item['selector'] ?? '' ) ) ) {
 				continue;
 			}
 
@@ -2224,6 +3109,17 @@ final class BlockWriter {
 
 		$type = (string) ( $field['type'] ?? 'text' );
 
+		if ( ! empty( $field['attr'] ) ) {
+			$raw = $node->getAttribute( (string) $field['attr'] );
+
+			// An inline style is CSS and only CSS; what could never be is taken out.
+			if ( 'style' === $field['attr'] ) {
+				$raw = (string) preg_replace( '/expression\s*\([^)]*\)|javascript\s*:|-moz-binding\s*:[^;]*;?|behavior\s*:[^;]*;?|@import/i', '', $raw );
+			}
+
+			return $raw;
+		}
+
 		if ( 'image' === $type ) {
 			return $node->getAttribute( 'src' );
 		}
@@ -2231,9 +3127,33 @@ final class BlockWriter {
 		if ( 'link' === $type ) {
 			return array(
 				'url'    => $node->getAttribute( 'href' ),
-				'title'  => trim( $node->textContent ),
+
+				// A link that is a card has no words of its own; its contents are fields of theirs.
+				'title'  => empty( $field['open'] ) ? trim( $node->textContent ) : '',
 				'target' => '',
 			);
+		}
+
+		/*
+		 * The words with their markup, for a field that keeps it. Reduced to
+		 * the allowed tags here as well as at render time, so the stored
+		 * value is already what the page will show.
+		 *
+		 * A copyright line is the exception, because it is not read back the
+		 * same way: {@see self::plant()} renders it through `esc_html()` so
+		 * that the year can be written into words rather than into markup. A
+		 * design that fills its own year in the browser writes
+		 * `© <span id="year"></span> Name`, and keeping that span put the span
+		 * itself on the page, spelled out, under the year the theme had just
+		 * filled in — "© 2026 <span id="year"></span> Chalir".
+		 */
+		if ( ! empty( $field['rich'] ) && ! self::is_dated( $node->textContent ) ) {
+			return trim( DesignField::inline( self::inner_html( $node ) ) );
+		}
+
+		// The words beside decoration: only what the element says itself.
+		if ( ! empty( $field['words'] ) ) {
+			return trim( (string) preg_replace( '/\s+/u', ' ', self::own_words( $node ) ) );
 		}
 
 		return trim( $node->textContent );

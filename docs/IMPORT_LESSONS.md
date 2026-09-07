@@ -98,6 +98,32 @@ that exists *only* as `.webp` is not saved by the strip above.
   itself. What is done instead: every generated block's description ends with
   a line saying its text is edited in the Block tab of the sidebar.
 
+- **A field's name is positional, and the option key is the whole of a row's
+  identity.** SectionPlan calls a footer's labels `label`, `label_2`, `label_3`
+  in the order it meets them, and ACF stores each at `options_{block}_{name}`.
+  So a generator that learns to see one more element — version 9 made the word
+  inside `<a class="brand">` a field of its own — shifts every later name down
+  a place, while the rows written by the earlier build stay where they are,
+  under names that now mean something else. On a live site the footer's brand
+  read "© Chalir. All rights reserved." and the copyright line showed the
+  tagline twice, for weeks, with the correct words all present in `wp_options`.
+  `SiteOptions::seed()` therefore keeps a print of what it wrote
+  (`SiteOptions::SEEDED`): a row still holding exactly that is the design
+  talking to itself and is refreshed, a row holding anything else is somebody's
+  and is left alone. A row seeded before that record existed cannot be told
+  apart and is left alone — which is why a site built before this needs its
+  chrome rows put right by hand once.
+- **A copyright line is words, not markup.** `plant()` renders a dated field
+  through `esc_html( DesignField::dated( … ) )` so the year can be written into
+  the words; a design that fills its own year in the browser writes
+  `© <span id="year"></span> Name`. Version 9 taught text fields to keep their
+  inline markup, and the two rules met: the span was kept, `dated()` wrote the
+  year in beside it, and the page printed "© 2026 <span id="year"></span>
+  Chalir" with the tags spelled out. A field that renders as `dated` is read as
+  words. More generally, a field is offered as rich only when the design
+  actually put markup in it — promising an editor that `<strong>` survives when
+  the page escapes it is worse than saying nothing.
+
 ## 6. Listings, records and the empty grid
 
 - **A listing with no usable singular is not a listing.** The review could
@@ -160,6 +186,127 @@ that exists *only* as `.webp` is not saved by the strip above.
   with work left calls `schedule()` explicitly. Symptom to recognise if it ever
   returns: the last log line is "Built <page>", no "Building <next>" for
   minutes, and no `qwerty_soft_build_tick` booking in the `cron` option.
+
+## 9. What the wrap must keep, and how it is edited
+
+- **A field claims its subtree, so what is inside it travels with the words
+  or is lost.** `plant()` wiped the children to write a text field, and
+  `<h1><span class="gradient-text">Your Security Program,</span><br>Built and
+  Managed.</h1>` rendered as "Program,Built" with the highlight's rule left
+  targeting nothing. A field whose element holds inline markup is *rich*: its
+  value is the inner HTML reduced to `SectionPlan::RICH_TAGS`, echoed through
+  `DesignField::inline()` (`wp_kses()` over the same list). Decoration
+  without words — an icon before a bullet — stays in the template and the
+  words are planted around it (`plant_in_text()`).
+- **libxml parses HTML 4.** `<source>` is not void to it, so the `<img>` of a
+  `<picture>` arrives *inside* the last `<source>`. Anything that walks to
+  "the picture's img" has to walk up, not sideways.
+- **The outermost list is the list.** `repeating_group()` picked the largest
+  run of identical siblings, and three cards each holding four bullets lost
+  to the first card's four `<li>`s: one card got a repeater, two got flat
+  fields. A candidate group nested inside another candidate's row is that
+  row's content and is dropped before the largest is chosen.
+- **A residual that differs by a glyph is still a difference.** Three cards
+  whose only non-field difference was the icon in each one's box passed
+  `rows_diverge()` (under the 30-character bar) and came out wearing the
+  first card's icon three times. Any element with words of its own is now a
+  field — the glyph, an eyebrow in a `<div>`, a table cell — so the
+  difference is a value, not a residual.
+- **The holder of a repeat is not only rows.** `keep_first_row()` and
+  `values()` took every element child of the holder; a grid's heading became
+  a row, or was deleted. Both match the row signature now
+  (`SectionPlan::is_row()`).
+- **Measure from the block's own data.** `Fidelity` rendered through
+  `get_field()` in the same request that rewrote the field groups, so ACF
+  answered from last version's groups and a good page measured 74%.
+  `DesignField::$raw` makes the reading come from the block for the
+  duration of the measurement. And the structure score has to be a
+  multiset: with `array_diff()`, one rendered `div.card` "covered" nine.
+- **The design owns html, body and :root under wrapping.** They used to keep
+  only their custom properties, a rule from the translating era, and every
+  dark design rendered on the theme's white body. The editor canvas is an
+  iframe, so a body rule there paints the canvas and nothing else.
+- **theme.json elements beat a design's bare tag rules, so lift the design.**
+  `DesignStylesheet::scoped()` appends `:is(.qs-design, .qs-design *)` to the
+  subject of every non-root selector — one class, uniformly, so the design's
+  rules keep their order among themselves and all sit above the theme's.
+  `write_canonical()` puts resets *before* the sheet (`revert` on what
+  `elements.heading/link/button` set), so the design's later rules win ties.
+- **`@import` is a file, not a statement to drop.** Inline what is in the
+  archive; hoist what is not to the top of the sheet, ahead of the resets,
+  because an `@import` anywhere else is ignored.
+- **The theme's block gap is 12px the design never had.** Every section
+  measured the same height as the design's and the page was still 156px
+  taller: `.is-layout-flow > * + *{margin-block-start:var(--wp--style--block-gap)}`
+  between every pair of blocks, and again between the header part and the
+  content. The resets zero `margin-block` on any child of a layout container
+  that is, or holds, a `.qs-design` element. Found by measuring landmark
+  offsets in Playwright, not by reading CSS — the review model reasoned it
+  was `body{font-size}`, and it was not.
+- **Global styles print after the design's sheet.** `body{font-size…}` from
+  theme.json wins every tie with a design's own `body{…}`, so the design's
+  body rule is lifted onto `body:is(.qs-design-site, .editor-styles-wrapper)`
+  (the site's body carries the first class via `body_class`; the editor
+  canvas already carries the second). The resets use the same selector.
+- **What differs between rows in an attribute is content.** A card numbered
+  by `data-no` and drawn by `content:attr()`, a bar sized by an inline
+  `style="width:82%"`: no text to be a field, so every row wore the first
+  row's. `SectionPlan::varying_attributes()` walks the first row's subtree,
+  and any `data-*` or `style` whose value differs at the same path in another
+  row becomes a row field written back into that attribute.
+- **Nothing measured in words can see a colour.** `Fidelity` counts words and
+  elements; a page can score 97% and still be the wrong colour on the wrong
+  background. `PixelReview` photographs the built page and the design in the
+  same headless browser, hands both pictures and the difference to Claude
+  Code with write access to that page's blocks only, and looks again. The
+  draft is admitted to the browser by a one-time key that is accepted from
+  the loopback address alone and dies with the photograph. It runs where
+  the `claude` binary, Node and Playwright are — a studio machine — and is
+  skipped, with a line in the log, anywhere else.
+- **In the editor, ACF spells a block's data by field key, not by name.**
+  The importer writes `heading` and a flat `items_0_point`; the moment the
+  editor loads the block, ACF rewrites it to `field_qs_…_heading` and
+  `{ "row-0": { "field_qs_…_row_point": … } }`. Writing by name into that
+  is silently ignored — the post went dirty and nothing changed. The canvas
+  script addresses values by key (`DesignBlocks::field_labels()` ships the
+  keys) and still reads the flat spelling for a block ACF has not touched.
+- **Editing on the canvas is done on the design's own elements.** ACF forces
+  preview mode in the iframed editor (§5), so `render.php` carries
+  `data-qs-field`/`data-qs-row` marks and `assets/js/design-canvas.js` makes
+  the marked elements editable after each preview render, writing to the same
+  block data the sidebar edits. Front-end output strips the marks. Do not
+  reach for `InnerBlocks`: one slot per block, scattered text, and a core
+  heading is not the design's heading.
+- **A field group long enough to be a wall is divided by the design's own
+  structure, not by an invented one.** Nineteen fields in one list told an
+  editor which link they were looking at and nothing about which of three
+  columns it stood in. Every field carries the address `path_of()` recorded, so
+  the columns divide themselves: `BlockWriter::tabbed()` descends those
+  addresses to the first level that branches and makes each branch a tab, named
+  by the holder's class where it reads as a name (`.footer-brand` is "Footer
+  brand"), else by the words in it (a column headed "AI Security" is the AI
+  Security tab). Three rules keep it from making things worse — under ten
+  fields nothing is divided, a part of one field means the markup is offering
+  the layout's structure rather than the page's and the group stays flat, and a
+  class that names every part (three cards all held by a `.task`) names none of
+  them and gives way to the words. A design whose columns are a repeat never
+  reaches any of this: SectionPlan reads them as rows first, which is right.
+- **A field group is drawn on two screens of very different widths, and has to
+  know which.** The Site content screen is as wide as the page: tabs across the
+  top, and `side_by_side()` putting a run of three links in a row. The block
+  sidebar is a column about 280 pixels across, where five tabs wrap into a
+  stack of stubs and a field given a third of the width is a 90-pixel box under
+  a two-line label — "Approve privileged-access remediation plan" was being
+  typed into one. So `self::$scope` decides: option scope gets tabs and widths,
+  block scope gets accordions (open on the first, several at once) and nothing
+  side by side. A divider's label is cut to 28 characters either way; it is a
+  handle, and the design's whole sentence is still in the field under it.
+- **The canvas panel is half the canvas, not a strip beside it.** At 340px it
+  was narrower than the sidebar it exists to replace. It now opens at 50% of
+  the canvas with the fields in as many columns as fit, cycles half → whole →
+  narrow on one button, remembers which in `localStorage`, and can be dragged
+  wider (`resize: horizontal` with `direction: rtl`, which is what puts the
+  grip on the left where a right-anchored panel needs it).
 
 ---
 

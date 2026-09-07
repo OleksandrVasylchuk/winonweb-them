@@ -3,7 +3,8 @@
 Internal. For scoping projects, quoting them, and understanding what this tool
 buys the studio.
 
-**Version 1.4.0 · WordPress 6.7+ · PHP 8.1+ · no required plugins**
+**Version 1.4.0 · WordPress 6.7+ · PHP 8.1+ · no required plugins for the
+theme itself; ACF Pro on any site built from a design import**
 
 ---
 

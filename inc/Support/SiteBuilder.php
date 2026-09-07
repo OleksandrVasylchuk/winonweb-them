@@ -163,6 +163,18 @@ final class SiteBuilder {
 			}
 		}
 
+		/*
+		 * The names the unpack had to change. The markup still says
+		 * `img/фото.jpg`; the file on disk is `img/foto.jpg`, and that is the
+		 * name the map was built on. Keying the same attachment under the
+		 * original as well is what lets the page find its picture.
+		 */
+		foreach ( DesignArchive::renamed( $root ) as $original => $written ) {
+			if ( isset( $map[ $written ] ) && ! isset( $map[ $original ] ) ) {
+				$map[ $original ] = $map[ $written ];
+			}
+		}
+
 		return $map;
 	}
 
@@ -755,6 +767,20 @@ final class SiteBuilder {
 
 		if ( '' !== $page_dir ) {
 			$candidates[] = self::normalise( $page_dir . '/' . $src );
+		}
+
+		/*
+		 * A name that is not ASCII is often written percent-encoded in the
+		 * page and plainly in the archive; the map is keyed the plain way.
+		 */
+		$decoded = rawurldecode( $src );
+
+		if ( $decoded !== $src ) {
+			$candidates[] = ltrim( $decoded, '/' );
+
+			if ( '' !== $page_dir ) {
+				$candidates[] = self::normalise( $page_dir . '/' . $decoded );
+			}
 		}
 
 		foreach ( $candidates as $candidate ) {

@@ -177,10 +177,26 @@ Two of them decide how to work rather than what to write, so they are here too:
   with its own database — confirm which one is being looked at before
   concluding anything about content.
 
+## Editing a generated block on the canvas
+
+ACF Pro forces preview mode in the iframed editor, so its form never appears
+on the canvas. Generated `render.php` marks every field's element
+(`data-qs-field`, `data-qs-type`) and every repeated row (`data-qs-row`,
+`data-qs-index`); `assets/js/design-canvas.js` reads the marks after ACF
+renders the preview and makes those elements editable in place, writing to
+the same block data the sidebar edits. `DesignField::unmarked()` strips the
+marks on the front end. Keep the marks in the generator, not in the blocks.
+
 ## Verifying against a real site
 
 The repo has no WordPress in it. To test, point a local WordPress at the theme,
-then fetch pages into `artifacts/html/` and run `npm run lint:html`. Accessibility
+then fetch pages into `artifacts/html/` and run `npm run lint:html`.
+
+On this machine two installs serve one checkout: `winonweb-them` (real
+content, do not run the integration suite against it) and `wow-sandbox`
+(database `wow_signal_wizard_test`). Run integration tests as
+`QSOFT_WP_PATH=D:/Work/XAMPP/htdocs/wow-sandbox npm run test:wp`. The PHP with
+mysqli is `D:/Work/XAMPP/php/php.exe` with its own `php.ini`. Accessibility
 is checked with axe-core in a real browser — structure rules only tell half the
 story, and colour-contrast over the hero gradient has to be reasoned about
 mathematically because axe reports it as "incomplete".

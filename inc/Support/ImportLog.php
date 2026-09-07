@@ -25,7 +25,7 @@ defined( 'ABSPATH' ) || exit;
  * ends. The screen polls for the lines it has not seen, which also means the
  * account survives a reload: the log lives on the user, not in the tab.
  *
- * Deliberately small. Two hundred lines, each one sentence, one file — this is
+ * Deliberately bounded. Each line is one sentence, in one meta row — this is
  * a narration, not an audit trail, and it is thrown away with the session.
  */
 final class ImportLog {
@@ -38,11 +38,29 @@ final class ImportLog {
 	private const META = '_qwerty_soft_import_log';
 
 	/**
-	 * How many lines are kept; the oldest fall off the end.
+	 * How many lines are kept.
+	 *
+	 * This was two hundred, and a build writes a line per section: a real
+	 * handoff of eleven pages ran past it inside the first page, and every
+	 * line before that — what the unpack skipped, which archives it opened,
+	 * what the design was diagnosed as — had been overwritten by the time
+	 * anybody wanted to read it.
 	 *
 	 * @var int
 	 */
-	private const MAX_LINES = 200;
+	public const MAX_LINES = 1500;
+
+	/**
+	 * How many of the first lines are never dropped.
+	 *
+	 * The start of the account is the part worth keeping when the rest has to
+	 * go: it says what was unpacked and what was left out, which is what a
+	 * missing page is traced back to. So the log keeps its head and its tail,
+	 * and the middle is what falls out when it overflows.
+	 *
+	 * @var int
+	 */
+	public const HEAD_LINES = 100;
 
 	/**
 	 * Write one line.
@@ -61,6 +79,14 @@ final class ImportLog {
 
 		$log = self::lines();
 
+		/*
+		 * A line is text, and the screen sets it as text. Titles arrive here
+		 * as WordPress stores them — "vCISO &#038; AI Security" — and a line
+		 * read back through the REST API showed exactly that. Decoded once,
+		 * here, so no message has to remember to.
+		 */
+		$message = trim( html_entity_decode( wp_strip_all_tags( $message ), ENT_QUOTES, 'UTF-8' ) );
+
 		$log[] = array(
 			'seq'     => self::next_sequence( $log ),
 			'at'      => time(),
@@ -69,11 +95,33 @@ final class ImportLog {
 			'data'    => $data,
 		);
 
-		if ( count( $log ) > self::MAX_LINES ) {
-			$log = array_slice( $log, -self::MAX_LINES );
+		update_user_meta( $user, self::META, wp_slash( self::trim( $log ) ) );
+	}
+
+	/**
+	 * Cut an overflowing log down to its first lines and its latest ones.
+	 *
+	 * Pure, so it can be tested without a user to hang the meta on.
+	 *
+	 * @param array<int, array<string, mixed>> $log  Lines, oldest first.
+	 * @param int                              $max  How many to keep in all.
+	 * @param int                              $head How many of the first to keep always.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function trim( array $log, int $max = self::MAX_LINES, int $head = self::HEAD_LINES ): array {
+		$log = array_values( $log );
+
+		if ( count( $log ) <= $max ) {
+			return $log;
 		}
 
-		update_user_meta( $user, self::META, wp_slash( $log ) );
+		$head = max( 0, min( $head, $max ) );
+		$tail = $max - $head;
+
+		return array_merge(
+			array_slice( $log, 0, $head ),
+			$tail > 0 ? array_slice( $log, -$tail ) : array()
+		);
 	}
 
 	/**

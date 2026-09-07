@@ -80,6 +80,17 @@ final class Spend {
 	private const TYPICAL_OUTPUT_TOKENS = 2200;
 
 	/**
+	 * Output tokens a conversion costs per token of prompt, once it is big.
+	 *
+	 * A section's reply is its own markup, written out again as blocks, so
+	 * the reply grows with the section rather than sitting at the typical
+	 * figure. A fixed 2,200 priced a fourteen-thousand-token hero at the
+	 * same output as a three-line footer, and the estimate under-read the
+	 * bill by most of it. The floor above still covers the small ones.
+	 */
+	private const OUTPUT_PER_INPUT_TOKEN = 0.6;
+
+	/**
 	 * Prices for one model, or null when no rate is known for it.
 	 *
 	 * An unknown model is not silently priced as Opus: the API reports which
@@ -253,8 +264,19 @@ final class Spend {
 
 		list( $in, $out ) = $price;
 
-		$input = (int) ceil( max( 0, $chars ) / self::CHARS_PER_TOKEN );
+		$input  = (int) ceil( max( 0, $chars ) / self::CHARS_PER_TOKEN );
+		$output = self::output_tokens( $input );
 
-		return ( ( $input * $in ) + ( self::TYPICAL_OUTPUT_TOKENS * $out ) ) / 1000000;
+		return ( ( $input * $in ) + ( $output * $out ) ) / 1000000;
+	}
+
+	/**
+	 * Output tokens a conversion of this many prompt tokens is expected to cost.
+	 *
+	 * @param int $input Prompt tokens.
+	 * @return int
+	 */
+	public static function output_tokens( int $input ): int {
+		return max( self::TYPICAL_OUTPUT_TOKENS, (int) ceil( max( 0, $input ) * self::OUTPUT_PER_INPUT_TOKEN ) );
 	}
 }

@@ -49,9 +49,11 @@
 		pageFilter: '',
 		// Whether the preview puts the design beside the blocks instead of showing the blocks alone.
 		compare: false,
-		// What that choice sets: whether the model corrects each section, and whether it reviews its own work.
+		// What that choice sets: whether Claude names the fields, and whether the pages are checked against the design.
 		smart: false,
 		refine: false,
+		// Which long log lines have been opened, by sequence number; kept across repaints.
+		logOpen: {},
 		// The live verdict from /model: which route works from here, and why not.
 		model: null,
 		modelChecking: false,
@@ -269,29 +271,36 @@
 	 * pass is on because that is a second call per section.
 	 */
 	function plannedCost() {
-		var total = plannedPages().reduce( function ( sum, page ) {
+		/*
+		 * The server priced one guided conversion per section, which is a
+		 * bigger request than the naming call "Named by Claude" makes — one
+		 * small call per fresh section, no markup coming back. So this is a
+		 * ceiling, and the screen says "at most". A checked build runs
+		 * through Claude Code only, where nothing is billed.
+		 */
+		if ( ! state.smart ) {
+			return 0;
+		}
+
+		return plannedPages().reduce( function ( sum, page ) {
 			return sum + ( Number( page.estimate ) || 0 );
 		}, 0 );
-
-		/*
-		 * A reviewed section is one guided call plus up to three review
-		 * rounds — the pass repeats until the model says the blocks match the
-		 * design. Estimating it at two would understate a build by a third.
-		 */
-		return total * ( state.refine ? 4 : 1 );
 	}
 
 	/**
-	 * How many model calls a checked build would make.
+	 * How many model calls the chosen mode would make.
 	 *
-	 * One guided call per section, then the review pass, which repeats until
-	 * the model says the blocks match the design and gives up after three
-	 * rounds. Four calls per section is the ceiling and the number worth
-	 * planning around, because a design the conversion reads badly is exactly
-	 * the one that runs every round.
+	 * "Named by Claude" is one small call per section. "Checked against the
+	 * design" is one agent turn per look and up to two looks per page — the
+	 * second look only happens when the first found something to correct, so
+	 * two per page is the ceiling worth planning around.
 	 */
 	function plannedCalls() {
-		return plannedSections() * ( state.refine ? 4 : 1 );
+		if ( state.refine ) {
+			return plannedPages().length * 2;
+		}
+
+		return state.smart ? plannedSections() : 0;
 	}
 
 	/**
@@ -305,10 +314,11 @@
 	 */
 	function plannedTime() {
 		/*
-		 * A section is a small request and the review rounds are smaller.
-		 * Forty seconds is the middle of what this pipeline actually spends.
+		 * A naming call is a small request: twenty seconds is the middle of
+		 * what it spends. A look is an agent turn that photographs two pages,
+		 * reads the blocks and edits files — a few minutes, not seconds.
 		 */
-		var seconds = plannedCalls() * 40;
+		var seconds = plannedCalls() * ( state.refine ? 180 : 20 );
 		var hours = seconds / 3600;
 
 		if ( hours >= 1.5 ) {
@@ -1054,6 +1064,110 @@
 			} );
 	}
 
+	/** Past this many characters a line is folded to its first sentence. */
+	var LOG_FOLD_AT = 240;
+
+	/**
+	 * The lines as the screen shows them: a run of the same line is one line.
+	 *
+	 * Every build writes "Measured against the design…" and a rebuild writes
+	 * it again, word for word; after five rounds the account was five copies
+	 * of one sentence. A repeat carries no news, so it becomes a count.
+	 */
+	function groupedLog( lines ) {
+		var groups = [];
+
+		lines.forEach( function ( line ) {
+			var last = groups.length ? groups[ groups.length - 1 ] : null;
+
+			if ( last && last.stage === ( line.stage || '' ) && last.message === line.message ) {
+				last.count += 1;
+				last.seq = line.seq;
+
+				return;
+			}
+
+			groups.push( {
+				seq: line.seq,
+				stage: line.stage || '',
+				message: String( line.message || '' ),
+				count: 1,
+			} );
+		} );
+
+		return groups;
+	}
+
+	/** The opening sentence of a message, or its first 240 characters. */
+	function firstSentence( message ) {
+		var flat = message.replace( /\s+/g, ' ' ).trim();
+		var match = flat.match( /^[\s\S]*?[.!?](?=\s|$)/ );
+		var head = match ? match[ 0 ] : flat;
+
+		if ( head.length > LOG_FOLD_AT ) {
+			head = head.slice( 0, LOG_FOLD_AT ).replace( /\s+\S*$/, '' ) + '…';
+		}
+
+		return head;
+	}
+
+	/**
+	 * One log line: its stage, its text in paragraphs, and a fold when it is
+	 * long. The pixel review writes a paragraph or two per look, which as one
+	 * run of text with literal line breaks in it was a wall; a line breaks
+	 * where the message did, and past a sentence it opens on request.
+	 */
+	function renderLogLine( group ) {
+		var stage = group.stage || 'build';
+		var open = !! state.logOpen[ group.seq ];
+		var long = group.message.length > LOG_FOLD_AT;
+		var text = el( 'span', { class: 'qs-import__log-text' + ( long ? ' is-foldable' : '' ) } );
+
+		var paragraphs = ( long && ! open ? [ firstSentence( group.message ) ] : group.message.split( /\n+/ ) ).filter( function ( part ) {
+			return '' !== part.trim();
+		} );
+
+		paragraphs.forEach( function ( part ) {
+			text.appendChild( el( 'p', { text: part.trim() } ) );
+		} );
+
+		if ( long ) {
+			text.appendChild(
+				el( 'button', {
+					type: 'button',
+					class: 'button-link qs-import__log-more',
+					'aria-expanded': open ? 'true' : 'false',
+					text: open ? __( 'Show less', 'qwerty-soft-signal' ) : __( 'Show more', 'qwerty-soft-signal' ),
+					onClick: function () {
+						state.logOpen[ group.seq ] = ! open;
+						refreshLive();
+					},
+				} )
+			);
+		}
+
+		var children = [
+			el( 'span', { class: 'qs-import__log-stage is-' + stage, text: stage } ),
+			text,
+		];
+
+		if ( group.count > 1 ) {
+			children.push(
+				el( 'span', {
+					class: 'qs-import__log-count',
+					title: sprintf(
+						/* translators: %d: how many times the same line was written in a row. */
+						_n( 'Written %d time in a row', 'Written %d times in a row', group.count, 'qwerty-soft-signal' ),
+						group.count
+					),
+					text: '×' + group.count,
+				} )
+			);
+		}
+
+		return el( 'li', { class: 'qs-import__log-line is-' + stage }, children );
+	}
+
 	function renderLog() {
 		if ( ! state.log.lines.length ) {
 			return null;
@@ -1061,13 +1175,8 @@
 
 		var list = el( 'ol', { class: 'qs-import__log-lines' } );
 
-		state.log.lines.slice( -24 ).forEach( function ( line ) {
-			list.appendChild(
-				el( 'li', { class: 'qs-import__log-line is-' + ( line.stage || 'build' ) }, [
-					el( 'span', { class: 'qs-import__log-stage', text: line.stage || '' } ),
-					el( 'span', { class: 'qs-import__log-text', text: line.message } ),
-				] )
-			);
+		groupedLog( state.log.lines ).slice( -24 ).forEach( function ( group ) {
+			list.appendChild( renderLogLine( group ) );
 		} );
 
 		var head = [
@@ -2864,13 +2973,13 @@
 			}
 
 			return el( 'p', { class: 'qs-import__hint' }, [
-				el( 'strong', { text: __( 'Correcting each section with Claude is not available yet. ', 'qwerty-soft-signal' ) } ),
+				el( 'strong', { text: __( 'The modes that ask Claude are not available yet. ', 'qwerty-soft-signal' ) } ),
 				el( 'span', { text: why + ' ' } ),
 				el( 'span', { text: __( 'Open Connection settings above to set it up. The build below works without it.', 'qwerty-soft-signal' ) } ),
 			] );
 		}
 
-		if ( ! state.smart ) {
+		if ( ! state.smart && ! state.refine ) {
 			return null;
 		}
 
@@ -2880,34 +2989,47 @@
 		 * is nothing to spend and nothing to wait for.
 		 */
 		var billed = 'api' === state.model.route;
-		var calls = plannedSections() * ( state.refine ? 4 : 1 );
+		var calls = plannedCalls();
+		var estimate;
+
+		if ( state.refine ) {
+			estimate = sprintf(
+				/* translators: %d: number of pages. */
+				_n(
+					'One agent turn per look, up to two looks per page — at most %d turn through Claude Code on this machine, on the subscription it is signed in to. Nothing is billed.',
+					'One agent turn per look, up to two looks per page — at most %d turns through Claude Code on this machine, on the subscription it is signed in to. Nothing is billed.',
+					calls,
+					'qwerty-soft-signal'
+				),
+				calls
+			);
+		} else if ( billed ) {
+			estimate = sprintf(
+				/* translators: 1: number of model calls, 2: estimated cost. */
+				_n(
+					'One small call per section — %1$d call to the Anthropic API, at most %2$s at list prices, billed to your key.',
+					'One small call per section — %1$d calls to the Anthropic API, at most %2$s at list prices, billed to your key.',
+					calls,
+					'qwerty-soft-signal'
+				),
+				calls,
+				money( plannedCost() )
+			);
+		} else {
+			estimate = sprintf(
+				/* translators: %d: number of model calls. */
+				_n(
+					'One small call per section — %d call through Claude Code on this machine, on the subscription it is signed in to. Nothing is billed.',
+					'One small call per section — %d calls through Claude Code on this machine, on the subscription it is signed in to. Nothing is billed.',
+					calls,
+					'qwerty-soft-signal'
+				),
+				calls
+			);
+		}
 
 		var lines = [
-			el( 'p', {
-				class: 'qs-import__estimate',
-				text: billed
-					? sprintf(
-						/* translators: 1: number of model calls, 2: estimated cost. */
-						_n(
-							'About %1$d call to the Anthropic API — roughly %2$s at list prices, billed to your key.',
-							'About %1$d calls to the Anthropic API — roughly %2$s at list prices, billed to your key.',
-							calls,
-							'qwerty-soft-signal'
-						),
-						calls,
-						money( state.refine ? plannedCost() : plannedCost() / 4 )
-					)
-					: sprintf(
-						/* translators: %d: number of model calls. */
-						_n(
-							'About %d call through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed.',
-							'About %d calls through Claude Code on this machine, which uses the subscription it is signed in to. Nothing is billed.',
-							calls,
-							'qwerty-soft-signal'
-						),
-						calls
-					),
-			} ),
+			el( 'p', { class: 'qs-import__estimate', text: estimate } ),
 			el( 'p', {
 				class: 'qs-import__hint',
 				text: state.unattended
@@ -2929,14 +3051,18 @@
 	 * the decision and sets them.
 	 */
 	/*
-	 * Two, not three.
+	 * Three, matching what the build does.
 	 *
-	 * The middle mode — convert, then have Claude correct each section but not
-	 * check the result — was a distinction without a decision. It cost the same
-	 * order of time and money as the full pass and gave up the one thing that
-	 * pass is for, so nobody could say when to pick it. What people actually
-	 * choose between is "now, free, offline" and "as close to the design as
-	 * this gets, and it will take a while".
+	 * Every mode wraps each section as a block of its own with the design's
+	 * markup and stylesheet; they differ in what a model is asked. Nothing:
+	 * the fields are named by code. One small call per fresh section: Claude
+	 * names the fields and says which sections repeat or list. Or a look at
+	 * the result: each page photographed beside its design and its blocks
+	 * corrected as files by Claude Code, up to two looks.
+	 *
+	 * The checked mode sends `smart` off on purpose. With both on, the older
+	 * per-section review loop runs as well, and that loop is the one that
+	 * used to run every round it was allowed.
 	 */
 	var BUILD_MODES = [
 		{
@@ -2946,8 +3072,14 @@
 			unattended: false,
 		},
 		{
-			key: 'checked',
+			key: 'named',
 			smart: true,
+			refine: false,
+			unattended: true,
+		},
+		{
+			key: 'checked',
+			smart: false,
 			refine: true,
 			unattended: true,
 		},
@@ -2959,39 +3091,85 @@
 		} )[ 0 ] || BUILD_MODES[ 0 ];
 	}
 
+	/** Why a mode cannot be chosen from here, or an empty string when it can. */
+	function modeBlocked( mode ) {
+		if ( ! mode.smart && ! mode.refine ) {
+			return '';
+		}
+
+		if ( ! modelReady() ) {
+			return ( state.model && state.model.reason ) || __( 'Claude cannot be reached from here yet.', 'qwerty-soft-signal' );
+		}
+
+		if ( mode.refine ) {
+			return ( state.model && state.model.review ) || '';
+		}
+
+		return '';
+	}
+
 	function chooseMode( key ) {
 		var mode = modeByKey( key );
 
+		if ( '' !== modeBlocked( mode ) ) {
+			mode = BUILD_MODES[ 0 ];
+		}
+
 		state.mode = mode.key;
-		state.smart = mode.smart && modelReady();
-		state.refine = mode.refine && modelReady();
-		state.unattended = mode.unattended && modelReady();
+		state.smart = mode.smart;
+		state.refine = mode.refine;
+		state.unattended = mode.unattended;
 	}
 
-	/** The two ways to build, as cards you pick one of. */
+	/** The three ways to build, as cards you pick one of. */
 	function renderModes( pages ) {
-		var ready = modelReady();
 		var sections = plannedSections();
+		var cli = 'cli' === ( state.model && state.model.route );
 
 		var copy = {
 			fast: {
 				title: __( 'Straight through', 'qwerty-soft-signal' ),
-				line: __( 'The structural conversion only. Free, offline, and finished in seconds.', 'qwerty-soft-signal' ),
+				line: __( 'Every section becomes a block of its own with the design\'s markup and stylesheet; the editable fields are named by code. Free, offline, and finished in seconds.', 'qwerty-soft-signal' ),
 				cost: sprintf(
 					/* translators: %d: number of pages. */
 					_n( '%d page · seconds · no cost', '%d pages · seconds · no cost', pages, 'qwerty-soft-signal' ),
 					pages
 				),
 			},
-			checked: {
-				title: __( 'Corrected and checked', 'qwerty-soft-signal' ),
-				line: __( 'Every section is converted, then read by Claude and fixed where the conversion misread the design, then rendered and compared with the original until the two agree.', 'qwerty-soft-signal' ),
+			named: {
+				title: __( 'Named by Claude', 'qwerty-soft-signal' ),
+				line: __( 'The same blocks, with one small model call per fresh section: Claude names the fields after what they hold and says which sections repeat or are listings.', 'qwerty-soft-signal' ),
 				cost: sprintf(
 					/* translators: 1: number of sections, 2: how long it takes, 3: cost or "no cost". */
-					__( '%1$d sections · %2$s · %3$s', 'qwerty-soft-signal' ),
+					__( '%1$d sections · one small call each · %2$s · %3$s', 'qwerty-soft-signal' ),
 					sections,
 					plannedTime(),
-					'cli' === ( state.model && state.model.route ) ? __( 'no cost', 'qwerty-soft-signal' ) : money( plannedCost() )
+					cli
+						? __( 'no cost', 'qwerty-soft-signal' )
+						: sprintf(
+							/* translators: %s: estimated cost. */
+							__( 'at most %s', 'qwerty-soft-signal' ),
+							money(
+								plannedPages().reduce( function ( sum, page ) {
+									return sum + ( Number( page.estimate ) || 0 );
+								}, 0 )
+							)
+						)
+				),
+			},
+			checked: {
+				title: __( 'Checked against the design', 'qwerty-soft-signal' ),
+				line: __( 'Every page is photographed beside its design in headless Chromium and its blocks corrected by Claude Code where the two differ, up to two looks per page. Needs Claude Code on this machine, with Node and Playwright beside the theme.', 'qwerty-soft-signal' ),
+				cost: sprintf(
+					/* translators: 1: number of pages, 2: how long it takes. */
+					_n(
+						'%1$d page · one agent turn per look, up to two looks · %2$s · no cost',
+						'%1$d pages · one agent turn per look, up to two looks per page · %2$s · no cost',
+						pages,
+						'qwerty-soft-signal'
+					),
+					pages,
+					plannedTime()
 				),
 			},
 		};
@@ -2999,7 +3177,8 @@
 		var list = el( 'ul', { class: 'qs-import__modes' } );
 
 		BUILD_MODES.forEach( function ( mode ) {
-			var disabled = mode.smart && ! ready;
+			var why = modeBlocked( mode );
+			var disabled = '' !== why;
 			var chosen = state.mode === mode.key;
 
 			var input = el( 'input', {
@@ -3024,6 +3203,16 @@
 							el( 'span', { class: 'qs-import__mode-title', text: copy[ mode.key ].title } ),
 							el( 'span', { class: 'qs-import__mode-line', text: copy[ mode.key ].line } ),
 							el( 'span', { class: 'qs-import__mode-cost', text: copy[ mode.key ].cost } ),
+							disabled
+								? el( 'span', {
+										class: 'qs-import__mode-why',
+										text: sprintf(
+											/* translators: %s: why this mode cannot be chosen here. */
+											__( 'Not available here: %s', 'qwerty-soft-signal' ),
+											why
+										),
+								  } )
+								: null,
 						] ),
 					] ),
 				] )
@@ -3114,28 +3303,30 @@
 		var planned = plannedPages().length;
 
 		var label = function ( n ) {
+			if ( state.refine && modelReady() ) {
+				return sprintf(
+					/* translators: %d: how many pages will be built. */
+					_n(
+						'Build the whole site, checked against the design — %d page',
+						'Build the whole site, checked against the design — %d pages',
+						n,
+						'qwerty-soft-signal'
+					),
+					n
+				);
+			}
+
 			if ( state.smart && modelReady() ) {
-				return state.refine
-					? sprintf(
-							/* translators: %d: how many pages will be built. */
-							_n(
-								'Build the whole site, corrected and reviewed — %d page',
-								'Build the whole site, corrected and reviewed — %d pages',
-								n,
-								'qwerty-soft-signal'
-							),
-							n
-					  )
-					: sprintf(
-							/* translators: %d: how many pages will be built. */
-							_n(
-								'Build the whole site, corrected by Claude — %d page',
-								'Build the whole site, corrected by Claude — %d pages',
-								n,
-								'qwerty-soft-signal'
-							),
-							n
-					  );
+				return sprintf(
+					/* translators: %d: how many pages will be built. */
+					_n(
+						'Build the whole site, named by Claude — %d page',
+						'Build the whole site, named by Claude — %d pages',
+						n,
+						'qwerty-soft-signal'
+					),
+					n
+				);
 			}
 
 			return sprintf(
@@ -4251,35 +4442,48 @@
 	 * first would never scroll far enough to learn it exists.
 	 */
 	function renderRoutes() {
-		var rows = [
+		var modes = [
 			[
-				__( 'Structure only — the button above', 'qwerty-soft-signal' ),
-				__( 'Free, instant, no account. Headings, lists, cards and images become blocks.', 'qwerty-soft-signal' ),
+				__( 'Straight through', 'qwerty-soft-signal' ),
+				__( 'Every section is wrapped as a block of its own — the design\'s markup and stylesheet, one editable field per heading, paragraph, image and link, named by code. No model, no account, seconds. Start here; a rebuild costs nothing.', 'qwerty-soft-signal' ),
 			],
 			[
-				__( 'Your Claude subscription', 'qwerty-soft-signal' ),
-				__( 'Free with any plan. Pick a page below, copy the brief into your Claude chat, paste the reply back. Better judgement than the button.', 'qwerty-soft-signal' ),
+				__( 'Named by Claude', 'qwerty-soft-signal' ),
+				__( 'The same blocks, plus one small model call per fresh section so the fields are named after what they hold ("Founder quote" rather than "Text 3") and repeated sections and listings are recognised as such. Worth it when editors will work in these pages for years.', 'qwerty-soft-signal' ),
 			],
 			[
-				__( 'An Anthropic API key', 'qwerty-soft-signal' ),
-				__( 'One click per page, no copying. Roughly one to three dollars for a whole site. Set the key in Connection settings above.', 'qwerty-soft-signal' ),
-			],
-			[
-				__( 'Claude Code on this machine', 'qwerty-soft-signal' ),
-				__( 'The same automatic route, run through the claude command instead of the API — so it uses the subscription that command is signed in to and adds nothing to a bill. Only possible where the binary is installed and PHP may start it, which usually means your own machine rather than a client\'s hosting.', 'qwerty-soft-signal' ),
+				__( 'Checked against the design', 'qwerty-soft-signal' ),
+				__( 'After the build, each page is photographed beside its design in headless Chromium and Claude Code corrects the generated block files where the two differ — up to two looks per page. Only on a machine with Claude Code, Node and Playwright; the mode says so when it cannot run.', 'qwerty-soft-signal' ),
 			],
 		];
 
-		var list = el( 'dl', { class: 'qs-import__routes' } );
+		var transports = [
+			[
+				__( 'Claude Code on this machine', 'qwerty-soft-signal' ),
+				__( 'Runs the claude command PHP can start here, on the subscription it is signed in to. Nothing is billed, and it is the only route the check can take, because that check edits files.', 'qwerty-soft-signal' ),
+			],
+			[
+				__( 'An Anthropic API key', 'qwerty-soft-signal' ),
+				__( 'For a client\'s hosting, where there is no such command. Reaches the naming pass only, billed to the key at list prices; set it in Connection settings above.', 'qwerty-soft-signal' ),
+			],
+		];
 
-		rows.forEach( function ( row ) {
-			list.appendChild( el( 'dt', { text: row[ 0 ] } ) );
-			list.appendChild( el( 'dd', { text: row[ 1 ] } ) );
-		} );
+		var list = function ( rows ) {
+			var out = el( 'dl', { class: 'qs-import__routes' } );
+
+			rows.forEach( function ( row ) {
+				out.appendChild( el( 'dt', { text: row[ 0 ] } ) );
+				out.appendChild( el( 'dd', { text: row[ 1 ] } ) );
+			} );
+
+			return out;
+		};
 
 		return el( 'details', { class: 'qs-import__routes-wrap' }, [
-			el( 'summary', { text: __( 'Four ways to convert — which should I use?', 'qwerty-soft-signal' ) } ),
-			list,
+			el( 'summary', { text: __( 'Three ways to build — which should I use?', 'qwerty-soft-signal' ) } ),
+			list( modes ),
+			el( 'p', { class: 'qs-import__label-inline', text: __( 'Two ways to reach Claude:', 'qwerty-soft-signal' ) } ),
+			list( transports ),
 		] );
 	}
 
@@ -4325,10 +4529,65 @@
 				);
 			}
 
+			/*
+			 * What the build measured, as chips: how much of the design's
+			 * copy the page renders, and — when it was checked — how far the
+			 * pixels were from the design before and after the review, with
+			 * the report the review wrote, when it wrote one.
+			 */
+			var chips = [];
+
+			if ( 'number' === typeof page.fidelity ) {
+				chips.push(
+					el( 'span', {
+						class: 'qs-import__chip is-fidelity',
+						title: __( 'How much of the copy the design wrote on this page the built page renders.', 'qwerty-soft-signal' ),
+						text: sprintf(
+							/* translators: %d: percentage of the design's words the page renders. */
+							__( 'Copy: %d%%', 'qwerty-soft-signal' ),
+							page.fidelity
+						),
+					} )
+				);
+			}
+
+			var pixels = page.pixels && ( null !== page.pixels.before || null !== page.pixels.after ) ? page.pixels : null;
+
+			if ( pixels ) {
+				var before = null === pixels.before ? '—' : percent( pixels.before );
+				var after = null === pixels.after ? '—' : percent( pixels.after );
+
+				chips.push(
+					el( 'span', {
+						class: 'qs-import__chip is-pixels',
+						title: __( 'Share of pixels that differ from the design, before and after the review.', 'qwerty-soft-signal' ),
+						text: sprintf(
+							/* translators: 1: pixels differing before the review, 2: after it. */
+							__( 'Pixels: %1$s → %2$s', 'qwerty-soft-signal' ),
+							before,
+							after
+						),
+					} )
+				);
+			}
+
+			if ( page.pixel_report ) {
+				chips.push(
+					el( 'a', {
+						class: 'qs-import__chip is-link',
+						href: page.pixel_report,
+						target: '_blank',
+						rel: 'noopener',
+						text: __( 'Compare', 'qwerty-soft-signal' ),
+					} )
+				);
+			}
+
 			tbody.appendChild(
 				el( 'tr', {}, [
 					el( 'td', {}, [
 						el( 'strong', { text: page.title } ),
+						chips.length ? el( 'span', { class: 'qs-import__chips' }, chips ) : null,
 
 						/*
 						 * A row read back off the site knows the page but not
@@ -4600,7 +4859,8 @@
 				 */
 				exclude: excludedFiles(),
 				smart: !! ( state.smart && modelReady() ),
-				refine: !! ( state.smart && state.refine && modelReady() ),
+				// The pixel review stands on its own: it corrects files, not the naming pass.
+				refine: !! ( state.refine && modelReady() ),
 				unattended: !! state.unattended,
 			},
 		} )
@@ -4998,7 +5258,13 @@
 			return null;
 		}
 
-		var body = [ el( 'h3', { text: __( 'Clean up', 'qwerty-soft-signal' ) } ) ];
+		var body = [
+			el( 'h2', { text: __( 'Danger zone', 'qwerty-soft-signal' ) } ),
+			el( 'p', {
+				class: 'qs-import__hint',
+				text: __( 'Everything below removes something. Nothing here is needed to build or rebuild a site.', 'qwerty-soft-signal' ),
+			} ),
+		];
 
 		if ( summaryTotal( summary ) ) {
 			body.push(
@@ -5094,7 +5360,7 @@
 			}
 		}
 
-		return el( 'section', { class: 'qs-import__cleanup', 'aria-label': __( 'Clean up a previous import', 'qwerty-soft-signal' ) }, body );
+		return el( 'section', { class: 'qs-import__cleanup qs-import__danger-zone', 'aria-label': __( 'Danger zone: remove what an import added', 'qwerty-soft-signal' ) }, body );
 	}
 
 	// -------------------------------------------------------------- sections
@@ -5873,12 +6139,6 @@
 			app.appendChild( log );
 		}
 
-		var cleanup = renderCleanup();
-
-		if ( cleanup ) {
-			app.appendChild( cleanup );
-		}
-
 		app.appendChild( renderUpload() );
 
 		var pages = renderPages();
@@ -5900,6 +6160,18 @@
 
 		if ( sections ) {
 			app.appendChild( sections );
+		}
+
+		/*
+		 * Last, and quiet. Two red buttons above the upload step were the
+		 * first thing the screen said, on a page whose point is the build.
+		 * What an import can be taken back out with belongs after what it
+		 * made, where somebody looking for it will look.
+		 */
+		var cleanup = renderCleanup();
+
+		if ( cleanup ) {
+			app.appendChild( cleanup );
 		}
 	}
 

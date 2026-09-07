@@ -1,0 +1,548 @@
+/**
+ * The Handbook screen under Appearance.
+ *
+ * The same visual language as the Design import screen — the dark masthead
+ * with the brand mark, the numbered rail, the soft cards — so the two read
+ * as one tool. Colours are the admin's own (WordPress blue on white), not
+ * the theme's tokens: this is chrome around the theme, not the theme.
+ */
+
+.qs-handbook {
+	--qs-hb-radius: 10px;
+	--qs-hb-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 10px 30px rgba(20, 30, 50, 0.08);
+	--qs-hb-line: #dcdfe4;
+	--qs-hb-ink: #1d2327;
+	--qs-hb-soft: #50575e;
+	--qs-hb-mute: #787c82;
+	--qs-hb-accent: #2271b1;
+	--qs-hb-accent-soft: #eaf2fb;
+	--qs-hb-good: #1a7f4b;
+	--qs-hb-good-soft: #e6f5ec;
+	--qs-hb-warn: #8a5a00;
+	--qs-hb-warn-soft: #fbf3df;
+	max-width: 960px;
+	color: var(--qs-hb-ink);
+}
+
+.qs-handbook > h1.wp-heading-inline,
+.qs-handbook > h1 {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+}
+
+/* Masthead */
+
+.qs-handbook__masthead {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 1.5rem 3rem;
+	align-items: end;
+	margin: 1.25rem 0 1.25rem;
+	padding: 2rem 2.25rem 1.9rem;
+	overflow: hidden;
+	color: #f6f6fb;
+	background:
+		radial-gradient(75% 130% at 100% 0%, rgba(43, 43, 217, 0.55), transparent 62%),
+		radial-gradient(60% 120% at 0% 100%, rgba(24, 99, 220, 0.35), transparent 60%),
+		#212121;
+	border-radius: var(--qs-hb-radius);
+	box-shadow: var(--qs-hb-shadow);
+}
+
+.qs-handbook__brand {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin: 0 0 0.9rem;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: rgba(246, 246, 251, 0.8);
+}
+
+.qs-handbook__mark {
+	display: inline-grid;
+	place-items: center;
+	width: 26px;
+	height: 26px;
+	border-radius: 7px;
+	background: linear-gradient(135deg, #5b7cff, #2b2bd9);
+	color: #fff;
+	font-size: 14px;
+	font-weight: 800;
+	letter-spacing: 0;
+}
+
+.qs-handbook__masthead h1 {
+	margin: 0;
+	padding: 0;
+	color: #fff;
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: -0.01em;
+}
+
+.qs-handbook__lede {
+	max-width: 58ch;
+	margin: 0.75rem 0 0;
+	font-size: 14px;
+	line-height: 1.6;
+	color: rgba(246, 246, 251, 0.82);
+}
+
+.qs-handbook__readers {
+	display: grid;
+	gap: 0.6rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	min-width: 240px;
+}
+
+.qs-handbook__readers a {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 0.7rem;
+	align-items: center;
+	padding: 0.55rem 0.8rem;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 8px;
+	color: #fff;
+	text-decoration: none;
+	background: rgba(255, 255, 255, 0.06);
+	transition: background 120ms ease, border-color 120ms ease;
+}
+
+.qs-handbook__readers a:hover,
+.qs-handbook__readers a:focus {
+	background: rgba(255, 255, 255, 0.12);
+	border-color: rgba(255, 255, 255, 0.35);
+	box-shadow: none;
+}
+
+.qs-handbook__readers a.is-current {
+	background: #fff;
+	color: var(--qs-hb-ink);
+	border-color: #fff;
+}
+
+.qs-handbook__readers strong {
+	display: block;
+	font-size: 13px;
+}
+
+.qs-handbook__readers span {
+	display: block;
+	font-size: 12px;
+	opacity: 0.8;
+}
+
+.qs-handbook__readers .qs-handbook__num {
+	display: inline-grid;
+	place-items: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.14);
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.qs-handbook__readers a.is-current .qs-handbook__num {
+	background: var(--qs-hb-accent);
+	color: #fff;
+}
+
+/* Body */
+
+.qs-handbook__body {
+	padding: 0.25rem 0 3rem;
+}
+
+.qs-handbook__body h2 {
+	margin: 2.2rem 0 0.6rem;
+	padding: 0;
+	font-size: 19px;
+	font-weight: 600;
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+}
+
+.qs-handbook__body h2:first-child {
+	margin-top: 1.25rem;
+}
+
+.qs-handbook__body h3 {
+	margin: 1.4rem 0 0.4rem;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.qs-handbook__body p,
+.qs-handbook__body li {
+	font-size: 14px;
+	line-height: 1.65;
+	color: var(--qs-hb-ink);
+}
+
+.qs-handbook__body p {
+	max-width: 72ch;
+	margin: 0.5rem 0;
+}
+
+.qs-handbook__body ul {
+	max-width: 72ch;
+	margin: 0.5rem 0;
+	padding-left: 1.3em;
+	list-style: disc;
+}
+
+.qs-handbook__body ol {
+	max-width: 72ch;
+	margin: 0.5rem 0;
+	padding-left: 1.3em;
+}
+
+.qs-handbook__body li {
+	margin: 0 0 0.45rem;
+}
+
+.qs-handbook__body code {
+	font-size: 12px;
+	padding: 1px 5px;
+	border-radius: 3px;
+	background: var(--qs-hb-accent-soft);
+	color: #144fa9;
+}
+
+.qs-handbook__body kbd {
+	display: inline-block;
+	padding: 0 5px;
+	border: 1px solid var(--qs-hb-line);
+	border-bottom-width: 2px;
+	border-radius: 4px;
+	background: #fff;
+	font: 12px/1.6 Consolas, Menlo, monospace;
+	color: var(--qs-hb-ink);
+}
+
+.qs-handbook__lead {
+	font-size: 15px;
+	color: var(--qs-hb-soft);
+}
+
+/* Cards, callouts, tables */
+
+.qs-handbook__cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 0.9rem;
+	margin: 0.8rem 0 0.4rem;
+}
+
+.qs-handbook__card {
+	padding: 1rem 1.15rem 1.05rem;
+	background: #fff;
+	border: 1px solid var(--qs-hb-line);
+	border-radius: var(--qs-hb-radius);
+	box-shadow: var(--qs-hb-shadow);
+}
+
+.qs-handbook__card h3 {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 0 0 0.5rem;
+}
+
+.qs-handbook__card ul {
+	margin: 0;
+}
+
+.qs-handbook__tag {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--qs-hb-accent-soft);
+	color: #144fa9;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.qs-handbook__callout {
+	max-width: 72ch;
+	margin: 1rem 0;
+	padding: 0.75rem 1rem;
+	border-left: 3px solid var(--qs-hb-accent);
+	border-radius: 0 6px 6px 0;
+	background: var(--qs-hb-accent-soft);
+}
+
+.qs-handbook__callout.is-good {
+	border-color: var(--qs-hb-good);
+	background: var(--qs-hb-good-soft);
+}
+
+.qs-handbook__callout.is-warn {
+	border-color: var(--qs-hb-warn);
+	background: var(--qs-hb-warn-soft);
+}
+
+.qs-handbook__callout p {
+	margin: 0;
+}
+
+.qs-handbook__lesson {
+	max-width: 72ch;
+	padding: 0.75rem 1rem;
+	border-left: 3px solid var(--qs-hb-accent);
+	border-radius: 0 6px 6px 0;
+	background: #f6f7f7;
+}
+
+.qs-handbook__table-wrap {
+	overflow-x: auto;
+	margin: 0.8rem 0 1rem;
+	background: #fff;
+	border: 1px solid var(--qs-hb-line);
+	border-radius: var(--qs-hb-radius);
+}
+
+.qs-handbook__table {
+	width: 100%;
+	min-width: 560px;
+	border-collapse: collapse;
+	font-size: 13.5px;
+}
+
+.qs-handbook__table th,
+.qs-handbook__table td {
+	padding: 0.6rem 0.9rem;
+	border-bottom: 1px solid var(--qs-hb-line);
+	text-align: left;
+	vertical-align: top;
+	line-height: 1.55;
+}
+
+.qs-handbook__table th {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--qs-hb-mute);
+	background: #f6f7f7;
+}
+
+.qs-handbook__table tr:last-child td {
+	border-bottom: 0;
+}
+
+.qs-handbook__table td:first-child {
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+/* Steps */
+
+.qs-handbook__steps {
+	counter-reset: qs-step;
+	list-style: none;
+	max-width: 72ch;
+	margin: 0.8rem 0;
+	padding: 0;
+}
+
+.qs-handbook__steps > li {
+	counter-increment: qs-step;
+	display: grid;
+	grid-template-columns: 32px minmax(0, 1fr);
+	gap: 0.8rem;
+	padding: 0.7rem 0;
+	border-top: 1px solid var(--qs-hb-line);
+}
+
+.qs-handbook__steps > li:last-child {
+	border-bottom: 1px solid var(--qs-hb-line);
+}
+
+.qs-handbook__steps > li::before {
+	content: counter(qs-step);
+	display: inline-grid;
+	place-items: center;
+	width: 26px;
+	height: 26px;
+	border-radius: 999px;
+	background: var(--qs-hb-accent-soft);
+	color: #144fa9;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+/* Figures */
+
+.qs-handbook__body figure {
+	max-width: 100%;
+	margin: 0.8rem 0 1.4rem;
+}
+
+.qs-handbook__body figure img {
+	max-width: 100%;
+	height: auto;
+	border: 1px solid var(--qs-hb-line);
+	border-radius: 8px;
+	box-shadow: var(--qs-hb-shadow);
+}
+
+.qs-handbook__body figcaption {
+	margin-top: 0.45rem;
+	font-size: 12px;
+	color: var(--qs-hb-mute);
+}
+
+/* A schematic of a section on the canvas, drawn in CSS rather than shipped as a picture. */
+
+.qs-handbook__mock {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 1.4rem;
+	max-width: 720px;
+	margin: 0.8rem 0 0.4rem;
+	padding: 2.4rem 1.75rem 1.75rem;
+	overflow: hidden;
+	border-radius: var(--qs-hb-radius);
+	background: #0b1628;
+	color: #f4f8fc;
+	box-shadow: var(--qs-hb-shadow);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.qs-handbook__mock p,
+.qs-handbook__mock span {
+	margin: 0;
+	color: inherit;
+}
+
+.qs-handbook__mock-open {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	padding: 5px 11px;
+	border-radius: 999px;
+	background: #007cba;
+	color: #fff;
+	font-size: 12px;
+	font-weight: 600;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.qs-handbook__mock-eye {
+	display: inline-block;
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #20d6b9;
+}
+
+.qs-handbook__mock-h {
+	max-width: 18ch;
+	margin: 0.6rem 0 0.7rem;
+	font-size: 30px;
+	font-weight: 800;
+	line-height: 1.05;
+	letter-spacing: -0.02em;
+}
+
+.qs-handbook__mock-h .is-grad {
+	color: #20d6b9;
+}
+
+.qs-handbook__mock p.qs-handbook__mock-p {
+	max-width: 46ch;
+	color: #9db0c5;
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+.qs-handbook__mock-cta {
+	display: inline-block;
+	margin-top: 0.9rem;
+	padding: 8px 16px;
+	border-radius: 999px;
+	background: #20d6b9;
+	color: #04121a;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.qs-handbook__mock-field {
+	position: relative;
+	display: inline-block;
+	outline: 1.5px dashed rgba(93, 155, 255, 0.7);
+	outline-offset: 5px;
+	border-radius: 2px;
+}
+
+.qs-handbook__mock-field.is-active {
+	outline: 2px solid #007cba;
+	box-shadow: 0 0 0 5px rgba(31, 111, 235, 0.18);
+}
+
+.qs-handbook__mock-field::after {
+	content: attr(data-name);
+	position: absolute;
+	top: -22px;
+	left: 0;
+	padding: 1px 6px;
+	border-radius: 3px;
+	background: #007cba;
+	color: #fff;
+	font: 500 10px/1.5 Consolas, Menlo, monospace;
+	white-space: nowrap;
+}
+
+.qs-handbook__mock-bar {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 0.9rem;
+	padding: 5px 7px;
+	border-radius: 4px;
+	background: #1e1e1e;
+	color: #fff;
+	font-size: 12px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.qs-handbook__mock-bar .is-input {
+	min-width: 220px;
+	padding: 3px 8px;
+	border: 1px solid #555;
+	border-radius: 3px;
+	background: #2b2b2b;
+	color: #ddd;
+	font: 11px/1.5 Consolas, Menlo, monospace;
+}
+
+.qs-handbook__mock-bar .is-ok {
+	padding: 3px 9px;
+	border-radius: 3px;
+	background: #007cba;
+}
+
+@media (max-width: 782px) {
+	.qs-handbook__masthead {
+		grid-template-columns: 1fr;
+		padding: 1.5rem 1.25rem;
+	}
+}

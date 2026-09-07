@@ -68,6 +68,67 @@ final class SectionPlan {
 	private const INLINE_TAGS = array( 'span', 'strong', 'b', 'em', 'small', 'time' );
 
 	/**
+	 * Markup a text field is allowed to keep inside it.
+	 *
+	 * A heading is rarely one run of text. `<h1><span class="gradient-text">Your
+	 * Security Program,</span><br>Built and Managed.</h1>` is one heading with
+	 * a highlighted half and a deliberate line break, and the stylesheet has a
+	 * rule aimed at that span. Wiping the children to write a text field lost
+	 * the break, the highlight and the rule's target in one move — the heading
+	 * read "Program,Built" on the live site. A field that holds these tags
+	 * holds the heading as the designer wrote it; anything not on this list is
+	 * still stripped, which is what keeps the field a line of copy and not a
+	 * place to put a script.
+	 *
+	 * @var array<int, string>
+	 */
+	public const RICH_TAGS = array( 'br', 'span', 'strong', 'b', 'em', 'i', 'small', 'sup', 'sub', 'mark', 'u', 's', 'code', 'a', 'time', 'abbr' );
+
+	/**
+	 * Elements whose text is never copy, whatever they hold.
+	 *
+	 * Everything else with words of its own is offered as a field.
+	 *
+	 * @var array<int, string>
+	 */
+	private const NOT_TEXT_TAGS = array(
+		'script',
+		'style',
+		'noscript',
+		'template',
+		'svg',
+		'path',
+		'g',
+		'defs',
+		'symbol',
+		'use',
+		'text',
+		'tspan',
+		'title',
+		'desc',
+		'math',
+		'iframe',
+		'object',
+		'embed',
+		'video',
+		'audio',
+		'source',
+		'track',
+		'canvas',
+		'select',
+		'option',
+		'optgroup',
+		'textarea',
+		'input',
+		'datalist',
+		'form',
+		'pre',
+		'html',
+		'head',
+		'body',
+	);
+
+	/**
 	 * How many identical siblings make a list rather than a coincidence.
 	 *
 	 * Two is a coincidence often enough — a two-column band, a pair of buttons —
@@ -150,12 +211,27 @@ final class SectionPlan {
 		 * a hamburger button, three of them, identical — answers no exactly as
 		 * it already did, and nothing below changes for that case.
 		 */
-		if ( array() === $rows ) {
-			$leaf = self::field_for( $repeat['nodes'][0] );
+		$leaf = self::field_for( $repeat['nodes'][0] );
 
-			if ( null !== $leaf ) {
-				$leaf['path'] = '';
-				$rows         = array( $leaf );
+		if ( null !== $leaf ) {
+			$leaf['path'] = '';
+
+			/*
+			 * The row's own words, too. `<div class="logo-name">BUYME<small>
+			 * Digital commerce</small></div>` is a row whose name is its own
+			 * text and whose caption is inside it; reading only what was
+			 * *under* the row made the caption a field and froze every
+			 * logo's name to the first row's. A rich row claims its whole
+			 * subtree as one field; words beside decoration, or a link that
+			 * is a card, keep what is inside as fields of their own and add
+			 * the row's own field in front.
+			 */
+			if ( ! empty( $leaf['rich'] ) || array() === $rows ) {
+				$rows = array( $leaf );
+			} else {
+				$leaf['name'] = self::unique( $leaf['name'], array_flip( array_column( $rows, 'name' ) ) );
+
+				array_unshift( $rows, $leaf );
 			}
 		}
 
@@ -174,6 +250,25 @@ final class SectionPlan {
 				'kind'   => 'single',
 				'fields' => self::fields_under( $xpath, $body, array() ),
 				'item'   => null,
+			);
+		}
+
+		/*
+		 * What a row says in its attributes. A card numbered by
+		 * `data-no="02"` and drawn by `content:attr(data-no)` has no text
+		 * to become a field, so every card came out wearing the first
+		 * card's number. An attribute whose value differs from row to row
+		 * is content, and is offered as a field of the row like any other.
+		 */
+		foreach ( self::varying_attributes( $repeat['nodes'] ) as $varying ) {
+			$name = self::unique( self::name_for_attribute( $varying['attr'], $varying['owner'] ), array_flip( array_column( $rows, 'name' ) ) );
+
+			$rows[] = array(
+				'name'  => $name,
+				'type'  => 'text',
+				'label' => ucfirst( str_replace( '_', ' ', $name ) ),
+				'path'  => $varying['path'],
+				'attr'  => $varying['attr'],
 			);
 		}
 
@@ -340,13 +435,30 @@ final class SectionPlan {
 			$groups[ $key ][] = $node;
 		}
 
+		$groups = array_filter( $groups, static fn( array $nodes ): bool => count( $nodes ) >= self::LIST_THRESHOLD );
+
+		/*
+		 * The outermost list is the list. Three service cards each holding a
+		 * four-point `<ul>` used to lose to the first card's four `<li>`s —
+		 * the bigger run won — so the first card got a repeater for its
+		 * bullets and the other two got flat fields, and the section was two
+		 * different things in one block. A list inside a row of a bigger list
+		 * is that row's content, not the section's repeat; it is dropped
+		 * before the largest is chosen.
+		 */
+		foreach ( $groups as $key => $nodes ) {
+			foreach ( $groups as $other_key => $others ) {
+				if ( $other_key !== $key && self::inside_any( $nodes[0], $others ) ) {
+					unset( $groups[ $key ] );
+
+					continue 2;
+				}
+			}
+		}
+
 		$best = null;
 
 		foreach ( $groups as $key => $nodes ) {
-			if ( count( $nodes ) < self::LIST_THRESHOLD ) {
-				continue;
-			}
-
 			if ( null !== $best && count( $nodes ) <= count( $best['nodes'] ) ) {
 				continue;
 			}
@@ -409,7 +521,10 @@ final class SectionPlan {
 				continue;
 			}
 
-			$claimed[] = $node;
+			// A link that is a card keeps its address as a field and leaves its contents to be fields too.
+			if ( empty( $field['open'] ) ) {
+				$claimed[] = $node;
+			}
 
 			$name = self::unique( $field['name'], $taken );
 
@@ -530,37 +645,198 @@ final class SectionPlan {
 		}
 
 		if ( 'a' === $tag && '' !== trim( $node->textContent ) ) {
-			return array(
+			$field = array(
 				'name'  => self::name_for( $node, 'link' ),
 				'type'  => 'link',
 				'label' => self::label_for( $node, 'Link' ),
 			);
+
+			/*
+			 * A link that is a card. `<a class="card"><h3>…</h3><p>…</p></a>`
+			 * is a link whose words live in its own elements, and claiming
+			 * its subtree as one link field left the heading and the
+			 * paragraph frozen in the template. The address stays a field;
+			 * the elements inside go on to become fields of their own.
+			 */
+			if ( '' === trim( self::own_text( $node ) ) ) {
+				$field['open'] = true;
+			}
+
+			return $field;
 		}
 
 		$inline = in_array( $tag, self::INLINE_TAGS, true );
 
-		if ( ! $inline && ! in_array( $tag, self::TEXT_TAGS, true ) ) {
+		if ( ! $inline && ! in_array( $tag, self::TEXT_TAGS, true ) && in_array( $tag, self::NOT_TEXT_TAGS, true ) ) {
 			return null;
 		}
 
-		// A heading or paragraph that only wraps other elements is a container, not a field.
+		// An element that only wraps other elements is a container, not a field.
 		if ( '' === trim( self::own_text( $node ) ) ) {
 			return null;
 		}
 
+		/*
+		 * What sits beside the words decides what kind of field they are.
+		 *
+		 * Inline markup — a highlighted span, a line break — travels with the
+		 * words as a rich field. Decoration with no words of its own — an
+		 * icon, a picture — stays in the template and the words are planted
+		 * around it. A block with words of its own, `<li>Plan<ul>…</ul></li>`,
+		 * makes the element a frame: a field that wiped the list to hold the
+		 * one word lost more than it made editable, so the frame is left and
+		 * what it holds is looked at on its own.
+		 */
+		$rich  = false;
+		$decor = false;
+
+		foreach ( $node->childNodes as $child ) {
+			if ( ! $child instanceof DOMElement ) {
+				continue;
+			}
+
+			if ( in_array( strtolower( $child->tagName ), self::RICH_TAGS, true ) ) {
+				$rich = true;
+			} elseif ( '' === trim( $child->textContent ) ) {
+				$decor = true;
+			} else {
+				return null;
+			}
+		}
+
 		if ( $inline ) {
-			return array(
+			$field = array(
 				'name'  => self::name_for( $node, 'label' ),
 				'type'  => 'text',
 				'label' => self::label_for( $node, 'Label' ),
 			);
+		} elseif ( in_array( $tag, self::TEXT_TAGS, true ) ) {
+			$field = array(
+				'name'  => self::name_for( $node, self::text_name( $tag ) ),
+				'type'  => in_array( $tag, array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ), true ) ? 'text' : 'textarea',
+				'label' => self::label_for( $node, ucfirst( self::text_name( $tag ) ) ),
+			);
+		} else {
+			/*
+			 * Any other element with words of its own: an eyebrow in a
+			 * `<div>`, an icon glyph, a table cell, a button. Left out, they
+			 * were frozen into the template — and a row of cards whose only
+			 * difference was the glyph in each one's icon box came out
+			 * wearing the first card's glyph three times.
+			 */
+			$field = array(
+				'name'  => self::name_for( $node, 'text' ),
+				'type'  => mb_strlen( trim( self::own_text( $node ) ) ) > 80 ? 'textarea' : 'text',
+				'label' => self::label_for( $node, 'Text' ),
+			);
 		}
 
-		return array(
-			'name'  => self::name_for( $node, self::text_name( $tag ) ),
-			'type'  => in_array( $tag, array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ), true ) ? 'text' : 'textarea',
-			'label' => self::label_for( $node, ucfirst( self::text_name( $tag ) ) ),
-		);
+		/*
+		 * Marked here, once, so the writer, the values and the field group
+		 * all agree on which fields hold markup and which keep decoration.
+		 */
+		if ( $decor ) {
+			$field['words'] = true;
+		} elseif ( $rich ) {
+			$field['rich'] = true;
+		}
+
+		return $field;
+	}
+
+	/**
+	 * The `data-*` attributes on a repeat's rows whose values differ between rows.
+	 *
+	 * @param array<int, DOMElement> $nodes The rows.
+	 * @return array<int, string> Attribute names, in the first row's order.
+	 */
+	private static function varying_attributes( array $nodes ): array {
+		$first = $nodes[0] ?? null;
+
+		if ( ! $first instanceof DOMElement || count( $nodes ) < 2 ) {
+			return array();
+		}
+
+		$found    = array();
+		$elements = array( $first );
+
+		foreach ( $first->getElementsByTagName( '*' ) as $inner ) {
+			$elements[] = $inner;
+		}
+
+		foreach ( $elements as $element ) {
+			if ( ! $element instanceof DOMElement ) {
+				continue;
+			}
+
+			$path = self::path_of( $element, $first );
+
+			foreach ( $element->attributes as $attribute ) {
+				$name = strtolower( (string) $attribute->name );
+
+				// `data-*` for what the stylesheet draws; `style` for a bar's width or a tile's own picture.
+				if ( ( ! str_starts_with( $name, 'data-' ) && 'style' !== $name ) || str_starts_with( $name, 'data-qs-' ) ) {
+					continue;
+				}
+
+				$value = (string) $attribute->value;
+
+				foreach ( $nodes as $node ) {
+					$twin = $node instanceof DOMElement ? self::at( $node, $path ) : null;
+
+					if ( $twin instanceof DOMElement && $twin->getAttribute( $name ) !== $value ) {
+						$found[] = array(
+							'attr'  => $name,
+							'path'  => $path,
+							'owner' => $element,
+						);
+
+						break;
+					}
+				}
+			}
+		}
+
+		return $found;
+	}
+
+	/**
+	 * A field name for an attribute: `data-no` becomes `no`, a `style` on
+	 * `.mini-bar span` becomes `mini_bar_style`.
+	 *
+	 * @param string     $attribute Attribute name.
+	 * @param DOMElement $owner     The element carrying it.
+	 * @return string
+	 */
+	private static function name_for_attribute( string $attribute, DOMElement $owner ): string {
+		$name = (string) preg_replace( '/^data-/', '', $attribute );
+
+		if ( 'style' === $attribute ) {
+			$class  = self::name_for( $owner, '' );
+			$holder = $owner->parentNode instanceof DOMElement ? self::name_for( $owner->parentNode, '' ) : '';
+			$name   = trim( ( '' !== $class ? $class : $holder ) . '_style', '_' );
+		}
+
+		$name = strtolower( (string) preg_replace( '/[^A-Za-z0-9]+/', '_', $name ) );
+		$name = trim( $name, '_' );
+
+		return '' === $name ? 'attribute' : substr( $name, 0, self::NAME_LIMIT );
+	}
+
+	/**
+	 * Whether an element is one of the rows a repeat was planned over.
+	 *
+	 * The rows' holder is not always only rows. A grid whose parent also
+	 * holds its heading or a "view all" link used to lose both — the writer
+	 * kept the first element child as the row and deleted the rest, and the
+	 * values read every child as a row. Both now ask this instead.
+	 *
+	 * @param DOMElement $node     Element.
+	 * @param string     $selector The signature the plan recorded for the rows.
+	 * @return bool
+	 */
+	public static function is_row( DOMElement $node, string $selector ): bool {
+		return '' === $selector || self::signature( $node ) === $selector;
 	}
 
 	/**

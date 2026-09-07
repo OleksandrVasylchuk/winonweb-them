@@ -280,6 +280,10 @@ for ( const [ index, entry ] of manifest.entries() ) {
 await browser.close();
 server.close();
 
+/* The same rows as data, for whatever wants the numbers rather than the page —
+ * the importer's own review step reads this after each round. */
+writeFileSync( resolve( outDir, 'report.json' ), JSON.stringify( { width, rows }, null, '\t' ) + '\n' );
+
 const cells = rows
 	.map( ( row ) => {
 		const label = row.percent === null ? `failed: ${ row.error }` : `${ row.percent }% of pixels differ`;
